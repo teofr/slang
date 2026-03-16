@@ -102,6 +102,9 @@ impl CargoWorkspace {
 pub trait CargoWorkspaceCommands {
     #[must_use]
     fn add_build_rustflags(self) -> Self;
+
+    #[must_use]
+    fn add_strict_build_rustflags(self) -> Self;
 }
 
 impl CargoWorkspaceCommands for Command {
@@ -111,6 +114,10 @@ impl CargoWorkspaceCommands for Command {
             return self;
         }
 
+        self.add_strict_build_rustflags()
+    }
+
+    fn add_strict_build_rustflags(self) -> Self {
         // Using `$RUSTFLAGS' or '--' overrides any rustflags from `.cargo/config.toml'.
         // Using this syntax instead, as it is concatenated with the existing flags:
         self.flag("--release")

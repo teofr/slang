@@ -12,17 +12,68 @@ use strum::IntoEnumIterator;
 use crate::toolchains::mkdocs::Mkdocs;
 use crate::toolchains::pipenv::PipEnv;
 use crate::toolchains::public_api::UserFacingCrate;
-use crate::utils::{ClapExtensions, OrderedCommand};
+use crate::utils::ClapExtensions;
+
+#[derive(Clone, Copy)]
+enum LintMode {
+    /// Check-only: report violations and fail without modifying files.
+    Fail,
+    /// Auto-fix: automatically fix violations when possible.
+    Fix,
+}
+
+impl LintMode {
+    fn should_fix(self) -> bool {
+        matches!(self, LintMode::Fix)
+    }
+}
 
 #[derive(Clone, Debug, Default, Parser)]
 pub struct LintController {
+    /// Check mode: report violations and fail without modifying files.
+    #[arg(long, conflicts_with = "fix")]
+    fail: bool,
+
+    /// Fix mode: automatically fix violations when possible.
+    #[arg(long, conflicts_with = "fail")]
+    fix: bool,
+
     #[clap(trailing_var_arg = true)]
     commands: Vec<LintCommand>,
 }
 
 impl LintController {
+    fn resolve_mode(&self) -> LintMode {
+        if self.fail {
+            LintMode::Fail
+        } else if self.fix {
+            LintMode::Fix
+        } else if GitHub::is_running_in_ci() {
+            LintMode::Fail
+        } else {
+            LintMode::Fix
+        }
+    }
+
     pub fn execute(&self) -> Result<()> {
-        LintCommand::execute_in_order(&self.commands)
+        let mode = self.resolve_mode();
+
+        let mut commands = self.commands.clone();
+
+        if commands.is_empty() {
+            // Execute all commands if none are provided:
+            commands.extend(LintCommand::value_variants().iter().cloned());
+        } else {
+            // Sort and deduplicate user provided commands by order of definition:
+            commands.sort();
+            commands.dedup();
+        }
+
+        for command in commands {
+            command.execute_with_mode(mode)?;
+        }
+
+        Ok(())
     }
 }
 
@@ -56,20 +107,20 @@ enum LintCommand {
     Typedoc,
 }
 
-impl OrderedCommand for LintCommand {
-    fn execute(&self) -> Result<()> {
+impl LintCommand {
+    fn execute_with_mode(&self, mode: LintMode) -> Result<()> {
         Terminal::step(format!("lint {name}", name = self.clap_name()));
 
         match self {
-            LintCommand::Clippy => run_clippy(),
-            LintCommand::Rustdoc => run_rustdoc(),
+            LintCommand::Clippy => run_clippy(mode),
+            LintCommand::Rustdoc => run_rustdoc(mode),
             LintCommand::RustdocTest => run_rustdoc_test(),
             LintCommand::Mkdocs => run_mkdocs(),
             LintCommand::Cspell => run_cspell(),
-            LintCommand::Prettier => run_prettier(),
+            LintCommand::Prettier => run_prettier(mode),
             LintCommand::MarkdownLinkCheck => run_markdown_link_check()?,
-            LintCommand::MarkdownLint => run_markdown_lint()?,
-            LintCommand::Rustfmt => run_rustfmt(),
+            LintCommand::MarkdownLint => run_markdown_lint(mode)?,
+            LintCommand::Rustfmt => run_rustfmt(mode),
             LintCommand::Shellcheck => run_shellcheck()?,
             LintCommand::Tsc => run_tsc(),
             LintCommand::Yamllint => run_yamllint()?,
@@ -80,26 +131,39 @@ impl OrderedCommand for LintCommand {
     }
 }
 
-fn run_clippy() {
-    Command::new("cargo")
+fn run_clippy(mode: LintMode) {
+    let mut command = Command::new("cargo")
         .arg("clippy")
         .flag("--workspace")
         .flag("--all-features")
         .flag("--all-targets")
-        .flag("--no-deps")
-        .add_build_rustflags()
-        .run();
+        .flag("--no-deps");
+
+    if mode.should_fix() {
+        command = command
+            .flag("--fix")
+            .flag("--allow-dirty")
+            .flag("--allow-staged");
+    } else {
+        command = command.add_strict_build_rustflags();
+    }
+
+    command.run();
 }
 
-fn run_rustdoc() {
-    Command::new("cargo")
+fn run_rustdoc(mode: LintMode) {
+    let mut command = Command::new("cargo")
         .arg("doc")
         .flag("--workspace")
         .flag("--all-features")
         .flag("--no-deps")
-        .flag("--document-private-items")
-        .add_build_rustflags()
-        .run();
+        .flag("--document-private-items");
+
+    if !mode.should_fix() {
+        command = command.add_strict_build_rustflags();
+    }
+
+    command.run();
 }
 
 fn run_rustdoc_test() {
@@ -128,11 +192,11 @@ fn run_cspell() {
         .run();
 }
 
-fn run_prettier() {
-    if GitHub::is_running_in_ci() {
-        Command::new("prettier").property("--check", ".").run();
-    } else {
+fn run_prettier(mode: LintMode) {
+    if mode.should_fix() {
         Command::new("prettier").property("--write", ".").run();
+    } else {
+        Command::new("prettier").property("--check", ".").run();
     }
 }
 
@@ -148,14 +212,14 @@ fn run_markdown_link_check() -> Result<()> {
     Ok(())
 }
 
-fn run_markdown_lint() -> Result<()> {
+fn run_markdown_lint(mode: LintMode) -> Result<()> {
     let markdown_files = FileWalker::from_repo_root()
         .find(["**/*.md"])?
         .inspect(|path| println!("{}", path.display()));
 
     let mut command = Command::new("markdownlint").flag("--dot");
 
-    if !GitHub::is_running_in_ci() {
+    if mode.should_fix() {
         command = command.flag("--fix");
     }
 
@@ -164,13 +228,13 @@ fn run_markdown_lint() -> Result<()> {
     Ok(())
 }
 
-fn run_rustfmt() {
+fn run_rustfmt(mode: LintMode) {
     let mut command = Command::new("cargo-fmt")
         .arg(format!("+{}", env!("RUST_NIGHTLY_VERSION")))
         .flag("--all")
         .flag("--verbose");
 
-    if GitHub::is_running_in_ci() {
+    if !mode.should_fix() {
         command = command.flag("--check");
     }
 
