@@ -1,0 +1,118 @@
+{%- set target = model.structured_cst_model -%}
+#![allow(non_camel_case_types)]
+
+use std::ops::Range;
+
+#[allow(clippy::wildcard_imports)]
+use super::nodes::*;
+
+fn merge(start: &mut usize, end: &mut usize, range: &Range<usize>) {
+    if range.start < *start {
+        *start = range.start;
+    }
+    if range.end > *end {
+        *end = range.end;
+    }
+}
+
+fn merge_opt(start: &mut usize, end: &mut usize, range: &Option<Range<usize>>) {
+    if let Some(r) = range {
+        merge(start, end, r);
+    }
+}
+
+fn result(start: usize, end: usize) -> Option<Range<usize>> {
+    if start <= end {
+        Some(start..end)
+    } else {
+        None
+    }
+}
+
+//
+// Sequences:
+//
+
+{% for parent_type, sequence in target.sequences %}
+impl {{ parent_type }}Struct {
+    pub fn range(&self) -> Option<Range<usize>> {
+        let mut start = usize::MAX;
+        let mut end: usize = 0;
+        {% for field in sequence.fields -%}
+          {%- if field.is_optional -%}
+            if let Some(ref val) = self.{{ field.label | snake_case }} {
+              {%- if field.type.is_terminal %}
+                merge(&mut start, &mut end, &val.range);
+              {%- else %}
+                merge_opt(&mut start, &mut end, &val.range());
+              {%- endif %}
+            }
+          {%- else -%}
+            {%- if field.type.is_terminal %}
+            merge(&mut start, &mut end, &self.{{ field.label | snake_case }}.range);
+            {%- else %}
+            merge_opt(&mut start, &mut end, &self.{{ field.label | snake_case }}.range());
+            {%- endif %}
+          {%- endif %}
+        {% endfor -%}
+        result(start, end)
+    }
+}
+
+{% endfor %}
+
+//
+// Choices:
+//
+
+{% for parent_type, choice in target.choices %}
+impl {{ parent_type }} {
+    pub fn range(&self) -> Option<Range<usize>> {
+        match self {
+          {% for variant in choice.variants -%}
+            {%- if variant.is_terminal -%}
+            Self::{{ variant.name }}(inner) => Some(inner.range.clone()),
+            {%- else -%}
+            Self::{{ variant.name }}(inner) => inner.range(),
+            {%- endif %}
+          {% endfor %}
+        }
+    }
+}
+
+{% endfor %}
+
+//
+// Collections:
+//
+
+{% for parent_type, collection in target.collections %}
+impl {{ parent_type }} {
+    pub fn range(&self) -> Option<Range<usize>> {
+        let mut start = usize::MAX;
+        let mut end: usize = 0;
+        for element in &self.elements {
+          {%- if collection.item_type.is_terminal %}
+            merge(&mut start, &mut end, &element.range);
+          {%- else %}
+            merge_opt(&mut start, &mut end, &element.range());
+          {%- endif %}
+        }
+        result(start, end)
+    }
+}
+
+{% endfor %}
+
+//
+// Terminals:
+//
+
+{% for parent_type in target.terminals %}
+impl {{ parent_type }} {
+    pub fn range(&self) -> Option<Range<usize>> {
+        Some(self.range.clone())
+    }
+}
+
+{% endfor %}

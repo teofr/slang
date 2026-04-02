@@ -1,0 +1,97 @@
+{%- set target = model.structured_cst_model -%}
+#![allow(non_camel_case_types)]
+#![allow(unused_variables)]
+
+#[allow(clippy::wildcard_imports)]
+use super::nodes::*;
+
+pub trait Visitor {
+  {%- for parent_type, sequence in target.sequences %}
+    fn enter_{{ parent_type | snake_case }}(&mut self, _node: &{{ parent_type }}) -> bool { true }
+    fn leave_{{ parent_type | snake_case }}(&mut self, _node: &{{ parent_type }}) {}
+  {% endfor -%}
+  {%- for parent_type, choice in target.choices %}
+    fn enter_{{ parent_type | snake_case }}(&mut self, _node: &{{ parent_type }}) -> bool { true }
+    fn leave_{{ parent_type | snake_case }}(&mut self, _node: &{{ parent_type }}) {}
+  {% endfor -%}
+  {%- for parent_type, collection in target.collections %}
+    fn enter_{{ parent_type | snake_case }}(&mut self, _node: &{{ parent_type }}) -> bool { true }
+    fn leave_{{ parent_type | snake_case }}(&mut self, _node: &{{ parent_type }}) {}
+  {% endfor -%}
+}
+
+//
+// Sequences
+//
+
+{% for parent_type, sequence in target.sequences %}
+pub fn accept_{{ parent_type | snake_case }}(node: &{{ parent_type }}, visitor: &mut impl Visitor) {
+    if !visitor.enter_{{ parent_type | snake_case }}(node) {
+        return;
+    }
+    {% for field in sequence.fields -%}
+      {%- if not field.type.is_terminal -%}
+        {%- if field.is_optional -%}
+          if let Some(ref {{ field.label | snake_case }}) = node.{{ field.label | snake_case }} {
+              accept_{{ field.type.name | snake_case }}({{ field.label | snake_case }}, visitor);
+          }
+        {% else -%}
+          accept_{{ field.type.name | snake_case }}(&node.{{ field.label | snake_case }}, visitor);
+        {%- endif -%}
+      {%- endif -%}
+    {%- endfor %}
+    visitor.leave_{{ parent_type | snake_case }}(node);
+}
+
+{% endfor %}
+
+//
+// Choices
+//
+
+{% for parent_type, choice in target.choices %}
+  {%- set nonterminals = choice.variants | filter(attribute="is_terminal", value=false) -%}
+  {%- set terminals = choice.variants | filter(attribute="is_terminal", value=true) -%}
+  {% if nonterminals | length == 0 %}
+pub fn accept_{{ parent_type | snake_case }}(_node: &{{ parent_type }}, _visitor: &mut impl Visitor) {}
+  {% else %}
+pub fn accept_{{ parent_type | snake_case }}(node: &{{ parent_type }}, visitor: &mut impl Visitor) {
+    if !visitor.enter_{{ parent_type | snake_case }}(node) {
+        return;
+    }
+    match node {
+      {% for variant in nonterminals -%}
+        {{ parent_type }}::{{ variant.name }}(ref inner) => {
+            accept_{{ variant.name | snake_case }}(inner, visitor);
+        }
+      {% endfor -%}
+      {%- if terminals | length > 0 %}
+        {% for terminal in terminals -%}
+          {%- if not loop.first %} | {% endif -%}
+          {{ parent_type }}::{{ terminal.name }}(_)
+        {%- endfor %} => {}
+      {% endif -%}
+    }
+    visitor.leave_{{ parent_type | snake_case }}(node);
+}
+  {% endif %}
+{% endfor %}
+
+//
+// Collections
+//
+
+{% for parent_type, collection in target.collections -%}
+pub fn accept_{{ parent_type | snake_case }}(node: &{{ parent_type }}, visitor: &mut impl Visitor) {
+    if !visitor.enter_{{ parent_type | snake_case }}(node) {
+        return;
+    }
+    {%- if not collection.item_type.is_terminal %}
+    for item in &node.elements {
+        accept_{{ collection.item_type.name | snake_case }}(item, visitor);
+    }
+    {% endif -%}
+    visitor.leave_{{ parent_type | snake_case }}(node);
+}
+
+{% endfor %}
