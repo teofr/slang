@@ -29,7 +29,6 @@ impl Pass<'_> {
         &'a self,
         type_ids: &[TypeId],
         argument_typings: &[Typing],
-        receiver_type_id: Option<TypeId>,
     ) -> Option<&'a FunctionType> {
         // get types and filter non-function types
         let mut function_types = type_ids.iter().filter_map(|type_id| {
@@ -45,57 +44,36 @@ impl Pass<'_> {
             else {
                 return false;
             };
-            if let Some(receiver_type_id) = receiver_type_id {
-                // we have a receiver type, so either check for an implicit
-                // receiver type, or the first parameter type
-                // against it and then the rest, if the counts match
-                if parameters.len() == argument_typings.len()
-                    && function_type.implicit_receiver_type.is_some_and(
-                        |implicit_receiver_type_id| {
-                            self.types.implicitly_convertible_to(
-                                receiver_type_id,
-                                implicit_receiver_type_id,
-                            )
-                        },
-                    )
-                {
-                    // matches "method" functions of a compatible receiver type
-                    self.parameters_match_positional_arguments(
-                        parameters,
-                        argument_typings,
-                        function_type.is_externally_visible(),
-                    )
-                } else if parameters.len() == argument_typings.len() + 1
-                    && function_type.implicit_receiver_type.is_none()
-                    && parameters.first().is_some_and(|parameter| {
-                        parameter.type_id.is_some_and(|type_id| {
-                            self.types
-                                .implicitly_convertible_to(receiver_type_id, type_id)
-                        })
-                    })
-                {
-                    // matches attached functions (these can only be
-                    // free-functions or library functions) with a compatible
-                    // first argument
-                    self.parameters_match_positional_arguments(
-                        &parameters[1..],
-                        argument_typings,
-                        function_type.is_externally_visible(),
-                    )
-                } else {
-                    false
-                }
-            } else if parameters.len() == argument_typings.len() {
-                // argument count matches, check that all types are implicitly convertible
-                self.parameters_match_positional_arguments(
+            // If the first argument was already bound to a receiver (eg. `a.foo`
+            // where `foo` is attached to the type of `a` via a `using`
+            // directive), then it has been matched when the binding was created,
+            // so only the remaining parameters are matched here.
+            let Some(parameters) = self.parameters_after_receiver(function_type, parameters) else {
+                return false;
+            };
+            parameters.len() == argument_typings.len()
+                && self.parameters_match_positional_arguments(
                     parameters,
                     argument_typings,
                     function_type.is_externally_visible(),
                 )
-            } else {
-                false
-            }
         })
+    }
+
+    /// Drops the bound first parameter (the receiver) from `parameters` when
+    /// `function_type` has a receiver bound, returning `None` if the function is
+    /// somehow bound but has no parameters. Returns the parameters unchanged for
+    /// functions that are not bound to a receiver.
+    fn parameters_after_receiver<'a>(
+        &self,
+        function_type: &FunctionType,
+        parameters: &'a [ParameterDefinition],
+    ) -> Option<&'a [ParameterDefinition]> {
+        if function_type.partial_application.receiver_type().is_some() {
+            parameters.split_first().map(|(_receiver, rest)| rest)
+        } else {
+            Some(parameters)
+        }
     }
 
     fn parameters_match_positional_arguments(
@@ -145,7 +123,6 @@ impl Pass<'_> {
         &'a self,
         type_ids: &[TypeId],
         argument_typings: &[(String, Typing)],
-        receiver_type_id: Option<TypeId>,
     ) -> Option<&'a FunctionType> {
         // get types and filter non-function types
         let mut function_types = type_ids.iter().filter_map(|type_id| {
@@ -161,41 +138,25 @@ impl Pass<'_> {
             else {
                 return false;
             };
+            // If the first argument was bound to a receiver (eg. `a.foo` via a
+            // `using` directive), it has already been matched, so only the
+            // remaining parameters take part in named-argument matching.
+            let Some(parameters) = self.parameters_after_receiver(function_type, parameters) else {
+                return false;
+            };
+
             if parameters.iter().any(|parameter| parameter.name.is_none()) {
                 // function has an unnamed parameter and we cannot use it for
                 // matching named arguments
                 return false;
             }
 
-            if parameters.len() == argument_typings.len() {
-                // argument count matches, check that all types are implicitly convertible
-                self.parameters_match_named_arguments(
+            parameters.len() == argument_typings.len()
+                && self.parameters_match_named_arguments(
                     parameters,
                     argument_typings,
                     function_type.is_externally_visible(),
                 )
-            } else if let Some(receiver_type_id) = receiver_type_id {
-                // we have a receiver type, so check the first parameter type
-                // against it and then the rest, if the counts match
-                if parameters.len() == argument_typings.len() + 1
-                    && parameters.first().is_some_and(|parameter| {
-                        parameter.type_id.is_some_and(|type_id| {
-                            self.types
-                                .implicitly_convertible_to(receiver_type_id, type_id)
-                        })
-                    })
-                {
-                    self.parameters_match_named_arguments(
-                        &parameters[1..],
-                        argument_typings,
-                        function_type.is_externally_visible(),
-                    )
-                } else {
-                    false
-                }
-            } else {
-                false
-            }
         })
     }
 

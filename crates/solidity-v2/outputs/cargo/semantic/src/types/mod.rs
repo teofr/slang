@@ -192,11 +192,40 @@ pub struct FunctionType {
     /// The type of the implicit receiver in contract or interface
     /// methods (ie. the type of `this`)
     pub implicit_receiver_type: Option<TypeId>,
-    /// Whether this function has been partially applied.
-    /// This happens when its first argument is bound, eg. `a.foo`
-    /// where `foo` is from a `using` directive on the type of `a`,
-    /// or when call options are pre-applied (eg. `foo{value: 3}`).
-    pub partially_applied: bool,
+    /// How (if at all) this function has been partially applied.
+    pub partial_application: Application,
+}
+
+/// Describes whether a function type has been partially applied, and how.
+///
+/// A partially applied function has the same shape as its original function
+/// type but behaves like a value: it has no mobile type and is not implicitly
+/// convertible to a plain function pointer.
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
+pub enum Application {
+    /// A plain, unapplied function.
+    None,
+    /// The function has been partially applied. `receiver_type` is `Some` when
+    /// the first argument was bound to a receiver value (eg. `a.foo` where
+    /// `foo` is from a `using` directive on the type of `a`), carrying the
+    /// receiver's type. It is `None` when only call options were pre-applied
+    /// (eg. `foo{value: 3}`), which binds no positional argument.
+    Partial { receiver_type: Option<TypeId> },
+}
+
+impl Application {
+    /// Whether the function has been partially applied in any way.
+    pub fn is_partial(&self) -> bool {
+        matches!(self, Self::Partial { .. })
+    }
+
+    /// The type of the receiver bound as the first argument, if any.
+    pub fn receiver_type(&self) -> Option<TypeId> {
+        match self {
+            Self::Partial { receiver_type } => *receiver_type,
+            Self::None => None,
+        }
+    }
 }
 
 impl FunctionType {

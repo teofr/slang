@@ -296,13 +296,49 @@ impl Pass<'_> {
         typing
     }
 
-    fn type_id_of_receiver(&self, operand: &ir::Expression) -> Option<TypeId> {
-        if let ir::Expression::MemberAccessExpression(member_access_expression) = operand {
-            self.typing_of_expression(&member_access_expression.operand)
-                .as_type_id()
-        } else {
-            None
+    /// If `type_id` is a function attached via a `using` directive whose first
+    /// parameter accepts a receiver of `receiver_type_id`, returns a partially
+    /// applied version with the receiver bound as the first argument. Returns
+    /// `None` otherwise, ie. for non-function types or for contract/interface
+    /// methods (which carry an implicit receiver rather than binding the first
+    /// parameter).
+    pub(super) fn bind_receiver_to_attached_function(
+        &mut self,
+        type_id: TypeId,
+        receiver_type_id: TypeId,
+    ) -> Option<TypeId> {
+        let Type::Function(function_type) = self.types.get_type_by_id(type_id) else {
+            return None;
+        };
+        if function_type.implicit_receiver_type.is_some() {
+            return None;
         }
+        let binds_receiver = function_type.parameter_types.first().is_some_and(|first| {
+            self.types
+                .implicitly_convertible_to_for_external_call(receiver_type_id, *first)
+        });
+        if !binds_receiver {
+            return None;
+        }
+        let function_type = function_type.clone();
+        Some(self.types.bind_receiver(function_type, receiver_type_id))
+    }
+
+    /// If `type_id` is a function that can take call options, returns a
+    /// partially applied version with the call options pre-applied. Returns
+    /// `None` for non-function types, and for functions with a bound receiver
+    /// (`a.foo{...}` where `foo` is attached): combining a `using`-directive
+    /// receiver with call options is not valid Solidity, so the binding is left
+    /// untouched rather than partially applying it again.
+    pub(super) fn maybe_apply_call_options(&mut self, type_id: TypeId) -> Option<TypeId> {
+        let Type::Function(function_type) = self.types.get_type_by_id(type_id) else {
+            return None;
+        };
+        if function_type.partial_application.receiver_type().is_some() {
+            return None;
+        }
+        let function_type = function_type.clone();
+        Some(self.types.apply_call_options(function_type))
     }
 
     fn typing_of_cast(&mut self, argument_typing: &Typing, target_type: Type) -> Typing {
@@ -358,12 +394,8 @@ impl Pass<'_> {
                 }
             }
             Typing::Undetermined(type_ids) => {
-                let receiver_type_id = self.type_id_of_receiver(&node.operand);
-                let candidate = self.lookup_function_matching_positional_arguments(
-                    &type_ids,
-                    &argument_typings,
-                    receiver_type_id,
-                );
+                let candidate = self
+                    .lookup_function_matching_positional_arguments(&type_ids, &argument_typings);
 
                 if let Some(candidate) = candidate {
                     let return_type = candidate.return_type;
@@ -509,13 +541,9 @@ impl Pass<'_> {
                 }
             }
             Typing::Undetermined(type_ids) => {
-                let receiver_type_id = self.type_id_of_receiver(&node.operand);
                 let argument_typings = self.collect_named_argument_typings(arguments);
-                let candidate = self.lookup_function_matching_named_arguments(
-                    &type_ids,
-                    &argument_typings,
-                    receiver_type_id,
-                );
+                let candidate =
+                    self.lookup_function_matching_named_arguments(&type_ids, &argument_typings);
 
                 if let Some(candidate) = candidate {
                     let return_type = candidate.return_type;

@@ -442,6 +442,24 @@ pub fn slang_solidity_v2_semantic::types::AddressType::fmt(&self, f: &mut core::
 impl core::hash::Hash for slang_solidity_v2_semantic::types::AddressType
 pub fn slang_solidity_v2_semantic::types::AddressType::hash<__H: core::hash::Hasher>(&self, state: &mut __H)
 impl core::marker::StructuralPartialEq for slang_solidity_v2_semantic::types::AddressType
+pub enum slang_solidity_v2_semantic::types::Application
+pub slang_solidity_v2_semantic::types::Application::None
+pub slang_solidity_v2_semantic::types::Application::Partial
+pub slang_solidity_v2_semantic::types::Application::Partial::receiver_type: core::option::Option<slang_solidity_v2_semantic::types::TypeId>
+impl slang_solidity_v2_semantic::types::Application
+pub fn slang_solidity_v2_semantic::types::Application::is_partial(&self) -> bool
+pub fn slang_solidity_v2_semantic::types::Application::receiver_type(&self) -> core::option::Option<slang_solidity_v2_semantic::types::TypeId>
+impl core::clone::Clone for slang_solidity_v2_semantic::types::Application
+pub fn slang_solidity_v2_semantic::types::Application::clone(&self) -> slang_solidity_v2_semantic::types::Application
+impl core::cmp::Eq for slang_solidity_v2_semantic::types::Application
+impl core::cmp::PartialEq for slang_solidity_v2_semantic::types::Application
+pub fn slang_solidity_v2_semantic::types::Application::eq(&self, other: &slang_solidity_v2_semantic::types::Application) -> bool
+impl core::fmt::Debug for slang_solidity_v2_semantic::types::Application
+pub fn slang_solidity_v2_semantic::types::Application::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::hash::Hash for slang_solidity_v2_semantic::types::Application
+pub fn slang_solidity_v2_semantic::types::Application::hash<__H: core::hash::Hasher>(&self, state: &mut __H)
+impl core::marker::Copy for slang_solidity_v2_semantic::types::Application
+impl core::marker::StructuralPartialEq for slang_solidity_v2_semantic::types::Application
 pub struct slang_solidity_v2_semantic::types::ArrayType
 pub slang_solidity_v2_semantic::types::ArrayType::element_type: slang_solidity_v2_semantic::types::TypeId
 pub slang_solidity_v2_semantic::types::ArrayType::location: slang_solidity_v2_semantic::types::DataLocation
@@ -536,7 +554,7 @@ pub slang_solidity_v2_semantic::types::FunctionType::definition_id: core::option
 pub slang_solidity_v2_semantic::types::FunctionType::implicit_receiver_type: core::option::Option<slang_solidity_v2_semantic::types::TypeId>
 pub slang_solidity_v2_semantic::types::FunctionType::mutability: slang_solidity_v2_semantic::types::FunctionTypeMutability
 pub slang_solidity_v2_semantic::types::FunctionType::parameter_types: alloc::vec::Vec<slang_solidity_v2_semantic::types::TypeId>
-pub slang_solidity_v2_semantic::types::FunctionType::partially_applied: bool
+pub slang_solidity_v2_semantic::types::FunctionType::partial_application: slang_solidity_v2_semantic::types::Application
 pub slang_solidity_v2_semantic::types::FunctionType::return_type: slang_solidity_v2_semantic::types::TypeId
 pub slang_solidity_v2_semantic::types::FunctionType::visibility: slang_solidity_v2_semantic::types::FunctionTypeVisibility
 impl slang_solidity_v2_semantic::types::FunctionType
