@@ -1353,3 +1353,45 @@ fn test_overloaded_attached_function_disambiguates_on_remaining_argument() {
         "`t.f(true)` should resolve to the `(uint, bool)` overload",
     );
 }
+
+// Call options wrapping an overloaded callee (`c.foo{gas: 4}(arg)`) must still
+// disambiguate on the arguments: the callee operand is a `CallOptionsExpression`
+// and the call options are applied to every candidate. (This already resolved
+// before per-candidate call options were applied, because contract methods
+// disambiguate by argument count regardless of the receiver.)
+#[test]
+fn test_overloaded_call_through_call_options_disambiguates() {
+    let source = r#"
+        contract C {
+            function foo(uint x) external returns (uint) { return x; }
+            function foo(bool x) external returns (bool) { return x; }
+        }
+        contract Test {
+            function __test(C c) internal {
+                c.foo{gas: 4}(7);    // -> foo(uint) returns uint
+                c.foo{gas: 4}(true); // -> foo(bool) returns bool
+            }
+        }
+        "#;
+
+    let TypeAnalysis {
+        file,
+        binder,
+        types,
+    } = analyze(LanguageVersion::LATEST, source);
+
+    let contract = find_contract(&file, "Test");
+    let function = find_function(&contract.members, "__test").expect("__test function");
+    let body = function.body.as_ref().expect("__test has a body");
+
+    let mut typings = expression_statement_types(body, &binder, &types).into_iter();
+
+    assert!(
+        matches!(typings.next(), Some(Some(Type::Integer(_)))),
+        "`c.foo{{gas: 4}}(7)` should resolve to the `(uint)` overload",
+    );
+    assert!(
+        matches!(typings.next(), Some(Some(Type::Boolean))),
+        "`c.foo{{gas: 4}}(true)` should resolve to the `(bool)` overload",
+    );
+}
