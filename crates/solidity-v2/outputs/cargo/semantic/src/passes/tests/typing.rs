@@ -1311,3 +1311,87 @@ fn test_partially_applied_function_is_not_convertible() {
         "partially applied function pointers should not be convertible",
     );
 }
+
+// Accessing an overloaded attached function on a value binds the receiver as
+// the first argument of every candidate, and overload resolution then
+// disambiguates between the bound candidates using the remaining argument.
+#[test]
+fn test_overloaded_attached_function_disambiguates_on_remaining_argument() {
+    let source = r#"
+        library L {
+            function f(uint x, uint y) internal pure returns (uint) { return x + y; }
+            function f(uint x, bool y) internal pure returns (bool) { return y; }
+        }
+        contract Test {
+            using L for uint;
+            function __test() internal {
+                uint t = 1;
+                t.f(5);    // -> f(uint, uint) returns uint
+                t.f(true); // -> f(uint, bool) returns bool
+            }
+        }
+        "#;
+
+    let TypeAnalysis {
+        file,
+        binder,
+        types,
+    } = analyze(LanguageVersion::LATEST, source);
+
+    let contract = find_contract(&file, "Test");
+    let function = find_function(&contract.members, "__test").expect("__test function");
+    let body = function.body.as_ref().expect("__test has a body");
+
+    let mut typings = expression_statement_types(body, &binder, &types).into_iter();
+
+    assert!(
+        matches!(typings.next(), Some(Some(Type::Integer(_)))),
+        "`t.f(5)` should resolve to the `(uint, uint)` overload",
+    );
+    assert!(
+        matches!(typings.next(), Some(Some(Type::Boolean))),
+        "`t.f(true)` should resolve to the `(uint, bool)` overload",
+    );
+}
+
+// Call options wrapping an overloaded callee (`c.foo{gas: 4}(arg)`) must still
+// disambiguate on the arguments: the callee operand is a `CallOptionsExpression`
+// and the call options are applied to every candidate. (This already resolved
+// before per-candidate call options were applied, because contract methods
+// disambiguate by argument count regardless of the receiver.)
+#[test]
+fn test_overloaded_call_through_call_options_disambiguates() {
+    let source = r#"
+        contract C {
+            function foo(uint x) external returns (uint) { return x; }
+            function foo(bool x) external returns (bool) { return x; }
+        }
+        contract Test {
+            function __test(C c) internal {
+                c.foo{gas: 4}(7);    // -> foo(uint) returns uint
+                c.foo{gas: 4}(true); // -> foo(bool) returns bool
+            }
+        }
+        "#;
+
+    let TypeAnalysis {
+        file,
+        binder,
+        types,
+    } = analyze(LanguageVersion::LATEST, source);
+
+    let contract = find_contract(&file, "Test");
+    let function = find_function(&contract.members, "__test").expect("__test function");
+    let body = function.body.as_ref().expect("__test has a body");
+
+    let mut typings = expression_statement_types(body, &binder, &types).into_iter();
+
+    assert!(
+        matches!(typings.next(), Some(Some(Type::Integer(_)))),
+        "`c.foo{{gas: 4}}(7)` should resolve to the `(uint)` overload",
+    );
+    assert!(
+        matches!(typings.next(), Some(Some(Type::Boolean))),
+        "`c.foo{{gas: 4}}(true)` should resolve to the `(bool)` overload",
+    );
+}

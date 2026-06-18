@@ -655,6 +655,11 @@ mod expressions {
     }
 
     #[test]
+    fn funcalls_overload_using_for_args() -> Result<()> {
+        run("expressions", "funcalls_overload_using_for_args")
+    }
+
+    #[test]
     fn incomplete_member_access() -> Result<()> {
         run("expressions", "incomplete_member_access")
     }

@@ -343,39 +343,45 @@ impl Visitor for Pass<'_> {
 
         // Special cases
         if let Some(type_id) = typing.as_type_id() {
-            let type_ = self.types.get_type_by_id(type_id);
-
-            if type_.is_inherited_location() {
+            if self.types.get_type_by_id(type_id).is_inherited_location() {
                 // If the type is a reference type with location "inherited", we
                 // use the operand's location for the resulting typing
                 if let Some(operand_location) = operand_typing
                     .as_type_id()
                     .and_then(|type_id| self.types.get_type_by_id(type_id).data_location())
                 {
+                    let type_ = self.types.get_type_by_id(type_id).clone();
                     let type_id_with_location = self
                         .types
-                        .register_type_with_data_location(type_.clone(), operand_location);
+                        .register_type_with_data_location(type_, operand_location);
                     typing = Typing::Resolved(type_id_with_location);
                 }
-            } else if let Type::Function(function_type) = type_ {
+            } else if let Some(receiver_type_id) = operand_typing.as_type_id() {
                 // If this member is a function attached via `using for`, accessing it
                 // on a value binds the receiver as its first argument, producing a
                 // partially applied function (which has no mobile type).
-                if let Some(receiver_type_id) = operand_typing.as_type_id() {
-                    if function_type.implicit_receiver_type.is_none()
-                        && function_type.parameter_types.first().is_some_and(|first| {
-                            self.types.implicitly_convertible_to_for_external_call(
-                                receiver_type_id,
-                                *first,
-                            )
-                        })
-                    {
-                        let function_type = function_type.clone();
-                        typing = Typing::Resolved(
-                            self.types.partially_apply_function_type(function_type),
-                        );
-                    }
+                if let Some(bound) =
+                    self.bind_receiver_to_attached_function(type_id, receiver_type_id)
+                {
+                    typing = Typing::Resolved(bound);
                 }
+            }
+        } else if let Typing::Undetermined(type_ids) = &typing {
+            // The member access is overloaded. If accessed on a value, bind the
+            // receiver as the first argument of every attached-function candidate
+            // so overload resolution (which sees only the candidate types) can
+            // match the remaining arguments. Non-attached candidates (eg.
+            // contract methods) are left untouched.
+            if let Some(receiver_type_id) = operand_typing.as_type_id() {
+                let type_ids = type_ids.clone();
+                let mut candidates = Vec::with_capacity(type_ids.len());
+                for type_id in type_ids {
+                    candidates.push(
+                        self.bind_receiver_to_attached_function(type_id, receiver_type_id)
+                            .unwrap_or(type_id),
+                    );
+                }
+                typing = Typing::Undetermined(candidates);
             }
         }
 
@@ -501,16 +507,24 @@ impl Visitor for Pass<'_> {
         let operand_typing = self.typing_of_expression(&node.operand);
 
         // Pre-applying call options (eg. `foo{value: 3}`) partially applies the
-        // function.
-        let typing = match operand_typing.as_type_id() {
-            Some(type_id) => match self.types.get_type_by_id(type_id) {
-                Type::Function(function_type) => {
-                    let function_type = function_type.clone();
-                    Typing::Resolved(self.types.partially_apply_function_type(function_type))
-                }
-                _ => operand_typing,
+        // function. For an overloaded callee (`Typing::Undetermined`) we apply
+        // them to every function candidate so the typing reflects the call
+        // options before overload resolution runs.
+        let typing = match operand_typing {
+            Typing::Undetermined(type_ids) => {
+                let candidates = type_ids
+                    .into_iter()
+                    .map(|type_id| self.maybe_apply_call_options(type_id).unwrap_or(type_id))
+                    .collect();
+                Typing::Undetermined(candidates)
+            }
+            other => match other.as_type_id() {
+                Some(type_id) => match self.maybe_apply_call_options(type_id) {
+                    Some(applied) => Typing::Resolved(applied),
+                    None => other,
+                },
+                None => other,
             },
-            None => operand_typing,
         };
         self.binder.set_node_typing(node.id(), typing);
     }

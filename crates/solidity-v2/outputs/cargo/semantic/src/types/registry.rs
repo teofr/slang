@@ -6,7 +6,7 @@ use slang_solidity_v2_common::versions::LanguageVersion;
 
 use super::literals::numbers;
 use super::{
-    AddressType, ArrayType, ByteArrayType, BytesType, ContractType, DataLocation,
+    AddressType, Application, ArrayType, ByteArrayType, BytesType, ContractType, DataLocation,
     FixedSizeArrayType, FunctionType, FunctionTypeVisibility, IntegerType, InterfaceType,
     LiteralKind, Number, StringType, StructType, TupleType, Type, TypeId,
 };
@@ -304,16 +304,17 @@ impl TypeRegistry {
 
             (Type::Function(from_function_type), Type::Function(to_function_type)) => {
                 // This is full equality except for visibility and mutability
-                // which can be converted to, partially_applied which must be `false`,
-                // and definition_id and implicit_receiver_type which can differ.
+                // which can be converted to, the application which must not be
+                // partial, and definition_id and implicit_receiver_type which
+                // can differ.
                 //
                 // Note: solc checks that the `from` and `to` function types have
                 // the same call options or bound argument applied in the same way,
                 // but that is not observable from Solidity source code.
                 // Therefore we have a stronger check here that has the same effect
                 // for users.
-                !from_function_type.partially_applied
-                    && !to_function_type.partially_applied
+                !from_function_type.partial_application.is_partial()
+                    && !to_function_type.partial_application.is_partial()
                     && from_function_type
                         .visibility
                         .implicitly_convertible_to(to_function_type.visibility)
@@ -443,12 +444,37 @@ impl TypeRegistry {
         }
     }
 
-    // Marks a function type as partially applied:
-    // - a function from a `using` directive applied on a value
-    // - call options have been pre-applied in an external call
-    pub(crate) fn partially_apply_function_type(&mut self, function_type: FunctionType) -> TypeId {
+    // Partially applies a function type by binding its first argument to a
+    // receiver value, eg. `a.foo` where `foo` is attached to the type of `a`
+    // via a `using` directive. The receiver's type is recorded in the
+    // application.
+    pub(crate) fn bind_receiver(
+        &mut self,
+        function_type: FunctionType,
+        receiver_type: TypeId,
+    ) -> TypeId {
         self.register_type(Type::Function(FunctionType {
-            partially_applied: true,
+            partial_application: Application::Partial {
+                receiver_type: Some(receiver_type),
+            },
+            ..function_type
+        }))
+    }
+
+    // Partially applies a function type by pre-applying call options, eg.
+    // `foo{value: 3}` in an external call. This binds no positional argument.
+    //
+    // Call options require an external call, while binding a receiver via a
+    // `using` directive produces an internal/library call; the two cannot
+    // combine in valid Solidity, so this is never reached for an
+    // already-receiver-bound function.
+    pub(crate) fn apply_call_options(&mut self, function_type: FunctionType) -> TypeId {
+        debug_assert!(
+            function_type.partial_application.receiver_type().is_none(),
+            "call options cannot be applied to a function with a bound receiver",
+        );
+        self.register_type(Type::Function(FunctionType {
+            partial_application: Application::Partial { receiver_type: None },
             ..function_type
         }))
     }
@@ -495,7 +521,7 @@ impl TypeRegistry {
                 return_type: *return_type,
                 visibility: *visibility,
                 mutability: *mutability,
-                partially_applied: false,
+                partial_application: Application::None,
             }),
 
             Type::Address(_)
@@ -593,7 +619,7 @@ impl TypeRegistry {
             // call options) doesn't have a mobile type.
             //
             // Matches solc behaviour
-            Type::Function(function_type) if function_type.partially_applied => None,
+            Type::Function(function_type) if function_type.partial_application.is_partial() => None,
             _ => Some(type_id),
         }
     }

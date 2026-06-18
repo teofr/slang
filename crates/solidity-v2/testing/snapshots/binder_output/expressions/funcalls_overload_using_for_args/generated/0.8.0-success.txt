@@ -1,0 +1,94 @@
+# This file is generated automatically by infrastructure scripts. Please don't edit by hand.
+
+Definitions (11):
+- Def: #1 ["Lib" @ input.sol:5:9] (library)
+- Def: #2 ["combine" @ input.sol:6:12] (function, type: function (uint256, uint256) returns uint256)
+- Def: #3 ["self" @ input.sol:6:25] (parameter, type: uint256)
+- Def: #4 ["other" @ input.sol:6:36] (parameter, type: uint256)
+- Def: #5 ["combine" @ input.sol:10:12] (function, type: function (uint256, bool) returns uint256)
+- Def: #6 ["self" @ input.sol:10:25] (parameter, type: uint256)
+- Def: #7 ["flag" @ input.sol:10:36] (parameter, type: bool)
+- Def: #8 ["Test" @ input.sol:15:10] (contract)
+- Def: #9 ["run" @ input.sol:18:12] (function, type: function (uint256) returns uint256)
+- Def: #10 ["a" @ input.sol:18:21] (parameter, type: uint256)
+- Def: #11 ["x" @ input.sol:19:10] (variable, type: uint256)
+
+------------------------------------------------------------------------
+
+References (10):
+- Ref: ["self" @ input.sol:7:12] -> #3
+- Ref: ["other" @ input.sol:7:19] -> #4
+- Ref: ["flag" @ input.sol:11:12] -> #7
+- Ref: ["self" @ input.sol:11:19] -> #6
+- Ref: ["Lib" @ input.sol:16:9] -> #1
+- Ref: ["a" @ input.sol:19:14] -> #10
+- Ref: ["combine" @ input.sol:19:16] -> #2
+- Ref: ["a" @ input.sol:20:12] -> #10
+- Ref: ["combine" @ input.sol:20:14] -> #5
+- Ref: ["x" @ input.sol:20:22] -> #11
+
+------------------------------------------------------------------------
+
+Unbound identifiers (0):
+
+------------------------------------------------------------------------
+
+Bindings: 
+    ╭─[input.sol:1:1]
+    │
+  5 │ library Lib {
+    │         ─┬─  
+    │          ╰─── name: 1
+  6 │   function combine(uint self, uint other) internal pure returns (uint) {
+    │            ───┬───      ──┬─       ──┬──  
+    │               ╰─────────────────────────── name: 2
+    │                           │          │    
+    │                           ╰─────────────── name: 3
+    │                                      │    
+    │                                      ╰──── name: 4
+  7 │     return self + other;
+    │            ──┬─   ──┬──  
+    │              ╰─────────── ref: 3
+    │                     │    
+    │                     ╰──── ref: 4
+    │ 
+ 10 │   function combine(uint self, bool flag) internal pure returns (uint) {
+    │            ───┬───      ──┬─       ──┬─  
+    │               ╰────────────────────────── name: 5
+    │                           │          │   
+    │                           ╰────────────── name: 6
+    │                                      │   
+    │                                      ╰─── name: 7
+ 11 │     return flag ? self : 0;
+    │            ──┬─   ──┬─  
+    │              ╰────────── ref: 7
+    │                     │   
+    │                     ╰─── ref: 6
+    │ 
+ 15 │ contract Test {
+    │          ──┬─  
+    │            ╰─── name: 8
+ 16 │   using Lib for uint;
+    │         ─┬─  
+    │          ╰─── ref: 1
+    │ 
+ 18 │   function run(uint a) internal pure returns (uint) {
+    │            ─┬─      ┬  
+    │             ╰────────── name: 9
+    │                     │  
+    │                     ╰── name: 10
+ 19 │     uint x = a.combine(2);   // -> combine(uint, uint)
+    │          ┬   ┬ ───┬───  
+    │          ╰────────────── name: 11
+    │              │    │     
+    │              ╰────────── ref: 10
+    │                   │     
+    │                   ╰───── ref: 2
+ 20 │     return a.combine(x > 0); // -> combine(uint, bool)
+    │            ┬ ───┬─── ┬  
+    │            ╰──────────── ref: 10
+    │                 │    │  
+    │                 ╰─────── ref: 5
+    │                      │  
+    │                      ╰── ref: 11
+────╯

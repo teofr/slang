@@ -11,7 +11,8 @@ use crate::binder::{Definition, Resolution, Scope, ScopeId};
 use crate::built_ins::BuiltInsResolver;
 use crate::passes::common::resolve_identifier_path_in_scope;
 use crate::types::{
-    ArrayType, DataLocation, FixedSizeArrayType, FunctionType, MappingType, TupleType, Type, TypeId,
+    Application, ArrayType, DataLocation, FixedSizeArrayType, FunctionType, MappingType, TupleType,
+    Type, TypeId,
 };
 
 impl Pass<'_> {
@@ -123,7 +124,7 @@ impl Pass<'_> {
                     return_type,
                     visibility: (&function_type.visibility).into(),
                     mutability: (&function_type.mutability).into(),
-                    partially_applied: false,
+                    partial_application: Application::None,
                 })))
             }
             ir::TypeName::MappingType(mapping_type) => {
