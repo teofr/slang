@@ -568,15 +568,6 @@ mod semantic {
 mod structure {
     use super::*;
 
-    mod fallback_function {
-        use super::*;
-
-        #[test]
-        fn shape_checks() -> Result<()> {
-            run("structure/fallback_function", "shape_checks")
-        }
-    }
-
     mod function_name_matches_container {
         use super::*;
 
@@ -618,6 +609,11 @@ mod structure {
         fn library() -> Result<()> {
             run("structure/invalid_using_directive_container", "library")
         }
+    }
+
+    #[test]
+    fn library_fallback_function() -> Result<()> {
+        run("structure", "library_fallback_function")
     }
 
     #[test]
@@ -772,6 +768,16 @@ mod syntax {
 
 mod type_system {
     use super::*;
+
+    #[test]
+    fn fallback_function_mutability() -> Result<()> {
+        run("type_system", "fallback_function_mutability")
+    }
+
+    #[test]
+    fn fallback_function_signature() -> Result<()> {
+        run("type_system", "fallback_function_signature")
+    }
 
     mod invalid_base {
         use super::*;
