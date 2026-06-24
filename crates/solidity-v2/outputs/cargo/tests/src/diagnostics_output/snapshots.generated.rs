@@ -568,6 +568,15 @@ mod semantic {
 mod structure {
     use super::*;
 
+    mod fallback_function {
+        use super::*;
+
+        #[test]
+        fn shape_checks() -> Result<()> {
+            run("structure/fallback_function", "shape_checks")
+        }
+    }
+
     mod function_name_matches_container {
         use super::*;
 

@@ -1,4 +1,5 @@
 mod binder;
+mod special_functions;
 mod typing;
 
 use slang_solidity_v2_common::nodes::NodeId;
