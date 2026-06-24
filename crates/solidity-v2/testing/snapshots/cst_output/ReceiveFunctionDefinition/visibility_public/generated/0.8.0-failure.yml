@@ -1,0 +1,19 @@
+# This file is generated automatically by infrastructure scripts. Please don't edit by hand.
+
+Source: >
+  1  │ contract C {                                                                     │ 0..12
+  2  │     receive() public payable {}                                                  │ 13..44
+  3  │ }                                                                                │ 45..46
+
+Errors: # 1 total
+  - >
+    Error: Unexpected PublicKeyword. One of AtKeyword, ErrorKeyword, ExternalKeyword, FromKeyword, GlobalKeyword, Identifier, LayoutKeyword, OpenBrace, OverrideKeyword, PayableKeyword, RevertKeyword, Semicolon, TransientKeyword, VirtualKeyword was expected
+       ╭─[crates/solidity-v2/testing/snapshots/cst_output/ReceiveFunctionDefinition/visibility_public/input.sol:2:15]
+       │
+     2 │     receive() public payable {}
+       │               ───┬──  
+       │                  ╰──── Error occurred here.
+    ───╯
+Tree:
+  - (root꞉ SourceUnit):
+      - (members꞉ SourceUnitMembers): []

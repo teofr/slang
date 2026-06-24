@@ -1,0 +1,19 @@
+# This file is generated automatically by infrastructure scripts. Please don't edit by hand.
+
+Source: >
+  1  │ contract C {                                                                     │ 0..12
+  2  │     fallback() internal {}                                                       │ 13..39
+  3  │ }                                                                                │ 40..41
+
+Errors: # 1 total
+  - >
+    Error: Unexpected InternalKeyword. One of AtKeyword, ErrorKeyword, ExternalKeyword, FromKeyword, GlobalKeyword, Identifier, LayoutKeyword, OpenBrace, OverrideKeyword, PayableKeyword, PureKeyword, ReturnsKeyword, RevertKeyword, Semicolon, TransientKeyword, ViewKeyword, VirtualKeyword was expected
+       ╭─[crates/solidity-v2/testing/snapshots/cst_output/FallbackFunctionDefinition/visibility_internal/input.sol:2:16]
+       │
+     2 │     fallback() internal {}
+       │                ────┬───  
+       │                    ╰───── Error occurred here.
+    ───╯
+Tree:
+  - (root꞉ SourceUnit):
+      - (members꞉ SourceUnitMembers): []
