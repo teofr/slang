@@ -1,12 +1,8 @@
-mod fallback_function_mutability;
-mod fallback_function_signature;
 mod function_name_matches_container;
 mod invalid_using_directive_container;
 mod library_fallback_function;
 mod multiple_constructors;
 
-pub use fallback_function_mutability::FallbackFunctionMutability;
-pub use fallback_function_signature::FallbackFunctionSignature;
 pub use function_name_matches_container::FunctionNameMatchesContainer;
 pub use invalid_using_directive_container::InvalidUsingDirectiveContainer;
 pub use library_fallback_function::LibraryFallbackFunction;
@@ -32,9 +28,5 @@ define_diagnostic_kind! {
 
         /// A library declares a fallback function.
         LibraryFallbackFunction(LibraryFallbackFunction),
-        /// A fallback function is declared `pure` or `view`.
-        FallbackFunctionMutability(FallbackFunctionMutability),
-        /// A fallback function has a signature other than the two accepted forms.
-        FallbackFunctionSignature(FallbackFunctionSignature),
     }
 }

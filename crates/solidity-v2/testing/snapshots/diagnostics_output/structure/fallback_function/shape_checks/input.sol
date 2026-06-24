@@ -5,10 +5,10 @@ pragma solidity *;
 // representable in Slang v2 (ie. that parse cleanly and so require a semantic
 // check rather than being rejected by the grammar):
 //
-//   structure/library-fallback-function    - libraries cannot have a fallback
-//   structure/fallback-function-mutability  - fallback must be payable/non-payable
-//   structure/fallback-function-signature   - signature must be `fallback()` or
-//                                             `fallback(bytes calldata) returns (bytes memory)`
+//   structure/library-fallback-function      - libraries cannot have a fallback
+//   type-system/fallback-function-mutability  - fallback must be payable/non-payable
+//   type-system/fallback-function-signature   - signature must be `fallback()` or
+//                                               `fallback(bytes calldata) returns (bytes memory)`
 //
 // The visibility rule (`fallback` must be `external`) is enforced by the v2
 // grammar itself: `internal`/`private`/`public` are not accepted attributes,

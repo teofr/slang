@@ -1,5 +1,6 @@
 mod built_ins;
 mod constant_cycles;
+mod special_functions;
 
 use slang_solidity_v2_common::diagnostics::DiagnosticCollection;
 use slang_solidity_v2_common::evm_targets::EvmTarget;
@@ -27,4 +28,6 @@ pub fn run(
         file_node_mapper,
         diagnostics,
     );
+
+    special_functions::check_fallback_functions(binder, file_node_mapper, diagnostics);
 }

@@ -17,7 +17,7 @@ impl DiagnosticExtensions for FallbackFunctionMutability {
     }
 
     fn code(&self) -> &'static str {
-        "structure/fallback-function-mutability"
+        "type-system/fallback-function-mutability"
     }
 
     fn message(&self) -> String {

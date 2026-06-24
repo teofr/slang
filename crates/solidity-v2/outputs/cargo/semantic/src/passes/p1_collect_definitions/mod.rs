@@ -16,7 +16,6 @@ use crate::context::SemanticFile;
 use crate::passes::common::conflicts::find_conflicting_definition;
 
 mod conflicts;
-mod special_functions;
 
 /// In this pass all definitions are collected with their naming identifiers.
 /// Also lexical (and other kinds of) scopes are identified and linked together,
@@ -123,20 +122,6 @@ impl<'a, F: SemanticFile> Pass<'a, F> {
     fn current_scope(&mut self) -> &mut Scope {
         let scope_id = self.current_scope_id();
         self.binder.get_scope_mut(scope_id)
-    }
-
-    /// Whether the definition owning the current scope is a library. Used by
-    /// the special-function shape checks, since libraries cannot declare
-    /// fallback or receive functions.
-    fn enclosing_container_is_library(&self) -> bool {
-        let scope_node_id = self
-            .binder
-            .get_scope_by_id(self.current_scope_id())
-            .node_id();
-        matches!(
-            self.binder.find_definition_by_id(scope_node_id),
-            Some(Definition::Library(_))
-        )
     }
 
     fn current_file_scope(&mut self) -> &mut FileScope {
@@ -354,15 +339,6 @@ impl<F: SemanticFile> Visitor for Pass<'_, F> {
             | ir::FunctionKind::Constructor
             | ir::FunctionKind::Fallback
             | ir::FunctionKind::Receive => {
-                if matches!(node.kind, ir::FunctionKind::Fallback) {
-                    special_functions::check_fallback_function(
-                        node,
-                        self.enclosing_container_is_library(),
-                        self.current_file.id(),
-                        self.diagnostics,
-                    );
-                }
-
                 let parameters_scope_id = self.collect_parameters(&node.parameters);
 
                 if let Some(name) = &node.name {

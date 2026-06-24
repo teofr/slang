@@ -1,21 +1,54 @@
-//! Shape checks for the special `fallback` (and, in a sibling change, `receive`)
-//! functions. These are structural rules that depend only on the function
-//! definition and the kind of its enclosing container, so they are emitted
-//! while collecting definitions rather than in a later, resolution-dependent
-//! pass.
+//! Shape checks for the special `fallback` function.
+//!
+//! A fallback's accepted state mutabilities and its accepted signatures are
+//! properties of its type, and whether a library is allowed to declare one is a
+//! structural rule. Either way the check needs only the function definition and
+//! the kind of its enclosing container, so it runs here, over the collected
+//! definitions.
 //!
 //! Note that the v2 grammar already rejects most malformed special functions
 //! as syntax errors (eg. `internal`/`public` visibility, or `view`/`pure`
 //! mutability on a `receive`). Only the forms that parse cleanly need a
 //! semantic check here.
 
-use slang_solidity_v2_common::diagnostics::kinds::structure::{
-    FallbackFunctionMutability, FallbackFunctionSignature, LibraryFallbackFunction,
+use slang_solidity_v2_common::diagnostics::kinds::structure::LibraryFallbackFunction;
+use slang_solidity_v2_common::diagnostics::kinds::type_system::{
+    FallbackFunctionMutability, FallbackFunctionSignature,
 };
 use slang_solidity_v2_common::diagnostics::DiagnosticCollection;
 use slang_solidity_v2_ir::ir;
 
-/// Emits the structural diagnostics for a `fallback` function:
+use crate::binder::{Binder, Definition};
+use crate::context::FileNodeMapper;
+
+/// Validates the shape of every `fallback` function in the program.
+pub(crate) fn check_fallback_functions(
+    binder: &Binder,
+    file_node_mapper: &FileNodeMapper,
+    diagnostics: &mut DiagnosticCollection,
+) {
+    for definition in binder.definitions().values() {
+        let (members, enclosing_is_library) = match definition {
+            Definition::Contract(contract) => (&contract.ir_node.members, false),
+            Definition::Interface(interface) => (&interface.ir_node.members, false),
+            Definition::Library(library) => (&library.ir_node.members, true),
+            _ => continue,
+        };
+
+        for member in members {
+            let ir::ContractMember::FunctionDefinition(function) = member else {
+                continue;
+            };
+
+            if matches!(function.kind, ir::FunctionKind::Fallback) {
+                let file_id = file_node_mapper.file_id_from_node_id(function.id());
+                check_fallback_function(function, enclosing_is_library, file_id, diagnostics);
+            }
+        }
+    }
+}
+
+/// Emits the shape diagnostics for a single `fallback` function:
 ///
 /// * libraries cannot declare a fallback function;
 /// * a fallback must be `payable` or non-payable (not `pure`/`view`); and
@@ -24,7 +57,7 @@ use slang_solidity_v2_ir::ir;
 ///
 /// The checks are independent, mirroring solc, so a single fallback can emit
 /// more than one of them.
-pub(super) fn check_fallback_function(
+fn check_fallback_function(
     node: &ir::FunctionDefinition,
     enclosing_is_library: bool,
     file_id: &str,

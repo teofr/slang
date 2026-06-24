@@ -15,7 +15,7 @@ impl DiagnosticExtensions for FallbackFunctionSignature {
     }
 
     fn code(&self) -> &'static str {
-        "structure/fallback-function-signature"
+        "type-system/fallback-function-signature"
     }
 
     fn message(&self) -> String {
