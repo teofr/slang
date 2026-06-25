@@ -19,9 +19,7 @@ use slang_solidity_v2_ir::ir;
 
 use crate::binder::{Binder, Definition};
 use crate::context::FileNodeMapper;
-use crate::types::{
-    BytesType, DataLocation, FunctionType, FunctionTypeMutability, Type, TypeRegistry,
-};
+use crate::types::{FunctionType, FunctionTypeMutability, Type, TypeRegistry};
 
 /// Validates the shape of every `fallback` function in the program.
 pub(crate) fn check_fallback_functions(
@@ -44,13 +42,12 @@ pub(crate) fn check_fallback_functions(
             };
 
             if matches!(function.kind, ir::FunctionKind::Fallback) {
-                let file_id = file_node_mapper.file_id_from_node_id(function.id());
                 check_fallback_function(
                     function,
                     enclosing_is_library,
                     binder,
                     types,
-                    file_id,
+                    file_node_mapper,
                     diagnostics,
                 );
             }
@@ -62,7 +59,7 @@ pub(crate) fn check_fallback_functions(
 ///
 /// * libraries cannot declare a fallback function;
 /// * a fallback must be `payable` or non-payable (not `pure`/`view`); and
-/// * if it declares any parameters or returns, the signature must be exactly
+/// * its signature must be exactly `fallback()` or
 ///   `fallback(bytes calldata) returns (bytes memory)`.
 ///
 /// The checks are independent, mirroring solc, so a single fallback can emit
@@ -72,84 +69,63 @@ fn check_fallback_function(
     enclosing_is_library: bool,
     binder: &Binder,
     types: &TypeRegistry,
-    file_id: &str,
+    file_node_mapper: &FileNodeMapper,
     diagnostics: &mut DiagnosticCollection,
 ) {
-    // Whether a library is allowed to declare a fallback is a property of the
-    // enclosing container, not of the function itself.
-    if enclosing_is_library {
-        diagnostics.push(
-            file_id.to_owned(),
-            node.range.clone(),
-            LibraryFallbackFunction,
-        );
-    }
-
-    // The mutability and signature rules are properties of the function's type.
-    let Some(function_type) = fallback_function_type(node, binder, types) else {
+    // The mutability and signature rules are properties of the function's type,
+    // computed during type definition.
+    let Some(Type::Function(function_type)) = binder
+        .node_typing(node.id())
+        .as_type_id()
+        .map(|type_id| types.get_type_by_id(type_id))
+    else {
         return;
     };
 
-    match function_type.mutability {
-        FunctionTypeMutability::Pure => diagnostics.push(
-            file_id.to_owned(),
-            node.range.clone(),
-            FallbackFunctionMutability {
-                mutability: "pure".to_owned(),
-            },
-        ),
-        FunctionTypeMutability::View => diagnostics.push(
-            file_id.to_owned(),
-            node.range.clone(),
-            FallbackFunctionMutability {
-                mutability: "view".to_owned(),
-            },
-        ),
-        FunctionTypeMutability::NonPayable | FunctionTypeMutability::Payable => {}
+    let invalid_mutability = match function_type.mutability {
+        FunctionTypeMutability::Pure => Some("pure"),
+        FunctionTypeMutability::View => Some("view"),
+        FunctionTypeMutability::NonPayable | FunctionTypeMutability::Payable => None,
+    };
+    let invalid_signature = !has_accepted_signature(function_type, types);
+
+    if !enclosing_is_library && invalid_mutability.is_none() && !invalid_signature {
+        return;
     }
 
-    let has_parameters = !function_type.parameter_types.is_empty();
-    let has_returns = !matches!(types.get_type_by_id(function_type.return_type), Type::Void);
+    // At least one diagnostic will be pushed, so resolve the file id once here
+    // rather than for every fallback (the common, diagnostic-free case).
+    let file_id = file_node_mapper.file_id_from_node_id(node.id()).to_owned();
 
-    // The signature rule only applies once the fallback declares parameters
-    // and/or returns; a bare `fallback()` is always accepted.
-    if (has_parameters || has_returns) && !is_accepted_fallback_with_args(function_type, types) {
+    if enclosing_is_library {
+        diagnostics.push(file_id.clone(), node.range.clone(), LibraryFallbackFunction);
+    }
+    if let Some(mutability) = invalid_mutability {
         diagnostics.push(
-            file_id.to_owned(),
+            file_id.clone(),
             node.range.clone(),
-            FallbackFunctionSignature,
+            FallbackFunctionMutability {
+                mutability: mutability.to_owned(),
+            },
         );
     }
-}
-
-/// Recovers the [`FunctionType`] computed for `node` during type definition.
-fn fallback_function_type<'a>(
-    node: &ir::FunctionDefinition,
-    binder: &Binder,
-    types: &'a TypeRegistry,
-) -> Option<&'a FunctionType> {
-    let type_id = binder.node_typing(node.id()).as_type_id()?;
-    match types.get_type_by_id(type_id) {
-        Type::Function(function_type) => Some(function_type),
-        _ => None,
+    if invalid_signature {
+        diagnostics.push(file_id, node.range.clone(), FallbackFunctionSignature);
     }
 }
 
-/// Whether `function_type` matches the only accepted signature that carries
-/// arguments: `fallback(bytes calldata) returns (bytes memory)`.
-fn is_accepted_fallback_with_args(function_type: &FunctionType, types: &TypeRegistry) -> bool {
-    let [parameter_type_id] = function_type.parameter_types.as_slice() else {
-        return false;
-    };
-
-    is_bytes_at(types.get_type_by_id(*parameter_type_id), DataLocation::Calldata)
-        && is_bytes_at(
-            types.get_type_by_id(function_type.return_type),
-            DataLocation::Memory,
-        )
-}
-
-/// Whether `ty` is the dynamic `bytes` type at the given data location.
-fn is_bytes_at(ty: &Type, location: DataLocation) -> bool {
-    matches!(ty, Type::Bytes(BytesType { location: actual }) if *actual == location)
+/// Whether `function_type`'s parameters and returns match one of the two
+/// accepted fallback signatures: `fallback()` or
+/// `fallback(bytes calldata) returns (bytes memory)`.
+fn has_accepted_signature(function_type: &FunctionType, types: &TypeRegistry) -> bool {
+    match function_type.parameter_types.as_slice() {
+        // `fallback()` — no parameters and no return values.
+        [] => function_type.return_type == types.void(),
+        // `fallback(bytes calldata) returns (bytes memory)`.
+        [parameter_type_id] => {
+            *parameter_type_id == types.bytes_calldata()
+                && function_type.return_type == types.bytes_memory()
+        }
+        _ => false,
+    }
 }
