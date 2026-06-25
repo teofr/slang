@@ -54,6 +54,14 @@ runs:
       if: "${{ inputs.restore-mtime == 'true' }}"
       uses: "./.github/actions/git/restore-mtime"
 
+    # After restoring commit-time mtimes, bump PR-changed files back to "now" so
+    # cargo recompiles them instead of reusing main-built artifacts from the
+    # restored cargo-target cache (whose commits often post-date the PR's). Only
+    # needed when both that cache and the restored mtimes are in play, on a PR.
+    - name: "Touch PR-changed files"
+      if: "${{ inputs.restore-mtime == 'true' && inputs.restore-target-cache == 'true' && github.event_name == 'pull_request' }}"
+      uses: "./.github/actions/git/touch-changed-files"
+
     - name: "Restore Dependencies Cache"
       if: "${{ inputs.restore-deps-cache == 'true' }}"
       uses: "./.github/actions/cache/dependencies/restore"
