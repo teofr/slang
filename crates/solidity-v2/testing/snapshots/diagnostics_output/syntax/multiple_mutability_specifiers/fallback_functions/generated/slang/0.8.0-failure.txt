@@ -1,6 +1,14 @@
 # This file is generated automatically by infrastructure scripts. Please don't edit by hand.
 
-Diagnostics: 1
+Diagnostics: 2
+
+Error: Fallback function must be payable or non-payable, but is "pure".
+   ╭─[input.sol:5:3]
+   │
+ 5 │   fallback() external pure view {}
+   │   ────────────────┬───────────────  
+   │                   ╰───────────────── Error occurred here.
+───╯
 
 Error: Only a single mutability specifier can be provided.
    ╭─[input.sol:5:28]

@@ -598,7 +598,8 @@ impl<S: Source> CstToIrBuilder<'_, S> {
         let kind = output::FunctionKind::Fallback;
         let name = None;
         let parameters = self.build_parameters_declaration(&source.parameters);
-        // TODO(validation) SDR[14]: fallback functions *must* have external visibility
+        // Non-`external` fallback visibility is rejected by the grammar, so the
+        // IR builder only ever sees the (implicit) `external` visibility here.
         let visibility = output::FunctionVisibility::External;
         let mutability = self
             .extract_mutability_specifier(&source.attributes.elements)
@@ -676,9 +677,11 @@ impl<S: Source> CstToIrBuilder<'_, S> {
         let kind = output::FunctionKind::Receive;
         let name = None;
         let parameters = self.build_parameters_declaration(&source.parameters);
-        // TODO(validation) SDR[8]: receive functions *must* have external visibility
+        // Non-`external` receive visibility is rejected by the grammar, so the
+        // IR builder only ever sees the (implicit) `external` visibility here.
         let visibility = output::FunctionVisibility::External;
-        // TODO(validation) SDR[7]: receive functions *must* have a 'payable' specifier
+        // Any mutability other than `payable` is rejected by the grammar for a
+        // receive function, so a missing specifier can only mean `payable`.
         let mutability = self
             .extract_mutability_specifier(&source.attributes.elements)
             .unwrap_or(output::FunctionMutability::Payable);
