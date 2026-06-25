@@ -962,21 +962,6 @@ mod fallback_function_definition {
     fn simple() -> Result<()> {
         run("FallbackFunctionDefinition", "simple")
     }
-
-    #[test]
-    fn visibility_internal() -> Result<()> {
-        run("FallbackFunctionDefinition", "visibility_internal")
-    }
-
-    #[test]
-    fn visibility_private() -> Result<()> {
-        run("FallbackFunctionDefinition", "visibility_private")
-    }
-
-    #[test]
-    fn visibility_public() -> Result<()> {
-        run("FallbackFunctionDefinition", "visibility_public")
-    }
 }
 
 mod for_statement {
@@ -1336,16 +1321,6 @@ mod receive_function_definition {
     use super::*;
 
     #[test]
-    fn mutability_pure() -> Result<()> {
-        run("ReceiveFunctionDefinition", "mutability_pure")
-    }
-
-    #[test]
-    fn mutability_view() -> Result<()> {
-        run("ReceiveFunctionDefinition", "mutability_view")
-    }
-
-    #[test]
     fn return_values() -> Result<()> {
         run("ReceiveFunctionDefinition", "return_values")
     }
@@ -1353,16 +1328,6 @@ mod receive_function_definition {
     #[test]
     fn simple() -> Result<()> {
         run("ReceiveFunctionDefinition", "simple")
-    }
-
-    #[test]
-    fn visibility_internal() -> Result<()> {
-        run("ReceiveFunctionDefinition", "visibility_internal")
-    }
-
-    #[test]
-    fn visibility_public() -> Result<()> {
-        run("ReceiveFunctionDefinition", "visibility_public")
     }
 }
 
