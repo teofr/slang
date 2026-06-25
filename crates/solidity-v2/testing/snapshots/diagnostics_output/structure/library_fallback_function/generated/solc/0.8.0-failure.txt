@@ -2,7 +2,7 @@
 
 Diagnostics: 1
 
-Error: Libraries cannot have fallback functions.
+[TypeError 5982] Error: Libraries cannot have fallback functions.
    ╭─[input.sol:6:5]
    │
  6 │     fallback() external {}

@@ -2,42 +2,42 @@
 
 Diagnostics: 5
 
-Error: Fallback function either has to have the signature "fallback()" or "fallback(bytes calldata) returns (bytes memory)".
-   ╭─[input.sol:6:5]
+[TypeError 5570] Error: Fallback function either has to have the signature "fallback()" or "fallback(bytes calldata) returns (bytes memory)".
+   ╭─[input.sol:6:32]
    │
  6 │     fallback(uint256) external {}
-   │     ──────────────┬──────────────  
-   │                   ╰──────────────── Error occurred here.
+   │                                │ 
+   │                                ╰─ Error occurred here.
 ───╯
 
-Error: Fallback function either has to have the signature "fallback()" or "fallback(bytes calldata) returns (bytes memory)".
-    ╭─[input.sol:11:5]
+[TypeError 5570] Error: Fallback function either has to have the signature "fallback()" or "fallback(bytes calldata) returns (bytes memory)".
+    ╭─[input.sol:11:33]
     │
  11 │     fallback() external returns (uint256) {}
-    │     ────────────────────┬───────────────────  
-    │                         ╰───────────────────── Error occurred here.
+    │                                 ────┬────  
+    │                                     ╰────── Error occurred here.
 ────╯
 
-Error: Fallback function either has to have the signature "fallback()" or "fallback(bytes calldata) returns (bytes memory)".
-    ╭─[input.sol:16:5]
+[TypeError 5570] Error: Fallback function either has to have the signature "fallback()" or "fallback(bytes calldata) returns (bytes memory)".
+    ╭─[input.sol:16:45]
     │
  16 │     fallback(bytes memory) external returns (bytes memory) {}
-    │     ────────────────────────────┬────────────────────────────  
-    │                                 ╰────────────────────────────── Error occurred here.
+    │                                             ───────┬──────  
+    │                                                    ╰──────── Error occurred here.
 ────╯
 
-Error: Fallback function either has to have the signature "fallback()" or "fallback(bytes calldata) returns (bytes memory)".
-    ╭─[input.sol:21:5]
+[TypeError 5570] Error: Fallback function either has to have the signature "fallback()" or "fallback(bytes calldata) returns (bytes memory)".
+    ╭─[input.sol:21:47]
     │
  21 │     fallback(bytes calldata) external returns (bytes calldata) {}
-    │     ──────────────────────────────┬──────────────────────────────  
-    │                                   ╰──────────────────────────────── Error occurred here.
+    │                                               ────────┬───────  
+    │                                                       ╰───────── Error occurred here.
 ────╯
 
-Error: Fallback function either has to have the signature "fallback()" or "fallback(bytes calldata) returns (bytes memory)".
-    ╭─[input.sol:26:5]
+[TypeError 5570] Error: Fallback function either has to have the signature "fallback()" or "fallback(bytes calldata) returns (bytes memory)".
+    ╭─[input.sol:26:33]
     │
  26 │     fallback() external returns (bytes memory, bytes memory) {}
-    │     ─────────────────────────────┬─────────────────────────────  
-    │                                  ╰─────────────────────────────── Error occurred here.
+    │                                 ──────────────┬─────────────  
+    │                                               ╰─────────────── Error occurred here.
 ────╯
