@@ -61,17 +61,16 @@ pub fn render<D: RenderDiagnostic>(
 
     let mut report = Report::build(kind, source_id, range.start)
         .with_config(Config::default().with_color(with_color))
-        .with_message(message);
-    if let Some(code) = code {
-        report = report.with_code(code);
-    }
-    let report = report
+        .with_message(message)
         .with_label(
             Label::new((source_id, range))
                 .with_color(color)
                 .with_message("Error occurred here."),
-        )
-        .finish();
+        );
+    if let Some(code) = code {
+        report = report.with_code(code);
+    }
+    let report = report.finish();
 
     let mut result = vec![];
     report
