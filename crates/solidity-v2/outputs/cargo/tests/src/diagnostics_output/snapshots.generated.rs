@@ -617,6 +617,11 @@ mod structure {
     }
 
     #[test]
+    fn library_receive_function() -> Result<()> {
+        run("structure", "library_receive_function")
+    }
+
+    #[test]
     fn multiple_constructors() -> Result<()> {
         run("structure", "multiple_constructors")
     }
@@ -845,5 +850,10 @@ mod type_system {
                 "valid_visibilities",
             )
         }
+    }
+
+    #[test]
+    fn receive_function_parameters() -> Result<()> {
+        run("type_system", "receive_function_parameters")
     }
 }
