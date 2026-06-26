@@ -1,35 +1,27 @@
 # This file is generated automatically by infrastructure scripts. Please don't edit by hand.
 
-Diagnostics: 4
+Diagnostics: 3
 
-[structure/too-many-event-indexed-arguments] Error: More than 3 indexed arguments for event.
-    ╭─[input.sol:12:5]
+[TypeError 7249] Error: More than 3 indexed arguments for event.
+    ╭─[input.sol:11:5]
     │
- 12 │     event Bad4(uint indexed a, uint indexed b, uint indexed c, uint indexed d);
+ 11 │     event Bad4(uint indexed a, uint indexed b, uint indexed c, uint indexed d);
     │     ─────────────────────────────────────┬─────────────────────────────────────  
     │                                          ╰─────────────────────────────────────── Error occurred here.
 ────╯
 
-[structure/too-many-event-indexed-arguments] Error: More than 3 indexed arguments for event.
-    ╭─[input.sol:13:5]
+[TypeError 7249] Error: More than 3 indexed arguments for event.
+    ╭─[input.sol:12:5]
     │
- 13 │     event Mixed4(uint indexed a, uint b, uint indexed c, uint d, uint indexed e, uint indexed f);
+ 12 │     event Mixed4(uint indexed a, uint b, uint indexed c, uint d, uint indexed e, uint indexed f);
     │     ──────────────────────────────────────────────┬──────────────────────────────────────────────  
     │                                                   ╰──────────────────────────────────────────────── Error occurred here.
 ────╯
 
-[structure/too-many-anonymous-event-indexed-arguments] Error: More than 4 indexed arguments for anonymous event.
-    ╭─[input.sol:15:5]
+[TypeError 8598] Error: More than 4 indexed arguments for anonymous event.
+    ╭─[input.sol:14:5]
     │
- 15 │     event BadAnon5(uint indexed a, uint indexed b, uint indexed c, uint indexed d, uint indexed e) anonymous;
+ 14 │     event BadAnon5(uint indexed a, uint indexed b, uint indexed c, uint indexed d, uint indexed e) anonymous;
     │     ────────────────────────────────────────────────────┬────────────────────────────────────────────────────  
     │                                                         ╰────────────────────────────────────────────────────── Error occurred here.
-────╯
-
-[structure/too-many-event-indexed-arguments] Error: More than 3 indexed arguments for event.
-    ╭─[input.sol:17:1]
-    │
- 17 │ event FileLevelBad4(uint indexed a, uint indexed b, uint indexed c, uint indexed d);
-    │ ──────────────────────────────────────────┬─────────────────────────────────────────  
-    │                                           ╰─────────────────────────────────────────── Error occurred here.
 ────╯
