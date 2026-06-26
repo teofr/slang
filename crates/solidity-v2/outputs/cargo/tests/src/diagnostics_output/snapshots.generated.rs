@@ -568,6 +568,11 @@ mod semantic {
 mod structure {
     use super::*;
 
+    #[test]
+    fn empty_enum() -> Result<()> {
+        run("structure", "empty_enum")
+    }
+
     mod function_name_matches_container {
         use super::*;
 
