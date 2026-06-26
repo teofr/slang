@@ -6,6 +6,9 @@ pub(crate) mod node_id_generator;
 use std::sync::Arc;
 
 use slang_solidity_v2_common::diagnostics::kinds::structure::UninitializedConstant;
+use slang_solidity_v2_common::diagnostics::kinds::syntax::{
+    MultipleInheritanceSpecifiers, MultipleStorageLayoutSpecifiers,
+};
 use slang_solidity_v2_common::diagnostics::kinds::DiagnosticKind;
 use slang_solidity_v2_common::diagnostics::DiagnosticCollection;
 use slang_solidity_v2_common::files::FileId;
@@ -102,25 +105,43 @@ impl<S: Source> CstToIrBuilder<'_, S> {
         let is_abstract = source.abstract_keyword.is_some();
         let name = self.build_identifier(&source.name);
         let members = self.build_contract_members(&source.members);
-        let inheritance_types = source
-            .specifiers
-            .elements
-            .iter()
-            .find_map(|specifier| {
-                if let input::ContractSpecifier::InheritanceSpecifier(inheritance) = specifier {
-                    Some(self.build_inheritance_specifier(inheritance))
-                } else {
-                    None
+        // A contract header may carry at most one inheritance (`is`) specifier
+        // list and at most one storage layout (`layout at`) specifier. The
+        // grammar accepts repeats, so the first of each is kept and any extras
+        // are reported here.
+        let mut inheritance_types = None;
+        let mut storage_layout = None;
+        for specifier in &source.specifiers.elements {
+            match specifier {
+                input::ContractSpecifier::InheritanceSpecifier(inheritance) => {
+                    if inheritance_types.is_none() {
+                        inheritance_types = Some(self.build_inheritance_specifier(inheritance));
+                    } else {
+                        self.diagnostics.push(
+                            self.file_id.to_owned(),
+                            inheritance.is_keyword.calculate_text_range().unwrap(),
+                            MultipleInheritanceSpecifiers,
+                        );
+                    }
                 }
-            })
-            .unwrap_or_default();
-        let storage_layout = source.specifiers.elements.iter().find_map(|specifier| {
-            if let input::ContractSpecifier::StorageLayoutSpecifier(storage_layout) = specifier {
-                Some(self.build_storage_layout_specifier(storage_layout))
-            } else {
-                None
+                input::ContractSpecifier::StorageLayoutSpecifier(storage_layout_specifier) => {
+                    if storage_layout.is_none() {
+                        storage_layout =
+                            Some(self.build_storage_layout_specifier(storage_layout_specifier));
+                    } else {
+                        self.diagnostics.push(
+                            self.file_id.to_owned(),
+                            storage_layout_specifier
+                                .layout_keyword
+                                .calculate_text_range()
+                                .unwrap(),
+                            MultipleStorageLayoutSpecifiers,
+                        );
+                    }
+                }
             }
-        });
+        }
+        let inheritance_types = inheritance_types.unwrap_or_default();
 
         Arc::new(output::ContractDefinitionStruct {
             id,

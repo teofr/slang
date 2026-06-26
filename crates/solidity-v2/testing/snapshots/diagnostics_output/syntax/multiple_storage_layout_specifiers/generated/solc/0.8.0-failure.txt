@@ -1,0 +1,27 @@
+# This file is generated automatically by infrastructure scripts. Please don't edit by hand.
+
+Diagnostics: 3
+
+[ParserError 2314] Error: Expected '{' but got identifier
+   ╭─[input.sol:8:20]
+   │
+ 8 │ contract TwoLayout layout at 0x1000 layout at 0x2000 {}
+   │                    ───┬──  
+   │                       ╰──── Error occurred here.
+───╯
+
+[ParserError 2314] Error: Expected '{' but got identifier
+   ╭─[input.sol:9:22]
+   │
+ 9 │ contract ThreeLayout layout at 0x1000 layout at 0x2000 layout at 0x3000 {}
+   │                      ───┬──  
+   │                         ╰──── Error occurred here.
+───╯
+
+[ParserError 2314] Error: Expected '{' but got identifier
+    ╭─[input.sol:10:22]
+    │
+ 10 │ contract ValidLayout layout at 0x1234 {}
+    │                      ───┬──  
+    │                         ╰──── Error occurred here.
+────╯

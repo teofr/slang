@@ -2,8 +2,10 @@ mod expected_array_length_expression;
 mod incompatible_syntax_version;
 mod invalid_mutability;
 mod invalid_visibility;
+mod multiple_inheritance_specifiers;
 mod multiple_mutability_specifiers;
 mod multiple_override_specifiers;
+mod multiple_storage_layout_specifiers;
 mod multiple_virtual_specifiers;
 mod multiple_visibility_specifiers;
 mod unexpected_eof;
@@ -13,8 +15,10 @@ pub use expected_array_length_expression::ExpectedArrayLengthExpression;
 pub use incompatible_syntax_version::IncompatibleSyntaxVersion;
 pub use invalid_mutability::InvalidMutability;
 pub use invalid_visibility::InvalidVisibility;
+pub use multiple_inheritance_specifiers::MultipleInheritanceSpecifiers;
 pub use multiple_mutability_specifiers::MultipleMutabilitySpecifiers;
 pub use multiple_override_specifiers::MultipleOverrideSpecifiers;
+pub use multiple_storage_layout_specifiers::MultipleStorageLayoutSpecifiers;
 pub use multiple_virtual_specifiers::MultipleVirtualSpecifiers;
 pub use multiple_visibility_specifiers::MultipleVisibilitySpecifiers;
 use serde::Serialize;
@@ -59,5 +63,11 @@ define_diagnostic_kind! {
         /// A range/slice index access was used where an array length
         /// expression is expected
         ExpectedArrayLengthExpression(ExpectedArrayLengthExpression),
+
+        /// More than one inheritance (`is`) specifier list was provided on a contract header.
+        MultipleInheritanceSpecifiers(MultipleInheritanceSpecifiers),
+
+        /// More than one storage layout (`layout at`) specifier was provided on a contract header.
+        MultipleStorageLayoutSpecifiers(MultipleStorageLayoutSpecifiers),
     }
 }

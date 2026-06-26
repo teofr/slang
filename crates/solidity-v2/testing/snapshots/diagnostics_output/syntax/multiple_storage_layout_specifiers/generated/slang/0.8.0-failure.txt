@@ -1,0 +1,75 @@
+# This file is generated automatically by infrastructure scripts. Please don't edit by hand.
+
+Diagnostics: 9
+
+[syntax/incompatible-syntax-version] Error: This syntax was introduced in version '0.8.29'.
+   ╭─[input.sol:8:20]
+   │
+ 8 │ contract TwoLayout layout at 0x1000 layout at 0x2000 {}
+   │                    ────────┬───────  
+   │                            ╰───────── Error occurred here.
+───╯
+
+[syntax/multiple-storage-layout-specifiers] Error: Only a single storage layout specifier can be provided.
+   ╭─[input.sol:8:37]
+   │
+ 8 │ contract TwoLayout layout at 0x1000 layout at 0x2000 {}
+   │                                     ───┬──  
+   │                                        ╰──── Error occurred here.
+───╯
+
+[syntax/incompatible-syntax-version] Error: This syntax was introduced in version '0.8.29'.
+   ╭─[input.sol:8:37]
+   │
+ 8 │ contract TwoLayout layout at 0x1000 layout at 0x2000 {}
+   │                                     ────────┬───────  
+   │                                             ╰───────── Error occurred here.
+───╯
+
+[syntax/incompatible-syntax-version] Error: This syntax was introduced in version '0.8.29'.
+   ╭─[input.sol:9:22]
+   │
+ 9 │ contract ThreeLayout layout at 0x1000 layout at 0x2000 layout at 0x3000 {}
+   │                      ────────┬───────  
+   │                              ╰───────── Error occurred here.
+───╯
+
+[syntax/multiple-storage-layout-specifiers] Error: Only a single storage layout specifier can be provided.
+   ╭─[input.sol:9:39]
+   │
+ 9 │ contract ThreeLayout layout at 0x1000 layout at 0x2000 layout at 0x3000 {}
+   │                                       ───┬──  
+   │                                          ╰──── Error occurred here.
+───╯
+
+[syntax/incompatible-syntax-version] Error: This syntax was introduced in version '0.8.29'.
+   ╭─[input.sol:9:39]
+   │
+ 9 │ contract ThreeLayout layout at 0x1000 layout at 0x2000 layout at 0x3000 {}
+   │                                       ────────┬───────  
+   │                                               ╰───────── Error occurred here.
+───╯
+
+[syntax/multiple-storage-layout-specifiers] Error: Only a single storage layout specifier can be provided.
+   ╭─[input.sol:9:56]
+   │
+ 9 │ contract ThreeLayout layout at 0x1000 layout at 0x2000 layout at 0x3000 {}
+   │                                                        ───┬──  
+   │                                                           ╰──── Error occurred here.
+───╯
+
+[syntax/incompatible-syntax-version] Error: This syntax was introduced in version '0.8.29'.
+   ╭─[input.sol:9:56]
+   │
+ 9 │ contract ThreeLayout layout at 0x1000 layout at 0x2000 layout at 0x3000 {}
+   │                                                        ────────┬───────  
+   │                                                                ╰───────── Error occurred here.
+───╯
+
+[syntax/incompatible-syntax-version] Error: This syntax was introduced in version '0.8.29'.
+    ╭─[input.sol:10:22]
+    │
+ 10 │ contract ValidLayout layout at 0x1234 {}
+    │                      ────────┬───────  
+    │                              ╰───────── Error occurred here.
+────╯
