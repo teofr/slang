@@ -2,7 +2,8 @@ use std::sync::Arc;
 
 use slang_solidity_v2_common::diagnostics::kinds::resolution::IdentifierRedeclaration;
 use slang_solidity_v2_common::diagnostics::kinds::structure::{
-    FunctionNameMatchesContainer, InvalidUsingDirectiveContainer, MultipleConstructors,
+    EnumWithTooManyMembers, FunctionNameMatchesContainer, InvalidUsingDirectiveContainer,
+    MultipleConstructors,
 };
 use slang_solidity_v2_common::diagnostics::DiagnosticCollection;
 use slang_solidity_v2_common::nodes::NodeId;
@@ -412,6 +413,16 @@ impl<F: SemanticFile> Visitor for Pass<'_, F> {
     fn enter_enum_definition(&mut self, node: &ir::EnumDefinition) -> bool {
         let definition = Definition::new_enum(node);
         self.insert_definition_in_current_scope(definition);
+
+        // An enum may declare at most 256 members, since its values must fit in
+        // a single byte.
+        if node.members.len() > 256 {
+            self.diagnostics.push(
+                self.current_file.id().to_owned(),
+                node.range.clone(),
+                EnumWithTooManyMembers,
+            );
+        }
 
         let enum_scope = Scope::new_enum(node.id());
         let enum_scope_id = self.binder.insert_scope(enum_scope);
