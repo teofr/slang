@@ -4,8 +4,9 @@ use slang_solidity_v2_common::diagnostics::kinds::resolution::IdentifierRedeclar
 use slang_solidity_v2_common::diagnostics::kinds::structure::{
     BreakOutsideLoop, ContinueOutsideLoop, EmptyEnum, EmptyStruct, EnumWithTooManyMembers,
     FunctionNameMatchesContainer, InvalidUsingDirectiveContainer, LibraryVirtualFunction,
-    LibraryVirtualModifier, MultipleConstructors, UnimplementedModifierMustBeVirtual,
-    VirtualFreeFunction, VirtualPrivateFunction,
+    LibraryVirtualModifier, MultipleConstructors, MultipleFallbackFunctions,
+    MultipleReceiveFunctions, UnimplementedModifierMustBeVirtual, VirtualFreeFunction,
+    VirtualPrivateFunction,
 };
 use slang_solidity_v2_common::diagnostics::DiagnosticCollection;
 use slang_solidity_v2_common::files::FileId;
@@ -257,6 +258,48 @@ impl<'a, F: SemanticFile> Pass<'a, F> {
                 Some(constructor_parameters_scope_id);
         }
     }
+
+    // At most one fallback and one receive function are allowed per contract.
+    // Each duplicate past the first is reported. (solc additionally attaches a
+    // secondary location pointing at the previous declaration; Slang's
+    // diagnostic model carries a single range, so only the duplicate is
+    // highlighted.)
+    fn register_special_function(&mut self, node: &ir::FunctionDefinition) {
+        let current_scope_node_id = self.current_scope().node_id();
+        let Definition::Contract(contract_definition) =
+            self.binder.get_definition_mut(current_scope_node_id)
+        else {
+            // Fallback/receive functions are only meaningful inside contracts;
+            // any other container is reported elsewhere.
+            return;
+        };
+
+        match node.kind {
+            ir::FunctionKind::Fallback => {
+                if contract_definition.has_fallback {
+                    self.diagnostics.push(
+                        self.current_file.id().to_owned(),
+                        node.range.clone(),
+                        MultipleFallbackFunctions,
+                    );
+                } else {
+                    contract_definition.has_fallback = true;
+                }
+            }
+            ir::FunctionKind::Receive => {
+                if contract_definition.has_receive {
+                    self.diagnostics.push(
+                        self.current_file.id().to_owned(),
+                        node.range.clone(),
+                        MultipleReceiveFunctions,
+                    );
+                } else {
+                    contract_definition.has_receive = true;
+                }
+            }
+            _ => unreachable!("register_special_function expects a fallback or receive function"),
+        }
+    }
 }
 
 impl<F: SemanticFile> Visitor for Pass<'_, F> {
@@ -441,6 +484,11 @@ impl<F: SemanticFile> Visitor for Pass<'_, F> {
                     // Register the constructor to resolve named parameters when
                     // constructing this contract
                     self.register_constructor(node, parameters_scope_id);
+                } else if matches!(
+                    node.kind,
+                    ir::FunctionKind::Fallback | ir::FunctionKind::Receive
+                ) {
+                    self.register_special_function(node);
                 }
 
                 let function_scope =

@@ -51,6 +51,8 @@ pub struct ContractDefinition {
     pub ir_node: ir::ContractDefinition,
     pub bases: Option<Vec<NodeId>>,
     pub(crate) constructor_parameters_scope_id: Option<ScopeId>,
+    pub(crate) has_fallback: bool,
+    pub(crate) has_receive: bool,
     pub base_slot: Option<U256>,
 }
 
@@ -334,6 +336,8 @@ impl Definition {
             ir_node: Arc::clone(ir_node),
             bases: None,
             constructor_parameters_scope_id: None,
+            has_fallback: false,
+            has_receive: false,
             base_slot: None,
         })
     }
