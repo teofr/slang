@@ -3,33 +3,33 @@
 Diagnostics: 4
 
 [ParserError 3147] Error: Enum with no members is not allowed.
-   ╭─[input.sol:8:1]
+   ╭─[input.sol:8:17]
    │
  8 │ enum FileLevel {}
-   │ ────────┬────────  
-   │         ╰────────── Error occurred here.
+   │                 ┬  
+   │                 ╰── Error occurred here.
 ───╯
 
 [ParserError 3147] Error: Enum with no members is not allowed.
-   ╭─[input.sol:9:14]
+   ╭─[input.sol:9:26]
    │
  9 │ contract C { enum Inner {} }
-   │              ──────┬──────  
-   │                    ╰──────── Error occurred here.
+   │                          ┬  
+   │                          ╰── Error occurred here.
 ───╯
 
 [ParserError 3147] Error: Enum with no members is not allowed.
-    ╭─[input.sol:10:13]
+    ╭─[input.sol:10:25]
     │
  10 │ library L { enum Inner {} }
-    │             ──────┬──────  
-    │                   ╰──────── Error occurred here.
+    │                         ┬  
+    │                         ╰── Error occurred here.
 ────╯
 
 [ParserError 3147] Error: Enum with no members is not allowed.
-    ╭─[input.sol:11:15]
+    ╭─[input.sol:11:27]
     │
  11 │ interface I { enum Inner {} }
-    │               ──────┬──────  
-    │                     ╰──────── Error occurred here.
+    │                           ┬  
+    │                           ╰── Error occurred here.
 ────╯
