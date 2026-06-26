@@ -896,6 +896,8 @@ impl core::convert::From<slang_solidity_v2_common::diagnostics::kinds::semantic:
 pub fn slang_solidity_v2_common::diagnostics::kinds::DiagnosticKind::from(slang_solidity_v2_common::diagnostics::kinds::semantic::LinearisationImpossible) -> Self
 impl core::convert::From<slang_solidity_v2_common::diagnostics::kinds::semantic::SemanticDiagnosticKind> for slang_solidity_v2_common::diagnostics::kinds::DiagnosticKind
 pub fn slang_solidity_v2_common::diagnostics::kinds::DiagnosticKind::from(slang_solidity_v2_common::diagnostics::kinds::semantic::SemanticDiagnosticKind) -> Self
+impl core::convert::From<slang_solidity_v2_common::diagnostics::kinds::structure::EmptyEnum> for slang_solidity_v2_common::diagnostics::kinds::DiagnosticKind
+pub fn slang_solidity_v2_common::diagnostics::kinds::DiagnosticKind::from(slang_solidity_v2_common::diagnostics::kinds::structure::EmptyEnum) -> Self
 impl core::convert::From<slang_solidity_v2_common::diagnostics::kinds::structure::FunctionNameMatchesContainer> for slang_solidity_v2_common::diagnostics::kinds::DiagnosticKind
 pub fn slang_solidity_v2_common::diagnostics::kinds::DiagnosticKind::from(slang_solidity_v2_common::diagnostics::kinds::structure::FunctionNameMatchesContainer) -> Self
 impl core::convert::From<slang_solidity_v2_common::diagnostics::kinds::structure::InvalidUsingDirectiveContainer> for slang_solidity_v2_common::diagnostics::kinds::DiagnosticKind
@@ -1074,6 +1076,10 @@ impl slang_solidity_v2_common::diagnostics::DiagnosticExtensions for slang_solid
 pub fn slang_solidity_v2_common::diagnostics::kinds::semantic::SemanticDiagnosticKind::code(&self) -> &'static str
 pub fn slang_solidity_v2_common::diagnostics::kinds::semantic::SemanticDiagnosticKind::message(&self) -> alloc::string::String
 pub fn slang_solidity_v2_common::diagnostics::kinds::semantic::SemanticDiagnosticKind::severity(&self) -> slang_solidity_v2_common::diagnostics::DiagnosticSeverity
+impl slang_solidity_v2_common::diagnostics::DiagnosticExtensions for slang_solidity_v2_common::diagnostics::kinds::structure::EmptyEnum
+pub fn slang_solidity_v2_common::diagnostics::kinds::structure::EmptyEnum::code(&self) -> &'static str
+pub fn slang_solidity_v2_common::diagnostics::kinds::structure::EmptyEnum::message(&self) -> alloc::string::String
+pub fn slang_solidity_v2_common::diagnostics::kinds::structure::EmptyEnum::severity(&self) -> slang_solidity_v2_common::diagnostics::DiagnosticSeverity
 impl slang_solidity_v2_common::diagnostics::DiagnosticExtensions for slang_solidity_v2_common::diagnostics::kinds::structure::FunctionNameMatchesContainer
 pub fn slang_solidity_v2_common::diagnostics::kinds::structure::FunctionNameMatchesContainer::code(&self) -> &'static str
 pub fn slang_solidity_v2_common::diagnostics::kinds::structure::FunctionNameMatchesContainer::message(&self) -> alloc::string::String
