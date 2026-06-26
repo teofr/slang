@@ -2,7 +2,7 @@
 
 Diagnostics: 3
 
-[ParserError 8714] Error: More than one storage layout specifier.
+[ParserError 8714] Error: More than one storage layout definition.
    ╭─[input.sol:8:37]
    │
  8 │ contract TwoLayout layout at 0x1000 layout at 0x2000 {}
@@ -10,7 +10,7 @@ Diagnostics: 3
    │                                        ╰──── Error occurred here.
 ───╯
 
-[ParserError 8714] Error: More than one storage layout specifier.
+[ParserError 8714] Error: More than one storage layout definition.
    ╭─[input.sol:9:39]
    │
  9 │ contract ThreeLayout layout at 0x1000 layout at 0x2000 layout at 0x3000 {}
@@ -18,7 +18,7 @@ Diagnostics: 3
    │                                          ╰──── Error occurred here.
 ───╯
 
-[ParserError 8714] Error: More than one storage layout specifier.
+[ParserError 8714] Error: More than one storage layout definition.
    ╭─[input.sol:9:56]
    │
  9 │ contract ThreeLayout layout at 0x1000 layout at 0x2000 layout at 0x3000 {}
