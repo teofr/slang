@@ -569,6 +569,11 @@ mod structure {
     use super::*;
 
     #[test]
+    fn empty_enum() -> Result<()> {
+        run("structure", "empty_enum")
+    }
+
+    #[test]
     fn enum_with_too_many_members() -> Result<()> {
         run("structure", "enum_with_too_many_members")
     }

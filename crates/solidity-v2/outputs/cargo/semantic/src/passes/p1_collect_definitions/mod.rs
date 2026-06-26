@@ -2,8 +2,8 @@ use std::sync::Arc;
 
 use slang_solidity_v2_common::diagnostics::kinds::resolution::IdentifierRedeclaration;
 use slang_solidity_v2_common::diagnostics::kinds::structure::{
-    EnumWithTooManyMembers, FunctionNameMatchesContainer, InvalidUsingDirectiveContainer,
-    MultipleConstructors,
+    EmptyEnum, EnumWithTooManyMembers, FunctionNameMatchesContainer,
+    InvalidUsingDirectiveContainer, MultipleConstructors,
 };
 use slang_solidity_v2_common::diagnostics::DiagnosticCollection;
 use slang_solidity_v2_common::nodes::NodeId;
@@ -414,9 +414,15 @@ impl<F: SemanticFile> Visitor for Pass<'_, F> {
         let definition = Definition::new_enum(node);
         self.insert_definition_in_current_scope(definition);
 
-        // An enum may declare at most 256 members, since its values must fit in
-        // a single byte.
-        if node.members.len() > 256 {
+        // An enum must declare at least one member, and at most 256 (its values
+        // must fit in a single byte).
+        if node.members.is_empty() {
+            self.diagnostics.push(
+                self.current_file.id().to_owned(),
+                node.range.clone(),
+                EmptyEnum,
+            );
+        } else if node.members.len() > 256 {
             self.diagnostics.push(
                 self.current_file.id().to_owned(),
                 node.range.clone(),
