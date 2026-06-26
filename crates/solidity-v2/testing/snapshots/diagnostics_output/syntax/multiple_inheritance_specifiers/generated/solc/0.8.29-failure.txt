@@ -2,7 +2,7 @@
 
 Diagnostics: 3
 
-[ParserError 6668] Error: More than one inheritance specifier list.
+[ParserError 6668] Error: More than one inheritance list.
    ╭─[input.sol:9:21]
    │
  9 │ contract TwoIs is A is B {}
@@ -10,7 +10,7 @@ Diagnostics: 3
    │                      ╰── Error occurred here.
 ───╯
 
-[ParserError 6668] Error: More than one inheritance specifier list.
+[ParserError 6668] Error: More than one inheritance list.
     ╭─[input.sol:10:23]
     │
  10 │ contract ThreeIs is A is B is A {}
@@ -18,7 +18,7 @@ Diagnostics: 3
     │                        ╰── Error occurred here.
 ────╯
 
-[ParserError 6668] Error: More than one inheritance specifier list.
+[ParserError 6668] Error: More than one inheritance list.
     ╭─[input.sol:10:28]
     │
  10 │ contract ThreeIs is A is B is A {}
