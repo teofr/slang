@@ -1,0 +1,7 @@
+{
+    "matrix": {
+        "type": "SingleVersionAllTargets",
+        "version": "0.8.29",
+        "reason": "Pinning a version that supports file-level events (since 0.8.22) so the file-level case parses; the indexed-argument count is independent of both language version and EVM target."
+    }
+}
