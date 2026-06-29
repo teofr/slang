@@ -10,3 +10,8 @@ contract A {
 contract C {
     receive() external payable {}
 }
+
+// The same rule applies to a receive declared inside an interface.
+interface I {
+    receive(uint256) external payable;
+}

@@ -1,8 +1,7 @@
 //! Shape checks for the special `receive` function.
 //!
-//! Whether a receive may declare parameters is a property of its resolved
-//! type, and a library may not declare one. The checks run here, in the
-//! code-analysis pass, over the fully resolved program.
+//! A `receive` function may not declare parameters,
+//! and a library may not declare one.
 //!
 //! Note that the v2 grammar already rejects most malformed special functions
 //! as syntax errors (a `receive` with `internal`/`public` visibility, with
@@ -80,8 +79,7 @@ fn check_receive_function(
     }
 
     // Whether the receive declares parameters can be extracted from the
-    // function's type, computed during type definition. A function definition
-    // always types to a function type.
+    // function's type, computed during type definition.
     let Typing::Resolved(type_id) = binder.node_typing(node.id()) else {
         unreachable!("receive function definition is not typed");
     };
