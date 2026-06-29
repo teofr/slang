@@ -78,8 +78,6 @@ fn check_receive_function(
         );
     }
 
-    // Whether the receive declares parameters can be extracted from the
-    // function's type, computed during type definition.
     let Typing::Resolved(type_id) = binder.node_typing(node.id()) else {
         unreachable!("receive function definition is not typed");
     };
