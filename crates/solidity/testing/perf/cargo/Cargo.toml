@@ -7,6 +7,7 @@ publish = false
 
 [dependencies]
 anyhow = { workspace = true }
+divan = { workspace = true }
 iai-callgrind = { workspace = true }
 Inflector = { workspace = true }
 infra_utils = { workspace = true }
@@ -37,6 +38,12 @@ harness = false
 
 [[bench]]
 name = "slang_v2"
+harness = false
+
+# Wall-clock + heap-allocation benchmark of the v2 parser (divan). Complements
+# the instruction-counting `slang_v2` iai bench; see `benches/slang_v2_divan`.
+[[bench]]
+name = "slang_v2_divan"
 harness = false
 
 [lints]
