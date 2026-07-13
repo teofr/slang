@@ -2,6 +2,7 @@
 //! `Type::UserMetaType`) and their accessors, reached through
 //! `Expression::get_type()`.
 
+use crate::abi::AbiType;
 use crate::{ast, define_fixture};
 
 define_fixture!(
@@ -19,17 +20,21 @@ contract C {
         // `(uint[])` — the index-access type expression carries a `MetaType`
         // (of an array).
         abi.decode(b, (uint[]));
+        // `uint(x)` — the elementary-type operand `uint` carries a stored
+        // `MetaType` typing of its own.
+        uint(x);
     }
 }
 "#,
 );
 
-/// Collects the `get_type()` of every meta-type-bearing expression: the operand
-/// of each function call (eg. `S` in `S(x)`) and each index-access type
-/// expression (eg. `uint[]`).
+/// Collects, for every function call: the `get_type()` of its operand (eg. `S`
+/// in `S(x)`) and whether it is a type conversion; plus the `get_type()` of
+/// each index-access type expression (eg. `uint[]`).
 #[derive(Default)]
 struct MetaTypeCollector {
     types: Vec<ast::Type>,
+    conversions: Vec<bool>,
 }
 
 impl ast::visitor::Visitor for MetaTypeCollector {
@@ -37,6 +42,7 @@ impl ast::visitor::Visitor for MetaTypeCollector {
         if let Some(type_) = node.operand().get_type() {
             self.types.push(type_);
         }
+        self.conversions.push(node.is_type_conversion());
         true
     }
 
@@ -67,17 +73,37 @@ fn meta_type_ast_wrappers_are_reachable_via_get_type() {
         .expect("expected a `Type::UserMetaType` from the `S(x)` operand");
     assert_eq!(user_meta.definition().identifier().name(), "S");
 
-    // `Type::MetaType` wraps the type it is the meta-type of (here, an array).
-    let meta = collector
+    // `Type::MetaType` wraps the type it is the meta-type of: an array for the
+    // `uint[]` type expression, and an integer for the `uint` cast operand
+    // (whose typing is stored on the elementary-type node itself).
+    let metas = collector
         .types
         .iter()
-        .find_map(|type_| match type_ {
-            ast::Type::MetaType(meta) => Some(meta),
+        .filter_map(|type_| match type_ {
+            ast::Type::MetaType(meta) => Some(meta.meta_type()),
             _ => None,
         })
-        .expect("expected a `Type::MetaType` from the `uint[]` type expression");
+        .collect::<Vec<_>>();
     assert!(
-        matches!(meta.meta_type(), ast::Type::Array(_)),
-        "expected the `uint[]` meta-type to wrap an array",
+        metas.iter().any(|meta| matches!(meta, ast::Type::Array(_))),
+        "expected a `Type::MetaType` wrapping an array from the `uint[]` type expression",
     );
+    assert!(
+        metas
+            .iter()
+            .any(|meta| matches!(meta, ast::Type::Integer(_))),
+        "expected a `Type::MetaType` wrapping an integer from the `uint(x)` cast operand",
+    );
+
+    // `is_type_conversion` in source order: `S(x)` is a construction through a
+    // type name (meta operand), `abi.decode(...)` is a plain call, `uint(x)`
+    // is an elementary cast.
+    assert_eq!(collector.conversions, vec![true, false, true]);
+
+    // Meta-types have no ABI representation.
+    for type_ in &collector.types {
+        if matches!(type_, ast::Type::MetaType(_) | ast::Type::UserMetaType(_)) {
+            assert!(AbiType::try_from(type_).is_err());
+        }
+    }
 }

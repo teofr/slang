@@ -7,7 +7,9 @@ use slang_solidity_v2_ir::ir::visitor::Visitor;
 use super::Pass;
 use crate::binder::{Definition, Reference, Resolution, Scope, Typing, UsingDirective};
 use crate::built_ins::InternalBuiltIn;
-use crate::types::{ContractType, DataLocation, EnumType, InterfaceType, LibraryType, Type};
+use crate::types::{
+    ContractType, DataLocation, EnumType, InterfaceType, LibraryType, Type, UserDefinedValueType,
+};
 
 impl Visitor for Pass<'_> {
     fn enter_source_unit(&mut self, node: &ir::SourceUnit) -> bool {
@@ -286,6 +288,14 @@ impl Visitor for Pass<'_> {
         node: &ir::UserDefinedValueTypeDefinition,
     ) {
         self.mark_user_meta_type_node(node.id());
+
+        // Register the UDVT's value type up front: `T.wrap(...)` types by
+        // *finding* this type in the registry, and must work even when `T` is
+        // never used in a declaration.
+        self.types
+            .register_type(Type::UserDefinedValue(UserDefinedValueType {
+                definition_id: node.id(),
+            }));
 
         let target_type_id = self.type_of_elementary_type(&node.value_type, None);
         let Definition::UserDefinedValueType(udvt) = self.binder.get_definition_mut(node.id())

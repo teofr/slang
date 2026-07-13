@@ -7,12 +7,13 @@ use slang_solidity_v2_common::diagnostics::kinds::type_system::{
 };
 use slang_solidity_v2_common::diagnostics::kinds::DiagnosticKind;
 use slang_solidity_v2_common::diagnostics::DiagnosticCollection;
+use slang_solidity_v2_common::evm_targets::EvmTarget;
 use slang_solidity_v2_common::versions::LanguageVersion;
 use slang_solidity_v2_ir::ir::{self, NodeIdGenerator};
 
 use super::{build_file, TestFile};
 use crate::binder::{Binder, Definition};
-use crate::context::{FileNodeMapper, SemanticFile};
+use crate::context::{FileNodeMapper, SemanticContext, SemanticFile};
 use crate::passes::common::node_id_for_expression_typing;
 use crate::passes::{
     p1_collect_definitions, p2_linearise_contracts, p3_type_definitions, p5_resolve_references,
@@ -1566,6 +1567,10 @@ fn test_meta_types_do_not_leak_into_value_positions() {
     // A meta-type as an array literal element.
     let (type_, _) = try_type_of_expression("[uint, uint]");
     assert_eq!(type_, None);
+
+    // A meta-type as a postfix operator operand.
+    let (type_, _) = try_type_of_expression("uint++");
+    assert_eq!(type_, None);
 }
 
 #[test]
@@ -1607,6 +1612,24 @@ fn test_fixed_size_array_type_expression() {
         matches!(&decoded, Type::Array(ArrayType { element_type, .. }) if *element_type == types.uint256()),
         "expected `uint[]` to decode to a dynamic array, got {decoded:?}",
     );
+
+    // A constant size evaluates through the compile-time constant evaluator,
+    // like array type *names* do in p3.
+    let (decoded, _) = type_of_expression_in_context(
+        "bytes b; uint256 constant LEN = 3;",
+        "abi.decode(b, (uint[LEN]))",
+    );
+    assert!(
+        matches!(decoded, Type::FixedSizeArray(FixedSizeArrayType { size, .. }) if size == U256::from(3)),
+        "expected `uint[LEN]` to decode to a fixed-size array of 3, got {decoded:?}",
+    );
+
+    // Zero-length and non-constant sizes don't type.
+    let (decoded, _) = try_type_of_expression_in_context("bytes b;", "abi.decode(b, (uint[0]))");
+    assert_eq!(decoded, None);
+    let (decoded, _) =
+        try_type_of_expression_in_context("bytes b; uint n;", "abi.decode(b, (uint[n]))");
+    assert_eq!(decoded, None);
 }
 
 #[test]
@@ -1728,4 +1751,156 @@ fn test_event_selector() {
     let (type_, _) =
         type_of_expression_in_context("event E(uint a); event E(bool b);", "E.selector");
     assert_eq!(type_, Type::ByteArray(ByteArrayType { width: 4 }));
+}
+
+#[test]
+fn test_bytes_and_string_concat_typing() {
+    // `concat` resolves as a member of the *meta-type* of `bytes`/`string`,
+    // and the two built-ins stay distinct: `bytes.concat` yields
+    // `bytes memory` while `string.concat` yields `string memory`.
+    let (type_, _) = type_of_expression(r#"bytes.concat(hex"01", hex"02")"#);
+    assert_eq!(
+        type_,
+        Type::Bytes(BytesType {
+            location: DataLocation::Memory
+        })
+    );
+
+    let (type_, _) = type_of_expression(r#"string.concat("a", "b")"#);
+    assert_eq!(
+        type_,
+        Type::String(StringType {
+            location: DataLocation::Memory
+        })
+    );
+}
+
+#[test]
+fn test_static_library_call_is_not_partially_applied() {
+    // With a matching `using` directive in scope, a *static* call through the
+    // library name must still resolve to the full function: the type name `L`
+    // is not a value receiver, so it must not bind the first parameter as a
+    // partial application.
+    let source = r#"
+        library L {
+            function f(uint x) internal pure returns (bool) { return x > 0; }
+        }
+        contract Test {
+            using L for uint;
+            function __test() internal pure {
+                L.f(1);
+            }
+        }
+        "#;
+    let TypeAnalysis {
+        file,
+        binder,
+        types,
+        ..
+    } = analyze(LanguageVersion::LATEST, source);
+    let contract = find_contract(&file, "Test");
+    let function = find_function(&contract.members, "__test").expect("__test function");
+    let body = function.body.as_ref().expect("__test has a body");
+    let typings = expression_statement_types(body, &binder, &types);
+    assert_eq!(typings, vec![Some(Type::Boolean)]);
+}
+
+#[test]
+fn test_meta_type_argument_does_not_match_overloads() {
+    // Passing a type name as an argument must not match any overload
+    // candidate during disambiguation.
+    let context = r#"
+        function f(uint x) internal pure returns (bool) { return x > 0; }
+        function f(bool x) internal pure returns (uint) { return x ? 1 : 0; }
+    "#;
+    let (type_, _) = try_type_of_expression_in_context(context, "f(uint)");
+    assert_eq!(type_, None);
+}
+
+#[test]
+fn test_user_meta_type_built_in_members() {
+    // Built-in members of a *type name* resolve through its meta-type: errors
+    // expose `selector`, and UDVTs expose `wrap`/`unwrap`.
+    let (type_, _) = type_of_expression_in_context("error Err(uint x);", "Err.selector");
+    assert_eq!(type_, Type::ByteArray(ByteArrayType { width: 4 }));
+
+    let (type_, _) = type_of_expression_in_context("type T is uint256;", "T.wrap(1)");
+    assert!(
+        matches!(type_, Type::UserDefinedValue(_)),
+        "expected `T.wrap(1)` to type as the UDVT, got {type_:?}",
+    );
+
+    let (type_, _) = type_of_expression_in_context("type T is uint256;", "T.unwrap(T.wrap(1))");
+    assert_eq!(
+        type_,
+        Type::Integer(IntegerType {
+            is_signed: false,
+            bits: 256
+        })
+    );
+}
+
+#[test]
+fn test_meta_type_internal_names() {
+    // Meta-types print in solc's `type(T)` notation: `type(uint256)` for an
+    // elementary type, `type(E)` for a named definition.
+    let mut id_generator = NodeIdGenerator::default();
+    let source = r#"
+        contract C {
+            enum E { A }
+            function g() internal pure {
+                uint(1);
+                E;
+            }
+        }
+    "#;
+    let file = build_file(
+        "test.sol".into(),
+        source,
+        &mut id_generator,
+        LanguageVersion::LATEST,
+    );
+    let files = vec![file];
+    let mut diagnostics = DiagnosticCollection::default();
+    let context = SemanticContext::build_from(
+        LanguageVersion::LATEST,
+        EvmTarget::LATEST,
+        &files,
+        None,
+        &mut diagnostics,
+    );
+    assert!(diagnostics.is_empty(), "{diagnostics:?}");
+
+    let contract = find_contract(&files[0], "C");
+    let function = find_function(&contract.members, "g").expect("g function");
+    let body = function.body.as_ref().expect("g has a body");
+    let mut expressions = body.statements.iter().filter_map(|stmt| match stmt {
+        ir::Statement::ExpressionStatement(s) => Some(&s.expression),
+        _ => None,
+    });
+
+    // `uint(1)`: the call operand `uint` carries the elementary meta-type.
+    let cast = expressions.next().expect("cast statement");
+    let ir::Expression::FunctionCallExpression(call) = cast else {
+        panic!("expected a function call expression");
+    };
+    let operand_node_id =
+        node_id_for_expression_typing(&call.operand).expect("operand has a typing node");
+    let uint_meta_id = context
+        .binder()
+        .node_typing(operand_node_id)
+        .as_type_id()
+        .expect("cast operand is typed");
+    assert_eq!(context.type_internal_name(uint_meta_id), "type(uint256)");
+
+    // `E`: the bare enum name carries the user meta-type.
+    let enum_expression = expressions.next().expect("enum statement");
+    let enum_node_id =
+        node_id_for_expression_typing(enum_expression).expect("expression has a typing node");
+    let enum_meta_id = context
+        .binder()
+        .node_typing(enum_node_id)
+        .as_type_id()
+        .expect("enum name is typed");
+    assert_eq!(context.type_internal_name(enum_meta_id), "type(E)");
 }

@@ -5,7 +5,8 @@ use slang_solidity_v2_ir::ir;
 use super::Pass;
 use crate::binder::{Definition, Resolution, Typing};
 use crate::built_ins::InternalBuiltIn;
-use crate::passes::common::node_id_for_expression_typing;
+use crate::passes::common::constant_evaluator::{evaluate_compile_time_constant, ConstantResolver};
+use crate::passes::common::{node_id_for_expression_typing, node_location};
 use crate::types::{
     literals, AddressType, ArrayType, ContractType, DataLocation, EnumType, FixedSizeArrayType,
     FunctionType, IntegerType, InterfaceType, LibraryType, LiteralKind, MetaType, Number,
@@ -60,8 +61,12 @@ impl Pass<'_> {
 
     /// Builds the meta-typing of an array type expression `T[...]` (an index
     /// access whose operand is itself a meta-type): `T[]` when there is no
-    /// index, `T[n]` when the index is a compile-time literal. An index that
-    /// is present but not a literal yields `Unresolved`.
+    /// index, `T[n]` when the index evaluates to a compile-time constant
+    /// (a literal or a constant like `uint[LEN]`, mirroring what
+    /// `resolve_array_length` does for array type *names* in p3). A size that
+    /// does not evaluate to a positive in-range integer yields `Unresolved`.
+    // TODO(validation): report the array-length diagnostics (not constant,
+    // zero, fractional, ...) that the p3 type-name path reports.
     pub(super) fn meta_typing_of_array_type_expression(
         &mut self,
         element_type: TypeId,
@@ -73,24 +78,26 @@ impl Pass<'_> {
                 location: DataLocation::Memory,
             }));
         };
-        let size = self
-            .typing_of_expression(size_expression)
-            .as_type_id()
-            .and_then(|type_id| self.types.number_value_of_type_id(type_id))
-            .and_then(|number| {
-                number
-                    .as_integer()
-                    .and_then(|value| U256::try_from(value).ok())
-            });
+        let (file_id, range) = node_location(size_expression, self.file_node_mapper);
+        let size = evaluate_compile_time_constant(
+            size_expression,
+            self.current_scope_id(),
+            self.types,
+            &ConstantResolver {
+                binder: self.binder,
+                use_site: Some((&file_id, range.start)),
+            },
+        )
+        .ok()
+        .and_then(|value| value.into_integer())
+        .and_then(|value| U256::try_from(&value).ok())
+        .filter(|size| !size.is_zero());
         match size {
             Some(size) => self.meta_typing_of(Type::FixedSizeArray(FixedSizeArrayType {
                 element_type,
                 size,
                 location: DataLocation::Memory,
             })),
-            // TODO: evaluate non-literal compile-time constant sizes (eg.
-            // `uint[LEN]` with a constant `LEN`), as `resolve_type_name` does
-            // for type names in p3.
             None => Typing::Unresolved,
         }
     }
