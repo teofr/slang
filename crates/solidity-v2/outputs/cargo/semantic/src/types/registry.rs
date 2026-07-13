@@ -133,6 +133,20 @@ impl TypeRegistry {
         self.super_types.insert(type_node_id, super_type_node_ids);
     }
 
+    /// Whether the type is a meta-type, or a tuple containing one at any
+    /// depth. A tuple of type names (eg. the `(uint, bool)` argument of
+    /// `abi.decode`) is not a *value* even though the tuple itself is not a
+    /// meta-type, so value positions must filter it out too.
+    pub(crate) fn contains_meta_type(&self, type_id: TypeId) -> bool {
+        match self.get_type_by_id(type_id) {
+            Type::MetaType(_) | Type::UserMetaType(_) => true,
+            Type::Tuple(TupleType { types }) => types
+                .iter()
+                .any(|element| self.contains_meta_type(*element)),
+            _ => false,
+        }
+    }
+
     pub fn get_type_by_id(&self, type_id: TypeId) -> &Type {
         self.types.get_index(type_id.0).unwrap()
     }

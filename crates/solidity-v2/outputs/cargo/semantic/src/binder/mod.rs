@@ -92,7 +92,10 @@ impl Typing {
     /// at the pointed-to `Type`.
     pub fn as_value_type_id(&self, types: &TypeRegistry) -> Option<TypeId> {
         let type_id = self.as_type_id()?;
-        if types.get_type_by_id(type_id).is_meta_type() {
+        // Filter meta-types recursively: a tuple of type names (eg. the
+        // `(uint, bool)` argument of `abi.decode`) is not a value either, even
+        // though the tuple itself is not a meta-type.
+        if types.contains_meta_type(type_id) {
             None
         } else {
             Some(type_id)

@@ -10,7 +10,8 @@ use crate::passes::common::{
     filter_overriden_definitions, node_id_for_elementary_type, node_id_for_string_expression_typing,
 };
 use crate::types::{
-    AddressType, ArrayType, FixedSizeArrayType, MappingType, MetaType, Number, Type, UserMetaType,
+    AddressType, ArrayType, FixedSizeArrayType, MappingType, MetaType, Number, TupleType, Type,
+    UserMetaType,
 };
 
 impl Visitor for Pass<'_> {
@@ -330,7 +331,22 @@ impl Visitor for Pass<'_> {
                     self.typing_of_expression(expression)
                 })
         } else {
-            self.typing_of_tuple_expression(node)
+            let mut types = Vec::new();
+            for item in &node.items {
+                // NOTE: deliberately `as_type_id` (not the value-filtered
+                // accessor): a tuple expression can be a *type* tuple — the
+                // second argument of `abi.decode(data, (T1, T2))` — whose
+                // elements are meta-types. `typing_of_abi_decode` consumes
+                // that shape.
+                let type_id = item
+                    .expression
+                    .as_ref()
+                    .and_then(|expression| self.typing_of_expression(expression).as_type_id())
+                    .unwrap_or(self.types.void());
+                types.push(type_id);
+            }
+            let type_id = self.types.register_type(Type::Tuple(TupleType { types }));
+            Typing::Resolved(type_id)
         };
         self.binder.set_node_typing(node.id(), typing);
     }

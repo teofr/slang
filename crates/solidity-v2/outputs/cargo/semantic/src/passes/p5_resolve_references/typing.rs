@@ -431,12 +431,7 @@ impl Pass<'_> {
                     let target_type_id = *target_type_id;
                     if argument_typings.len() == 1 {
                         let target_type = self.types.get_type_by_id(target_type_id).clone();
-                        // A tuple of types is not castable (eg. `(uint, bool)(x)`).
-                        if matches!(target_type, Type::Tuple(_)) {
-                            Typing::Unresolved
-                        } else {
-                            self.typing_of_cast(&argument_typings[0], target_type)
-                        }
+                        self.typing_of_cast(&argument_typings[0], target_type)
                     } else {
                         Typing::Unresolved
                     }
@@ -531,52 +526,6 @@ impl Pass<'_> {
         }
     }
 
-    /// Types a multi-element tuple expression. A tuple whose elements are all
-    /// type names denotes a *type* itself, so it normalizes to the meta-type
-    /// of the tuple of the denoted types: the `(uint, bool)` in
-    /// `abi.decode(data, (uint, bool))` types as `type((uint256, bool))`. A
-    /// tuple mixing type names and values does not type.
-    pub(super) fn typing_of_tuple_expression(&mut self, node: &ir::TupleExpression) -> Typing {
-        let element_ids: Vec<Option<TypeId>> = node
-            .items
-            .iter()
-            .map(|item| {
-                item.expression
-                    .as_ref()
-                    .and_then(|expression| self.typing_of_expression(expression).as_type_id())
-            })
-            .collect();
-
-        let meta_count = element_ids
-            .iter()
-            .filter(|id| id.is_some_and(|id| self.types.get_type_by_id(id).is_meta_type()))
-            .count();
-
-        if meta_count == 0 {
-            // A value tuple; unresolved elements degrade to `void`.
-            let types = element_ids
-                .iter()
-                .map(|id| id.unwrap_or(self.types.void()))
-                .collect();
-            return Typing::Resolved(self.types.register_type(Type::Tuple(TupleType { types })));
-        }
-
-        if meta_count == element_ids.len() {
-            let mut types = Vec::with_capacity(element_ids.len());
-            for element_id in element_ids {
-                let Some(denoted) = element_id.and_then(|id| self.type_denoted_by_meta_type(id))
-                else {
-                    return Typing::Unresolved;
-                };
-                types.push(denoted);
-            }
-            return self.meta_typing_of(Type::Tuple(TupleType { types }));
-        }
-
-        // TODO(validation): a tuple mixing type names and values is invalid.
-        Typing::Unresolved
-    }
-
     fn typing_of_abi_decode(&mut self, argument_typings: &[Typing]) -> Typing {
         if argument_typings.len() != 2 {
             return Typing::Unresolved;
@@ -584,14 +533,37 @@ impl Pass<'_> {
         let Typing::Resolved(type_id) = &argument_typings[1] else {
             return Typing::Unresolved;
         };
-        // The second argument must denote a type: a single type name, or a
-        // tuple of type names (which normalizes to the meta-type of a tuple).
-        match self.type_denoted_by_meta_type(*type_id) {
-            Some(decoded) => Typing::Resolved(decoded),
-            // TODO(validation) SDR[42]: report an error when the second
-            // argument is not a type or a tuple of types.
-            None => Typing::Unresolved,
+
+        // `abi.decode(data, (T))`: a single-element tuple collapses to the
+        // meta-type of `T`, which decodes to `T` itself.
+        if let Some(decoded) = self.type_denoted_by_meta_type(*type_id) {
+            return Typing::Resolved(decoded);
         }
+
+        // `abi.decode(data, (T1, T2, ...))`: a tuple of meta-types decodes to
+        // the tuple of the types they denote. Note a *nested* tuple element is
+        // not a type name and does not decode (matching solc, which rejects
+        // eg. `abi.decode(data, (uint, (bool, bool)))`).
+        if let Type::Tuple(TupleType { types }) = self.types.get_type_by_id(*type_id) {
+            let element_ids = types.clone();
+            let mut decoded = Vec::with_capacity(element_ids.len());
+            for element_id in element_ids {
+                let Some(element) = self.type_denoted_by_meta_type(element_id) else {
+                    // TODO(validation) SDR[42]: report an error when a tuple
+                    // element is not a type name (eg. `abi.decode(b, (uint, 5))`).
+                    return Typing::Unresolved;
+                };
+                decoded.push(element);
+            }
+            return Typing::Resolved(
+                self.types
+                    .register_type(Type::Tuple(TupleType { types: decoded })),
+            );
+        }
+
+        // TODO(validation) SDR[42]: report an error when the second argument
+        // is not a type or a tuple of types.
+        Typing::Unresolved
     }
 
     pub(super) fn collect_named_argument_typings(
