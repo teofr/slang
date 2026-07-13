@@ -232,38 +232,6 @@ fn type_of_expression_in_context(context: &str, expr: &str) -> (Type, TypeRegist
     )
 }
 
-/// Like `try_type_of_expression_in_context`, but also returns the diagnostic
-/// produced (if any) instead of asserting there is none.
-fn try_type_of_expression_with_diagnostics(
-    context: &str,
-    expr: &str,
-) -> (Option<Type>, Option<DiagnosticKind>) {
-    let source = format!(
-        r#"
-        contract Test {{
-            {context}
-            function __test() internal {{
-                {expr};
-            }}
-        }}
-        "#
-    );
-    let TypeAnalysis {
-        file,
-        binder,
-        types,
-        diagnostics,
-    } = analyze_with_diagnostics(LanguageVersion::LATEST, &source);
-    let contract = find_contract(&file, "Test");
-    let function = find_function(&contract.members, "__test").expect("__test function not found");
-    let block = function.body.as_ref().expect("__test has a body");
-    let typing = expression_statement_types(block, &binder, &types)
-        .into_iter()
-        .next()
-        .expect("at least one expression");
-    (typing, diagnostic_kind(&diagnostics))
-}
-
 fn try_type_of_expression_in_context(context: &str, expr: &str) -> (Option<Type>, TypeRegistry) {
     let (typings, types) =
         type_of_expressions(LanguageVersion::LATEST, None, Some(context), &[expr]);
@@ -1656,15 +1624,9 @@ fn test_fixed_size_array_type_expression() {
         "expected `uint[LEN]` to decode to a fixed-size array of 3, got {decoded:?}",
     );
 
-    // Zero-length and non-constant sizes are reported and don't type.
-    let (decoded, diagnostic) =
-        try_type_of_expression_with_diagnostics("bytes b;", "abi.decode(b, (uint[0]))");
-    assert_eq!(decoded, None);
-    assert_eq!(diagnostic, Some(ArrayLengthZero.into()));
-    let (decoded, diagnostic) =
-        try_type_of_expression_with_diagnostics("bytes b; uint n;", "abi.decode(b, (uint[n]))");
-    assert_eq!(decoded, None);
-    assert_eq!(diagnostic, Some(ArrayLengthNotConstant.into()));
+    // Invalid sizes (zero, non-constant, ...) are reported as diagnostics and
+    // yield `Unresolved`; see the `type_system/array_length/type_expression_*`
+    // cases in the diagnostics_output snapshots.
 }
 
 #[test]

@@ -1,0 +1,1 @@
+PLACEHOLDER: real solc output to be filled from CI failure diff.
