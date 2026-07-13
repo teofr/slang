@@ -4,8 +4,9 @@ use slang_solidity_v2_common::diagnostics::kinds::resolution::IdentifierRedeclar
 use slang_solidity_v2_common::diagnostics::kinds::structure::{
     BreakOutsideLoop, ContinueOutsideLoop, EmptyEnum, EmptyStruct, EnumWithTooManyMembers,
     FunctionNameMatchesContainer, InvalidUsingDirectiveContainer, LibraryVirtualFunction,
-    LibraryVirtualModifier, MultipleConstructors, UnimplementedModifierMustBeVirtual,
-    VirtualFreeFunction, VirtualPrivateFunction,
+    LibraryVirtualModifier, MultipleConstructors, TooManyAnonymousEventIndexedArguments,
+    TooManyEventIndexedArguments, UnimplementedModifierMustBeVirtual, VirtualFreeFunction,
+    VirtualPrivateFunction,
 };
 use slang_solidity_v2_common::diagnostics::DiagnosticCollection;
 use slang_solidity_v2_common::files::FileId;
@@ -551,6 +552,30 @@ impl<F: SemanticFile> Visitor for Pass<'_, F> {
         let parameters_scope_id = self.collect_parameters(&node.parameters);
         let definition = Definition::new_event(node, parameters_scope_id);
         self.insert_definition_in_current_scope(definition);
+
+        // Indexed event arguments map to log topics. A non-anonymous event
+        // reserves topic 0 for its signature, leaving 3 for indexed arguments;
+        // an anonymous event may use all 4.
+        let indexed_count = node
+            .parameters
+            .iter()
+            .filter(|parameter| parameter.is_indexed)
+            .count();
+        if node.is_anonymous {
+            if indexed_count > 4 {
+                self.diagnostics.push(
+                    self.current_file.id().to_owned(),
+                    node.range.clone(),
+                    TooManyAnonymousEventIndexedArguments,
+                );
+            }
+        } else if indexed_count > 3 {
+            self.diagnostics.push(
+                self.current_file.id().to_owned(),
+                node.range.clone(),
+                TooManyEventIndexedArguments,
+            );
+        }
 
         false
     }

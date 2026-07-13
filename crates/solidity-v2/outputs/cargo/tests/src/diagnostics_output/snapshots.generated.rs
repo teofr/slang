@@ -832,6 +832,11 @@ mod structure {
     }
 
     #[test]
+    fn too_many_event_indexed_arguments() -> Result<()> {
+        run("structure", "too_many_event_indexed_arguments")
+    }
+
+    #[test]
     fn unimplemented_modifier_must_be_virtual() -> Result<()> {
         run("structure", "unimplemented_modifier_must_be_virtual")
     }
