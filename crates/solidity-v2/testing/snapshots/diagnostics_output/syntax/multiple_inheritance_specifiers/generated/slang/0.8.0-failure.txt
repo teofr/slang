@@ -1,0 +1,27 @@
+# This file is generated automatically by infrastructure scripts. Please don't edit by hand.
+
+Diagnostics: 3
+
+[syntax/multiple-inheritance-specifiers] Error: Only a single inheritance specifier list can be provided.
+   ╭─[input.sol:9:21]
+   │
+ 9 │ contract TwoIs is A is B {}
+   │                     ─┬  
+   │                      ╰── Error occurred here.
+───╯
+
+[syntax/multiple-inheritance-specifiers] Error: Only a single inheritance specifier list can be provided.
+    ╭─[input.sol:10:23]
+    │
+ 10 │ contract ThreeIs is A is B is A {}
+    │                       ─┬  
+    │                        ╰── Error occurred here.
+────╯
+
+[syntax/multiple-inheritance-specifiers] Error: Only a single inheritance specifier list can be provided.
+    ╭─[input.sol:10:28]
+    │
+ 10 │ contract ThreeIs is A is B is A {}
+    │                            ─┬  
+    │                             ╰── Error occurred here.
+────╯

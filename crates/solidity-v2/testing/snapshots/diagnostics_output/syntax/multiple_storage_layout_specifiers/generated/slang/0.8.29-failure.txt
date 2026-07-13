@@ -1,0 +1,27 @@
+# This file is generated automatically by infrastructure scripts. Please don't edit by hand.
+
+Diagnostics: 3
+
+[syntax/multiple-storage-layout-specifiers] Error: Only a single storage layout specifier can be provided.
+   ╭─[input.sol:8:37]
+   │
+ 8 │ contract TwoLayout layout at 0x1000 layout at 0x2000 {}
+   │                                     ───┬──  
+   │                                        ╰──── Error occurred here.
+───╯
+
+[syntax/multiple-storage-layout-specifiers] Error: Only a single storage layout specifier can be provided.
+   ╭─[input.sol:9:39]
+   │
+ 9 │ contract ThreeLayout layout at 0x1000 layout at 0x2000 layout at 0x3000 {}
+   │                                       ───┬──  
+   │                                          ╰──── Error occurred here.
+───╯
+
+[syntax/multiple-storage-layout-specifiers] Error: Only a single storage layout specifier can be provided.
+   ╭─[input.sol:9:56]
+   │
+ 9 │ contract ThreeLayout layout at 0x1000 layout at 0x2000 layout at 0x3000 {}
+   │                                                        ───┬──  
+   │                                                           ╰──── Error occurred here.
+───╯

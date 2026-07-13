@@ -953,6 +953,11 @@ mod syntax {
         }
     }
 
+    #[test]
+    fn multiple_inheritance_specifiers() -> Result<()> {
+        run("syntax", "multiple_inheritance_specifiers")
+    }
+
     mod multiple_mutability_specifiers {
         use super::*;
 
@@ -1017,6 +1022,11 @@ mod syntax {
         fn state_variables() -> Result<()> {
             run("syntax/multiple_override_specifiers", "state_variables")
         }
+    }
+
+    #[test]
+    fn multiple_storage_layout_specifiers() -> Result<()> {
+        run("syntax", "multiple_storage_layout_specifiers")
     }
 
     mod multiple_virtual_specifiers {
