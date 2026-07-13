@@ -126,6 +126,11 @@ impl Pass<'_> {
     ) -> bool {
         match argument_typing {
             Typing::Resolved(type_id) => {
+                // A meta-type argument (a type name, eg. passing `uint` as an
+                // argument) never matches a value parameter.
+                if self.types.get_type_by_id(*type_id).is_meta_type() {
+                    return false;
+                }
                 if external_call {
                     self.types
                         .implicitly_convertible_to_for_external_call(*type_id, parameter_type)

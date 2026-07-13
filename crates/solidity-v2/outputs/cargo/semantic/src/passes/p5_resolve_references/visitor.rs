@@ -6,9 +6,12 @@ use slang_solidity_v2_ir::ir::visitor::Visitor;
 use super::Pass;
 use crate::binder::{Reference, Resolution, Typing};
 use crate::built_ins::InternalBuiltIn;
-use crate::passes::common::{filter_overriden_definitions, node_id_for_string_expression_typing};
+use crate::passes::common::{
+    filter_overriden_definitions, node_id_for_elementary_type, node_id_for_string_expression_typing,
+};
 use crate::types::{
-    ArrayType, DataLocation, FixedSizeArrayType, MappingType, Number, TupleType, Type,
+    AddressType, ArrayType, FixedSizeArrayType, MappingType, MetaType, Number, TupleType, Type,
+    UserMetaType,
 };
 
 impl Visitor for Pass<'_> {
@@ -126,6 +129,24 @@ impl Visitor for Pass<'_> {
         true
     }
 
+    fn leave_elementary_type(&mut self, node: &ir::ElementaryType) {
+        // An elementary type keyword always denotes a type, so it types as the
+        // meta-type of that type (eg. `uint` types as `type(uint256)`). The
+        // typing is stored once per occurrence — cast operand (`uint(x)`),
+        // type expression (`abi.decode(data, (uint[]))`), or type name — so
+        // `typing_of_expression` reads it back like any other expression.
+        let typing = self.meta_typing_of(Self::type_of_elementary_type(node));
+        self.binder
+            .set_node_typing(node_id_for_elementary_type(node), typing);
+    }
+
+    fn visit_payable_keyword(&mut self, node: &ir::PayableKeyword) {
+        // A standalone `payable` (the operand of a `payable(x)` cast) denotes
+        // the `address payable` type, so it types as its meta-type.
+        let typing = self.meta_typing_of(Type::Address(AddressType { is_payable: true }));
+        self.binder.set_node_typing(node.id(), typing);
+    }
+
     fn leave_hex_number_expression(&mut self, node: &ir::HexNumberExpression) {
         let type_id = Self::hex_number_literal_kind(node)
             .map(|kind| self.types.register_type(Type::Literal(kind)));
@@ -149,19 +170,15 @@ impl Visitor for Pass<'_> {
     }
 
     fn leave_assignment_expression(&mut self, node: &ir::AssignmentExpression) {
-        let type_id = self.typing_of_expression(&node.left_operand).as_type_id();
+        let type_id = self.value_type_id_of_expression(&node.left_operand);
         // TODO(validation) SDR[59]: check that the type of right_operand can be applied
         // to the left by means of the operator
         self.binder.set_node_type(node.id(), type_id);
     }
 
     fn leave_conditional_expression(&mut self, node: &ir::ConditionalExpression) {
-        let true_type_id = self
-            .typing_of_expression(&node.true_expression)
-            .as_type_id();
-        let false_type_id = self
-            .typing_of_expression(&node.false_expression)
-            .as_type_id();
+        let true_type_id = self.value_type_id_of_expression(&node.true_expression);
+        let false_type_id = self.value_type_id_of_expression(&node.false_expression);
 
         // TODO(validation) SDR[47]: both true_expression and false_expression should
         // have the compatible types
@@ -286,7 +303,7 @@ impl Visitor for Pass<'_> {
 
     fn leave_postfix_expression(&mut self, node: &ir::PostfixExpression) {
         // TODO(validation) SDR[52]: check that the operand is an integer
-        let type_id = self.typing_of_expression(&node.operand).as_type_id();
+        let type_id = self.value_type_id_of_expression(&node.operand);
         self.binder.set_node_type(node.id(), type_id);
     }
 
@@ -308,6 +325,11 @@ impl Visitor for Pass<'_> {
         } else {
             let mut types = Vec::new();
             for item in &node.items {
+                // NOTE: deliberately `as_type_id` (not the value-filtered
+                // accessor): a tuple expression can be a *type* tuple — the
+                // second argument of `abi.decode(data, (T1, T2))` — whose
+                // elements are meta-types. `typing_of_abi_decode` consumes
+                // that shape (see TODO SDR[42] there).
                 let type_id = item
                     .expression
                     .as_ref()
@@ -346,7 +368,7 @@ impl Visitor for Pass<'_> {
                 // If the type is a reference type with location "inherited", we
                 // use the operand's location for the resulting typing
                 if let Some(operand_location) = operand_typing
-                    .as_type_id()
+                    .as_value_type_id(self.types)
                     .and_then(|type_id| self.types.get_type_by_id(type_id).data_location())
                 {
                     let type_id_with_location = self
@@ -357,8 +379,10 @@ impl Visitor for Pass<'_> {
             } else if let Type::Function(function_type) = type_ {
                 // If this member is a function attached via `using for`, accessing it
                 // on a value binds the receiver as its first argument, producing a
-                // partially applied function (which has no mobile type).
-                if let Some(receiver_type_id) = operand_typing.as_type_id() {
+                // partially applied function (which has no mobile type). The
+                // value filter keeps a *type name* operand (eg. `L` in `L.f`,
+                // a static library access) from being bound as a receiver.
+                if let Some(receiver_type_id) = operand_typing.as_value_type_id(self.types) {
                     if function_type.implicit_receiver_type.is_none()
                         && function_type.parameter_types.first().is_some_and(|first| {
                             self.types.implicitly_convertible_to_for_external_call(
@@ -388,8 +412,7 @@ impl Visitor for Pass<'_> {
         let typing = match self.typing_of_expression(&node.operand) {
             Typing::Resolved(operand_type_id) => {
                 let range_access = node.end.is_some();
-                let operand_type = self.types.get_type_by_id(operand_type_id);
-                match operand_type {
+                match self.types.get_type_by_id(operand_type_id) {
                     Type::Array(ArrayType { element_type, .. })
                     | Type::FixedSizeArray(FixedSizeArrayType { element_type, .. }) => {
                         // TODO(validation) SDR[58]: for fixed-size arrays, if the range
@@ -426,30 +449,30 @@ impl Visitor for Pass<'_> {
                             Typing::Resolved(*value_type_id)
                         }
                     }
+                    // Indexing a meta-type creates the meta-type of an array,
+                    // eg. the `uint[]` in `abi.decode(data, (uint[]))` or the
+                    // fixed-size `uint[3]`.
+                    Type::MetaType(MetaType {
+                        type_id: element_type,
+                    }) => {
+                        let element_type = *element_type;
+                        self.meta_typing_of_array_type_expression(element_type, node)
+                    }
+                    // Indexing a user meta-type likewise creates the meta-type
+                    // of an array (eg. `MyStruct[]`).
+                    Type::UserMetaType(UserMetaType { definition_id }) => {
+                        let definition_id = *definition_id;
+                        if let Some(operand_type) = self.type_of_definition(definition_id) {
+                            let element_type = self.types.register_type(operand_type);
+                            self.meta_typing_of_array_type_expression(element_type, node)
+                        } else {
+                            Typing::Unresolved
+                        }
+                    }
                     _ => {
                         // TODO(validation) SDR[45]: the operand is not indexable
                         Typing::Unresolved
                     }
-                }
-            }
-            Typing::MetaType(operand_type) => {
-                // indexing a meta-type creates a new meta-type of the array
-                let operand_type_id = self.types.register_type(operand_type);
-                Typing::MetaType(Type::Array(ArrayType {
-                    element_type: operand_type_id,
-                    location: DataLocation::Memory,
-                }))
-            }
-            Typing::UserMetaType(definition_id) => {
-                // indexing a user meta-type creates a new meta-type of the array
-                if let Some(operand_type) = self.type_of_definition(definition_id) {
-                    let operand_type_id = self.types.register_type(operand_type);
-                    Typing::MetaType(Type::Array(ArrayType {
-                        element_type: operand_type_id,
-                        location: DataLocation::Memory,
-                    }))
-                } else {
-                    Typing::Unresolved
                 }
             }
             _ => Typing::Unresolved,
@@ -533,14 +556,16 @@ impl Visitor for Pass<'_> {
 
     fn leave_emit_statement(&mut self, node: &ir::EmitStatement) {
         let event_reference_id = node.event.last().unwrap().id();
+        // Clone the resolution so it doesn't keep `self.binder` borrowed while
+        // we compute argument typings (which now needs `&mut self`).
         let event_resolution = self
             .binder
             .find_reference_by_identifier_node_id(event_reference_id)
-            .map(|reference| &reference.resolution);
+            .map(|reference| reference.resolution.clone());
         match &node.arguments {
             ir::ArgumentsDeclaration::PositionalArguments(positional_arguments) => {
                 // For positional arguments, resolve ambiguity of overloads only
-                if let Some(Resolution::Ambiguous(definition_ids)) = event_resolution {
+                if let Some(Resolution::Ambiguous(definition_ids)) = &event_resolution {
                     let argument_typings =
                         self.collect_positional_argument_typings(positional_arguments);
                     if let Some(candidate) = self.lookup_event_matching_positional_arguments(
@@ -555,7 +580,7 @@ impl Visitor for Pass<'_> {
             }
             ir::ArgumentsDeclaration::NamedArguments(named_arguments) => {
                 // For named arguments, we need to resolve ambiguity and the named arguments
-                let definition_id = match event_resolution {
+                let definition_id = match &event_resolution {
                     Some(Resolution::Ambiguous(definition_ids)) => {
                         let argument_typings = self.collect_named_argument_typings(named_arguments);
                         let candidate = self.lookup_event_matching_named_arguments(

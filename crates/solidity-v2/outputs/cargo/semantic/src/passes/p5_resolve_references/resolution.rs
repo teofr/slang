@@ -19,7 +19,7 @@ use crate::passes::common::constant_evaluator::{
     evaluate_compile_time_constant, ConstantResolver, EvaluationError,
 };
 use crate::passes::common::{find_definition_namespace_scope_id, node_location};
-use crate::types::{ContractType, InterfaceType, StructType, Type, TypeId};
+use crate::types::{ContractType, InterfaceType, StructType, Type, TypeId, UserMetaType};
 
 /// Lexical style resolution of symbols
 impl Pass<'_> {
@@ -98,7 +98,12 @@ impl Pass<'_> {
             Typing::Unresolved => Resolution::Unresolved,
             Typing::Undetermined(type_ids) => {
                 // We cannot use argument-type disambiguation here, so we will
-                // use the first result
+                // use the first result.
+                // NOTE: the candidates may be meta-types, eg. `E.selector`
+                // where `E` names overloaded events: every candidate is the
+                // `UserMetaType` of one overload, and we resolve the member
+                // against the first. solc reports an ambiguity error for that
+                // case; emitting the diagnostic is part of SDR[37] below.
                 // TODO(validation) SDR[37]: check that the types are consistent (eg.
                 // they are all function types) and that it makes sense to use
                 // the first one
@@ -151,26 +156,6 @@ impl Pass<'_> {
                 // No legacy constructor call options in >= 0.8.0
                 Resolution::Unresolved
             }
-            Typing::MetaType(type_) => {
-                if let Some(built_in) = BuiltInsResolver::lookup_member_of_meta_type(type_, symbol)
-                {
-                    Resolution::BuiltIn(built_in)
-                } else {
-                    Resolution::Unresolved
-                }
-            }
-            Typing::UserMetaType(node_id) => {
-                // We're trying to resolve a member access expression into a
-                // type name, ie. this is a meta-type member access
-                let Some(definition) = self.binder.find_definition_by_id(*node_id) else {
-                    return Resolution::Unresolved;
-                };
-                if let Some(scope_id) = find_definition_namespace_scope_id(self.binder, *node_id) {
-                    self.binder.resolve_in_scope_as_namespace(scope_id, symbol)
-                } else {
-                    BuiltInsResolver::lookup_member_of_user_definition(definition, symbol).into()
-                }
-            }
             Typing::BuiltIn(built_in) => self
                 .built_ins_resolver()
                 .lookup_member_of(built_in, symbol)
@@ -181,7 +166,10 @@ impl Pass<'_> {
     fn resolve_symbol_in_type(&self, type_id: TypeId, symbol: &str) -> Resolution {
         let type_ = self.types.get_type_by_id(type_id);
 
-        // Resolve direct members of the type first
+        // Resolve direct members of the type first. The built-in fallback below
+        // covers meta-type members too: `Type::MetaType` (eg. `bytes.concat`)
+        // and the built-in members of a `Type::UserMetaType` (eg.
+        // `MyError.selector`) are resolved by `lookup_member_of_type_id`.
         let mut definition_ids = match type_ {
             Type::Contract(ContractType { definition_id })
             | Type::Interface(InterfaceType { definition_id }) => {
@@ -200,11 +188,28 @@ impl Pass<'_> {
                 let scope_id = self.binder.scope_id_for_node_id(*definition_id).unwrap();
                 self.binder.resolve_in_scope_as_namespace(scope_id, symbol)
             }
+            // The meta-type of a named user definition resolves its *namespace*
+            // members (static access, eg. `MyEnum.Variant`, `MyLib.f`,
+            // `MyContract.staticFn`). Its built-in members come from the
+            // fallback below.
+            Type::UserMetaType(UserMetaType { definition_id }) => {
+                find_definition_namespace_scope_id(self.binder, *definition_id)
+                    .map_or(Resolution::Unresolved, |scope_id| {
+                        self.binder.resolve_in_scope_as_namespace(scope_id, symbol)
+                    })
+            }
             _ => Resolution::Unresolved,
         }
         .get_definition_ids();
 
-        // Next, consider active `using` directives in the current context
+        // Next, consider active `using` directives in the current context.
+        // NOTE: this also runs when `type_` is a meta-type (a static access on
+        // a type name, eg. `MyLib.f` or `MyEnum.Variant`). Attached functions
+        // can never bind to a type name — `is_function_with_receiver_type`
+        // rejects meta receivers because no value parameter is implicitly
+        // convertible from a meta-type — so this scan is pure overhead there.
+        // TODO: skip the scan for meta-types (`type_.is_meta_type()`) once the
+        // guarantee is covered by a test.
         self.add_attached_functions_for_type(type_id, symbol, &mut definition_ids);
 
         Resolution::from(definition_ids).or_else(|| {

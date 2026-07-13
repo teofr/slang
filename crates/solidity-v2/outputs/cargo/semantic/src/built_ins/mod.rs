@@ -1,7 +1,7 @@
 use super::binder::{Binder, Definition, Typing};
 use super::types::{
-    AddressType, ArrayType, BytesType, DataLocation, LiteralKind, Type, TypeId, TypeRegistry,
-    UserDefinedValueType,
+    AddressType, ArrayType, BytesType, DataLocation, LiteralKind, MetaType, Type, TypeId,
+    TypeRegistry, UserDefinedValueType, UserMetaType,
 };
 
 #[path = "internal.generated.rs"]
@@ -200,7 +200,7 @@ impl<'a> BuiltInsResolver<'a> {
         }
     }
 
-    pub(crate) fn lookup_member_of_user_definition(
+    fn lookup_member_of_user_definition(
         definition: &Definition,
         symbol: &str,
     ) -> Option<InternalBuiltIn> {
@@ -216,23 +216,6 @@ impl<'a> BuiltInsResolver<'a> {
             Definition::UserDefinedValueType(_) => match symbol {
                 "wrap" => Some(InternalBuiltIn::Wrap(definition.node_id())),
                 "unwrap" => Some(InternalBuiltIn::Unwrap(definition.node_id())),
-                _ => None,
-            },
-            _ => None,
-        }
-    }
-
-    pub(crate) fn lookup_member_of_meta_type(
-        parent_type: &Type,
-        symbol: &str,
-    ) -> Option<InternalBuiltIn> {
-        match parent_type {
-            Type::Bytes(_) => match symbol {
-                "concat" => Some(InternalBuiltIn::BytesConcat),
-                _ => None,
-            },
-            Type::String(_) => match symbol {
-                "concat" => Some(InternalBuiltIn::StringConcat),
                 _ => None,
             },
             _ => None,
@@ -307,6 +290,27 @@ impl<'a> BuiltInsResolver<'a> {
             }
             Type::Literal(_) => None,
             Type::Mapping(_) => None,
+            // The meta-type of `bytes`/`string` exposes the `concat` built-in.
+            Type::MetaType(MetaType { type_id }) => match self.types.get_type_by_id(*type_id) {
+                Type::Bytes(_) => match symbol {
+                    "concat" => Some(InternalBuiltIn::BytesConcat),
+                    _ => None,
+                },
+                Type::String(_) => match symbol {
+                    "concat" => Some(InternalBuiltIn::StringConcat),
+                    _ => None,
+                },
+                _ => None,
+            },
+            // The meta-type of a named user definition exposes the built-in
+            // members of that definition (eg. `MyError.selector`,
+            // `MyUDVT.wrap`). Its *namespace* members (eg. enum variants,
+            // library functions) are resolved in `resolve_symbol_in_type`,
+            // which has the scope-resolution machinery this resolver lacks.
+            Type::UserMetaType(UserMetaType { definition_id }) => self
+                .binder
+                .find_definition_by_id(*definition_id)
+                .and_then(|definition| Self::lookup_member_of_user_definition(definition, symbol)),
             Type::String(_) => match symbol {
                 "length" => Some(InternalBuiltIn::Length),
                 _ => None,

@@ -18,8 +18,9 @@ use crate::passes::{
     p1_collect_definitions, p2_linearise_contracts, p3_type_definitions, p5_resolve_references,
 };
 use crate::types::{
-    ByteArrayType, BytesType, ContractType, DataLocation, FixedSizeArrayType, IntegerType,
-    LibraryType, LiteralKind, MappingType, StringType, TupleType, Type, TypeId, TypeRegistry,
+    ArrayType, ByteArrayType, BytesType, ContractType, DataLocation, FixedSizeArrayType,
+    IntegerType, LibraryType, LiteralKind, MappingType, MetaType, StringType, StructType,
+    TupleType, Type, TypeId, TypeRegistry,
 };
 
 struct TypeAnalysis {
@@ -1432,6 +1433,63 @@ fn test_partially_applied_function_is_not_convertible() {
 }
 
 #[test]
+fn test_index_access_on_elementary_meta_type_yields_array_meta_type() {
+    // Control: indexing the meta-type of an elementary type (`uint[]`) yields
+    // the meta-type of an array of that elementary type.
+    let (meta, types) = type_of_expression("uint[]");
+
+    let Type::MetaType(MetaType { type_id: array_id }) = meta else {
+        panic!("expected the `uint[]` expression to be a MetaType, got {meta:?}");
+    };
+    let Type::Array(ArrayType {
+        element_type,
+        location,
+    }) = types.get_type_by_id(array_id).clone()
+    else {
+        panic!(
+            "expected the meta-type to wrap an Array, got {:?}",
+            types.get_type_by_id(array_id)
+        );
+    };
+    assert_eq!(location, DataLocation::Memory);
+    assert_eq!(element_type, types.uint256());
+}
+
+#[test]
+fn test_index_access_on_user_meta_type_yields_array_meta_type() {
+    // `MyStruct[]` is a *type expression*: indexing the user meta-type of a
+    // struct produces the meta-type of an array whose element is that struct.
+    // This is the `Type::UserMetaType` arm of `leave_index_access_expression`
+    // (the path exercised by eg. `abi.decode(data, (MyStruct[]))`).
+    let (meta, types) = type_of_expression_in_context("struct MyStruct { uint a; }", "MyStruct[]");
+
+    let Type::MetaType(MetaType { type_id: array_id }) = meta else {
+        panic!("expected the `MyStruct[]` expression to be a MetaType, got {meta:?}");
+    };
+    let Type::Array(ArrayType {
+        element_type,
+        location,
+    }) = types.get_type_by_id(array_id).clone()
+    else {
+        panic!(
+            "expected the meta-type to wrap an Array, got {:?}",
+            types.get_type_by_id(array_id)
+        );
+    };
+    assert_eq!(location, DataLocation::Memory);
+
+    // The array element is the struct's own value type.
+    assert!(
+        matches!(
+            types.get_type_by_id(element_type),
+            Type::Struct(StructType { .. })
+        ),
+        "expected the array element to be the struct type, got {:?}",
+        types.get_type_by_id(element_type),
+    );
+}
+
+#[test]
 fn reference_type_constant_is_indexable() {
     let (element_type, _types) =
         type_of_expression_in_context(r#"bytes constant B = hex"1234";"#, "B[0]");
@@ -1483,6 +1541,71 @@ fn test_array_length_folds_with_typed_constants() {
     assert_eq!(
         folded_array_length("uint8 constant A = 1;", "uint256[A + 255]"),
         (U256::ZERO, Some(ConstantArithmeticError.into())),
+    );
+}
+
+#[test]
+fn test_meta_types_do_not_leak_into_value_positions() {
+    // A type name is not a value: using one as an operator operand, a
+    // conditional branch, or a cast argument must not type (previously the
+    // `from == to` fast path of implicit conversion let identical meta-types
+    // through, typing `uint + uint` as `type(uint256)`).
+    let (type_, _) = try_type_of_expression("uint + uint");
+    assert_eq!(type_, None);
+
+    let (type_, _) = try_type_of_expression("~uint");
+    assert_eq!(type_, None);
+
+    let (type_, _) = try_type_of_expression("true ? uint : uint");
+    assert_eq!(type_, None);
+
+    // A meta-type as the *argument* of a cast (casting a type name).
+    let (type_, _) = try_type_of_expression("uint(bool)");
+    assert_eq!(type_, None);
+
+    // A meta-type as an array literal element.
+    let (type_, _) = try_type_of_expression("[uint, uint]");
+    assert_eq!(type_, None);
+}
+
+#[test]
+fn test_explicit_enum_cast() {
+    // Explicit conversion from an integer to an enum is valid Solidity and
+    // types as the enum.
+    let (type_, _) = type_of_expression_in_context("enum E { A, B }", "E(1)");
+    assert!(
+        matches!(type_, Type::Enum(_)),
+        "expected `E(1)` to type as the enum, got {type_:?}",
+    );
+
+    // User defined value types are not castable by name: conversion goes
+    // through `wrap`/`unwrap`.
+    let (type_, _) = try_type_of_expression_in_context("type T is uint256;", "T(1)");
+    assert_eq!(type_, None);
+}
+
+#[test]
+fn test_fixed_size_array_type_expression() {
+    // `uint[3]` as a type expression is the meta-type of a *fixed-size* array;
+    // decoding through it must preserve the size.
+    let (decoded, types) = type_of_expression_in_context("bytes b;", "abi.decode(b, (uint[3]))");
+    let Type::FixedSizeArray(FixedSizeArrayType {
+        element_type,
+        size,
+        location,
+    }) = decoded
+    else {
+        panic!("expected `uint[3]` to decode to a fixed-size array, got {decoded:?}");
+    };
+    assert_eq!(element_type, types.uint256());
+    assert_eq!(size, 3);
+    assert_eq!(location, DataLocation::Memory);
+
+    // Without a size, the type expression stays a dynamic array.
+    let (decoded, types) = type_of_expression_in_context("bytes b;", "abi.decode(b, (uint[]))");
+    assert!(
+        matches!(&decoded, Type::Array(ArrayType { element_type, .. }) if *element_type == types.uint256()),
+        "expected `uint[]` to decode to a dynamic array, got {decoded:?}",
     );
 }
 
@@ -1588,4 +1711,21 @@ fn test_storage_base_slot_evaluation() {
         ),
         (None, Some(StorageLayoutBaseNotConstant.into())),
     );
+}
+
+#[test]
+fn test_event_selector() {
+    // `.selector` on an event name types as `bytes4`.
+    let (type_, _) = type_of_expression_in_context("event E(uint a);", "E.selector");
+    assert_eq!(type_, Type::ByteArray(ByteArrayType { width: 4 }));
+
+    // With *overloaded* events the name is ambiguous; we currently resolve the
+    // member against the first candidate (both candidates expose `selector`,
+    // so the typing is still `bytes4`). solc reports an ambiguity error here —
+    // that diagnostic is part of the SDR[37] validation backlog. Note this
+    // used to panic (index out of bounds on the empty candidate list) before
+    // meta-types became regular types.
+    let (type_, _) =
+        type_of_expression_in_context("event E(uint a); event E(bool b);", "E.selector");
+    assert_eq!(type_, Type::ByteArray(ByteArrayType { width: 4 }));
 }

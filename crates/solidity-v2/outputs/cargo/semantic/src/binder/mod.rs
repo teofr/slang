@@ -5,7 +5,7 @@ use slang_solidity_v2_common::files::FileId;
 use slang_solidity_v2_common::nodes::NodeId;
 
 use super::built_ins::InternalBuiltIn;
-use super::types::{Type, TypeId};
+use super::types::{TypeId, TypeRegistry};
 
 mod assembly;
 mod capacities;
@@ -48,17 +48,6 @@ pub enum Typing {
     /// the appropriate type by matching the types of the arguments and work
     /// backwards to the reference (if any) and fixup the selected definition.
     Undetermined(Vec<TypeId>),
-    /// A node which refers to a user defined type by name, eg. the identifier
-    /// of a contract. This is not a type that can be translated to the EVM, and
-    /// as such is a way to suspend the typing until more information on how
-    /// it's used is gathered. Eg. to create a new contract via the new
-    /// operator, or construct a struct by using the struct's name in a function
-    /// call.
-    UserMetaType(NodeId),
-    /// Similar to `UserMetaType` above, but refers to the meta type of an
-    /// elementary type. A typical use case is explicit casting, which parses as
-    /// a function call.
-    MetaType(Type),
     /// Used to type the `BuiltIn` resolution when the result is not yet an
     /// actual type representable in the EVM. Eg. the built-in function `addmod`
     /// resolves to `Resolution::BuiltIn(Addmod)` and will type to
@@ -78,11 +67,35 @@ pub enum Typing {
 }
 
 impl Typing {
+    /// Returns the resolved `TypeId`, including meta-types (the typing of an
+    /// expression that names a *type* rather than a value, eg. the `uint` in
+    /// `uint(x)`). Most consumers want [`Self::as_value_type_id`] instead;
+    /// use this only where meta-types are deliberately handled (casts,
+    /// `abi.decode` type arguments, indexing a type name, the public AST
+    /// `get_type()` surface).
     pub fn as_type_id(&self) -> Option<TypeId> {
         match self {
             Self::Resolved(type_id) => Some(*type_id),
             Self::This(type_id) => Some(*type_id),
             _ => None,
+        }
+    }
+
+    /// Returns the resolved `TypeId` only when it is a *value* type, filtering
+    /// out meta-types. This is the accessor for value positions (operator
+    /// operands, conditional branches, receivers, arguments): a type name like
+    /// `uint` or `MyStruct` is not a value and must not participate in value
+    /// typing rules (notably the `from == to` fast path of implicit
+    /// conversion, which would otherwise let `uint + uint` type-check).
+    ///
+    /// Needs the `TypeRegistry` because the meta-type check requires looking
+    /// at the pointed-to `Type`.
+    pub fn as_value_type_id(&self, types: &TypeRegistry) -> Option<TypeId> {
+        let type_id = self.as_type_id()?;
+        if types.get_type_by_id(type_id).is_meta_type() {
+            None
+        } else {
+            Some(type_id)
         }
     }
 }
@@ -384,11 +397,6 @@ impl Binder {
             .get(&node_id)
             .cloned()
             .unwrap_or(Typing::Unresolved)
-    }
-
-    pub(crate) fn mark_user_meta_type_node(&mut self, node_id: NodeId) {
-        self.node_typing
-            .insert(node_id, Typing::UserMetaType(node_id));
     }
 
     pub(crate) fn set_node_type(&mut self, node_id: NodeId, type_id: Option<TypeId>) {

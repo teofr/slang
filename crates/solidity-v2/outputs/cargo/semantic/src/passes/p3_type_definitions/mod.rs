@@ -4,7 +4,7 @@ use slang_solidity_v2_ir::ir;
 
 use crate::binder::{Binder, Definition, Scope, ScopeId};
 use crate::context::{FileNodeMapper, SemanticFile};
-use crate::types::{ContractType, Type, TypeId, TypeRegistry};
+use crate::types::{ContractType, Type, TypeId, TypeRegistry, UserMetaType};
 
 mod resolution;
 mod typing;
@@ -44,6 +44,21 @@ struct Pass<'a> {
 }
 
 impl<'a> Pass<'a> {
+    /// Registers a [`Type::UserMetaType`] for the given definition node and
+    /// records it as the node's typing. This is used for definitions that name
+    /// a type rather than producing a value (contracts, interfaces, libraries,
+    /// structs, enums, events, errors, UDVTs, and aliased imports).
+    fn mark_user_meta_type_node(&mut self, node_id: NodeId) {
+        let type_id = self.types.register_type(Type::UserMetaType(UserMetaType {
+            definition_id: node_id,
+        }));
+        // NOTE: `set_node_type` panics if the node already has a typing. That
+        // strictness is deliberate: each definition marked here is visited
+        // exactly once, and a second write would indicate a pass bug (the
+        // previous implementation silently overwrote instead).
+        self.binder.set_node_type(node_id, Some(type_id));
+    }
+
     fn visit_file(
         file: &'a impl SemanticFile,
         binder: &'a mut Binder,
