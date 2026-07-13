@@ -832,6 +832,11 @@ mod structure {
     }
 
     #[test]
+    fn multiple_special_functions() -> Result<()> {
+        run("structure", "multiple_special_functions")
+    }
+
+    #[test]
     fn unimplemented_modifier_must_be_virtual() -> Result<()> {
         run("structure", "unimplemented_modifier_must_be_virtual")
     }

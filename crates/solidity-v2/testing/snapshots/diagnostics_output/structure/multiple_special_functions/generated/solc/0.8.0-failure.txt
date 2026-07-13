@@ -1,0 +1,51 @@
+# This file is generated automatically by infrastructure scripts. Please don't edit by hand.
+
+Diagnostics: 6
+
+[DeclarationError 7301] Error: Only one fallback function is allowed.
+   ╭─[input.sol:8:47]
+   │
+ 8 │ contract TwoFallback { fallback() external {} fallback() external {} }
+   │                                               ───────────┬──────────  
+   │                                                          ╰──────────── Error occurred here.
+───╯
+
+[DeclarationError 7301] Error: Only one fallback function is allowed.
+   ╭─[input.sol:9:49]
+   │
+ 9 │ contract ThreeFallback { fallback() external {} fallback() external {} fallback() external {} }
+   │                                                 ───────────┬──────────  
+   │                                                            ╰──────────── Error occurred here.
+───╯
+
+[DeclarationError 7301] Error: Only one fallback function is allowed.
+   ╭─[input.sol:9:72]
+   │
+ 9 │ contract ThreeFallback { fallback() external {} fallback() external {} fallback() external {} }
+   │                                                                        ───────────┬──────────  
+   │                                                                                   ╰──────────── Error occurred here.
+───╯
+
+[DeclarationError 4046] Error: Only one receive function is allowed.
+    ╭─[input.sol:10:53]
+    │
+ 10 │ contract TwoReceive { receive() external payable {} receive() external payable {} }
+    │                                                     ──────────────┬──────────────  
+    │                                                                   ╰──────────────── Error occurred here.
+────╯
+
+[DeclarationError 4046] Error: Only one receive function is allowed.
+    ╭─[input.sol:11:55]
+    │
+ 11 │ contract ThreeReceive { receive() external payable {} receive() external payable {} receive() external payable {} }
+    │                                                       ──────────────┬──────────────  
+    │                                                                     ╰──────────────── Error occurred here.
+────╯
+
+[DeclarationError 4046] Error: Only one receive function is allowed.
+    ╭─[input.sol:11:85]
+    │
+ 11 │ contract ThreeReceive { receive() external payable {} receive() external payable {} receive() external payable {} }
+    │                                                                                     ──────────────┬──────────────  
+    │                                                                                                   ╰──────────────── Error occurred here.
+────╯

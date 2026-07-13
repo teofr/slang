@@ -10,6 +10,8 @@ mod library_receive_function;
 mod library_virtual_function;
 mod library_virtual_modifier;
 mod multiple_constructors;
+mod multiple_fallback_functions;
+mod multiple_receive_functions;
 mod unimplemented_modifier_must_be_virtual;
 mod uninitialized_constant;
 mod virtual_free_function;
@@ -27,6 +29,8 @@ pub use library_receive_function::LibraryReceiveFunction;
 pub use library_virtual_function::LibraryVirtualFunction;
 pub use library_virtual_modifier::LibraryVirtualModifier;
 pub use multiple_constructors::MultipleConstructors;
+pub use multiple_fallback_functions::MultipleFallbackFunctions;
+pub use multiple_receive_functions::MultipleReceiveFunctions;
 use serde::Serialize;
 pub use unimplemented_modifier_must_be_virtual::UnimplementedModifierMustBeVirtual;
 pub use uninitialized_constant::UninitializedConstant;
@@ -83,5 +87,10 @@ define_diagnostic_kind! {
 
         /// A `constant` is declared without an initializer value.
         UninitializedConstant(UninitializedConstant),
+
+        /// A contract defines more than one fallback function.
+        MultipleFallbackFunctions(MultipleFallbackFunctions),
+        /// A contract defines more than one receive function.
+        MultipleReceiveFunctions(MultipleReceiveFunctions),
     }
 }
