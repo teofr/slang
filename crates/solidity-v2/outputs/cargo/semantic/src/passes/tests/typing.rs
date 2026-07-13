@@ -1571,6 +1571,16 @@ fn test_meta_types_do_not_leak_into_value_positions() {
     // A meta-type as a postfix operator operand.
     let (type_, _) = try_type_of_expression("uint++");
     assert_eq!(type_, None);
+
+    // A tuple of type names is itself a meta-type, so it is filtered from
+    // value positions too (previously `Tuple(meta, meta)` slipped through the
+    // shallow top-level check).
+    let (type_, _) = try_type_of_expression("true ? (uint, bool) : (uint, bool)");
+    assert_eq!(type_, None);
+
+    // A tuple of types is not a castable target.
+    let (type_, _) = try_type_of_expression_in_context("uint x;", "(uint, bool)(x)");
+    assert_eq!(type_, None);
 }
 
 #[test]
@@ -1925,4 +1935,36 @@ fn test_abi_decode_tuple_of_types() {
     // Neither does a second argument that is not a type or tuple of types.
     let (decoded, _) = try_type_of_expression_in_context("bytes b; uint x;", "abi.decode(b, x)");
     assert_eq!(decoded, None);
+}
+
+#[test]
+fn test_tuple_of_type_names_is_a_meta_type() {
+    // A tuple whose elements are all type names normalizes to the meta-type
+    // of the tuple of the denoted types: `type((uint256, bool))`.
+    let (type_, registry) = type_of_expression("(uint, bool)");
+    let Type::MetaType(MetaType { type_id }) = type_ else {
+        panic!("expected `(uint, bool)` to type as a meta-type, got {type_:?}");
+    };
+    let Type::Tuple(TupleType { types: element_ids }) = registry.get_type_by_id(type_id) else {
+        panic!("expected the meta-type to wrap a tuple");
+    };
+    assert_eq!(element_ids[0], registry.uint256());
+    assert_eq!(element_ids[1], registry.boolean());
+
+    // User-defined type names resolve to their concrete types.
+    let (type_, registry) = type_of_expression_in_context("struct S { uint a; }", "(uint, S)");
+    let Type::MetaType(MetaType { type_id }) = type_ else {
+        panic!("expected `(uint, S)` to type as a meta-type, got {type_:?}");
+    };
+    let Type::Tuple(TupleType { types: element_ids }) = registry.get_type_by_id(type_id) else {
+        panic!("expected the meta-type to wrap a tuple");
+    };
+    assert!(matches!(
+        registry.get_type_by_id(element_ids[1]),
+        Type::Struct(_)
+    ));
+
+    // A tuple mixing type names and values does not type.
+    let (type_, _) = try_type_of_expression("(uint, 5)");
+    assert_eq!(type_, None);
 }
