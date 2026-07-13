@@ -931,8 +931,10 @@ pub slang_solidity_v2_common::diagnostics::kinds::syntax::SyntaxDiagnosticKind::
 pub slang_solidity_v2_common::diagnostics::kinds::syntax::SyntaxDiagnosticKind::IncompatibleSyntaxVersion(slang_solidity_v2_common::diagnostics::kinds::syntax::IncompatibleSyntaxVersion)
 pub slang_solidity_v2_common::diagnostics::kinds::syntax::SyntaxDiagnosticKind::InvalidMutability(slang_solidity_v2_common::diagnostics::kinds::syntax::InvalidMutability)
 pub slang_solidity_v2_common::diagnostics::kinds::syntax::SyntaxDiagnosticKind::InvalidVisibility(slang_solidity_v2_common::diagnostics::kinds::syntax::InvalidVisibility)
+pub slang_solidity_v2_common::diagnostics::kinds::syntax::SyntaxDiagnosticKind::MultipleInheritanceSpecifiers(slang_solidity_v2_common::diagnostics::kinds::syntax::MultipleInheritanceSpecifiers)
 pub slang_solidity_v2_common::diagnostics::kinds::syntax::SyntaxDiagnosticKind::MultipleMutabilitySpecifiers(slang_solidity_v2_common::diagnostics::kinds::syntax::MultipleMutabilitySpecifiers)
 pub slang_solidity_v2_common::diagnostics::kinds::syntax::SyntaxDiagnosticKind::MultipleOverrideSpecifiers(slang_solidity_v2_common::diagnostics::kinds::syntax::MultipleOverrideSpecifiers)
+pub slang_solidity_v2_common::diagnostics::kinds::syntax::SyntaxDiagnosticKind::MultipleStorageLayoutSpecifiers(slang_solidity_v2_common::diagnostics::kinds::syntax::MultipleStorageLayoutSpecifiers)
 pub slang_solidity_v2_common::diagnostics::kinds::syntax::SyntaxDiagnosticKind::MultipleVirtualSpecifiers(slang_solidity_v2_common::diagnostics::kinds::syntax::MultipleVirtualSpecifiers)
 pub slang_solidity_v2_common::diagnostics::kinds::syntax::SyntaxDiagnosticKind::MultipleVisibilitySpecifiers(slang_solidity_v2_common::diagnostics::kinds::syntax::MultipleVisibilitySpecifiers)
 pub slang_solidity_v2_common::diagnostics::kinds::syntax::SyntaxDiagnosticKind::UnexpectedEof(slang_solidity_v2_common::diagnostics::kinds::syntax::UnexpectedEof)
@@ -950,10 +952,14 @@ impl core::convert::From<slang_solidity_v2_common::diagnostics::kinds::syntax::I
 pub fn slang_solidity_v2_common::diagnostics::kinds::syntax::SyntaxDiagnosticKind::from(slang_solidity_v2_common::diagnostics::kinds::syntax::InvalidMutability) -> Self
 impl core::convert::From<slang_solidity_v2_common::diagnostics::kinds::syntax::InvalidVisibility> for slang_solidity_v2_common::diagnostics::kinds::syntax::SyntaxDiagnosticKind
 pub fn slang_solidity_v2_common::diagnostics::kinds::syntax::SyntaxDiagnosticKind::from(slang_solidity_v2_common::diagnostics::kinds::syntax::InvalidVisibility) -> Self
+impl core::convert::From<slang_solidity_v2_common::diagnostics::kinds::syntax::MultipleInheritanceSpecifiers> for slang_solidity_v2_common::diagnostics::kinds::syntax::SyntaxDiagnosticKind
+pub fn slang_solidity_v2_common::diagnostics::kinds::syntax::SyntaxDiagnosticKind::from(slang_solidity_v2_common::diagnostics::kinds::syntax::MultipleInheritanceSpecifiers) -> Self
 impl core::convert::From<slang_solidity_v2_common::diagnostics::kinds::syntax::MultipleMutabilitySpecifiers> for slang_solidity_v2_common::diagnostics::kinds::syntax::SyntaxDiagnosticKind
 pub fn slang_solidity_v2_common::diagnostics::kinds::syntax::SyntaxDiagnosticKind::from(slang_solidity_v2_common::diagnostics::kinds::syntax::MultipleMutabilitySpecifiers) -> Self
 impl core::convert::From<slang_solidity_v2_common::diagnostics::kinds::syntax::MultipleOverrideSpecifiers> for slang_solidity_v2_common::diagnostics::kinds::syntax::SyntaxDiagnosticKind
 pub fn slang_solidity_v2_common::diagnostics::kinds::syntax::SyntaxDiagnosticKind::from(slang_solidity_v2_common::diagnostics::kinds::syntax::MultipleOverrideSpecifiers) -> Self
+impl core::convert::From<slang_solidity_v2_common::diagnostics::kinds::syntax::MultipleStorageLayoutSpecifiers> for slang_solidity_v2_common::diagnostics::kinds::syntax::SyntaxDiagnosticKind
+pub fn slang_solidity_v2_common::diagnostics::kinds::syntax::SyntaxDiagnosticKind::from(slang_solidity_v2_common::diagnostics::kinds::syntax::MultipleStorageLayoutSpecifiers) -> Self
 impl core::convert::From<slang_solidity_v2_common::diagnostics::kinds::syntax::MultipleVirtualSpecifiers> for slang_solidity_v2_common::diagnostics::kinds::syntax::SyntaxDiagnosticKind
 pub fn slang_solidity_v2_common::diagnostics::kinds::syntax::SyntaxDiagnosticKind::from(slang_solidity_v2_common::diagnostics::kinds::syntax::MultipleVirtualSpecifiers) -> Self
 impl core::convert::From<slang_solidity_v2_common::diagnostics::kinds::syntax::MultipleVisibilitySpecifiers> for slang_solidity_v2_common::diagnostics::kinds::syntax::SyntaxDiagnosticKind
@@ -1052,6 +1058,25 @@ impl slang_solidity_v2_common::diagnostics::DiagnosticExtensions for slang_solid
 pub fn slang_solidity_v2_common::diagnostics::kinds::syntax::InvalidVisibility::code(&self) -> &'static str
 pub fn slang_solidity_v2_common::diagnostics::kinds::syntax::InvalidVisibility::message(&self) -> alloc::string::String
 pub fn slang_solidity_v2_common::diagnostics::kinds::syntax::InvalidVisibility::severity(&self) -> slang_solidity_v2_common::diagnostics::DiagnosticSeverity
+pub struct slang_solidity_v2_common::diagnostics::kinds::syntax::MultipleInheritanceSpecifiers
+impl core::clone::Clone for slang_solidity_v2_common::diagnostics::kinds::syntax::MultipleInheritanceSpecifiers
+pub fn slang_solidity_v2_common::diagnostics::kinds::syntax::MultipleInheritanceSpecifiers::clone(&self) -> slang_solidity_v2_common::diagnostics::kinds::syntax::MultipleInheritanceSpecifiers
+impl core::cmp::Eq for slang_solidity_v2_common::diagnostics::kinds::syntax::MultipleInheritanceSpecifiers
+impl core::cmp::PartialEq for slang_solidity_v2_common::diagnostics::kinds::syntax::MultipleInheritanceSpecifiers
+pub fn slang_solidity_v2_common::diagnostics::kinds::syntax::MultipleInheritanceSpecifiers::eq(&self, &slang_solidity_v2_common::diagnostics::kinds::syntax::MultipleInheritanceSpecifiers) -> bool
+impl core::convert::From<slang_solidity_v2_common::diagnostics::kinds::syntax::MultipleInheritanceSpecifiers> for slang_solidity_v2_common::diagnostics::kinds::DiagnosticKind
+pub fn slang_solidity_v2_common::diagnostics::kinds::DiagnosticKind::from(slang_solidity_v2_common::diagnostics::kinds::syntax::MultipleInheritanceSpecifiers) -> Self
+impl core::convert::From<slang_solidity_v2_common::diagnostics::kinds::syntax::MultipleInheritanceSpecifiers> for slang_solidity_v2_common::diagnostics::kinds::syntax::SyntaxDiagnosticKind
+pub fn slang_solidity_v2_common::diagnostics::kinds::syntax::SyntaxDiagnosticKind::from(slang_solidity_v2_common::diagnostics::kinds::syntax::MultipleInheritanceSpecifiers) -> Self
+impl core::fmt::Debug for slang_solidity_v2_common::diagnostics::kinds::syntax::MultipleInheritanceSpecifiers
+pub fn slang_solidity_v2_common::diagnostics::kinds::syntax::MultipleInheritanceSpecifiers::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::StructuralPartialEq for slang_solidity_v2_common::diagnostics::kinds::syntax::MultipleInheritanceSpecifiers
+impl serde_core::ser::Serialize for slang_solidity_v2_common::diagnostics::kinds::syntax::MultipleInheritanceSpecifiers
+pub fn slang_solidity_v2_common::diagnostics::kinds::syntax::MultipleInheritanceSpecifiers::serialize<__S>(&self, __S) -> core::result::Result<<__S as serde_core::ser::Serializer>::Ok, <__S as serde_core::ser::Serializer>::Error> where __S: serde_core::ser::Serializer
+impl slang_solidity_v2_common::diagnostics::DiagnosticExtensions for slang_solidity_v2_common::diagnostics::kinds::syntax::MultipleInheritanceSpecifiers
+pub fn slang_solidity_v2_common::diagnostics::kinds::syntax::MultipleInheritanceSpecifiers::code(&self) -> &'static str
+pub fn slang_solidity_v2_common::diagnostics::kinds::syntax::MultipleInheritanceSpecifiers::message(&self) -> alloc::string::String
+pub fn slang_solidity_v2_common::diagnostics::kinds::syntax::MultipleInheritanceSpecifiers::severity(&self) -> slang_solidity_v2_common::diagnostics::DiagnosticSeverity
 pub struct slang_solidity_v2_common::diagnostics::kinds::syntax::MultipleMutabilitySpecifiers
 impl core::clone::Clone for slang_solidity_v2_common::diagnostics::kinds::syntax::MultipleMutabilitySpecifiers
 pub fn slang_solidity_v2_common::diagnostics::kinds::syntax::MultipleMutabilitySpecifiers::clone(&self) -> slang_solidity_v2_common::diagnostics::kinds::syntax::MultipleMutabilitySpecifiers
@@ -1090,6 +1115,25 @@ impl slang_solidity_v2_common::diagnostics::DiagnosticExtensions for slang_solid
 pub fn slang_solidity_v2_common::diagnostics::kinds::syntax::MultipleOverrideSpecifiers::code(&self) -> &'static str
 pub fn slang_solidity_v2_common::diagnostics::kinds::syntax::MultipleOverrideSpecifiers::message(&self) -> alloc::string::String
 pub fn slang_solidity_v2_common::diagnostics::kinds::syntax::MultipleOverrideSpecifiers::severity(&self) -> slang_solidity_v2_common::diagnostics::DiagnosticSeverity
+pub struct slang_solidity_v2_common::diagnostics::kinds::syntax::MultipleStorageLayoutSpecifiers
+impl core::clone::Clone for slang_solidity_v2_common::diagnostics::kinds::syntax::MultipleStorageLayoutSpecifiers
+pub fn slang_solidity_v2_common::diagnostics::kinds::syntax::MultipleStorageLayoutSpecifiers::clone(&self) -> slang_solidity_v2_common::diagnostics::kinds::syntax::MultipleStorageLayoutSpecifiers
+impl core::cmp::Eq for slang_solidity_v2_common::diagnostics::kinds::syntax::MultipleStorageLayoutSpecifiers
+impl core::cmp::PartialEq for slang_solidity_v2_common::diagnostics::kinds::syntax::MultipleStorageLayoutSpecifiers
+pub fn slang_solidity_v2_common::diagnostics::kinds::syntax::MultipleStorageLayoutSpecifiers::eq(&self, &slang_solidity_v2_common::diagnostics::kinds::syntax::MultipleStorageLayoutSpecifiers) -> bool
+impl core::convert::From<slang_solidity_v2_common::diagnostics::kinds::syntax::MultipleStorageLayoutSpecifiers> for slang_solidity_v2_common::diagnostics::kinds::DiagnosticKind
+pub fn slang_solidity_v2_common::diagnostics::kinds::DiagnosticKind::from(slang_solidity_v2_common::diagnostics::kinds::syntax::MultipleStorageLayoutSpecifiers) -> Self
+impl core::convert::From<slang_solidity_v2_common::diagnostics::kinds::syntax::MultipleStorageLayoutSpecifiers> for slang_solidity_v2_common::diagnostics::kinds::syntax::SyntaxDiagnosticKind
+pub fn slang_solidity_v2_common::diagnostics::kinds::syntax::SyntaxDiagnosticKind::from(slang_solidity_v2_common::diagnostics::kinds::syntax::MultipleStorageLayoutSpecifiers) -> Self
+impl core::fmt::Debug for slang_solidity_v2_common::diagnostics::kinds::syntax::MultipleStorageLayoutSpecifiers
+pub fn slang_solidity_v2_common::diagnostics::kinds::syntax::MultipleStorageLayoutSpecifiers::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::StructuralPartialEq for slang_solidity_v2_common::diagnostics::kinds::syntax::MultipleStorageLayoutSpecifiers
+impl serde_core::ser::Serialize for slang_solidity_v2_common::diagnostics::kinds::syntax::MultipleStorageLayoutSpecifiers
+pub fn slang_solidity_v2_common::diagnostics::kinds::syntax::MultipleStorageLayoutSpecifiers::serialize<__S>(&self, __S) -> core::result::Result<<__S as serde_core::ser::Serializer>::Ok, <__S as serde_core::ser::Serializer>::Error> where __S: serde_core::ser::Serializer
+impl slang_solidity_v2_common::diagnostics::DiagnosticExtensions for slang_solidity_v2_common::diagnostics::kinds::syntax::MultipleStorageLayoutSpecifiers
+pub fn slang_solidity_v2_common::diagnostics::kinds::syntax::MultipleStorageLayoutSpecifiers::code(&self) -> &'static str
+pub fn slang_solidity_v2_common::diagnostics::kinds::syntax::MultipleStorageLayoutSpecifiers::message(&self) -> alloc::string::String
+pub fn slang_solidity_v2_common::diagnostics::kinds::syntax::MultipleStorageLayoutSpecifiers::severity(&self) -> slang_solidity_v2_common::diagnostics::DiagnosticSeverity
 pub struct slang_solidity_v2_common::diagnostics::kinds::syntax::MultipleVirtualSpecifiers
 impl core::clone::Clone for slang_solidity_v2_common::diagnostics::kinds::syntax::MultipleVirtualSpecifiers
 pub fn slang_solidity_v2_common::diagnostics::kinds::syntax::MultipleVirtualSpecifiers::clone(&self) -> slang_solidity_v2_common::diagnostics::kinds::syntax::MultipleVirtualSpecifiers
@@ -1592,10 +1636,14 @@ impl core::convert::From<slang_solidity_v2_common::diagnostics::kinds::syntax::I
 pub fn slang_solidity_v2_common::diagnostics::kinds::DiagnosticKind::from(slang_solidity_v2_common::diagnostics::kinds::syntax::InvalidMutability) -> Self
 impl core::convert::From<slang_solidity_v2_common::diagnostics::kinds::syntax::InvalidVisibility> for slang_solidity_v2_common::diagnostics::kinds::DiagnosticKind
 pub fn slang_solidity_v2_common::diagnostics::kinds::DiagnosticKind::from(slang_solidity_v2_common::diagnostics::kinds::syntax::InvalidVisibility) -> Self
+impl core::convert::From<slang_solidity_v2_common::diagnostics::kinds::syntax::MultipleInheritanceSpecifiers> for slang_solidity_v2_common::diagnostics::kinds::DiagnosticKind
+pub fn slang_solidity_v2_common::diagnostics::kinds::DiagnosticKind::from(slang_solidity_v2_common::diagnostics::kinds::syntax::MultipleInheritanceSpecifiers) -> Self
 impl core::convert::From<slang_solidity_v2_common::diagnostics::kinds::syntax::MultipleMutabilitySpecifiers> for slang_solidity_v2_common::diagnostics::kinds::DiagnosticKind
 pub fn slang_solidity_v2_common::diagnostics::kinds::DiagnosticKind::from(slang_solidity_v2_common::diagnostics::kinds::syntax::MultipleMutabilitySpecifiers) -> Self
 impl core::convert::From<slang_solidity_v2_common::diagnostics::kinds::syntax::MultipleOverrideSpecifiers> for slang_solidity_v2_common::diagnostics::kinds::DiagnosticKind
 pub fn slang_solidity_v2_common::diagnostics::kinds::DiagnosticKind::from(slang_solidity_v2_common::diagnostics::kinds::syntax::MultipleOverrideSpecifiers) -> Self
+impl core::convert::From<slang_solidity_v2_common::diagnostics::kinds::syntax::MultipleStorageLayoutSpecifiers> for slang_solidity_v2_common::diagnostics::kinds::DiagnosticKind
+pub fn slang_solidity_v2_common::diagnostics::kinds::DiagnosticKind::from(slang_solidity_v2_common::diagnostics::kinds::syntax::MultipleStorageLayoutSpecifiers) -> Self
 impl core::convert::From<slang_solidity_v2_common::diagnostics::kinds::syntax::MultipleVirtualSpecifiers> for slang_solidity_v2_common::diagnostics::kinds::DiagnosticKind
 pub fn slang_solidity_v2_common::diagnostics::kinds::DiagnosticKind::from(slang_solidity_v2_common::diagnostics::kinds::syntax::MultipleVirtualSpecifiers) -> Self
 impl core::convert::From<slang_solidity_v2_common::diagnostics::kinds::syntax::MultipleVisibilitySpecifiers> for slang_solidity_v2_common::diagnostics::kinds::DiagnosticKind
@@ -1876,6 +1924,10 @@ impl slang_solidity_v2_common::diagnostics::DiagnosticExtensions for slang_solid
 pub fn slang_solidity_v2_common::diagnostics::kinds::syntax::InvalidVisibility::code(&self) -> &'static str
 pub fn slang_solidity_v2_common::diagnostics::kinds::syntax::InvalidVisibility::message(&self) -> alloc::string::String
 pub fn slang_solidity_v2_common::diagnostics::kinds::syntax::InvalidVisibility::severity(&self) -> slang_solidity_v2_common::diagnostics::DiagnosticSeverity
+impl slang_solidity_v2_common::diagnostics::DiagnosticExtensions for slang_solidity_v2_common::diagnostics::kinds::syntax::MultipleInheritanceSpecifiers
+pub fn slang_solidity_v2_common::diagnostics::kinds::syntax::MultipleInheritanceSpecifiers::code(&self) -> &'static str
+pub fn slang_solidity_v2_common::diagnostics::kinds::syntax::MultipleInheritanceSpecifiers::message(&self) -> alloc::string::String
+pub fn slang_solidity_v2_common::diagnostics::kinds::syntax::MultipleInheritanceSpecifiers::severity(&self) -> slang_solidity_v2_common::diagnostics::DiagnosticSeverity
 impl slang_solidity_v2_common::diagnostics::DiagnosticExtensions for slang_solidity_v2_common::diagnostics::kinds::syntax::MultipleMutabilitySpecifiers
 pub fn slang_solidity_v2_common::diagnostics::kinds::syntax::MultipleMutabilitySpecifiers::code(&self) -> &'static str
 pub fn slang_solidity_v2_common::diagnostics::kinds::syntax::MultipleMutabilitySpecifiers::message(&self) -> alloc::string::String
@@ -1884,6 +1936,10 @@ impl slang_solidity_v2_common::diagnostics::DiagnosticExtensions for slang_solid
 pub fn slang_solidity_v2_common::diagnostics::kinds::syntax::MultipleOverrideSpecifiers::code(&self) -> &'static str
 pub fn slang_solidity_v2_common::diagnostics::kinds::syntax::MultipleOverrideSpecifiers::message(&self) -> alloc::string::String
 pub fn slang_solidity_v2_common::diagnostics::kinds::syntax::MultipleOverrideSpecifiers::severity(&self) -> slang_solidity_v2_common::diagnostics::DiagnosticSeverity
+impl slang_solidity_v2_common::diagnostics::DiagnosticExtensions for slang_solidity_v2_common::diagnostics::kinds::syntax::MultipleStorageLayoutSpecifiers
+pub fn slang_solidity_v2_common::diagnostics::kinds::syntax::MultipleStorageLayoutSpecifiers::code(&self) -> &'static str
+pub fn slang_solidity_v2_common::diagnostics::kinds::syntax::MultipleStorageLayoutSpecifiers::message(&self) -> alloc::string::String
+pub fn slang_solidity_v2_common::diagnostics::kinds::syntax::MultipleStorageLayoutSpecifiers::severity(&self) -> slang_solidity_v2_common::diagnostics::DiagnosticSeverity
 impl slang_solidity_v2_common::diagnostics::DiagnosticExtensions for slang_solidity_v2_common::diagnostics::kinds::syntax::MultipleVirtualSpecifiers
 pub fn slang_solidity_v2_common::diagnostics::kinds::syntax::MultipleVirtualSpecifiers::code(&self) -> &'static str
 pub fn slang_solidity_v2_common::diagnostics::kinds::syntax::MultipleVirtualSpecifiers::message(&self) -> alloc::string::String
