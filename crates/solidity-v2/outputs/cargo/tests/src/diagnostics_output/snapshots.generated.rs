@@ -1212,11 +1212,6 @@ mod type_system {
         }
 
         #[test]
-        fn type_expression_zero() -> Result<()> {
-            run("type_system/array_length", "type_expression_zero")
-        }
-
-        #[test]
         fn valid() -> Result<()> {
             run("type_system/array_length", "valid")
         }

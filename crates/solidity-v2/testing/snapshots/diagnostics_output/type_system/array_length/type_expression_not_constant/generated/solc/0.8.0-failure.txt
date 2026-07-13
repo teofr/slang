@@ -1,1 +1,11 @@
-PLACEHOLDER: real solc output to be filled from CI failure diff.
+# This file is generated automatically by infrastructure scripts. Please don't edit by hand.
+
+Diagnostics: 1
+
+[TypeError 3940] Error: Integer constant expected.
+   ╭─[input.sol:8:35]
+   │
+ 8 │         abi.decode(data, (uint256[n]));
+   │                                   ┬  
+   │                                   ╰── Error occurred here.
+───╯
