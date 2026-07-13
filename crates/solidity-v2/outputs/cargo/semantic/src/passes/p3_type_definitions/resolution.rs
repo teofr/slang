@@ -1,9 +1,4 @@
-use num_traits::Signed;
 use ruint::aliases::U256;
-use slang_solidity_v2_common::diagnostics::kinds::type_system::{
-    ArrayLengthFractional, ArrayLengthNegative, ArrayLengthNotConstant, ArrayLengthTooLarge,
-    ArrayLengthZero,
-};
 use slang_solidity_v2_common::diagnostics::kinds::DiagnosticKind;
 use slang_solidity_v2_ir::ir;
 use slang_solidity_v2_ir::ir::{NodeIdentity, TextRange};
@@ -11,7 +6,7 @@ use slang_solidity_v2_ir::ir::{NodeIdentity, TextRange};
 use super::Pass;
 use crate::binder::{Definition, Resolution, ScopeId};
 use crate::passes::common::constant_evaluator::{
-    evaluate_compile_time_constant, ConstantResolver, EvaluationError,
+    classify_array_length, evaluate_compile_time_constant, ConstantResolver,
 };
 use crate::passes::common::{node_location, resolve_identifier_path_in_scope};
 use crate::types::{
@@ -49,7 +44,7 @@ impl Pass<'_> {
     /// construction can proceed.
     fn resolve_array_length(&mut self, size_expression: &ir::Expression) -> U256 {
         let (file_id, range) = node_location(size_expression, self.file_node_mapper);
-        let value = match evaluate_compile_time_constant(
+        let value = evaluate_compile_time_constant(
             size_expression,
             self.current_contract_or_file_scope_id(),
             self.types,
@@ -57,38 +52,16 @@ impl Pass<'_> {
                 binder: self.binder,
                 use_site: Some((&file_id, range.start)),
             },
-        ) {
-            Ok(value) => value,
-            Err(EvaluationError::Diagnostic { kind, expression }) => {
+        );
+        match classify_array_length(value) {
+            Ok(size) => size,
+            Err((kind, expression)) => {
                 // Report at the failing operation, falling back to the length
                 // expression when the evaluator didn't attach one.
                 self.push_diagnostic(expression.as_ref().unwrap_or(size_expression), kind);
-                return U256::ZERO;
+                U256::ZERO
             }
-            Err(EvaluationError::CouldNotEvaluate) => {
-                self.push_diagnostic(size_expression, ArrayLengthNotConstant);
-                return U256::ZERO;
-            }
-        };
-
-        // Classify the value: zero, then fractional, then negative and then too large.
-        if value.is_zero() {
-            self.push_diagnostic(size_expression, ArrayLengthZero);
-            return U256::ZERO;
         }
-        let Some(integer) = value.as_integer() else {
-            self.push_diagnostic(size_expression, ArrayLengthFractional);
-            return U256::ZERO;
-        };
-        if integer.is_negative() {
-            self.push_diagnostic(size_expression, ArrayLengthNegative);
-            return U256::ZERO;
-        }
-        let Ok(size) = U256::try_from(integer) else {
-            self.push_diagnostic(size_expression, ArrayLengthTooLarge);
-            return U256::ZERO;
-        };
-        size
     }
 
     /// Emits `kind` located at `node`.

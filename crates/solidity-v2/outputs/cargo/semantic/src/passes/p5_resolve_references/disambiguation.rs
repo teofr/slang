@@ -124,25 +124,18 @@ impl Pass<'_> {
         argument_typing: &Typing,
         external_call: bool,
     ) -> bool {
-        match argument_typing {
-            Typing::Resolved(type_id) => {
-                // A meta-type argument (a type name, eg. passing `uint` as an
-                // argument) never matches a value parameter.
-                if self.types.get_type_by_id(*type_id).is_meta_type() {
-                    return false;
-                }
-                if external_call {
-                    self.types
-                        .implicitly_convertible_to_for_external_call(*type_id, parameter_type)
-                } else {
-                    self.types
-                        .implicitly_convertible_to(*type_id, parameter_type)
-                }
-            }
-            Typing::This(type_id) => self
-                .types
-                .implicitly_convertible_to(*type_id, parameter_type),
-            _ => false,
+        // `as_value_type_id` covers both `Resolved` and `This` typings, and
+        // filters out meta-type arguments (a type name never matches a value
+        // parameter).
+        let Some(type_id) = argument_typing.as_value_type_id(self.types) else {
+            return false;
+        };
+        if external_call {
+            self.types
+                .implicitly_convertible_to_for_external_call(type_id, parameter_type)
+        } else {
+            self.types
+                .implicitly_convertible_to(type_id, parameter_type)
         }
     }
 

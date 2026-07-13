@@ -5,12 +5,14 @@ use slang_solidity_v2_ir::ir;
 use super::Pass;
 use crate::binder::{Definition, Resolution, Typing};
 use crate::built_ins::InternalBuiltIn;
-use crate::passes::common::constant_evaluator::{evaluate_compile_time_constant, ConstantResolver};
+use crate::passes::common::constant_evaluator::{
+    classify_array_length, evaluate_compile_time_constant, ConstantResolver,
+};
 use crate::passes::common::{node_id_for_expression_typing, node_location};
 use crate::types::{
     literals, AddressType, ArrayType, ContractType, DataLocation, EnumType, FixedSizeArrayType,
     FunctionType, IntegerType, InterfaceType, LibraryType, LiteralKind, MetaType, Number,
-    StringType, StructType, Type, TypeId, UserDefinedValueType, UserMetaType,
+    StringType, StructType, TupleType, Type, TypeId, UserDefinedValueType, UserMetaType,
 };
 
 impl Pass<'_> {
@@ -39,9 +41,7 @@ impl Pass<'_> {
             // Other special cases
             ir::Expression::SuperKeyword(_) => Typing::Super,
 
-            // By default, query the binder for registered typing information.
-            // This includes elementary types and the `payable` keyword, whose
-            // meta-typings are stored by the corresponding visitor hooks.
+            // By default, query the binder for registered typing information
             _ => {
                 let node_id = node_id_for_expression_typing(node).expect(
                     "typing of expression variant not handled and it doesn't have a NodeId",
@@ -51,22 +51,11 @@ impl Pass<'_> {
         }
     }
 
-    /// Returns the typing of an expression when it is a *value*, filtering out
-    /// meta-types (see [`Typing::as_value_type_id`]). This is the accessor for
-    /// value positions: operator operands, conditional branches, receivers,
-    /// tuple/array literal elements.
-    pub(super) fn value_type_id_of_expression(&self, node: &ir::Expression) -> Option<TypeId> {
-        self.typing_of_expression(node).as_value_type_id(self.types)
-    }
-
     /// Builds the meta-typing of an array type expression `T[...]` (an index
     /// access whose operand is itself a meta-type): `T[]` when there is no
-    /// index, `T[n]` when the index evaluates to a compile-time constant
-    /// (a literal or a constant like `uint[LEN]`, mirroring what
-    /// `resolve_array_length` does for array type *names* in p3). A size that
-    /// does not evaluate to a positive in-range integer yields `Unresolved`.
-    // TODO(validation): report the array-length diagnostics (not constant,
-    // zero, fractional, ...) that the p3 type-name path reports.
+    /// index, `T[n]` when the index evaluates to a valid compile-time constant
+    /// length, mirroring `resolve_array_length` for array type *names* in p3.
+    /// An invalid length is reported and yields `Unresolved`.
     pub(super) fn meta_typing_of_array_type_expression(
         &mut self,
         element_type: TypeId,
@@ -79,7 +68,7 @@ impl Pass<'_> {
             }));
         };
         let (file_id, range) = node_location(size_expression, self.file_node_mapper);
-        let size = evaluate_compile_time_constant(
+        let value = evaluate_compile_time_constant(
             size_expression,
             self.current_scope_id(),
             self.types,
@@ -87,18 +76,19 @@ impl Pass<'_> {
                 binder: self.binder,
                 use_site: Some((&file_id, range.start)),
             },
-        )
-        .ok()
-        .and_then(|value| value.into_integer())
-        .and_then(|value| U256::try_from(&value).ok())
-        .filter(|size| !size.is_zero());
-        match size {
-            Some(size) => self.meta_typing_of(Type::FixedSizeArray(FixedSizeArrayType {
+        );
+        match classify_array_length(value) {
+            Ok(size) => self.meta_typing_of(Type::FixedSizeArray(FixedSizeArrayType {
                 element_type,
                 size,
                 location: DataLocation::Memory,
             })),
-            None => Typing::Unresolved,
+            Err((kind, expression)) => {
+                // Report at the failing operation, falling back to the length
+                // expression when the evaluator didn't attach one.
+                self.push_diagnostic(expression.as_ref().unwrap_or(size_expression), kind);
+                Typing::Unresolved
+            }
         }
     }
 
@@ -160,8 +150,12 @@ impl Pass<'_> {
     where
         F: FnOnce(&Number, &Number) -> Option<Number>,
     {
-        let left_type_id = self.value_type_id_of_expression(left_operand)?;
-        let right_type_id = self.value_type_id_of_expression(right_operand)?;
+        let left_type_id = self
+            .typing_of_expression(left_operand)
+            .as_value_type_id(self.types)?;
+        let right_type_id = self
+            .typing_of_expression(right_operand)
+            .as_value_type_id(self.types)?;
 
         // If both operands are number constants, fold them using the given operator.
         if let (Some(left_value), Some(right_value)) = (
@@ -201,7 +195,9 @@ impl Pass<'_> {
             ir::PrefixExpressionOperator::Minus(_) | ir::PrefixExpressionOperator::Tilde(_) => {
                 // Fold `-<constant>` or `~<constant>` by operating on the
                 // operand's known number value.
-                let operand_type_id = self.value_type_id_of_expression(&node.operand)?;
+                let operand_type_id = self
+                    .typing_of_expression(&node.operand)
+                    .as_value_type_id(self.types)?;
                 if let Some(value) = self.types.number_value_of_type_id(operand_type_id) {
                     let result = match node.operator {
                         ir::PrefixExpressionOperator::Minus(_) => value.negate(),
@@ -218,9 +214,9 @@ impl Pass<'_> {
                 }
             }
             ir::PrefixExpressionOperator::PlusPlus(_)
-            | ir::PrefixExpressionOperator::MinusMinus(_) => {
-                self.value_type_id_of_expression(&node.operand)
-            }
+            | ir::PrefixExpressionOperator::MinusMinus(_) => self
+                .typing_of_expression(&node.operand)
+                .as_value_type_id(self.types),
             ir::PrefixExpressionOperator::Bang(_) => {
                 // TODO(validation) SDR[49]: check that the operand is boolean
                 Some(self.types.boolean())
@@ -235,7 +231,10 @@ impl Pass<'_> {
     ) -> Option<TypeId> {
         let mut item_type_ids: Vec<TypeId> = Vec::with_capacity(array.items.len());
         for item in &array.items {
-            item_type_ids.push(self.value_type_id_of_expression(item)?);
+            item_type_ids.push(
+                self.typing_of_expression(item)
+                    .as_value_type_id(self.types)?,
+            );
         }
         let element_type = self.types.type_of_array_literal(&item_type_ids)?;
         Some(
@@ -257,8 +256,12 @@ impl Pass<'_> {
     where
         F: FnOnce(&Number, &Number) -> Option<Number>,
     {
-        let left_type_id = self.value_type_id_of_expression(left_operand)?;
-        let right_type_id = self.value_type_id_of_expression(right_operand)?;
+        let left_type_id = self
+            .typing_of_expression(left_operand)
+            .as_value_type_id(self.types)?;
+        let right_type_id = self
+            .typing_of_expression(right_operand)
+            .as_value_type_id(self.types)?;
 
         let left_value = self.types.number_value_of_type_id(left_type_id);
         let right_value = self.types.number_value_of_type_id(right_type_id);
@@ -370,7 +373,8 @@ impl Pass<'_> {
         // in `L.foo(...)`) is a `UserMetaType` here — the meta-type of the
         // *name* — not a `Type::Library` value (which is what `this` in a
         // library, or a `L(addr)` cast, produces).
-        self.value_type_id_of_expression(&member_access_expression.operand)
+        self.typing_of_expression(&member_access_expression.operand)
+            .as_value_type_id(self.types)
     }
 
     fn typing_of_cast(&mut self, argument_typing: &Typing, target_type: Type) -> Typing {
@@ -433,10 +437,9 @@ impl Pass<'_> {
                     }
                 }
                 Type::UserMetaType(UserMetaType { definition_id }) => {
-                    // Generally this is a cast to the underlying type of the
-                    // given definition (eg. `MyEnum(1)`, `IFoo(addr)`), except
-                    // for structs for which this is a construction of the
-                    // value in memory
+                    // A cast to the underlying type of the definition (eg.
+                    // `MyEnum(1)`), or a struct construction. UDVTs are not
+                    // castable by name (they convert via `wrap`/`unwrap`).
                     let definition_id = *definition_id;
                     match self.binder.find_definition_by_id(definition_id) {
                         Some(
@@ -454,9 +457,6 @@ impl Pass<'_> {
                                 .expect("definition kind is handled by type_of_definition");
                             Typing::Resolved(self.types.register_type(type_))
                         }
-                        // NOTE: user defined value types are deliberately not
-                        // castable by name — `MyUDVT(x)` is invalid; conversion
-                        // goes through `MyUDVT.wrap`/`.unwrap`.
                         _ => Typing::Unresolved,
                     }
                 }
@@ -511,37 +511,57 @@ impl Pass<'_> {
         }
     }
 
+    /// Returns the value type a meta-type denotes: `type(T)` unwraps to `T`,
+    /// and the meta-type of a named definition to the definition's type.
+    /// Returns `None` when `type_id` is not a meta-type.
+    fn type_denoted_by_meta_type(&mut self, type_id: TypeId) -> Option<TypeId> {
+        match self.types.get_type_by_id(type_id) {
+            Type::MetaType(MetaType { type_id }) => Some(*type_id),
+            Type::UserMetaType(UserMetaType { definition_id }) => {
+                let definition_id = *definition_id;
+                let type_ = self.type_of_definition(definition_id)?;
+                Some(self.types.register_type(type_))
+            }
+            _ => None,
+        }
+    }
+
     fn typing_of_abi_decode(&mut self, argument_typings: &[Typing]) -> Typing {
         if argument_typings.len() != 2 {
             return Typing::Unresolved;
         }
-        match &argument_typings[1] {
-            Typing::Resolved(type_id) => match self.types.get_type_by_id(*type_id) {
-                // `abi.decode(data, (T))` for an elementary type `T`: the
-                // single-element tuple collapses to the meta-type of `T`, which
-                // decodes to `T` itself.
-                Type::MetaType(MetaType { type_id }) => Typing::Resolved(*type_id),
-                // `abi.decode(data, (T))` for a user-defined type `T`.
-                Type::UserMetaType(UserMetaType { definition_id }) => {
-                    let definition_id = *definition_id;
-                    if let Some(type_) = self.type_of_definition(definition_id) {
-                        Typing::Resolved(self.types.register_type(type_))
-                    } else {
-                        Typing::Unresolved
-                    }
-                }
-                // Multi-element `abi.decode(data, (T1, T2, ...))`: the second
-                // argument is a tuple expression whose *elements* are each
-                // meta-types. To be correct we'd produce a tuple of the decoded
-                // value types by unwrapping each element (as the single-element
-                // arms above do); we currently return the tuple-of-meta-types
-                // verbatim.
-                // TODO(validation) SDR[42]: unwrap the tuple's element
-                // meta-types, and error if `type_id` is not a tuple of types.
-                _ => Typing::Resolved(*type_id),
-            },
-            _ => Typing::Unresolved,
+        let Typing::Resolved(type_id) = &argument_typings[1] else {
+            return Typing::Unresolved;
+        };
+
+        // `abi.decode(data, (T))`: a single-element tuple collapses to the
+        // meta-type of `T`, which decodes to `T` itself.
+        if let Some(decoded) = self.type_denoted_by_meta_type(*type_id) {
+            return Typing::Resolved(decoded);
         }
+
+        // `abi.decode(data, (T1, T2, ...))`: a tuple of meta-types decodes to
+        // the tuple of the types they denote.
+        if let Type::Tuple(TupleType { types }) = self.types.get_type_by_id(*type_id) {
+            let element_ids = types.clone();
+            let mut decoded = Vec::with_capacity(element_ids.len());
+            for element_id in element_ids {
+                let Some(element) = self.type_denoted_by_meta_type(element_id) else {
+                    // TODO(validation) SDR[42]: report an error when a tuple
+                    // element is not a type name (eg. `abi.decode(b, (uint, 5))`).
+                    return Typing::Unresolved;
+                };
+                decoded.push(element);
+            }
+            return Typing::Resolved(
+                self.types
+                    .register_type(Type::Tuple(TupleType { types: decoded })),
+            );
+        }
+
+        // TODO(validation) SDR[42]: report an error when the second argument
+        // is not a type or a tuple of types.
+        Typing::Unresolved
     }
 
     pub(super) fn collect_named_argument_typings(

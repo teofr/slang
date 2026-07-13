@@ -23,6 +23,9 @@ contract C {
         // `uint(x)` — the elementary-type operand `uint` carries a stored
         // `MetaType` typing of its own.
         uint(x);
+        // `(uint)(x)` — a parenthesized cast: the tuple operand's typing
+        // passes the meta-type through.
+        (uint)(x);
     }
 }
 "#,
@@ -97,8 +100,8 @@ fn meta_type_ast_wrappers_are_reachable_via_get_type() {
 
     // `is_type_conversion` in source order: `S(x)` is a construction through a
     // type name (meta operand), `abi.decode(...)` is a plain call, `uint(x)`
-    // is an elementary cast.
-    assert_eq!(collector.conversions, vec![true, false, true]);
+    // is an elementary cast, and `(uint)(x)` is a parenthesized cast.
+    assert_eq!(collector.conversions, vec![true, false, true, true]);
 
     // Meta-types have no ABI representation.
     for type_ in &collector.types {

@@ -98,12 +98,7 @@ impl Pass<'_> {
             Typing::Unresolved => Resolution::Unresolved,
             Typing::Undetermined(type_ids) => {
                 // We cannot use argument-type disambiguation here, so we will
-                // use the first result.
-                // NOTE: the candidates may be meta-types, eg. `E.selector`
-                // where `E` names overloaded events: every candidate is the
-                // `UserMetaType` of one overload, and we resolve the member
-                // against the first. solc reports an ambiguity error for that
-                // case; emitting the diagnostic is part of SDR[37] below.
+                // use the first result
                 // TODO(validation) SDR[37]: check that the types are consistent (eg.
                 // they are all function types) and that it makes sense to use
                 // the first one
@@ -426,7 +421,7 @@ impl Pass<'_> {
     }
 
     /// Emits `kind` located at `node`.
-    fn push_diagnostic(
+    pub(super) fn push_diagnostic(
         &mut self,
         node: &(impl NodeIdentity + TextRange),
         kind: impl Into<DiagnosticKind>,

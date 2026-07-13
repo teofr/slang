@@ -211,8 +211,6 @@ fn abi_type_from_ast_type(value: &AstType, visited_structs: &mut Set<NodeId>) ->
         AstType::UserDefinedValue(udvt) => {
             abi_type_from_ast_type(&udvt.target_type()?, visited_structs)
         }
-        // Meta-types (the typing of an expression that names a type rather
-        // than a value) have no ABI representation.
         AstType::Library(_)
         | AstType::Literal(_)
         | AstType::Mapping(_)

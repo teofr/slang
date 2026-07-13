@@ -1,9 +1,12 @@
 use num_bigint::{BigInt, Sign};
+use num_traits::Signed;
 use ruint::aliases::U256;
 use sha3::{Digest, Keccak256};
 use slang_solidity_v2_common::diagnostics::kinds::semantic::CyclicConstantDefinition;
 use slang_solidity_v2_common::diagnostics::kinds::type_system::{
-    ConstantArithmeticError, IncompatibleConstantOperator, TypeSystemDiagnosticKind,
+    ArrayLengthFractional, ArrayLengthNegative, ArrayLengthNotConstant, ArrayLengthTooLarge,
+    ArrayLengthZero, ConstantArithmeticError, IncompatibleConstantOperator,
+    TypeSystemDiagnosticKind,
 };
 use slang_solidity_v2_common::diagnostics::kinds::DiagnosticKind;
 use slang_solidity_v2_common::files::FileId;
@@ -42,6 +45,37 @@ impl From<DiagnosticKind> for EvaluationError {
             expression: None,
         }
     }
+}
+
+/// Classifies the result of evaluating an array length: either a valid
+/// positive size, or the diagnostic to report. `Err` carries the expression
+/// the evaluator attached to the failure, when any; the caller should fall
+/// back to its own length expression otherwise.
+pub(crate) fn classify_array_length(
+    value: Result<Number, EvaluationError>,
+) -> Result<U256, (DiagnosticKind, Option<ir::Expression>)> {
+    let value = match value {
+        Ok(value) => value,
+        Err(EvaluationError::Diagnostic { kind, expression }) => return Err((kind, expression)),
+        Err(EvaluationError::CouldNotEvaluate) => {
+            return Err((ArrayLengthNotConstant.into(), None))
+        }
+    };
+
+    // Classify the value: zero, then fractional, then negative and then too large.
+    if value.is_zero() {
+        return Err((ArrayLengthZero.into(), None));
+    }
+    let Some(integer) = value.as_integer() else {
+        return Err((ArrayLengthFractional.into(), None));
+    };
+    if integer.is_negative() {
+        return Err((ArrayLengthNegative.into(), None));
+    }
+    let Ok(size) = U256::try_from(integer) else {
+        return Err((ArrayLengthTooLarge.into(), None));
+    };
+    Ok(size)
 }
 
 pub(crate) fn evaluate_compile_time_constant<Scope>(

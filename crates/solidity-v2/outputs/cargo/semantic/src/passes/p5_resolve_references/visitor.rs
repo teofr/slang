@@ -170,15 +170,21 @@ impl Visitor for Pass<'_> {
     }
 
     fn leave_assignment_expression(&mut self, node: &ir::AssignmentExpression) {
-        let type_id = self.value_type_id_of_expression(&node.left_operand);
+        let type_id = self
+            .typing_of_expression(&node.left_operand)
+            .as_value_type_id(self.types);
         // TODO(validation) SDR[59]: check that the type of right_operand can be applied
         // to the left by means of the operator
         self.binder.set_node_type(node.id(), type_id);
     }
 
     fn leave_conditional_expression(&mut self, node: &ir::ConditionalExpression) {
-        let true_type_id = self.value_type_id_of_expression(&node.true_expression);
-        let false_type_id = self.value_type_id_of_expression(&node.false_expression);
+        let true_type_id = self
+            .typing_of_expression(&node.true_expression)
+            .as_value_type_id(self.types);
+        let false_type_id = self
+            .typing_of_expression(&node.false_expression)
+            .as_value_type_id(self.types);
 
         // TODO(validation) SDR[47]: both true_expression and false_expression should
         // have the compatible types
@@ -303,7 +309,9 @@ impl Visitor for Pass<'_> {
 
     fn leave_postfix_expression(&mut self, node: &ir::PostfixExpression) {
         // TODO(validation) SDR[52]: check that the operand is an integer
-        let type_id = self.value_type_id_of_expression(&node.operand);
+        let type_id = self
+            .typing_of_expression(&node.operand)
+            .as_value_type_id(self.types);
         self.binder.set_node_type(node.id(), type_id);
     }
 
