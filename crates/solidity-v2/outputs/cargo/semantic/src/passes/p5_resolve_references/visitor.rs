@@ -10,8 +10,8 @@ use crate::passes::common::{
     filter_overriden_definitions, node_id_for_elementary_type, node_id_for_string_expression_typing,
 };
 use crate::types::{
-    AddressType, ArrayType, FixedSizeArrayType, MappingType, MetaType, Number, TupleType, Type,
-    UserMetaType,
+    AddressType, ArrayType, DataLocation, FixedSizeArrayType, MappingType, MetaType, Number,
+    TupleType, Type, UserMetaType,
 };
 
 impl Visitor for Pass<'_> {
@@ -458,13 +458,15 @@ impl Visitor for Pass<'_> {
                         }
                     }
                     // Indexing a meta-type creates the meta-type of an array,
-                    // eg. the `uint[]` in `abi.decode(data, (uint[]))` or the
-                    // fixed-size `uint[3]`.
+                    // eg. the `uint[]` in `abi.decode(data, (uint[]))`.
                     Type::MetaType(MetaType {
                         type_id: element_type,
                     }) => {
                         let element_type = *element_type;
-                        self.meta_typing_of_array_type_expression(element_type, node)
+                        self.meta_typing_of(Type::Array(ArrayType {
+                            element_type,
+                            location: DataLocation::Memory,
+                        }))
                     }
                     // Indexing a user meta-type likewise creates the meta-type
                     // of an array (eg. `MyStruct[]`).
@@ -472,7 +474,10 @@ impl Visitor for Pass<'_> {
                         let definition_id = *definition_id;
                         if let Some(operand_type) = self.type_of_definition(definition_id) {
                             let element_type = self.types.register_type(operand_type);
-                            self.meta_typing_of_array_type_expression(element_type, node)
+                            self.meta_typing_of(Type::Array(ArrayType {
+                                element_type,
+                                location: DataLocation::Memory,
+                            }))
                         } else {
                             Typing::Unresolved
                         }

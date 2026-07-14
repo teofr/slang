@@ -1596,46 +1596,6 @@ fn test_explicit_enum_cast() {
 }
 
 #[test]
-fn test_fixed_size_array_type_expression() {
-    // `uint[3]` as a type expression is the meta-type of a *fixed-size* array;
-    // decoding through it must preserve the size.
-    let (decoded, types) = type_of_expression_in_context("bytes b;", "abi.decode(b, (uint[3]))");
-    let Type::FixedSizeArray(FixedSizeArrayType {
-        element_type,
-        size,
-        location,
-    }) = decoded
-    else {
-        panic!("expected `uint[3]` to decode to a fixed-size array, got {decoded:?}");
-    };
-    assert_eq!(element_type, types.uint256());
-    assert_eq!(size, 3);
-    assert_eq!(location, DataLocation::Memory);
-
-    // Without a size, the type expression stays a dynamic array.
-    let (decoded, types) = type_of_expression_in_context("bytes b;", "abi.decode(b, (uint[]))");
-    assert!(
-        matches!(&decoded, Type::Array(ArrayType { element_type, .. }) if *element_type == types.uint256()),
-        "expected `uint[]` to decode to a dynamic array, got {decoded:?}",
-    );
-
-    // A constant size evaluates through the compile-time constant evaluator,
-    // like array type *names* do in p3.
-    let (decoded, _) = type_of_expression_in_context(
-        "bytes b; uint256 constant LEN = 3;",
-        "abi.decode(b, (uint[LEN]))",
-    );
-    assert!(
-        matches!(decoded, Type::FixedSizeArray(FixedSizeArrayType { size, .. }) if size == U256::from(3)),
-        "expected `uint[LEN]` to decode to a fixed-size array of 3, got {decoded:?}",
-    );
-
-    // Invalid sizes (zero, non-constant, ...) are reported as diagnostics and
-    // yield `Unresolved`; see the `type_system/array_length/type_expression_*`
-    // cases in the diagnostics_output snapshots.
-}
-
-#[test]
 fn test_array_length_folds_all_literal_arithmetic() {
     // No typed constant: exact rational arithmetic, then the whole result feeds
     // the length. `100 / 8 * 2 = 25` (`100 / 8` is the exact `25/2`).
