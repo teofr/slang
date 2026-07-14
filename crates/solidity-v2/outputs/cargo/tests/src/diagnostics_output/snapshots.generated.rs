@@ -1207,6 +1207,11 @@ mod type_system {
         }
 
         #[test]
+        fn type_expression_not_constant() -> Result<()> {
+            run("type_system/array_length", "type_expression_not_constant")
+        }
+
+        #[test]
         fn valid() -> Result<()> {
             run("type_system/array_length", "valid")
         }

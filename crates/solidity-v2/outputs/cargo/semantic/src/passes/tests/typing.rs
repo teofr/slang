@@ -11,15 +11,16 @@ use slang_solidity_v2_common::versions::LanguageVersion;
 use slang_solidity_v2_ir::ir::{self, NodeIdGenerator};
 
 use super::{build_file, TestFile};
-use crate::binder::{Binder, Definition};
+use crate::binder::{Binder, Definition, Typing};
 use crate::context::{FileNodeMapper, SemanticFile};
 use crate::passes::common::node_id_for_expression_typing;
 use crate::passes::{
     p1_collect_definitions, p2_linearise_contracts, p3_type_definitions, p5_resolve_references,
 };
 use crate::types::{
-    ByteArrayType, BytesType, ContractType, DataLocation, FixedSizeArrayType, IntegerType,
-    LibraryType, LiteralKind, MappingType, StringType, TupleType, Type, TypeId, TypeRegistry,
+    ArrayType, ByteArrayType, BytesType, ContractType, DataLocation, FixedSizeArrayType,
+    IntegerType, LibraryType, LiteralKind, MappingType, StringType, StructType, TupleType, Type,
+    TypeId, TypeRegistry,
 };
 
 struct TypeAnalysis {
@@ -1588,4 +1589,123 @@ fn test_storage_base_slot_evaluation() {
         ),
         (None, Some(StorageLayoutBaseNotConstant.into())),
     );
+}
+
+/// Types a `T[...]` array *type expression* (an index access whose operand is a
+/// meta-type, as in `abi.decode(data, (uint[3]))`) as an expression statement
+/// through the full pipeline, returning the inner array `Type` that the
+/// resulting meta-type denotes (`None` when the typing isn't a meta-type — e.g.
+/// a rejected length yields `Unresolved`) together with any diagnostic emitted.
+fn typed_array_type_expression(
+    context: &str,
+    type_expression: &str,
+) -> (Option<Type>, Option<DiagnosticKind>, TypeRegistry) {
+    let source = format!(
+        r#"
+        contract Test {{
+            {context}
+            function __test() internal {{
+                {type_expression};
+            }}
+        }}
+        "#
+    );
+
+    let TypeAnalysis {
+        file,
+        binder,
+        types,
+        diagnostics,
+    } = analyze_with_diagnostics(LanguageVersion::LATEST, &source);
+
+    let contract = find_contract(&file, "Test");
+    let function = find_function(&contract.members, "__test").expect("__test function not found");
+    let block = function.body.as_ref().expect("__test has a body");
+    let ir::Statement::ExpressionStatement(statement) = &block.statements[0] else {
+        panic!("expected an expression statement");
+    };
+    let node_id =
+        node_id_for_expression_typing(&statement.expression).expect("expression has a typing node");
+    let inner = match binder.node_typing(node_id) {
+        Typing::MetaType(inner) => Some(inner),
+        _ => None,
+    };
+    (inner, diagnostic_kind(&diagnostics), types)
+}
+
+#[test]
+fn test_array_type_expression_lengths() {
+    let uint256 = Type::Integer(IntegerType {
+        is_signed: false,
+        bits: 256,
+    });
+
+    // `uint[]` is a dynamic-array meta-type: `type(uint256[])`.
+    let (inner, diagnostic, types) = typed_array_type_expression("", "uint[]");
+    let Some(Type::Array(ArrayType {
+        element_type,
+        location,
+    })) = inner
+    else {
+        panic!("expected a dynamic array meta-type, got {inner:?}");
+    };
+    assert_eq!(types.get_type_by_id(element_type), &uint256);
+    assert_eq!(location, DataLocation::Memory);
+    assert_eq!(diagnostic, None);
+
+    // `uint[3]` is a fixed-size-array meta-type of the literal length.
+    let (inner, diagnostic, types) = typed_array_type_expression("", "uint[3]");
+    let Some(Type::FixedSizeArray(FixedSizeArrayType {
+        element_type, size, ..
+    })) = inner
+    else {
+        panic!("expected a fixed-size array meta-type, got {inner:?}");
+    };
+    assert_eq!(types.get_type_by_id(element_type), &uint256);
+    assert_eq!(size, U256::from(3));
+    assert_eq!(diagnostic, None);
+
+    // The length is folded through the constant evaluator, exactly like array
+    // type *names* in p3: `uint[LEN]` with `LEN` a constant is `uint256[4]`.
+    let (inner, diagnostic, _types) =
+        typed_array_type_expression("uint256 constant LEN = 2 * 2;", "uint[LEN]");
+    let Some(Type::FixedSizeArray(FixedSizeArrayType { size, .. })) = inner else {
+        panic!("expected a fixed-size array meta-type, got {inner:?}");
+    };
+    assert_eq!(size, U256::from(4));
+    assert_eq!(diagnostic, None);
+
+    // A zero length is rejected with the same diagnostic as a type name.
+    let (inner, diagnostic, _types) = typed_array_type_expression("", "uint[0]");
+    assert_eq!(inner, None);
+    assert_eq!(diagnostic, Some(ArrayLengthZero.into()));
+
+    // A non-constant length (here a non-constant state variable) is rejected as
+    // not constant, rather than silently dropped.
+    let (inner, diagnostic, _types) = typed_array_type_expression("uint256 n;", "uint[n]");
+    assert_eq!(inner, None);
+    assert_eq!(diagnostic, Some(ArrayLengthNotConstant.into()));
+}
+
+#[test]
+fn test_array_type_expression_of_user_defined_type() {
+    // Indexing a user meta-type (a struct name) with a literal length produces a
+    // fixed-size-array meta-type whose element is the struct type.
+    let (inner, diagnostic, types) = typed_array_type_expression("struct S { uint256 x; }", "S[2]");
+    let Some(Type::FixedSizeArray(FixedSizeArrayType {
+        element_type, size, ..
+    })) = inner
+    else {
+        panic!("expected a fixed-size array meta-type, got {inner:?}");
+    };
+    assert!(
+        matches!(
+            types.get_type_by_id(element_type),
+            Type::Struct(StructType { .. })
+        ),
+        "expected the element to be the struct type, got {:?}",
+        types.get_type_by_id(element_type),
+    );
+    assert_eq!(size, U256::from(2));
+    assert_eq!(diagnostic, None);
 }

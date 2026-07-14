@@ -5,11 +5,14 @@ use slang_solidity_v2_ir::ir;
 use super::Pass;
 use crate::binder::{Definition, Resolution, Typing};
 use crate::built_ins::InternalBuiltIn;
-use crate::passes::common::node_id_for_expression_typing;
+use crate::passes::common::constant_evaluator::{
+    classify_array_length, evaluate_compile_time_constant, ConstantResolver,
+};
+use crate::passes::common::{node_id_for_expression_typing, node_location};
 use crate::types::{
-    literals, AddressType, ContractType, DataLocation, EnumType, FixedSizeArrayType, FunctionType,
-    IntegerType, InterfaceType, LibraryType, LiteralKind, Number, StringType, StructType, Type,
-    TypeId, UserDefinedValueType,
+    literals, AddressType, ArrayType, ContractType, DataLocation, EnumType, FixedSizeArrayType,
+    FunctionType, IntegerType, InterfaceType, LibraryType, LiteralKind, Number, StringType,
+    StructType, Type, TypeId, UserDefinedValueType,
 };
 
 impl Pass<'_> {
@@ -40,6 +43,47 @@ impl Pass<'_> {
                     "typing of expression variant not handled and it doesn't have a NodeId",
                 );
                 self.binder.node_typing(node_id)
+            }
+        }
+    }
+
+    /// Builds the meta-typing of an array type expression `T[...]` (an index
+    /// access whose operand is itself a meta-type): `T[]` when there is no
+    /// index, `T[n]` when the index evaluates to a valid compile-time constant
+    /// length, mirroring `resolve_array_length` for array type *names* in p3.
+    /// An invalid length is reported and yields `Unresolved`.
+    pub(super) fn meta_typing_of_array_type_expression(
+        &mut self,
+        element_type: TypeId,
+        node: &ir::IndexAccessExpression,
+    ) -> Typing {
+        let Some(size_expression) = &node.start else {
+            return Typing::MetaType(Type::Array(ArrayType {
+                element_type,
+                location: DataLocation::Memory,
+            }));
+        };
+        let (file_id, range) = node_location(size_expression, self.file_node_mapper);
+        let value = evaluate_compile_time_constant(
+            size_expression,
+            self.current_scope_id(),
+            self.types,
+            &ConstantResolver {
+                binder: self.binder,
+                use_site: Some((&file_id, range.start)),
+            },
+        );
+        match classify_array_length(value) {
+            Ok(size) => Typing::MetaType(Type::FixedSizeArray(FixedSizeArrayType {
+                element_type,
+                size,
+                location: DataLocation::Memory,
+            })),
+            Err((kind, expression)) => {
+                // Report at the failing operation, falling back to the length
+                // expression when the evaluator didn't attach one.
+                self.push_diagnostic(expression.as_ref().unwrap_or(size_expression), kind);
+                Typing::Unresolved
             }
         }
     }
