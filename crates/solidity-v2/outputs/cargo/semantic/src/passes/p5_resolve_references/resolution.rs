@@ -421,7 +421,7 @@ impl Pass<'_> {
     }
 
     /// Emits `kind` located at `node`.
-    fn push_diagnostic(
+    pub(super) fn push_diagnostic(
         &mut self,
         node: &(impl NodeIdentity + TextRange),
         kind: impl Into<DiagnosticKind>,
