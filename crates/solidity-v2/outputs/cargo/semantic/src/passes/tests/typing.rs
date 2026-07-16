@@ -8,12 +8,11 @@ use slang_solidity_v2_common::diagnostics::kinds::type_system::{
 use slang_solidity_v2_common::diagnostics::kinds::DiagnosticKind;
 use slang_solidity_v2_common::diagnostics::DiagnosticCollection;
 use slang_solidity_v2_common::versions::LanguageVersion;
-use slang_solidity_v2_ir::ir::{self, NodeIdGenerator};
+use slang_solidity_v2_ir::ir::{self, NodeIdGenerator, NodeIdentity};
 
 use super::{build_file, TestFile};
 use crate::binder::{Binder, Definition};
 use crate::context::{FileNodeMapper, SemanticFile};
-use crate::passes::common::node_id_for_expression_typing;
 use crate::passes::{
     p1_collect_definitions, p2_linearise_contracts, p3_type_definitions, p5_resolve_references,
 };
@@ -89,7 +88,7 @@ fn recover_expression_type(
     binder: &Binder,
     types: &TypeRegistry,
 ) -> Option<Type> {
-    let node_id = node_id_for_expression_typing(node)?;
+    let node_id = node.node_id()?;
     binder
         .node_typing(node_id)
         .as_type_id()

@@ -1,11 +1,10 @@
 use ruint::aliases::{U160, U256};
 use slang_solidity_v2_common::nodes::NodeId;
-use slang_solidity_v2_ir::ir;
+use slang_solidity_v2_ir::ir::{self, NodeIdentity};
 
 use super::Pass;
 use crate::binder::{Definition, Resolution, Typing};
 use crate::built_ins::InternalBuiltIn;
-use crate::passes::common::node_id_for_expression_typing;
 use crate::types::{
     literals, AddressType, ContractType, DataLocation, EnumType, FixedSizeArrayType, FunctionType,
     IntegerType, InterfaceType, LibraryType, LiteralKind, Number, StringType, StructType, Type,
@@ -36,7 +35,7 @@ impl Pass<'_> {
 
             // By default, query the binder for registered typing information
             _ => {
-                let node_id = node_id_for_expression_typing(node).expect(
+                let node_id = node.node_id().expect(
                     "typing of expression variant not handled and it doesn't have a NodeId",
                 );
                 self.binder.node_typing(node_id)

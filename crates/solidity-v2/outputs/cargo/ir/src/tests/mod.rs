@@ -16,5 +16,6 @@ macro_rules! expect_variant {
 }
 
 mod builder;
+mod node_identity;
 mod text_range;
 mod visitor;

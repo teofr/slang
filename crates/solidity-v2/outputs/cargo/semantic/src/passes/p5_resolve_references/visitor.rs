@@ -1,12 +1,12 @@
 use std::sync::Arc;
 
-use slang_solidity_v2_ir::ir;
 use slang_solidity_v2_ir::ir::visitor::Visitor;
+use slang_solidity_v2_ir::ir::{self, NodeIdentity};
 
 use super::Pass;
 use crate::binder::{Reference, Resolution, Typing};
 use crate::built_ins::InternalBuiltIn;
-use crate::passes::common::{filter_overriden_definitions, node_id_for_string_expression_typing};
+use crate::passes::common::filter_overriden_definitions;
 use crate::types::{
     ArrayType, DataLocation, FixedSizeArrayType, MappingType, Number, TupleType, Type,
 };
@@ -144,7 +144,11 @@ impl Visitor for Pass<'_> {
         let type_id = self
             .types
             .register_type(Self::type_of_string_expression(node));
-        let node_id = node_id_for_string_expression_typing(node);
+        // A `StringExpression` is a non-empty collection of string literals, so
+        // it always resolves to the `NodeId` of its first terminal.
+        let node_id = node
+            .node_id()
+            .expect("string expression always has at least one literal");
         self.binder.set_node_type(node_id, Some(type_id));
     }
 
