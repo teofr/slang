@@ -144,8 +144,6 @@ impl Visitor for Pass<'_> {
         let type_id = self
             .types
             .register_type(Self::type_of_string_expression(node));
-        // A `StringExpression` is a non-empty collection of string literals, so
-        // it always resolves to the `NodeId` of its first terminal.
         let node_id = node
             .node_id()
             .expect("string expression always has at least one literal");
