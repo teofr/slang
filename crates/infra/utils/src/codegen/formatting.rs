@@ -66,6 +66,6 @@ fn run_rustfmt(contents: &str) -> Result<String> {
         .property("--emit", "stdout")
         // Parse as edition 2024 so generated code can use edition-2024 syntax (e.g. let-chains).
         // The formatting style is still governed by `style_edition` in `.rustfmt.toml`.
-        .property("--edition", "2024")
+        .property("--edition", "2024") // __RUST_EDITION_MARKER__ (keep in sync)
         .evaluate_with_input(contents)
 }
