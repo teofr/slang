@@ -165,30 +165,39 @@ impl<'a> BuiltInsResolver<'a> {
                 "origin" => Some(InternalBuiltIn::TxOrigin),
                 _ => None,
             },
-            InternalBuiltIn::Type(type_id) => match self.types.get_type_by_id(*type_id) {
-                Type::Contract(_) | Type::Library(_) => match symbol {
-                    "name" => Some(InternalBuiltIn::TypeName),
-                    "creationCode" => Some(InternalBuiltIn::TypeCreationCode),
-                    "runtimeCode" => Some(InternalBuiltIn::TypeRuntimeCode),
+            InternalBuiltIn::Type(meta_type_id) => {
+                // `Type(..)` carries the meta-type of the underlying type (so the
+                // `type(T)` expression has a type); unwrap it to inspect `T`.
+                let Type::MetaType(MetaType { type_id }) = self.types.get_type_by_id(*meta_type_id)
+                else {
+                    return None;
+                };
+                let type_id = *type_id;
+                match self.types.get_type_by_id(type_id) {
+                    Type::Contract(_) | Type::Library(_) => match symbol {
+                        "name" => Some(InternalBuiltIn::TypeName),
+                        "creationCode" => Some(InternalBuiltIn::TypeCreationCode),
+                        "runtimeCode" => Some(InternalBuiltIn::TypeRuntimeCode),
+                        _ => None,
+                    },
+                    Type::Interface(_) => match symbol {
+                        "name" => Some(InternalBuiltIn::TypeName),
+                        "interfaceId" => Some(InternalBuiltIn::TypeInterfaceId),
+                        _ => None,
+                    },
+                    Type::Enum(_) => match symbol {
+                        "min" => Some(InternalBuiltIn::TypeEnumMin(type_id)),
+                        "max" => Some(InternalBuiltIn::TypeEnumMax(type_id)),
+                        _ => None,
+                    },
+                    Type::Integer(_) => match symbol {
+                        "min" => Some(InternalBuiltIn::TypeMin(type_id)),
+                        "max" => Some(InternalBuiltIn::TypeMax(type_id)),
+                        _ => None,
+                    },
                     _ => None,
-                },
-                Type::Interface(_) => match symbol {
-                    "name" => Some(InternalBuiltIn::TypeName),
-                    "interfaceId" => Some(InternalBuiltIn::TypeInterfaceId),
-                    _ => None,
-                },
-                Type::Enum(_) => match symbol {
-                    "min" => Some(InternalBuiltIn::TypeEnumMin(*type_id)),
-                    "max" => Some(InternalBuiltIn::TypeEnumMax(*type_id)),
-                    _ => None,
-                },
-                Type::Integer(_) => match symbol {
-                    "min" => Some(InternalBuiltIn::TypeMin(*type_id)),
-                    "max" => Some(InternalBuiltIn::TypeMax(*type_id)),
-                    _ => None,
-                },
-                _ => None,
-            },
+                }
+            }
             InternalBuiltIn::Msg => match symbol {
                 "data" => Some(InternalBuiltIn::MsgData),
                 "sender" => Some(InternalBuiltIn::MsgSender),
