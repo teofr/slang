@@ -16,13 +16,18 @@ use crate::test_case::{IsolTestCase, parse_evm_target_name, resolve_evm_target};
 
 /// The result of running `slang` against a single semantic test.
 pub enum Outcome {
-    /// `slang` compiled the test with no error diagnostics.
+    /// `slang` compiled the test with no error diagnostics, and every in-scope
+    /// node was assigned a type.
     Passed,
     /// The test was not compiled cleanly. Either `slang` emitted error
     /// diagnostics, or the harness couldn't turn the file into a compilable set
     /// of sources (unparseable `isoltest` file, a missing `ExternalSource`
     /// fixture, or no sources at all). Holds human-readable detail.
     Failed { diagnostics: Vec<String> },
+    /// The test compiled cleanly, but some in-scope nodes have no type (i.e.
+    /// their `get_type()` returned `None`). Holds one rendered description per
+    /// untyped node — see `type_coverage`.
+    Untyped { nodes: Vec<String> },
 }
 
 /// Parses and runs a single semantic test file located at `test_path`, pinned
@@ -74,7 +79,13 @@ fn run_test_case(test_case: &IsolTestCase, language_version: LanguageVersion) ->
     let diagnostics = unit.diagnostics();
 
     if diagnostics.is_empty() {
-        return Outcome::Passed;
+        // Compiled cleanly — now check that every in-scope node has a type.
+        let untyped = crate::type_coverage::untyped_nodes(&unit);
+        return if untyped.is_empty() {
+            Outcome::Passed
+        } else {
+            Outcome::Untyped { nodes: untyped }
+        };
     }
 
     let rendered = diagnostics

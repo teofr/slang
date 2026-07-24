@@ -11,3 +11,4 @@ pub mod baseline;
 pub mod dataset;
 pub mod runner;
 pub mod test_case;
+pub mod type_coverage;

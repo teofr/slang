@@ -2,8 +2,11 @@
 
 Runs **slang (v2)** against `solc`'s own [`libsolidity` semantic test
 suite](https://github.com/argotorg/solidity/tree/develop/test/libsolidity/semanticTests),
-checking that all of this **valid** Solidity still compiles without slang
-emitting any error diagnostics.
+checking two things about this **valid** Solidity:
+
+1. **It still compiles** without slang emitting any error diagnostics.
+2. **Every in-scope node is typed** — i.e. `get_type()` returns `Some(_)` for
+   each expression and typed declaration (see "Type coverage" below).
 
 It does this for **every Solidity version slang v2 supports** (0.8.0 up to the
 latest): for each version it downloads the semantic tests from that version's
@@ -21,6 +24,12 @@ guarantees compiles (they are runtime-behavior tests; every source in the suite
 compiles successfully under `solc`). Running slang against them and asserting
 "no errors" is therefore a cheap, high-signal guard against over-eager
 validations.
+
+The same corpus doubles as a **type-coverage** guard. slang's typing is being
+filled in incrementally, so beyond "does it compile" we also track, per node,
+whether slang assigned it a type. This turns any accidental loss of type
+coverage (a node that used to be typed and now isn't) into a caught regression,
+and lets forward progress show up as the untyped baseline shrinking.
 
 ## Usage
 
@@ -41,22 +50,23 @@ CI=1 infra verify
 ```
 
 Each `(version, test)` pair is a separate test case, so a run fails if any test
-**regresses** (fails without being in the baseline) or if the baseline is
-**stale** (a listed pair now passes). This is what makes it a CI regression
+**regresses** (does worse than its baseline records) or if a baseline is
+**stale** (a listed pair now does better). This is what makes it a CI regression
 guard.
 
 ### Baseline update mode
 
 Like the repo's other snapshot tests, the mode is chosen by the `CI` env var:
 
-- **In CI** (`CI` set) the cases **check** against the committed baseline and
+- **In CI** (`CI` set) the cases **check** against the committed baselines and
   the run fails on any drift.
-- **Run locally** (`CI` unset) the cases instead **rewrite** the baseline
-  (`expected-failures.json`), and the fetch step re-pins `pinned-commits.json`.
+- **Run locally** (`CI` unset) the cases instead **rewrite** the baselines
+  (`expected-failures.json` and `expected-untyped.json`), and the fetch step
+  re-pins `pinned-commits.json`.
 
-So after intentionally changing which tests pass (a new validation, a parser
-fix, a version bump), just run `infra verify solc-semantic-suite` locally and commit
-the regenerated files.
+So after intentionally changing which tests pass or which nodes are typed (a new
+validation, a parser fix, a typing improvement, a version bump), just run
+`infra verify solc-semantic-suite` locally and commit the regenerated files.
 
 ## How it works
 
@@ -102,11 +112,36 @@ runners, and the whole matrix runs in-process in seconds.
    compiles with the slang v2 `CompilationBuilder` pinned to that language
    version and the resolved EVM target (the `EVMVersion` setting if present,
    else that version's default), resolving imports with the shared
-   `solidity_testing_utils` `ImportResolver`. The case **passes** iff slang's
-   result (clean / has-errors) matches the baseline for that `(version, test)`.
-4. **Baseline** — in CI (checking) each case is compared to the baseline.
-   Outside CI (update mode) the cases instead rewrite `expected-failures.json`,
-   and the fetch step re-pins `pinned-commits.json` (see "Baseline update mode").
+   `solidity_testing_utils` `ImportResolver`. Each case has one of three
+   outcomes: it **compiles cleanly and is fully typed** (a pass), it **fails to
+   compile**, or it **compiles but has untyped nodes** (see "Type coverage"). It
+   passes iff its outcome matches the two baselines for that `(version, test)`.
+4. **Baseline** — in CI (checking) each case is compared to the baselines.
+   Outside CI (update mode) the cases instead rewrite `expected-failures.json`
+   and `expected-untyped.json`, and the fetch step re-pins `pinned-commits.json`
+   (see "Baseline update mode").
+
+### Type coverage
+
+For a test that compiles cleanly, the harness then walks its AST and checks that
+every **in-scope** node has a type (`get_type()` is `Some(_)`). "In scope" is
+**expression nodes plus typed declarations** (parameters, state variables,
+constants, and variable declarations) — the positions that semantically carry a
+type. Statements, pragmas, and other structural nodes have no type by design and
+are ignored (see `src/type_coverage.rs`).
+
+Expressions are collected through the AST visitor's enum-level
+`enter_expression` hook, so identifiers appearing as _definition names_ (a
+contract/function/struct name — the same `Identifier` node, but not an
+expression) are correctly excluded; only identifiers used as references are
+checked. Two expression variants (`StringExpression` and an `ElementaryType`
+used as an expression) are skipped, as they wrap terminal lists with no single
+text range — see the module docs.
+
+A test with any untyped in-scope node lands in `expected-untyped.json` (keyed by
+version, same shape as `expected-failures.json`). The two baselines are disjoint:
+a test that doesn't compile is only in the failures baseline; one that compiles
+but isn't fully typed is only in the untyped baseline.
 
 ## Design decisions
 
@@ -138,6 +173,12 @@ runners, and the whole matrix runs in-process in seconds.
   current known gaps and turns the check into a **regression detector**: it only
   fails on _new_ breakage. When slang improves, re-running the suite locally
   shrinks the list.
+- **Two disjoint baselines, one for each dimension.** Compilation failures live
+  in `expected-failures.json` and type-coverage gaps in `expected-untyped.json`,
+  rather than one combined file. They track independent kinds of "not there
+  yet", so keeping them separate keeps each diff readable (a typing improvement
+  churns only the untyped baseline) and makes the two guards legible on their
+  own. A test is in at most one of them.
 
 ## Known limitations / potential problems
 
@@ -173,13 +214,21 @@ to be aware of:
    access the first time; afterwards the extracted trees are reused from the
    `target/` cache.
 
-## What the current baseline tells us
+## What the current baselines tell us
 
 Across all supported versions (0.8.0–0.8.36) this runs ~51k (version, test)
-combinations. The baseline currently holds **342 failing (version, test)
-pairs**, spanning **16 distinct tests** — every one a place where slang v2
-rejects valid Solidity today. They cluster into a few themes: inline-assembly
-target/version-gated builtins (and builtin-vs-identifier shadowing),
-aliased-import free-function overload sets, `block` members across the Paris
-fork (`difficulty`/`prevrandao`), and the experimental-Solidity tests (which use
-a language slang doesn't implement).
+combinations.
+
+The **failures** baseline holds **342 failing (version, test) pairs**, spanning
+**16 distinct tests** — every one a place where slang v2 rejects valid Solidity
+today. They cluster into a few themes: inline-assembly target/version-gated
+builtins (and builtin-vs-identifier shadowing), aliased-import free-function
+overload sets, `block` members across the Paris fork
+(`difficulty`/`prevrandao`), and the experimental-Solidity tests (which use a
+language slang doesn't implement).
+
+The **untyped** baseline holds **24,088 (version, test) pairs** (of the ~51k
+that compile cleanly), spanning **994 distinct tests** — each a test with at
+least one in-scope node slang doesn't yet type. Roughly half of the
+cleanly-compiling corpus is already fully typed; the rest is the current
+type-coverage frontier, expected to shrink as slang's typing pass grows.

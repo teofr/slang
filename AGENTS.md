@@ -147,13 +147,18 @@ Then commit the updated snapshots alongside your code change.
 `infra verify` (specifically `infra verify solc-semantic-suite`) runs slang v2
 against solc's `libsolidity` semanticTests (a large corpus of known-valid
 Solidity) to catch new validations that accidentally reject valid code. It runs
-in CI as a step after `infra test`. The set of currently-failing tests is
-tracked in `crates/solidity-v2/testing/solc-comparison/expected-failures.json`.
-Like the other snapshot tests, the mode is chosen by the `CI` env var: in CI it
-checks against the committed baseline, run locally it regenerates it. So if you
-intentionally change which tests pass (add a validation, fix the parser, bump
-the supported version), just run `infra verify solc-semantic-suite` locally and
-commit the regenerated `expected-failures.json` / `pinned-commits.json`.
+in CI as a step after `infra test`. It tracks **two** disjoint baselines, both
+keyed by version: `expected-failures.json` (tests that don't compile cleanly)
+and `expected-untyped.json` (tests that compile but have in-scope nodes slang
+doesn't yet type — every expression and typed declaration whose `get_type()` is
+`None`; see `src/type_coverage.rs`). Both live under
+`crates/solidity-v2/testing/solc-comparison/`. Like the other snapshot tests,
+the mode is chosen by the `CI` env var: in CI it checks against the committed
+baselines, run locally it regenerates them. So if you intentionally change which
+tests pass or which nodes are typed (add a validation, fix the parser, improve
+typing, bump the supported version), just run `infra verify solc-semantic-suite`
+locally and commit the regenerated `expected-failures.json` /
+`expected-untyped.json` / `pinned-commits.json`.
 
 ### V2 Snapshot `.tests.config.json`
 

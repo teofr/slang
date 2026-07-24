@@ -11,31 +11,41 @@ use slang_solidity_v2_common::collections::{SortedMap, SortedSet};
 use slang_solidity_v2_common::versions::LanguageVersion;
 
 const CRATE_NAME: &str = "solidity_testing_solc_comparison";
-const EXPECTED_FAILURES_FILE: &str = "expected-failures.json";
 
-/// The set of tests expected to currently fail, grouped by the Solidity version
-/// they fail at.
+/// Tests that don't compile cleanly under slang v2 (see [`Baseline::load`]).
+pub const EXPECTED_FAILURES_FILE: &str = "expected-failures.json";
+/// Tests that compile cleanly but have in-scope nodes slang doesn't yet type
+/// (see `type_coverage`).
+pub const EXPECTED_UNTYPED_FILE: &str = "expected-untyped.json";
+
+/// A set of tests expected to be in a particular non-clean state, grouped by
+/// the Solidity version they're in that state at.
 #[derive(Default, Serialize, Deserialize)]
 #[serde(transparent)]
 pub struct Baseline {
+    #[serde(skip)]
+    file_name: &'static str,
     failures: SortedMap<LanguageVersion, SortedSet<String>>,
 }
 
 impl Baseline {
-    /// Loads the checked-in baseline. The file is committed to the repo, so its
+    /// Loads the checked-in baseline named `file_name` (e.g.
+    /// [`EXPECTED_FAILURES_FILE`]). The file is committed to the repo, so its
     /// absence is a real error (a broken checkout or a wrong working directory)
     /// rather than an empty baseline — a silent default would turn every
     /// expected failure into a spurious regression.
-    pub fn load() -> Result<Self> {
-        let path = expected_failures_path()?;
+    pub fn load(file_name: &'static str) -> Result<Self> {
+        let path = baseline_path(file_name)?;
         let contents = path
             .read_to_string()
             .with_context(|| format!("failed to read the checked-in baseline at {path:?}"))?;
-        Ok(serde_json::from_str(&contents)?)
+        let mut baseline: Self = serde_json::from_str(&contents)?;
+        baseline.file_name = file_name;
+        Ok(baseline)
     }
 
-    /// Whether `test_path` is expected to fail at `version`.
-    pub fn is_expected_failure(&self, version: LanguageVersion, test_path: &str) -> bool {
+    /// Whether `test_path` is recorded for `version` in this baseline.
+    pub fn contains(&self, version: LanguageVersion, test_path: &str) -> bool {
         self.failures
             .get(&version)
             .is_some_and(|paths| paths.contains(test_path))
@@ -73,12 +83,13 @@ impl Baseline {
         Ok(())
     }
 
-    /// Serializes the baseline to `expected-failures.json`, holding an exclusive
-    /// file lock across the truncate-and-rewrite (the same `File::lock` the solc
-    /// binary cache uses) so a concurrent writer waits rather than corrupting
-    /// the file. The lock is released when `file` is dropped.
+    /// Serializes the baseline back to the file it was loaded from, holding an
+    /// exclusive file lock across the truncate-and-rewrite (the same
+    /// `File::lock` the solc binary cache uses) so a concurrent writer waits
+    /// rather than corrupting the file. The lock is released when `file` is
+    /// dropped.
     fn write_locked(&self) -> Result<()> {
-        let path = expected_failures_path()?;
+        let path = baseline_path(self.file_name)?;
         let mut file = OpenOptions::new()
             .create(true)
             .write(true)
@@ -97,13 +108,12 @@ impl Baseline {
     }
 }
 
-/// Path to the checked-in baseline, located via the shared cargo-workspace
-/// helper (which resolves the crate's source directory from the workspace
-/// manifest).
-fn expected_failures_path() -> Result<PathBuf> {
+/// Path to a checked-in baseline, located via the shared cargo-workspace helper
+/// (which resolves the crate's source directory from the workspace manifest).
+fn baseline_path(file_name: &str) -> Result<PathBuf> {
     static CRATE_DIR: LazyLock<Result<PathBuf, String>> = LazyLock::new(|| {
         CargoWorkspace::locate_source_crate(CRATE_NAME).map_err(|e| e.to_string())
     });
     let crate_dir = CRATE_DIR.as_ref().map_err(|e| anyhow::anyhow!("{e}"))?;
-    Ok(crate_dir.join(EXPECTED_FAILURES_FILE))
+    Ok(crate_dir.join(file_name))
 }

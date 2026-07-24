@@ -28,4 +28,5 @@ documentation/overrides/**/*.html
 # Generated solc-comparison baseline (rewritten verbatim by `infra verify
 # solc-comparison` via serde_json, whose array formatting differs from Prettier)
 crates/solidity/testing/solc-comparison/expected-failures.json
+crates/solidity/testing/solc-comparison/expected-untyped.json
 crates/solidity/testing/solc-comparison/pinned-commits.json
