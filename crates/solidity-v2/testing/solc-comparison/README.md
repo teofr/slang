@@ -143,6 +143,16 @@ version, same shape as `expected-failures.json`). The two baselines are disjoint
 a test that doesn't compile is only in the failures baseline; one that compiles
 but isn't fully typed is only in the untyped baseline.
 
+To see _what_ is still untyped (rather than just which tests), run:
+
+```sh
+infra verify solc-comparison --stats
+```
+
+This walks the whole corpus and prints the untyped nodes tallied by node kind
+(e.g. `Identifier`, `MemberAccessExpression`) — an on-demand view of the
+type-coverage frontier, not part of the checked baseline.
+
 ## Design decisions
 
 - **slang v2, not v1.** The semantic validations under active development live

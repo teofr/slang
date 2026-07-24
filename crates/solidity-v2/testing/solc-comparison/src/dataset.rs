@@ -34,6 +34,8 @@ pub fn cache_dir() -> PathBuf {
 
 /// A local, on-disk copy of the `libsolidity` semantic tests for one version.
 pub struct Dataset {
+    /// Root directory containing the extracted `semanticTests` tree.
+    root: PathBuf,
     /// The Solidity version these tests come from.
     version: LanguageVersion,
     /// The commit the tag resolved to when fetched (from the tarball's
@@ -68,6 +70,7 @@ impl Dataset {
                 );
             }
             return Ok(Self {
+                root,
                 version,
                 commit_sha,
             });
@@ -105,9 +108,14 @@ impl Dataset {
         sha_path.write_string(&commit_sha)?;
 
         Ok(Self {
+            root,
             version,
             commit_sha,
         })
+    }
+
+    pub fn root(&self) -> &Path {
+        &self.root
     }
 
     pub fn version(&self) -> LanguageVersion {
@@ -116,6 +124,18 @@ impl Dataset {
 
     pub fn commit_sha(&self) -> &str {
         &self.commit_sha
+    }
+
+    /// Enumerates all standalone semantic test files, as paths relative to the
+    /// `semanticTests` root (e.g. `various/erc20.sol`), sorted for determinism.
+    /// Fixture files under `_`-prefixed directories (referenced via
+    /// `ExternalSource`) are not standalone tests and are excluded.
+    pub fn test_files(&self) -> Result<Vec<String>> {
+        let mut tests = Vec::new();
+        collect_sol_files(&self.root, &self.root, &mut tests)?;
+        tests.retain(|path| !is_fixture_path(path));
+        tests.sort();
+        Ok(tests)
     }
 }
 
@@ -315,6 +335,30 @@ fn strip_to_semantic_tests(path: &Path) -> Option<PathBuf> {
     } else {
         Some(PathBuf::from(relative))
     }
+}
+
+fn collect_sol_files(base: &Path, dir: &Path, out: &mut Vec<String>) -> Result<()> {
+    for entry in fs::read_dir(dir).with_context(|| format!("Failed to read directory: {dir:?}"))? {
+        let entry = entry?;
+        let path = entry.path();
+        if path.is_dir() {
+            collect_sol_files(base, &path, out)?;
+        } else if path.extension().is_some_and(|ext| ext == "sol") {
+            let relative = path
+                .strip_prefix(base)
+                .with_context(|| format!("Path {path:?} is not under {base:?}"))?;
+            out.push(relative.to_str().context("Non-UTF-8 test path")?.to_owned());
+        }
+    }
+    Ok(())
+}
+
+/// Fixture files (referenced via `ExternalSource`) live in directories prefixed
+/// with `_`, and shouldn't be run as standalone tests.
+fn is_fixture_path(relative_path: &str) -> bool {
+    relative_path
+        .split('/')
+        .any(|segment| segment.starts_with('_'))
 }
 
 #[cfg(test)]

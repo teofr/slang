@@ -17,7 +17,10 @@ impl VerifyController {
     #[allow(clippy::unnecessary_wraps)]
     pub fn execute(&self) -> Result<()> {
         match &self.command {
-            Some(VerifyCommand::SolcSemanticSuite { passthrough }) => {
+            Some(VerifyCommand::SolcSemanticSuite { stats: true, .. }) => {
+                solc_semantic_suite_stats();
+            }
+            Some(VerifyCommand::SolcSemanticSuite { passthrough, .. }) => {
                 verify_solc_semantic_suite(passthrough);
             }
             None => verify_solc_semantic_suite(std::iter::empty::<String>()),
@@ -35,6 +38,10 @@ enum VerifyCommand {
     /// Downloads an external dataset (solc's own semantic tests) and guards
     /// against new validations in slang accidentally rejecting valid code.
     SolcSemanticSuite {
+        /// Instead of running the suite, print a breakdown of the nodes slang
+        /// leaves untyped across the whole corpus, tallied by node kind.
+        #[arg(long)]
+        stats: bool,
         #[arg(
             trailing_var_arg = true,
             help = "Passthrough arguments forwarded to `cargo test`."
@@ -66,5 +73,19 @@ fn verify_solc_semantic_suite(passthrough: impl IntoIterator<Item = impl Into<St
         .arg("--")
         .flag("--quiet")
         .args(passthrough)
+        .run();
+}
+
+fn solc_semantic_suite_stats() {
+    Terminal::step("verify solc-semantic-suite --stats");
+
+    // Reuses the same cached `target/` artifacts as the suite (debug profile),
+    // so this only rebuilds the small `stats` binary. It walks the whole corpus
+    // and tallies untyped nodes by kind — an on-demand view of the type-coverage
+    // frontier, not part of the checked baseline.
+    Command::new("cargo")
+        .arg("run")
+        .property("--package", SOLC_COMPARISON_CRATE)
+        .property("--bin", "stats")
         .run();
 }

@@ -10,5 +10,6 @@ use datatest_stable as _;
 pub mod baseline;
 pub mod dataset;
 pub mod runner;
+pub mod stats;
 pub mod test_case;
 pub mod type_coverage;

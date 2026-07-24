@@ -23,7 +23,7 @@
 
 use std::ops::Range;
 
-use slang_solidity_v2::ast::visitor::{accept_source_unit, Visitor};
+use slang_solidity_v2::ast::visitor::{Visitor, accept_source_unit};
 use slang_solidity_v2::ast::{
     ConstantDefinition, Expression, Parameter, StateVariableDefinition, VariableDeclaration,
 };
