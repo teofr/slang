@@ -17,9 +17,9 @@ use crate::passes::{
     p5_resolve_references, p6_resolve_yul, p7_code_analysis,
 };
 use crate::types::{
-    ArrayType, ByteArrayType, ContractType, EnumType, FixedPointNumberType, FixedSizeArrayType,
-    IntegerType, InterfaceType, LibraryType, MappingType, MetaType, StructType, TupleType, Type,
-    TypeId, TypeRegistry, UserDefinedValueType, UserMetaType,
+    ArraySliceType, ArrayType, ByteArrayType, ContractType, EnumType, FixedPointNumberType,
+    FixedSizeArrayType, IntegerType, InterfaceType, LibraryType, MappingType, MetaType, StructType,
+    TupleType, Type, TypeId, TypeRegistry, UserDefinedValueType, UserMetaType,
 };
 
 mod contract_data;
@@ -240,6 +240,10 @@ impl SemanticContext {
                     element = self.type_internal_name(*element_type)
                 )
             }
+            // A slice ABI-encodes exactly like the array it slices.
+            Type::ArraySlice(ArraySliceType { array_type_id }) => {
+                self.type_internal_name(*array_type_id)
+            }
             Type::Boolean => "bool".to_string(),
             Type::ByteArray(ByteArrayType { width }) => format!("bytes{width}"),
             Type::Bytes(_) => "bytes".to_string(),
@@ -329,6 +333,8 @@ impl SemanticContext {
             Type::Mapping(_) => Some(Slots(U256::from(1))),
 
             Type::Array(_) => Some(Slots(U256::from(1))),
+            // A calldata slice is never stored, so it has no storage size.
+            Type::ArraySlice(_) => None,
             Type::FixedSizeArray(FixedSizeArrayType {
                 element_type, size, ..
             }) => Some(Slots(

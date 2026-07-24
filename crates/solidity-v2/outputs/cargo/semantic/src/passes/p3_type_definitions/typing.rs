@@ -175,7 +175,10 @@ impl Pass<'_> {
         loop {
             match self.types.get_type_by_id(return_type) {
                 // scalar types
-                Type::Address(_)
+                // A calldata slice can't be a state-variable type, so it never
+                // reaches a getter; treat it as a terminal like other scalars.
+                Type::ArraySlice(_)
+                | Type::Address(_)
                 | Type::Boolean
                 | Type::ByteArray(_)
                 | Type::Contract(_)
