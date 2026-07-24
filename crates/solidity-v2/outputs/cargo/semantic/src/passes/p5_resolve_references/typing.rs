@@ -92,21 +92,16 @@ impl Pass<'_> {
 
         // TODO(validation) SDR[44]: check that both operands are valid for the operator
         // (needs additional parameter or check at the call site)
-        if self
-            .types
-            .implicitly_convertible_to(right_type_id, left_type_id)
-        {
-            Some(left_type_id)
-        } else if self
-            .types
-            .implicitly_convertible_to(left_type_id, right_type_id)
-        {
-            Some(right_type_id)
-        } else {
-            // TODO(validation) SDR[43]: the types are not compatible, we should
-            // emit an error, or signal our caller
-            None
-        }
+        //
+        // Otherwise the result is the common type of the operands. This uses the
+        // *mobile* type of each side rather than the raw types, which is what
+        // lets a literal widen against a typed operand: `0x1000 + i` (with `i:
+        // uint8`) types as `uint16` — the literal's mobile type — because `uint8`
+        // converts into it, even though `int_const 4096` does not fit `uint8`.
+        //
+        // TODO(validation) SDR[43]: a `None` here means the types are not
+        // compatible; we should emit an error, or signal our caller.
+        self.types.common_type(left_type_id, right_type_id)
     }
 
     pub(super) fn type_of_prefix_expression(
