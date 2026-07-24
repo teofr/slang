@@ -1,0 +1,376 @@
+{
+  "V0_8_0": [
+    "constructor/function_usage_in_constructor_arguments.sol",
+    "multiSource/free_different_interger_types.sol",
+    "multiSource/free_function_transitive_import.sol",
+    "virtualFunctions/virtual_function_usage_in_constructor_arguments.sol"
+  ],
+  "V0_8_1": [
+    "constructor/function_usage_in_constructor_arguments.sol",
+    "multiSource/free_different_interger_types.sol",
+    "multiSource/free_function_transitive_import.sol",
+    "virtualFunctions/virtual_function_usage_in_constructor_arguments.sol"
+  ],
+  "V0_8_2": [
+    "constructor/function_usage_in_constructor_arguments.sol",
+    "multiSource/free_different_interger_types.sol",
+    "multiSource/free_function_transitive_import.sol",
+    "virtualFunctions/virtual_function_usage_in_constructor_arguments.sol"
+  ],
+  "V0_8_3": [
+    "constructor/function_usage_in_constructor_arguments.sol",
+    "multiSource/free_different_interger_types.sol",
+    "multiSource/free_function_transitive_import.sol",
+    "virtualFunctions/virtual_function_usage_in_constructor_arguments.sol"
+  ],
+  "V0_8_4": [
+    "constructor/function_usage_in_constructor_arguments.sol",
+    "multiSource/free_different_interger_types.sol",
+    "multiSource/free_function_transitive_import.sol",
+    "virtualFunctions/virtual_function_usage_in_constructor_arguments.sol"
+  ],
+  "V0_8_5": [
+    "constructor/function_usage_in_constructor_arguments.sol",
+    "multiSource/free_different_interger_types.sol",
+    "multiSource/free_function_transitive_import.sol",
+    "virtualFunctions/virtual_function_usage_in_constructor_arguments.sol"
+  ],
+  "V0_8_6": [
+    "constructor/function_usage_in_constructor_arguments.sol",
+    "multiSource/free_different_interger_types.sol",
+    "multiSource/free_function_transitive_import.sol",
+    "virtualFunctions/virtual_function_usage_in_constructor_arguments.sol"
+  ],
+  "V0_8_7": [
+    "constructor/function_usage_in_constructor_arguments.sol",
+    "inlineAssembly/basefee_berlin_function.sol",
+    "multiSource/free_different_interger_types.sol",
+    "multiSource/free_function_transitive_import.sol",
+    "virtualFunctions/virtual_function_usage_in_constructor_arguments.sol"
+  ],
+  "V0_8_8": [
+    "constructor/function_usage_in_constructor_arguments.sol",
+    "inlineAssembly/basefee_berlin_function.sol",
+    "multiSource/free_different_interger_types.sol",
+    "multiSource/free_function_transitive_import.sol",
+    "virtualFunctions/virtual_function_usage_in_constructor_arguments.sol"
+  ],
+  "V0_8_9": [
+    "constructor/function_usage_in_constructor_arguments.sol",
+    "inlineAssembly/basefee_berlin_function.sol",
+    "multiSource/free_different_interger_types.sol",
+    "multiSource/free_function_transitive_import.sol",
+    "virtualFunctions/virtual_function_usage_in_constructor_arguments.sol"
+  ],
+  "V0_8_10": [
+    "constructor/function_usage_in_constructor_arguments.sol",
+    "inlineAssembly/basefee_berlin_function.sol",
+    "multiSource/free_different_interger_types.sol",
+    "multiSource/free_function_transitive_import.sol",
+    "virtualFunctions/virtual_function_usage_in_constructor_arguments.sol"
+  ],
+  "V0_8_11": [
+    "constructor/function_usage_in_constructor_arguments.sol",
+    "inlineAssembly/basefee_berlin_function.sol",
+    "multiSource/free_different_interger_types.sol",
+    "multiSource/free_function_transitive_import.sol",
+    "virtualFunctions/virtual_function_usage_in_constructor_arguments.sol"
+  ],
+  "V0_8_12": [
+    "constructor/function_usage_in_constructor_arguments.sol",
+    "inlineAssembly/basefee_berlin_function.sol",
+    "multiSource/free_different_interger_types.sol",
+    "multiSource/free_function_transitive_import.sol",
+    "virtualFunctions/virtual_function_usage_in_constructor_arguments.sol"
+  ],
+  "V0_8_13": [
+    "constructor/function_usage_in_constructor_arguments.sol",
+    "inlineAssembly/basefee_berlin_function.sol",
+    "multiSource/free_different_interger_types.sol",
+    "multiSource/free_function_transitive_import.sol",
+    "virtualFunctions/virtual_function_usage_in_constructor_arguments.sol"
+  ],
+  "V0_8_14": [
+    "constructor/function_usage_in_constructor_arguments.sol",
+    "inlineAssembly/basefee_berlin_function.sol",
+    "multiSource/free_different_interger_types.sol",
+    "multiSource/free_function_transitive_import.sol",
+    "virtualFunctions/virtual_function_usage_in_constructor_arguments.sol"
+  ],
+  "V0_8_15": [
+    "constructor/function_usage_in_constructor_arguments.sol",
+    "inlineAssembly/basefee_berlin_function.sol",
+    "multiSource/free_different_interger_types.sol",
+    "multiSource/free_function_transitive_import.sol",
+    "virtualFunctions/virtual_function_usage_in_constructor_arguments.sol"
+  ],
+  "V0_8_16": [
+    "constructor/function_usage_in_constructor_arguments.sol",
+    "inlineAssembly/basefee_berlin_function.sol",
+    "multiSource/free_different_interger_types.sol",
+    "multiSource/free_function_transitive_import.sol",
+    "virtualFunctions/virtual_function_usage_in_constructor_arguments.sol"
+  ],
+  "V0_8_17": [
+    "constructor/function_usage_in_constructor_arguments.sol",
+    "inlineAssembly/basefee_berlin_function.sol",
+    "multiSource/free_different_interger_types.sol",
+    "multiSource/free_function_transitive_import.sol",
+    "virtualFunctions/virtual_function_usage_in_constructor_arguments.sol"
+  ],
+  "V0_8_18": [
+    "constructor/function_usage_in_constructor_arguments.sol",
+    "inlineAssembly/basefee_berlin_function.sol",
+    "multiSource/free_different_interger_types.sol",
+    "multiSource/free_function_transitive_import.sol",
+    "state/block_difficulty_post_paris.sol",
+    "state/block_prevrandao_pre_paris.sol",
+    "virtualFunctions/virtual_function_usage_in_constructor_arguments.sol"
+  ],
+  "V0_8_19": [
+    "constructor/function_usage_in_constructor_arguments.sol",
+    "inlineAssembly/basefee_berlin_function.sol",
+    "multiSource/free_different_interger_types.sol",
+    "multiSource/free_function_transitive_import.sol",
+    "state/block_difficulty_post_paris.sol",
+    "state/block_prevrandao_pre_paris.sol",
+    "virtualFunctions/virtual_function_usage_in_constructor_arguments.sol"
+  ],
+  "V0_8_20": [
+    "constructor/function_usage_in_constructor_arguments.sol",
+    "inlineAssembly/basefee_berlin_function.sol",
+    "multiSource/free_different_interger_types.sol",
+    "multiSource/free_function_transitive_import.sol",
+    "state/block_difficulty_post_paris.sol",
+    "state/block_prevrandao_pre_paris.sol",
+    "virtualFunctions/virtual_function_usage_in_constructor_arguments.sol"
+  ],
+  "V0_8_21": [
+    "constructor/function_usage_in_constructor_arguments.sol",
+    "inlineAssembly/basefee_berlin_function.sol",
+    "multiSource/free_different_interger_types.sol",
+    "multiSource/free_function_transitive_import.sol",
+    "state/block_difficulty_post_paris.sol",
+    "state/block_prevrandao_pre_paris.sol",
+    "virtualFunctions/virtual_function_usage_in_constructor_arguments.sol"
+  ],
+  "V0_8_22": [
+    "constructor/function_usage_in_constructor_arguments.sol",
+    "inlineAssembly/basefee_berlin_function.sol",
+    "multiSource/free_different_interger_types.sol",
+    "multiSource/free_function_transitive_import.sol",
+    "state/block_difficulty_post_paris.sol",
+    "state/block_prevrandao_pre_paris.sol",
+    "virtualFunctions/virtual_function_usage_in_constructor_arguments.sol"
+  ],
+  "V0_8_23": [
+    "constructor/function_usage_in_constructor_arguments.sol",
+    "inlineAssembly/basefee_berlin_function.sol",
+    "multiSource/free_different_interger_types.sol",
+    "multiSource/free_function_transitive_import.sol",
+    "state/block_difficulty_post_paris.sol",
+    "state/block_prevrandao_pre_paris.sol",
+    "virtualFunctions/virtual_function_usage_in_constructor_arguments.sol"
+  ],
+  "V0_8_24": [
+    "constructor/function_usage_in_constructor_arguments.sol",
+    "experimental/stub.sol",
+    "experimental/type_class.sol",
+    "inlineAssembly/basefee_berlin_function.sol",
+    "inlineAssembly/blobbasefee_shanghai_function.sol",
+    "inlineAssembly/blobhash_pre_cancun.sol",
+    "inlineAssembly/mcopy_as_identifier_pre_cancun.sol",
+    "inlineAssembly/tload_tstore_not_reserved_before_cancun.sol",
+    "multiSource/free_different_interger_types.sol",
+    "multiSource/free_function_transitive_import.sol",
+    "state/block_difficulty_post_paris.sol",
+    "state/block_prevrandao_pre_paris.sol",
+    "virtualFunctions/virtual_function_usage_in_constructor_arguments.sol"
+  ],
+  "V0_8_25": [
+    "constructor/function_usage_in_constructor_arguments.sol",
+    "experimental/stub.sol",
+    "experimental/type_class.sol",
+    "inlineAssembly/basefee_berlin_function.sol",
+    "inlineAssembly/blobbasefee_shanghai_function.sol",
+    "inlineAssembly/blobhash_pre_cancun.sol",
+    "inlineAssembly/mcopy_as_identifier_pre_cancun.sol",
+    "inlineAssembly/tload_tstore_not_reserved_before_cancun.sol",
+    "multiSource/free_different_interger_types.sol",
+    "multiSource/free_function_transitive_import.sol",
+    "state/block_difficulty_post_paris.sol",
+    "state/block_prevrandao_pre_paris.sol",
+    "virtualFunctions/virtual_function_usage_in_constructor_arguments.sol"
+  ],
+  "V0_8_26": [
+    "constructor/function_usage_in_constructor_arguments.sol",
+    "experimental/stub.sol",
+    "experimental/type_class.sol",
+    "inlineAssembly/basefee_berlin_function.sol",
+    "inlineAssembly/blobbasefee_shanghai_function.sol",
+    "inlineAssembly/blobhash_pre_cancun.sol",
+    "inlineAssembly/mcopy_as_identifier_pre_cancun.sol",
+    "inlineAssembly/tload_tstore_not_reserved_before_cancun.sol",
+    "multiSource/free_different_interger_types.sol",
+    "multiSource/free_function_transitive_import.sol",
+    "state/block_difficulty_post_paris.sol",
+    "state/block_prevrandao_pre_paris.sol",
+    "virtualFunctions/virtual_function_usage_in_constructor_arguments.sol"
+  ],
+  "V0_8_27": [
+    "constructor/function_usage_in_constructor_arguments.sol",
+    "experimental/stub.sol",
+    "experimental/type_class.sol",
+    "inlineAssembly/basefee_berlin_function.sol",
+    "inlineAssembly/blobbasefee_shanghai_function.sol",
+    "inlineAssembly/blobhash_pre_cancun.sol",
+    "inlineAssembly/mcopy_as_identifier_pre_cancun.sol",
+    "inlineAssembly/tload_tstore_not_reserved_before_cancun.sol",
+    "multiSource/free_different_interger_types.sol",
+    "multiSource/free_function_transitive_import.sol",
+    "state/block_difficulty_post_paris.sol",
+    "state/block_prevrandao_pre_paris.sol",
+    "virtualFunctions/virtual_function_usage_in_constructor_arguments.sol"
+  ],
+  "V0_8_28": [
+    "constructor/function_usage_in_constructor_arguments.sol",
+    "experimental/stub.sol",
+    "experimental/type_class.sol",
+    "inlineAssembly/basefee_berlin_function.sol",
+    "inlineAssembly/blobbasefee_shanghai_function.sol",
+    "inlineAssembly/blobhash_pre_cancun.sol",
+    "inlineAssembly/mcopy_as_identifier_pre_cancun.sol",
+    "inlineAssembly/tload_tstore_not_reserved_before_cancun.sol",
+    "multiSource/free_different_interger_types.sol",
+    "multiSource/free_function_transitive_import.sol",
+    "state/block_difficulty_post_paris.sol",
+    "state/block_prevrandao_pre_paris.sol",
+    "virtualFunctions/virtual_function_usage_in_constructor_arguments.sol"
+  ],
+  "V0_8_29": [
+    "constructor/function_usage_in_constructor_arguments.sol",
+    "experimental/stub.sol",
+    "experimental/type_class.sol",
+    "inlineAssembly/basefee_berlin_function.sol",
+    "inlineAssembly/blobbasefee_shanghai_function.sol",
+    "inlineAssembly/blobhash_pre_cancun.sol",
+    "inlineAssembly/mcopy_as_identifier_pre_cancun.sol",
+    "inlineAssembly/tload_tstore_not_reserved_before_cancun.sol",
+    "multiSource/free_different_interger_types.sol",
+    "multiSource/free_function_transitive_import.sol",
+    "state/block_difficulty_post_paris.sol",
+    "state/block_prevrandao_pre_paris.sol",
+    "virtualFunctions/virtual_function_usage_in_constructor_arguments.sol"
+  ],
+  "V0_8_30": [
+    "constructor/function_usage_in_constructor_arguments.sol",
+    "experimental/stub.sol",
+    "experimental/type_class.sol",
+    "inlineAssembly/basefee_berlin_function.sol",
+    "inlineAssembly/blobbasefee_shanghai_function.sol",
+    "inlineAssembly/blobhash_pre_cancun.sol",
+    "inlineAssembly/mcopy_as_identifier_pre_cancun.sol",
+    "inlineAssembly/tload_tstore_not_reserved_before_cancun.sol",
+    "multiSource/free_different_interger_types.sol",
+    "multiSource/free_function_transitive_import.sol",
+    "state/block_difficulty_post_paris.sol",
+    "state/block_prevrandao_pre_paris.sol",
+    "virtualFunctions/virtual_function_usage_in_constructor_arguments.sol"
+  ],
+  "V0_8_31": [
+    "constructor/function_usage_in_constructor_arguments.sol",
+    "experimental/stub.sol",
+    "experimental/type_class.sol",
+    "inlineAssembly/basefee_berlin_function.sol",
+    "inlineAssembly/blobbasefee_shanghai_function.sol",
+    "inlineAssembly/blobhash_pre_cancun.sol",
+    "inlineAssembly/clz_pre_osaka.sol",
+    "inlineAssembly/mcopy_as_identifier_pre_cancun.sol",
+    "inlineAssembly/tload_tstore_not_reserved_before_cancun.sol",
+    "multiSource/free_different_interger_types.sol",
+    "multiSource/free_function_transitive_import.sol",
+    "state/block_difficulty_post_paris.sol",
+    "state/block_prevrandao_pre_paris.sol",
+    "virtualFunctions/virtual_function_usage_in_constructor_arguments.sol"
+  ],
+  "V0_8_32": [
+    "constructor/function_usage_in_constructor_arguments.sol",
+    "experimental/stub.sol",
+    "experimental/type_class.sol",
+    "inlineAssembly/basefee_berlin_function.sol",
+    "inlineAssembly/blobbasefee_shanghai_function.sol",
+    "inlineAssembly/blobhash_pre_cancun.sol",
+    "inlineAssembly/clz_pre_osaka.sol",
+    "inlineAssembly/mcopy_as_identifier_pre_cancun.sol",
+    "inlineAssembly/tload_tstore_not_reserved_before_cancun.sol",
+    "multiSource/free_different_interger_types.sol",
+    "multiSource/free_function_transitive_import.sol",
+    "state/block_difficulty_post_paris.sol",
+    "state/block_prevrandao_pre_paris.sol",
+    "virtualFunctions/virtual_function_usage_in_constructor_arguments.sol"
+  ],
+  "V0_8_33": [
+    "constructor/function_usage_in_constructor_arguments.sol",
+    "experimental/stub.sol",
+    "experimental/type_class.sol",
+    "inlineAssembly/basefee_berlin_function.sol",
+    "inlineAssembly/blobbasefee_shanghai_function.sol",
+    "inlineAssembly/blobhash_pre_cancun.sol",
+    "inlineAssembly/clz_pre_osaka.sol",
+    "inlineAssembly/mcopy_as_identifier_pre_cancun.sol",
+    "inlineAssembly/tload_tstore_not_reserved_before_cancun.sol",
+    "multiSource/free_different_interger_types.sol",
+    "multiSource/free_function_transitive_import.sol",
+    "state/block_difficulty_post_paris.sol",
+    "state/block_prevrandao_pre_paris.sol",
+    "virtualFunctions/virtual_function_usage_in_constructor_arguments.sol"
+  ],
+  "V0_8_34": [
+    "constructor/function_usage_in_constructor_arguments.sol",
+    "experimental/stub.sol",
+    "experimental/type_class.sol",
+    "inlineAssembly/basefee_berlin_function.sol",
+    "inlineAssembly/blobbasefee_shanghai_function.sol",
+    "inlineAssembly/blobhash_pre_cancun.sol",
+    "inlineAssembly/clz_pre_osaka.sol",
+    "inlineAssembly/mcopy_as_identifier_pre_cancun.sol",
+    "inlineAssembly/tload_tstore_not_reserved_before_cancun.sol",
+    "multiSource/free_different_interger_types.sol",
+    "multiSource/free_function_transitive_import.sol",
+    "state/block_difficulty_post_paris.sol",
+    "state/block_prevrandao_pre_paris.sol",
+    "virtualFunctions/virtual_function_usage_in_constructor_arguments.sol"
+  ],
+  "V0_8_35": [
+    "constructor/function_usage_in_constructor_arguments.sol",
+    "experimental/stub.sol",
+    "experimental/type_class.sol",
+    "inlineAssembly/basefee_berlin_function.sol",
+    "inlineAssembly/blobbasefee_shanghai_function.sol",
+    "inlineAssembly/blobhash_pre_cancun.sol",
+    "inlineAssembly/clz_pre_osaka.sol",
+    "inlineAssembly/mcopy_as_identifier_pre_cancun.sol",
+    "inlineAssembly/tload_tstore_not_reserved_before_cancun.sol",
+    "multiSource/free_different_interger_types.sol",
+    "multiSource/free_function_transitive_import.sol",
+    "state/block_difficulty_post_paris.sol",
+    "state/block_prevrandao_pre_paris.sol",
+    "virtualFunctions/virtual_function_usage_in_constructor_arguments.sol"
+  ],
+  "V0_8_36": [
+    "constructor/function_usage_in_constructor_arguments.sol",
+    "experimental/stub.sol",
+    "experimental/type_class.sol",
+    "inlineAssembly/basefee_berlin_function.sol",
+    "inlineAssembly/blobbasefee_shanghai_function.sol",
+    "inlineAssembly/blobhash_pre_cancun.sol",
+    "inlineAssembly/clz_pre_osaka.sol",
+    "inlineAssembly/mcopy_as_identifier_pre_cancun.sol",
+    "inlineAssembly/tload_tstore_not_reserved_before_cancun.sol",
+    "multiSource/free_different_interger_types.sol",
+    "multiSource/free_function_transitive_import.sol",
+    "state/block_difficulty_post_paris.sol",
+    "state/block_prevrandao_pre_paris.sol",
+    "virtualFunctions/virtual_function_usage_in_constructor_arguments.sol"
+  ]
+}
