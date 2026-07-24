@@ -398,9 +398,10 @@ impl Visitor for Pass<'_> {
                     })
                     .collect(),
             ),
-            Typing::Unresolved | Typing::BuiltIn(_) | Typing::NewExpression(_) | Typing::Super => {
-                typing
-            }
+            Typing::Unresolved
+            | Typing::BuiltIn(_)
+            | Typing::NewExpression(_)
+            | Typing::Super(_) => typing,
         };
 
         // Store the typing
@@ -552,7 +553,20 @@ impl Visitor for Pass<'_> {
     }
 
     fn visit_super_keyword(&mut self, node: &ir::SuperKeyword) {
-        self.binder.set_node_typing(node.id(), Typing::Super);
+        // `super` types as the current contract (like `this`), so it carries a
+        // type; member resolution still walks the linearisation specially (see
+        // `Typing::Super` handling in `resolution`).
+        if let Some(scope_id) = self.current_contract_scope_id() {
+            let node_id = self.binder.get_scope_by_id(scope_id).node_id();
+            let type_ = self
+                .type_of_definition(node_id)
+                .expect("the scope of `super` should be a contract definition");
+            let type_id = self.types.register_type(type_);
+            self.binder
+                .set_node_typing(node.id(), Typing::Super(type_id));
+        }
+        // Otherwise `super` is used outside a contract, which is invalid and
+        // reported elsewhere; leave it unresolved.
     }
 
     fn visit_this_keyword(&mut self, node: &ir::ThisKeyword) {

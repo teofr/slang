@@ -448,7 +448,7 @@ impl Pass<'_> {
         let argument_typings = self.collect_positional_argument_typings(arguments);
 
         match operand_typing {
-            Typing::Unresolved | Typing::This(_) | Typing::Super => {
+            Typing::Unresolved | Typing::This(_) | Typing::Super(_) => {
                 // `this` and `super` are not callable
                 Typing::Unresolved
             }
@@ -606,7 +606,7 @@ impl Pass<'_> {
         let operand_typing = self.typing_of_expression(&node.operand);
 
         let (typing, definition_id) = match operand_typing {
-            Typing::Unresolved | Typing::This(_) | Typing::Super => {
+            Typing::Unresolved | Typing::This(_) | Typing::Super(_) => {
                 // `this` and `super` are not callable
                 (Typing::Unresolved, None)
             }

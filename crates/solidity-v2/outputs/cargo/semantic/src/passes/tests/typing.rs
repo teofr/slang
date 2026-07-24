@@ -1099,7 +1099,12 @@ fn test_super_keyword_types_as_super() {
         }
         "#;
 
-    let TypeAnalysis { file, binder, .. } = analyze(LanguageVersion::LATEST, source);
+    let TypeAnalysis {
+        file,
+        binder,
+        types,
+        ..
+    } = analyze(LanguageVersion::LATEST, source);
 
     let contract = find_contract(&file, "B");
     let function = find_function(&contract.members, "g").expect("g function");
@@ -1119,9 +1124,14 @@ fn test_super_keyword_types_as_super() {
         panic!("expected a super keyword");
     };
 
+    // `super` types as `Typing::Super`, carrying the current contract (`B`) so
+    // it has a type while still using the special member-lookup rules.
+    let Typing::Super(type_id) = binder.node_typing(super_keyword.id()) else {
+        panic!("`super` should be typed as `Typing::Super`");
+    };
     assert!(
-        matches!(binder.node_typing(super_keyword.id()), Typing::Super),
-        "`super` should be typed as `Typing::Super`"
+        matches!(types.get_type_by_id(type_id), Type::Contract(_)),
+        "`super` carries the current contract type"
     );
 }
 

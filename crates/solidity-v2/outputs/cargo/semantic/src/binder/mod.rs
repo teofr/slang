@@ -66,9 +66,11 @@ pub enum Typing {
     /// Typing of the `this` keyword. Resolving a member of `this` requires
     /// special lookup rules.
     This(TypeId),
-    /// Typing of the `super` keyword. Resolving members requires special lookup
-    /// rules.
-    Super,
+    /// Typing of the `super` keyword. Carries the current contract's type (so
+    /// `super` has a type, mirroring `this`); resolving members still requires
+    /// special lookup rules that walk the linearisation above the current
+    /// contract.
+    Super(TypeId),
 }
 
 impl Typing {
@@ -77,6 +79,7 @@ impl Typing {
         match self {
             Self::Resolved(type_id) => Some(*type_id),
             Self::This(type_id) => Some(*type_id),
+            Self::Super(type_id) => Some(*type_id),
             _ => None,
         }
     }
