@@ -1,4 +1,5 @@
 use super::fixtures;
+use crate::ast::visitor::{Visitor, accept_source_unit};
 use crate::{ast, define_fixture};
 
 #[test]
@@ -70,6 +71,58 @@ fn test_function_get_type() {
         function_type
             .associated_definition()
             .is_some_and(|definition| matches!(definition, ast::Definition::Function(_)))
+    );
+}
+
+define_fixture!(
+    MappingKeyValue,
+    file: "main.sol", r#"
+// SPDX-License-Identifier: UNLICENSED
+pragma solidity ^0.8.0;
+
+contract C {
+    mapping(uint256 => bool) m;
+}
+"#,
+);
+
+/// Collects the resolved type of every `Parameter` node (used to reach the
+/// key/value `Parameter`s of a `mapping` type).
+#[derive(Default)]
+struct ParameterTypes {
+    types: Vec<Option<ast::Type>>,
+}
+
+impl Visitor for ParameterTypes {
+    fn enter_parameter(&mut self, node: &ast::Parameter) -> bool {
+        self.types.push(node.get_type());
+        true
+    }
+}
+
+#[test]
+fn test_mapping_key_value_get_type() {
+    let unit = MappingKeyValue::build_compilation_unit();
+
+    // Collect the key/value `Parameter` nodes of the `mapping(uint256 => bool)`
+    // type and check both are typed.
+    let mut finder = ParameterTypes::default();
+    for file in unit.files() {
+        accept_source_unit(&file.ast(), &mut finder);
+    }
+
+    assert_eq!(finder.types.len(), 2, "the mapping has a key and a value");
+    let key = finder.types[0].as_ref().expect("the mapping key is typed");
+    let value = finder.types[1]
+        .as_ref()
+        .expect("the mapping value is typed");
+    assert!(
+        matches!(key, ast::Type::Integer(i) if !i.is_signed() && i.bits() == 256),
+        "the key types as uint256"
+    );
+    assert!(
+        matches!(value, ast::Type::Boolean(_)),
+        "the value types as bool"
     );
 }
 
