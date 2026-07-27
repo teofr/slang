@@ -49,13 +49,23 @@ fn test_new_bytes_and_string_get_type() {
         .map(|t| t.expect("each `new` call has a resolved type"))
         .collect();
     assert_eq!(resolved.len(), 2, "two `new` calls");
-    assert!(
-        matches!(resolved[0], ast::Type::Bytes(_)),
-        "`new bytes(35)` types as bytes"
+
+    let ast::Type::Bytes(bytes) = &resolved[0] else {
+        panic!("`new bytes(35)` should type as bytes");
+    };
+    assert_eq!(
+        bytes.location(),
+        ast::DataLocation::Memory,
+        "`new bytes(35)` is `bytes memory`"
     );
-    assert!(
-        matches!(resolved[1], ast::Type::String(_)),
-        "`new string(4)` types as string"
+
+    let ast::Type::String(string) = &resolved[1] else {
+        panic!("`new string(4)` should type as string");
+    };
+    assert_eq!(
+        string.location(),
+        ast::DataLocation::Memory,
+        "`new string(4)` is `string memory`"
     );
 }
 
