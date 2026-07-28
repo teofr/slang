@@ -22,7 +22,6 @@ slang_solidity = { workspace = true, features = [
 ] }
 solidity_testing_utils = { workspace = true }
 solidity_v2_testing_utils = { workspace = true }
-tar = { workspace = true }
 
 [lints]
 workspace = true

@@ -4,13 +4,13 @@ use std::rc::Rc;
 use std::time::SystemTime;
 
 use anyhow::{Error, Result, anyhow, bail};
+use infra_utils::archives::{ExtractOptions, extract_tarball};
 use infra_utils::cargo::CargoWorkspace;
 use infra_utils::http::{DownloadResult, request_download_if_modified};
 use infra_utils::paths::PathExtensions;
 use semver::{BuildMetadata, Prerelease, Version};
 use slang_solidity::compilation::{CompilationBuilder, CompilationBuilderConfig, CompilationUnit};
 use solidity_testing_utils::import_resolver::{ImportRemap, ImportResolver, SourceMap};
-use tar::Archive;
 
 use crate::command::{ArchiveOptions, ChainId, ShardingOptions};
 
@@ -226,8 +226,7 @@ impl ContractArchive {
                     println!("Downloading shard archive from {url}", url = desc.url);
                     let archive_dir = desc.archive_dir();
 
-                    let mut archive = Archive::new(response);
-                    archive.unpack(&archive_dir)?;
+                    extract_tarball(response, &archive_dir, ExtractOptions::default())?;
 
                     // explicitly touch the contracts path mtime to avoid downloading
                     // again if sufficiently up-to-date

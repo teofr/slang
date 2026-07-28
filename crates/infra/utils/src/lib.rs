@@ -1,3 +1,4 @@
+pub mod archives;
 pub mod cargo;
 pub mod codegen;
 pub mod commands;
