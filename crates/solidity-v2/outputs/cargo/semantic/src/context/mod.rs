@@ -17,9 +17,9 @@ use crate::passes::{
     p5_resolve_references, p6_resolve_yul, p7_code_analysis,
 };
 use crate::types::{
-    ArraySliceType, ArrayType, ByteArrayType, ContractType, EnumType, FixedPointNumberType,
-    FixedSizeArrayType, IntegerType, InterfaceType, LibraryType, MappingType, MetaType, StructType,
-    TupleType, Type, TypeId, TypeRegistry, UserDefinedValueType, UserMetaType,
+    ArrayType, ByteArrayType, ContractType, EnumType, FixedPointNumberType, FixedSizeArrayType,
+    IntegerType, InterfaceType, LibraryType, MappingType, MetaType, StructType, TupleType, Type,
+    TypeId, TypeRegistry, UserDefinedValueType, UserMetaType,
 };
 
 mod contract_data;
@@ -240,9 +240,12 @@ impl SemanticContext {
                     element = self.type_internal_name(*element_type)
                 )
             }
-            // A slice ABI-encodes exactly like the array it slices.
-            Type::ArraySlice(ArraySliceType { array_type_id }) => {
-                self.type_internal_name(*array_type_id)
+            // `type_internal_name` only builds ABI signature strings. A slice
+            // arises solely from a `data[a:b]` expression on a calldata value —
+            // it is never a declarable parameter/state/return type — so it can
+            // never reach an ABI-signature position.
+            Type::ArraySlice(_) => {
+                unreachable!("array slices never appear in ABI signature positions")
             }
             Type::Boolean => "bool".to_string(),
             Type::ByteArray(ByteArrayType { width }) => format!("bytes{width}"),

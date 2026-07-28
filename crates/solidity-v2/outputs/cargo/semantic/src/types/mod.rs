@@ -22,11 +22,6 @@ pub struct TypeId(usize);
 pub enum Type {
     Address(AddressType),
     Array(ArrayType),
-    /// A slice of a dynamically-sized calldata array (`bytes`, `string`, or
-    /// `T[]`), as produced by a range index like `data[1:3]`. Wraps the
-    /// `TypeId` of the underlying array type — it carries no extra data, mirrors
-    /// solc's `ArraySliceType`, and behaves like that array except that it
-    /// prints with a ` slice` suffix and its mobile type is the array itself.
     ArraySlice(ArraySliceType),
     Boolean,
     ByteArray(ByteArrayType),

@@ -441,7 +441,6 @@ impl Visitor for Pass<'_> {
                         }
                     }
                     Type::ByteArray(_) => {
-                        // `bytesN` can be indexed (yielding `bytes1`) but not sliced.
                         if range_access {
                             Typing::Unresolved
                         } else {
@@ -449,18 +448,16 @@ impl Visitor for Pass<'_> {
                         }
                     }
                     Type::Bytes(BytesType { location }) => {
-                        let location = *location;
                         if range_access {
-                            self.slice_typing(operand_type_id, location)
+                            self.slice_typing(operand_type_id, *location)
                         } else {
                             Typing::Resolved(self.types.bytes1())
                         }
                     }
                     Type::String(StringType { location }) => {
-                        let location = *location;
                         if range_access {
                             // `string` can be sliced in calldata, but not indexed.
-                            self.slice_typing(operand_type_id, location)
+                            self.slice_typing(operand_type_id, *location)
                         } else {
                             Typing::Unresolved
                         }

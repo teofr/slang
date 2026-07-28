@@ -17,9 +17,6 @@ use super::Definition;
 pub enum Type {
     Address(AddressType),
     Array(ArrayType),
-    /// A slice of a dynamically-sized calldata array (`bytes`, `string`, or
-    /// `T[]`), produced by a range index like `data[1:3]`. See
-    /// [`ArraySliceType::array_type`] for the array it slices.
     ArraySlice(ArraySliceType),
     Boolean(BooleanType),
     ByteArray(ByteArrayType),
