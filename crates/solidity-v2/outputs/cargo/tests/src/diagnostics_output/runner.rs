@@ -107,6 +107,12 @@ fn status_of(cell: &CellOutcome, name: &str) -> Option<SnapshotStatus> {
         .map(|output| output.status)
 }
 
+/// Unlike the other snapshot kinds, this does one-time setup before handing off
+/// to `run_snapshot`: it resolves the config to learn which solc versions the
+/// matrix will cover, fetches those solc binaries once via `SolcTarget::new`
+/// (a network call that would be wasteful to repeat per cell), and builds the
+/// runner holding both targets and the matrix. The per-cell work lives in
+/// `render`/`finish`.
 pub(crate) fn run(group_name: &str, test_name: &str) -> Result<()> {
     let test_dir = CargoWorkspace::locate_source_crate("solidity_v2_testing_snapshots")?
         .join("diagnostics_output")
