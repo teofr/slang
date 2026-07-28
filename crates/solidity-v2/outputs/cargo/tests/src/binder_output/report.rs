@@ -1,22 +1,12 @@
 use std::fmt::Write;
-use std::ops::Range;
 
 use anyhow::Result;
-use ariadne::{Color, Config, Label, Report, ReportBuilder, ReportKind, Source};
 use slang_solidity_v2::compilation::FileId;
-use slang_solidity_v2::diagnostics::DiagnosticCollection;
-use slang_solidity_v2_common::collections::SortedMap;
-use solidity_v2_testing_utils::reporting::diagnostic;
 
 use super::report_data::{
     CollectedDefinition, CollectedIdentifier, CollectedReference, CollectedResolution, ReportData,
 };
-
-const SEPARATOR: &str =
-    "\n------------------------------------------------------------------------\n";
-
-type Span<'a> = (&'a str, Range<usize>);
-type BuilderType<'a> = ReportBuilder<'a, Span<'a>>;
+use crate::snapshots::render::{SEPARATOR, SourceLabel, annotated_source, report_diagnostics};
 
 pub(crate) fn binder_report(report_data: &'_ ReportData<'_>) -> Result<String> {
     let mut report = String::new();
@@ -30,7 +20,12 @@ pub(crate) fn binder_report(report_data: &'_ ReportData<'_>) -> Result<String> {
     } = report_data;
 
     if !compilation.diagnostics().is_empty() {
-        report_diagnostics(&mut report, compilation.diagnostics(), files)?;
+        report_diagnostics(
+            &mut report,
+            "Parse errors:",
+            compilation.diagnostics(),
+            files,
+        )?;
         writeln!(report, "{SEPARATOR}")?;
     }
 
@@ -104,21 +99,6 @@ fn report_unbound_identifiers(
     Ok(())
 }
 
-fn report_diagnostics(
-    report: &mut String,
-    diagnostics: &DiagnosticCollection,
-    file_contents: &SortedMap<FileId, String>,
-) -> Result<()> {
-    writeln!(report, "Parse errors:")?;
-    for diagnostic in diagnostics {
-        let file_id = diagnostic.file_id();
-        let source = file_contents.get(file_id).cloned().unwrap_or_default();
-        let rendered = diagnostic::render(diagnostic, file_id.as_str(), &source, false);
-        writeln!(report, "{rendered}")?;
-    }
-    Ok(())
-}
-
 fn render_bindings_for_file(
     report: &mut String,
     file_id: &FileId,
@@ -127,23 +107,7 @@ fn render_bindings_for_file(
     all_references: &[CollectedReference],
     unbound_identifiers: &[CollectedIdentifier],
 ) -> Result<()> {
-    let file_id_str = file_id.as_str();
-    let mut builder: BuilderType<'_> =
-        Report::build(ReportKind::Custom("Bindings", Color::Unset), file_id_str, 0)
-            .with_config(Config::default().with_color(false));
-
-    let new_label = |range: &Range<usize>, message: &str| -> Label<Span<'_>> {
-        // ariadne works with character offsets, not byte offsets, so we need to
-        // convert ranges
-        // TODO: the next ariadne release should allow byte offsets (see
-        // https://github.com/NomicFoundation/slang/issues/1536)
-        let char_range = {
-            let start = contents[..range.start].chars().count();
-            let end = contents[..range.end].chars().count();
-            start..end
-        };
-        Label::new((file_id_str, char_range)).with_message(message)
-    };
+    let mut labels: Vec<SourceLabel> = Vec::new();
 
     for definition in all_definitions {
         if definition.identifier.file_id() != file_id {
@@ -154,7 +118,7 @@ fn render_bindings_for_file(
             "name: {definition_id}",
             definition_id = definition.definition_id,
         );
-        builder.add_label(new_label(definition.identifier.range(), &message));
+        labels.push((definition.identifier.range().clone(), message));
     }
 
     for reference in all_references {
@@ -169,7 +133,7 @@ fn render_bindings_for_file(
                 format!("ref: {definition_id}")
             }
         };
-        builder.add_label(new_label(reference.identifier.range(), &message));
+        labels.push((reference.identifier.range().clone(), message));
     }
 
     for unbound_identifier in unbound_identifiers {
@@ -177,14 +141,8 @@ fn render_bindings_for_file(
             continue;
         }
 
-        builder.add_label(new_label(unbound_identifier.range(), "???"));
+        labels.push((unbound_identifier.range().clone(), "???".to_string()));
     }
 
-    let mut buffer = Vec::<u8>::new();
-    builder
-        .finish()
-        .write((file_id_str, Source::from(contents)), &mut buffer)?;
-    report.extend(String::from_utf8(buffer));
-
-    Ok(())
+    annotated_source(report, "Bindings", file_id, contents, &labels)
 }
