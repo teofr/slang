@@ -20,7 +20,15 @@ use tar::{Archive, EntryType};
 /// tag is later re-pointed at a different commit. Regenerated in update mode.
 const PINNED_COMMITS_FILE: &str = "pinned-commits.json";
 
-const SEMANTIC_TESTS_PATH: &str = "test/libsolidity/semanticTests";
+/// The corpora we extract from each release tarball, as
+/// `(path within the archive, local subdirectory under the version's cache dir)`.
+/// Both ship in the same tarball, so a single download populates both — see
+/// [`Dataset::fetch`]. The `syntaxTests` tree is consumed by the sibling
+/// [`crate::syntax`] harness.
+const TEST_SUITES: [(&str, &str); 2] = [
+    ("test/libsolidity/semanticTests", "semanticTests"),
+    ("test/libsolidity/syntaxTests", "syntaxTests"),
+];
 
 /// The `solc` release tag for a language version (e.g. `v0.8.20`).
 pub(crate) fn release_tag(version: LanguageVersion) -> String {
@@ -36,8 +44,8 @@ pub(crate) fn version_from_release_tag(tag: &str) -> Option<LanguageVersion> {
     LanguageVersion::try_from(version).ok()
 }
 
-/// The cache directory holding every version's extracted `semanticTests` tree,
-/// as `<cache>/v<version>/semanticTests/...`.
+/// The cache directory holding every version's extracted corpora, as
+/// `<cache>/v<version>/{semanticTests,syntaxTests}/...`.
 pub fn cache_dir() -> PathBuf {
     Path::repo_path("target/solc-comparison")
 }
@@ -52,28 +60,34 @@ pub struct Dataset {
 }
 
 impl Dataset {
-    /// Ensures the semantic tests for `version` are available locally,
+    /// Ensures every [`TEST_SUITES`] corpus for `version` is available locally,
     /// downloading and extracting them from the matching `solc` release tag if
-    /// necessary, and returns a handle to the extracted tree (carrying the
-    /// commit SHA the tag resolved to). Reconciling that SHA against the pinned
+    /// necessary, and returns a handle carrying the commit SHA the tag resolved
+    /// to. Both corpora ship in the same tarball, so this downloads it **once**
+    /// and extracts them together (the `syntaxTests` tree is what the sibling
+    /// [`crate::syntax`] harness reuses). Reconciling the SHA against the pinned
     /// baseline is the caller's job (see [`fetch_all_versions`]).
     pub fn fetch(version: LanguageVersion) -> Result<Self> {
         let tag = release_tag(version);
         let version_dir = cache_dir().join(&tag);
-        let root = version_dir.join("semanticTests");
         let sha_path = version_dir.join(".commit-sha");
 
         // Release tags are immutable, so a populated cache is always current —
         // skip the network entirely. This matters here because we fetch dozens
-        // of versions, and the cache lives under `target/` (cached in CI).
-        if is_populated(&root) {
+        // of versions, and the cache lives under `target/` (cached in CI). We
+        // require *every* corpus present, so a cache left by an older,
+        // semantic-only run is re-fetched to add the sibling trees.
+        let all_present = TEST_SUITES
+            .iter()
+            .all(|(_, dir)| is_populated(&version_dir.join(dir)));
+        if all_present {
             let commit_sha = sha_path
                 .read_to_string()
                 .map(|s| s.trim().to_owned())
                 .unwrap_or_default();
             if commit_sha.is_empty() {
                 bail!(
-                    "cached semantic tests at {root:?} are missing their recorded commit SHA \
+                    "cached tests at {version_dir:?} are missing their recorded commit SHA \
                      ({sha_path:?}); delete the directory and re-run to re-download."
                 );
             }
@@ -83,18 +97,23 @@ impl Dataset {
             });
         }
 
-        // Reuse the shared download helper (as the sourcify runner does).
+        // Reuse the shared download helper (as the sourcify runner does). A
+        // single download yields both corpora, so we never fetch the same
+        // tarball twice.
         let url = format!("https://codeload.github.com/argotorg/solidity/tar.gz/{tag}");
-        let commit_sha = match request_download_if_modified(&url, &root) {
+        let commit_sha = match request_download_if_modified(&url, &version_dir) {
             DownloadResult::Ok(response) => {
-                println!("Downloading semantic tests from {url}");
-                let commit_sha = extract_semantic_tests(response, &root)?;
+                println!("Downloading tests from {url}");
+                let commit_sha = extract_test_suites(response, &version_dir)?;
 
-                if !is_populated(&root) {
-                    bail!(
-                        "Extraction completed but no semantic tests were found under {root:?}. \
-                         The tag '{tag}' may not contain '{SEMANTIC_TESTS_PATH}'."
-                    );
+                for (archive_path, dir) in TEST_SUITES {
+                    let root = version_dir.join(dir);
+                    if !is_populated(&root) {
+                        bail!(
+                            "Extraction completed but no tests were found under {root:?}. \
+                             The tag '{tag}' may not contain '{archive_path}'."
+                        );
+                    }
                 }
                 commit_sha
             }
@@ -102,7 +121,7 @@ impl Dataset {
                 bail!("Unexpected 'not modified' response downloading {url} into an empty cache");
             }
             DownloadResult::Error(error) => {
-                bail!("Failed to download semantic tests from {url}: {error}");
+                bail!("Failed to download tests from {url}: {error}");
             }
         };
 
@@ -251,9 +270,11 @@ fn is_populated(root: &Path) -> bool {
     root.is_dir() && fs::read_dir(root).is_ok_and(|mut entries| entries.next().is_some())
 }
 
-/// Extracts the `semanticTests/` tree into `root` and returns the commit SHA the
-/// tarball was built from (read from its `pax_global_header`, empty if absent).
-fn extract_semantic_tests(reader: impl Read, root: &Path) -> Result<String> {
+/// Extracts every [`TEST_SUITES`] corpus from a single tarball into
+/// `<version_dir>/<local subdir>`, and returns the commit SHA the tarball was
+/// built from (read from its `pax_global_header`, empty if absent). Extracting
+/// all corpora in one pass is what lets us download the tarball only once.
+fn extract_test_suites(reader: impl Read, version_dir: &Path) -> Result<String> {
     let decoder = GzDecoder::new(reader);
     let mut archive = Archive::new(decoder);
 
@@ -275,15 +296,15 @@ fn extract_semantic_tests(reader: impl Read, root: &Path) -> Result<String> {
 
         let entry_path = entry.path()?.into_owned();
 
-        let Some(relative) = strip_to_semantic_tests(&entry_path) else {
+        let Some((dir, relative)) = strip_to_test_suite(&entry_path) else {
             continue;
         };
 
-        let dest = root.join(relative);
         if entry.header().entry_type().is_dir() {
             continue;
         }
 
+        let dest = version_dir.join(dir).join(relative);
         fs::create_dir_all(dest.unwrap_parent())?;
         entry
             .unpack(&dest)
@@ -291,7 +312,7 @@ fn extract_semantic_tests(reader: impl Read, root: &Path) -> Result<String> {
         extracted += 1;
     }
 
-    println!("Extracted {extracted} file(s) into {root:?}");
+    println!("Extracted {extracted} file(s) into {version_dir:?}");
     Ok(commit_sha)
 }
 
@@ -303,20 +324,23 @@ fn parse_pax_comment(header: &str) -> Option<String> {
     (!value.is_empty()).then(|| value.to_owned())
 }
 
-/// Returns the portion of `path` after the `test/libsolidity/semanticTests`
-/// segment, if present.
-fn strip_to_semantic_tests(path: &Path) -> Option<PathBuf> {
-    // GitHub tarballs nest everything under a top-level directory, so the
+/// If `path` falls under one of the [`TEST_SUITES`] corpora, returns that
+/// corpus's local subdirectory and the portion of the path below the matched
+/// segment. Returns `None` for anything else in the archive.
+fn strip_to_test_suite(path: &Path) -> Option<(&'static str, PathBuf)> {
+    // GitHub tarballs nest everything under a top-level directory, so each
     // anchor sits at an unknown depth. Match it component-wise (rather than as a
     // substring, which could match inside a file name) and keep what follows.
-    let anchor: Vec<&OsStr> = Path::new(SEMANTIC_TESTS_PATH).iter().collect();
     let components: Vec<&OsStr> = path.iter().collect();
-    let anchor_end = components
-        .windows(anchor.len())
-        .position(|window| window == anchor.as_slice())?
-        + anchor.len();
-    let relative: PathBuf = components[anchor_end..].iter().collect();
-    (!relative.as_os_str().is_empty()).then_some(relative)
+    TEST_SUITES.iter().find_map(|(archive_path, dir)| {
+        let anchor: Vec<&OsStr> = Path::new(archive_path).iter().collect();
+        let anchor_end = components
+            .windows(anchor.len())
+            .position(|window| window == anchor.as_slice())?
+            + anchor.len();
+        let relative: PathBuf = components[anchor_end..].iter().collect();
+        (!relative.as_os_str().is_empty()).then_some((*dir, relative))
+    })
 }
 
 #[cfg(test)]
@@ -359,26 +383,42 @@ mod tests {
     }
 
     #[test]
-    fn strips_to_semantic_tests() {
-        // A real tarball entry: top-level dir, the anchor, then the test path.
+    fn strips_to_test_suite() {
+        // Real tarball entries: top-level dir, the anchor, then the test path.
+        // Each corpus is routed to its own local subdirectory.
         assert_eq!(
-            strip_to_semantic_tests(Path::new(
+            strip_to_test_suite(Path::new(
                 "solidity-0.8.20/test/libsolidity/semanticTests/various/erc20.sol"
             )),
-            Some(PathBuf::from("various/erc20.sol"))
+            Some(("semanticTests", PathBuf::from("various/erc20.sol")))
+        );
+        assert_eq!(
+            strip_to_test_suite(Path::new(
+                "solidity-0.8.20/test/libsolidity/syntaxTests/array/length.sol"
+            )),
+            Some(("syntaxTests", PathBuf::from("array/length.sol")))
         );
 
-        // Sibling trees under `libsolidity` (e.g. syntaxTests) are not matched.
+        // Sibling trees under `libsolidity` that aren't a corpus we want.
         assert_eq!(
-            strip_to_semantic_tests(Path::new(
-                "solidity-0.8.20/test/libsolidity/syntaxTests/x.sol"
+            strip_to_test_suite(Path::new(
+                "solidity-0.8.20/test/libsolidity/astJSON/contract.sol"
             )),
             None
         );
 
-        // The anchor directory itself, with nothing after it, yields nothing.
+        // An anchor directory itself, with nothing after it, yields nothing.
         assert_eq!(
-            strip_to_semantic_tests(Path::new("solidity-0.8.20/test/libsolidity/semanticTests")),
+            strip_to_test_suite(Path::new("solidity-0.8.20/test/libsolidity/semanticTests")),
+            None
+        );
+
+        // The anchor is matched component-wise, so a file merely *named* like
+        // the anchor's last segment doesn't match.
+        assert_eq!(
+            strip_to_test_suite(Path::new(
+                "solidity-0.8.20/test/libsolidity/semanticTests.md"
+            )),
             None
         );
     }

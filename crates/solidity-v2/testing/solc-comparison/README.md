@@ -1,14 +1,23 @@
 # `solidity_testing_solc_comparison`
 
-Runs **slang (v2)** against `solc`'s own [`libsolidity` semantic test
-suite](https://github.com/argotorg/solidity/tree/develop/test/libsolidity/semanticTests),
-checking that all of this **valid** Solidity still compiles without slang
-emitting any error diagnostics.
+Runs **slang (v2)** against `solc`'s own test corpora, checking that all of this
+**valid** Solidity still compiles without slang emitting any error diagnostics.
+Two corpora are used, each with its own harness and baseline:
+
+| corpus                                                                                                                | harness                   | baseline                          |
+| --------------------------------------------------------------------------------------------------------------------- | ------------------------- | --------------------------------- |
+| [`semanticTests`](https://github.com/argotorg/solidity/tree/develop/test/libsolidity/semanticTests)                   | `tests/semantic_tests.rs` | `expected-semantic-failures.json` |
+| [`syntaxTests`](https://github.com/argotorg/solidity/tree/develop/test/libsolidity/syntaxTests) (trailer-free subset) | `tests/syntax_tests.rs`   | `expected-syntax-failures.json`   |
+
+Every `semanticTests` case is known-valid (they're runtime-behavior tests, so
+they all compile). `syntaxTests` cases instead declare their expected
+diagnostics in a `// ----` trailer, so only the **trailer-free** ones — the cases
+solc accepts cleanly — are checked here; a case that expects errors is the
+opposite ("slang rejects what solc rejects") direction and is skipped.
 
 It does this for **every Solidity version slang v2 supports** (0.8.0 up to the
-latest): for each version it downloads the semantic tests from that version's
-`solc` release tag and runs slang against them pinned to that same language
-version.
+latest): for each version it downloads that version's `solc` release tarball and
+runs slang against both corpora pinned to that same language version.
 
 ## Usage
 
@@ -39,8 +48,9 @@ Like the repo's other snapshot tests, the mode is chosen by the `CI` env var:
 
 - **In CI** (`CI` set) the cases **check** against the committed baseline and
   the run fails on any drift.
-- **Run locally** (`CI` unset) the cases instead **rewrite** the baseline
-  (`expected-failures.json`), and the fetch step re-pins `pinned-commits.json`.
+- **Run locally** (`CI` unset) the cases instead **rewrite** their baseline
+  (`expected-semantic-failures.json` / `expected-syntax-failures.json`), and the
+  fetch step re-pins `pinned-commits.json`.
 
 So after intentionally changing which tests pass (a new validation, a parser
 fix, a version bump), just run `infra verify solc-semantic-suite` locally and commit
@@ -48,12 +58,12 @@ the regenerated files.
 
 ## How it works
 
-The suite is a [`datatest-stable`](https://github.com/nextest-rs/datatest-stable)
-harness (`tests/semantic_tests.rs`, `harness = false`), run via `cargo test`.
-`datatest-stable` generates **one test case per file**; we point its `root` at
-a directory holding every version's tests
-(`target/solc-comparison/v<version>/…`), so the generated cases span the whole
-`(version, test)` matrix.
+Each corpus is a [`datatest-stable`](https://github.com/nextest-rs/datatest-stable)
+harness (`tests/semantic_tests.rs` and `tests/syntax_tests.rs`, both
+`harness = false`), run via `cargo test`. `datatest-stable` generates **one test
+case per file**; we point each harness's `root` at a directory holding every
+version's tests (`target/solc-comparison/v<version>/…`), so the generated cases
+span the whole `(version, test)` matrix.
 
 We run it with `cargo test` (in-process, threaded) rather than `cargo nextest`:
 nextest is [process-per-test by design](https://nexte.st/docs/design/why-process-per-test/)
@@ -63,9 +73,11 @@ runners, and the whole matrix runs in-process in seconds.
 
 1. **Fetch** — the harness's `root` expression downloads, for every supported
    version (`LanguageVersion::ALL`), the `argotorg/solidity` tarball at that
-   version's release tag (e.g. `v0.8.20`) and extracts the `semanticTests/`
-   tree into `target/solc-comparison/<tag>/`, reusing the shared
-   `infra_utils::http` download helper. The versions are fetched in parallel
+   version's release tag (e.g. `v0.8.20`) and extracts **both** the
+   `semanticTests/` and `syntaxTests/` trees into
+   `target/solc-comparison/<tag>/`, reusing the shared `infra_utils::http`
+   download helper. Both corpora ship in the same tarball, so one download
+   populates both (see `TEST_SUITES`). The versions are fetched in parallel
    (via `rayon`), since a cold cache means three dozen independent network
    downloads. Release tags are immutable, so a populated cache is reused without
    hitting the network (and `target/` is cached in CI). Because the `root`
@@ -92,6 +104,7 @@ runners, and the whole matrix runs in-process in seconds.
    else that version's default), resolving imports with the shared
    `solidity_testing_utils` `ImportResolver`. The case **passes** iff slang's
    result (clean / has-errors) matches the baseline for that `(version, test)`.
-4. **Baseline** — in CI (checking) each case is compared to the baseline.
-   Outside CI (update mode) the cases instead rewrite `expected-failures.json`,
-   and the fetch step re-pins `pinned-commits.json` (see "Baseline update mode").
+4. **Baseline** — in CI (checking) each case is compared to its corpus's
+   baseline. Outside CI (update mode) the cases instead rewrite that baseline
+   (`expected-semantic-failures.json` / `expected-syntax-failures.json`), and the
+   fetch step re-pins `pinned-commits.json` (see "Baseline update mode").

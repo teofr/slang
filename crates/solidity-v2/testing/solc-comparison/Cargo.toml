@@ -8,10 +8,15 @@ publish = false
 [lib]
 path = "src/lib.rs"
 
-# The semantic-test suite is a data-driven `datatest-stable` harness (one test
-# per (version, test-file) pair).
+# The suites are data-driven `datatest-stable` harnesses (one test per (version,
+# test-file) pair). They are excluded from the default `infra test` run and
+# executed via `infra verify` instead — see `dataset::dataset_root`.
 [[test]]
 name = "semantic_tests"
+harness = false
+
+[[test]]
+name = "syntax_tests"
 harness = false
 
 [dependencies]
@@ -28,8 +33,8 @@ solidity_testing_utils = { workspace = true }
 solidity_v2_testing_utils = { workspace = true }
 tar = { workspace = true }
 
-# Only the `semantic_tests` integration harness uses `datatest-stable`, not the
-# library, so it's a dev-dependency (available to the test target).
+# Only the integration harnesses use `datatest-stable`, not the library, so it's
+# a dev-dependency (available to the test targets).
 [dev-dependencies]
 datatest-stable = { workspace = true }
 

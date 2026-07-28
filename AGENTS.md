@@ -142,18 +142,24 @@ When source changes cause snapshot mismatches, the test output shows the diff.
 Simply re-run the tests, and they will update the snapshot files on disk automatically.
 Then commit the updated snapshots alongside your code change.
 
-### `solc-comparison` baseline
+### `solc-comparison` baselines
 
 `infra verify` (specifically `infra verify solc-semantic-suite`) runs slang v2
-against solc's `libsolidity` semanticTests (a large corpus of known-valid
-Solidity) to catch new validations that accidentally reject valid code. It runs
-in CI as a step after `infra test`. The set of currently-failing tests is
-tracked in `crates/solidity-v2/testing/solc-comparison/expected-failures.json`.
+against two corpora of known-valid Solidity from solc's `libsolidity` tests, to
+catch new validations that accidentally reject valid code. It runs in CI as a
+step after `infra test`. Each corpus has its own harness and baseline under
+`crates/solidity-v2/testing/solc-comparison/`:
+
+- `semanticTests` (all cases are known-valid) → `expected-semantic-failures.json`
+- `syntaxTests`, restricted to the **trailer-free** cases solc accepts (cases
+  declaring expected diagnostics in a `// ----` trailer are skipped) →
+  `expected-syntax-failures.json`
+
 Like the other snapshot tests, the mode is chosen by the `CI` env var: in CI it
-checks against the committed baseline, run locally it regenerates it. So if you
-intentionally change which tests pass (add a validation, fix the parser, bump
+checks against the committed baselines, run locally it regenerates them. So if
+you intentionally change which tests pass (add a validation, fix the parser, bump
 the supported version), just run `infra verify solc-semantic-suite` locally and
-commit the regenerated `expected-failures.json` / `pinned-commits.json`.
+commit the regenerated baselines / `pinned-commits.json`.
 
 ### V2 Snapshot `.tests.config.json`
 

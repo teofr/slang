@@ -10,24 +10,42 @@ use slang_solidity_v2_common::collections::{SortedMap, SortedSet};
 use slang_solidity_v2_common::versions::LanguageVersion;
 
 const CRATE_NAME: &str = "solidity_testing_solc_comparison";
-const EXPECTED_FAILURES_FILE: &str = "expected-failures.json";
+
+/// The semantic-suite baseline: tests from the `semanticTests` corpus that
+/// slang v2 rejects (don't compile cleanly).
+pub const EXPECTED_SEMANTIC_FAILURES_FILE: &str = "expected-semantic-failures.json";
+/// Known-valid tests from the `syntaxTests` corpus that slang v2 rejects (see
+/// [`crate::syntax`]).
+pub const EXPECTED_SYNTAX_FAILURES_FILE: &str = "expected-syntax-failures.json";
 
 /// The set of tests expected to currently fail, grouped by the Solidity version
-/// they fail at.
+/// they fail at. Serialized to its baseline file as a JSON object keyed by
+/// version — a `SortedMap<LanguageVersion, _>` so keys are ordered by version
+/// (0.8.9 before 0.8.30, i.e. `LanguageVersion`'s declaration order), not
+/// lexicographically.
+///
+/// The suite keeps one of these per corpus ([`EXPECTED_SEMANTIC_FAILURES_FILE`]
+/// and [`EXPECTED_SYNTAX_FAILURES_FILE`]); the loaded file name is remembered so
+/// [`Baseline::record`] writes back to the right one.
 #[derive(Default, Serialize, Deserialize)]
 #[serde(transparent)]
 pub struct Baseline {
+    #[serde(skip)]
+    file_name: &'static str,
     failures: SortedMap<LanguageVersion, SortedSet<String>>,
 }
 
 impl Baseline {
-    /// Loads the checked-in baseline.
-    pub fn load() -> Result<Self> {
-        let path = expected_failures_path()?;
+    /// Loads the checked-in baseline named `file_name` (e.g.
+    /// [`EXPECTED_SEMANTIC_FAILURES_FILE`]).
+    pub fn load(file_name: &'static str) -> Result<Self> {
+        let path = baseline_path(file_name)?;
         let contents = path
             .read_to_string()
             .with_context(|| format!("failed to read the checked-in baseline at {path:?}"))?;
-        Ok(serde_json::from_str(&contents)?)
+        let mut baseline: Self = serde_json::from_str(&contents)?;
+        baseline.file_name = file_name;
+        Ok(baseline)
     }
 
     /// Whether `test_path` is expected to fail at `version`.
@@ -67,12 +85,13 @@ impl Baseline {
         Ok(())
     }
 
-    /// Serializes the baseline to `expected-failures.json`, holding an exclusive
-    /// file lock across the truncate-and-rewrite (the same `File::lock` the solc
-    /// binary cache uses) so a concurrent writer waits rather than corrupting
-    /// the file. The lock is released when `file` is dropped.
+    /// Serializes the baseline back to the file it was loaded from, holding an
+    /// exclusive file lock across the truncate-and-rewrite (the same
+    /// `File::lock` the solc binary cache uses) so a concurrent writer waits
+    /// rather than corrupting the file. The lock is released when `file` is
+    /// dropped.
     fn write_locked(&self) -> Result<()> {
-        let path = expected_failures_path()?;
+        let path = baseline_path(self.file_name)?;
         let mut file = OpenOptions::new()
             .create(true)
             .write(true)
@@ -91,9 +110,8 @@ impl Baseline {
     }
 }
 
-/// Path to the checked-in baseline, located via the shared cargo-workspace
-/// helper (which resolves the crate's source directory from the workspace
-/// manifest).
-fn expected_failures_path() -> Result<PathBuf> {
-    Ok(CargoWorkspace::locate_source_crate(CRATE_NAME)?.join(EXPECTED_FAILURES_FILE))
+/// Path to a checked-in baseline, located via the shared cargo-workspace helper
+/// (which resolves the crate's source directory from the workspace manifest).
+fn baseline_path(file_name: &str) -> Result<PathBuf> {
+    Ok(CargoWorkspace::locate_source_crate(CRATE_NAME)?.join(file_name))
 }

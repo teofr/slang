@@ -20,26 +20,31 @@ use serde as _;
 use serde_json as _;
 use slang_solidity_v2 as _;
 use slang_solidity_v2_common as _;
-use solidity_testing_solc_comparison::baseline::Baseline;
+use solidity_testing_solc_comparison::baseline::{Baseline, EXPECTED_SEMANTIC_FAILURES_FILE};
 use solidity_testing_solc_comparison::dataset::{self, HARNESS_PATTERN, dataset_root};
 use solidity_testing_solc_comparison::runner::{self, Outcome};
 use solidity_testing_utils as _;
 use solidity_v2_testing_utils as _;
 use tar as _;
 
-/// The checked-in baseline, loaded once for the (read-only) checking path.
+/// The checked-in semantic baseline, loaded once for the (read-only) checking path.
 fn baseline() -> &'static Baseline {
-    static BASELINE: LazyLock<Baseline> =
-        LazyLock::new(|| Baseline::load().expect("failed to load baseline"));
+    static BASELINE: LazyLock<Baseline> = LazyLock::new(|| {
+        Baseline::load(EXPECTED_SEMANTIC_FAILURES_FILE).expect("failed to load semantic baseline")
+    });
     &BASELINE
 }
 
-/// In update mode, the baseline being updated. The `Mutex` serializes the
-/// in-process test threads sharing this one instance; `Baseline::record` adds
-/// the cross-process file lock when it writes.
+/// In update mode, the semantic baseline being updated. The `Mutex` serializes
+/// the in-process test threads sharing this one instance; `Baseline::record`
+/// adds the cross-process file lock when it writes.
 fn baseline_updater() -> &'static Mutex<Baseline> {
-    static UPDATER: LazyLock<Mutex<Baseline>> =
-        LazyLock::new(|| Mutex::new(Baseline::load().expect("failed to load baseline")));
+    static UPDATER: LazyLock<Mutex<Baseline>> = LazyLock::new(|| {
+        Mutex::new(
+            Baseline::load(EXPECTED_SEMANTIC_FAILURES_FILE)
+                .expect("failed to load semantic baseline"),
+        )
+    });
     &UPDATER
 }
 
