@@ -88,14 +88,18 @@ pub(crate) trait SnapshotRunner {
     fn finish(&self, _cells: &[CellOutcome]) -> Result<()> {
         Ok(())
     }
-
-    /// Drives the full matrix for one test. Not meant to be overridden.
-    fn run(&self, group: &str, test: &str) -> Result<()> {
-        drive(self, group, test)
-    }
 }
 
-fn drive<R: SnapshotRunner + ?Sized>(runner: &R, group: &str, test: &str) -> Result<()> {
+/// Drives the full matrix for one test against a [`SnapshotRunner`].
+///
+/// This is a free function rather than a provided trait method precisely so a
+/// kind can't override the shared plumbing — it only supplies `render`,
+/// `finish`, and the associated constants.
+pub(crate) fn run_snapshot<R: SnapshotRunner + ?Sized>(
+    runner: &R,
+    group: &str,
+    test: &str,
+) -> Result<()> {
     let test_dir = CargoWorkspace::locate_source_crate("solidity_v2_testing_snapshots")?
         .join(R::OUTPUT_DIR)
         .join(group)

@@ -11,7 +11,7 @@ use super::targets::{SlangTarget, SolcTarget, TestTarget};
 use crate::snapshots::render::diagnostics_summary;
 use crate::snapshots::{
     CellOutcome, NamedOutput, SnapshotInput, SnapshotRunner, SnapshotStatus, TestConfig,
-    TestMatrix, files_of,
+    TestMatrix, files_of, run_snapshot,
 };
 
 struct DiagnosticsRunner {
@@ -128,5 +128,5 @@ pub(crate) fn run(group_name: &str, test_name: &str) -> Result<()> {
         test_path: format!("{group_name}/{test_name}"),
     };
 
-    runner.run(group_name, test_name)
+    run_snapshot(&runner, group_name, test_name)
 }

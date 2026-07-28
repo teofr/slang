@@ -6,6 +6,7 @@ use super::report::binder_report;
 use super::report_data::ReportData;
 use crate::snapshots::{
     NamedOutput, SnapshotInput, SnapshotRunner, SnapshotStatus, build_compilation_unit, files_of,
+    run_snapshot,
 };
 
 struct BinderRunner;
@@ -36,5 +37,5 @@ impl SnapshotRunner for BinderRunner {
 }
 
 pub(crate) fn run(group_name: &str, test_name: &str) -> Result<()> {
-    BinderRunner.run(group_name, test_name)
+    run_snapshot(&BinderRunner, group_name, test_name)
 }
