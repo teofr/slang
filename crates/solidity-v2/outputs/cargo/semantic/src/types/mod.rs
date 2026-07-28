@@ -41,6 +41,12 @@ pub enum Type {
     MetaType(MetaType),
     String(StringType),
     Struct(StructType),
+    /// The type of the `super` keyword: a magic reference to the enclosing
+    /// contract, used to look up members in the base contracts above it in the
+    /// linearisation. Wraps the enclosing contract's type. This mirrors solc's
+    /// distinct `type(contract super C)`, which is deliberately *not* the same
+    /// as `this`'s plain `contract C`.
+    Super(SuperType),
     Tuple(TupleType),
     UserDefinedValue(UserDefinedValueType),
     /// The meta-type of a user defined type referred to by name, eg. the
@@ -140,6 +146,12 @@ pub struct UserDefinedValueType {
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct MetaType {
     /// The `TypeId` of the type this is a meta-type of.
+    pub type_id: TypeId,
+}
+
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
+pub struct SuperType {
+    /// The `TypeId` of the enclosing contract that `super` refers to.
     pub type_id: TypeId,
 }
 
@@ -416,9 +428,10 @@ impl Type {
             | Type::Literal(_)
             | Type::Library(_)
             | Type::Tuple(_)
-            // Meta-types are not real values and can never be returned.
+            // Meta-types and `super` are not real values and can never be returned.
             | Type::MetaType(_)
             | Type::UserMetaType(_)
+            | Type::Super(_)
             | Type::Void => false,
         }
     }

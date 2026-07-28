@@ -136,13 +136,16 @@ fn test_super_keyword_get_type() {
         panic!("expected the `super` keyword");
     };
 
-    // `super` types as the enclosing contract `B`, mirroring solc's
-    // `type(contract super B)` (the closest representable type).
-    let ast::Type::Contract(contract_type) = super_keyword
+    // `super` types as its own `ast::Type::Super`, mirroring solc's distinct
+    // `type(contract super B)`. It wraps the enclosing contract `B`.
+    let ast::Type::Super(super_type) = super_keyword
         .get_type()
         .expect("`super` has a resolved type")
     else {
-        panic!("expected `super` to type as a contract");
+        panic!("expected `super` to type as `Type::Super`");
+    };
+    let ast::Type::Contract(contract_type) = super_type.contract_type() else {
+        panic!("`super` wraps a contract type");
     };
     let ast::Definition::Contract(definition) = contract_type.definition() else {
         panic!("a contract type resolves to a contract definition");
@@ -150,7 +153,7 @@ fn test_super_keyword_get_type() {
     assert_eq!(
         definition.name().name(),
         "B",
-        "`super` is the enclosing contract B"
+        "`super` wraps the enclosing contract B"
     );
 }
 

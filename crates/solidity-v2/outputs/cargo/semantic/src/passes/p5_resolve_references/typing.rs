@@ -9,8 +9,8 @@ use crate::binder::{Definition, Resolution, Typing};
 use crate::passes::common::node_location;
 use crate::types::{
     AddressType, ContractType, DataLocation, FixedSizeArrayType, FunctionType,
-    FunctionTypeVisibility, IntegerType, LiteralKind, MetaType, Number, StringType, Type, TypeId,
-    UserMetaType, literals,
+    FunctionTypeVisibility, IntegerType, LiteralKind, MetaType, Number, StringType, SuperType,
+    Type, TypeId, UserMetaType, literals,
 };
 
 impl Pass<'_> {
@@ -306,11 +306,18 @@ impl Pass<'_> {
             let type_id = self
                 .typing_of_expression(&member_access_expression.operand)
                 .as_type_id()?;
+            let type_ = self.types.get_type_by_id(type_id);
             // A meta-type operand is a namespace qualifier, not
             // a runtime value, so there is no receiver to bind as an implicit
             // first argument during overload resolution.
-            if self.types.get_type_by_id(type_id).is_meta_type() {
+            if type_.is_meta_type() {
                 return None;
+            }
+            // `super`'s runtime receiver is the current contract instance
+            // (`super` only redirects member lookup, not the receiver), so bind
+            // the wrapped contract type rather than the `super` type itself.
+            if let Type::Super(SuperType { type_id }) = type_ {
+                return Some(*type_id);
             }
             Some(type_id)
         } else {
@@ -448,8 +455,10 @@ impl Pass<'_> {
         let argument_typings = self.collect_positional_argument_typings(arguments);
 
         match operand_typing {
-            Typing::Unresolved | Typing::This(_) | Typing::Super(_) => {
-                // `this` and `super` are not callable
+            Typing::Unresolved | Typing::This(_) => {
+                // `this` is not callable (`super` types as `Type::Super`, which
+                // falls through to the `Resolved` arm below and is rejected
+                // there as a non-callable type).
                 Typing::Unresolved
             }
             Typing::NewExpression(type_id) => {
@@ -606,8 +615,10 @@ impl Pass<'_> {
         let operand_typing = self.typing_of_expression(&node.operand);
 
         let (typing, definition_id) = match operand_typing {
-            Typing::Unresolved | Typing::This(_) | Typing::Super(_) => {
-                // `this` and `super` are not callable
+            Typing::Unresolved | Typing::This(_) => {
+                // `this` is not callable (`super` types as `Type::Super`, which
+                // falls through to the `Resolved` arm below and is rejected
+                // there as a non-callable type).
                 (Typing::Unresolved, None)
             }
             Typing::Resolved(type_id) => {

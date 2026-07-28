@@ -20,7 +20,7 @@ use crate::passes::{
 use crate::types::{
     ArrayType, ByteArrayType, BytesType, ContractType, DataLocation, FixedSizeArrayType,
     FunctionType, IntegerType, LibraryType, LiteralKind, MappingType, MetaType, StringType,
-    StructType, TupleType, Type, TypeId, TypeRegistry, UserMetaType,
+    StructType, SuperType, TupleType, Type, TypeId, TypeRegistry, UserMetaType,
 };
 
 struct TypeAnalysis {
@@ -1124,14 +1124,18 @@ fn test_super_keyword_types_as_super() {
         panic!("expected a super keyword");
     };
 
-    // `super` types as `Typing::Super`, carrying the current contract (`B`) so
-    // it has a type while still using the special member-lookup rules.
-    let Typing::Super(type_id) = binder.node_typing(super_keyword.id()) else {
-        panic!("`super` should be typed as `Typing::Super`");
+    // `super` types as its own `Type::Super`, wrapping the current contract
+    // (`B`); member lookup keys off this type to use the special base-contract
+    // resolution rules.
+    let Typing::Resolved(super_type_id) = binder.node_typing(super_keyword.id()) else {
+        panic!("`super` should be typed as a resolved `Type::Super`");
+    };
+    let Type::Super(SuperType { type_id }) = types.get_type_by_id(super_type_id) else {
+        panic!("`super` should type as `Type::Super`");
     };
     assert!(
-        matches!(types.get_type_by_id(type_id), Type::Contract(_)),
-        "`super` carries the current contract type"
+        matches!(types.get_type_by_id(*type_id), Type::Contract(_)),
+        "`super` wraps the current contract type"
     );
 }
 

@@ -527,6 +527,7 @@ impl TypeRegistry {
             | Type::Literal(_)
             | Type::Mapping(_)
             | Type::MetaType(_)
+            | Type::Super(_)
             | Type::Tuple(_)
             | Type::UserDefinedValue(_)
             | Type::UserMetaType(_)
@@ -589,6 +590,7 @@ impl TypeRegistry {
             | Type::Literal(_)
             | Type::Mapping(_)
             | Type::MetaType(_)
+            | Type::Super(_)
             | Type::UserDefinedValue(_)
             | Type::UserMetaType(_)
             | Type::Void => type_,

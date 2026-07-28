@@ -10,7 +10,7 @@ use crate::built_ins::InternalBuiltIn;
 use crate::passes::common::filter_overriden_definitions;
 use crate::types::{
     AddressType, ArrayType, DataLocation, FixedSizeArrayType, MappingType, MetaType, Number,
-    TupleType, Type, UserMetaType,
+    SuperType, TupleType, Type, UserMetaType,
 };
 
 impl Visitor for Pass<'_> {
@@ -398,10 +398,7 @@ impl Visitor for Pass<'_> {
                     })
                     .collect(),
             ),
-            Typing::Unresolved
-            | Typing::BuiltIn(_)
-            | Typing::NewExpression(_)
-            | Typing::Super(_) => typing,
+            Typing::Unresolved | Typing::BuiltIn(_) | Typing::NewExpression(_) => typing,
         };
 
         // Store the typing
@@ -553,17 +550,20 @@ impl Visitor for Pass<'_> {
     }
 
     fn visit_super_keyword(&mut self, node: &ir::SuperKeyword) {
-        // `super` types as the current contract (like `this`), so it carries a
-        // type; member resolution still walks the linearisation specially (see
-        // `Typing::Super` handling in `resolution`).
+        // `super` has its own type: a `Type::Super` wrapping the enclosing
+        // contract, mirroring solc's distinct `type(contract super C)` (which
+        // is not the same as `this`'s plain `contract C`). Member resolution
+        // keys off this type to walk the linearisation above the current
+        // contract (see the `Type::Super` handling in `resolution`).
         if let Some(scope_id) = self.current_contract_scope_id() {
             let node_id = self.binder.get_scope_by_id(scope_id).node_id();
-            let type_ = self
+            let contract_type = self
                 .type_of_definition(node_id)
                 .expect("the scope of `super` should be a contract definition");
-            let type_id = self.types.register_type(type_);
+            let type_id = self.types.register_type(contract_type);
+            let super_type_id = self.types.register_type(Type::Super(SuperType { type_id }));
             self.binder
-                .set_node_typing(node.id(), Typing::Super(type_id));
+                .set_node_typing(node.id(), Typing::Resolved(super_type_id));
         }
         // Otherwise `super` is used outside a contract, which is invalid and
         // reported elsewhere; leave it unresolved.

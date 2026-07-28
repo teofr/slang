@@ -215,6 +215,7 @@ fn abi_type_from_ast_type(value: &AstType, visited_structs: &mut Set<NodeId>) ->
         | AstType::Literal(_)
         | AstType::Mapping(_)
         | AstType::MetaType(_)
+        | AstType::Super(_)
         | AstType::Tuple(_)
         | AstType::UserMetaType(_)
         | AstType::Void(_) => None,

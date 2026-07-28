@@ -320,6 +320,9 @@ impl<'a> BuiltInsResolver<'a> {
                 _ => None,
             },
             Type::Struct(_) => None,
+            // `super`'s members are resolved via the contract linearisation,
+            // not as built-ins.
+            Type::Super(_) => None,
             Type::Tuple(_) => None,
             Type::UserDefinedValue(_) => None,
             Type::Void => None,
