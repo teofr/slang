@@ -163,6 +163,14 @@ impl Pass<'_> {
                     self.resolve_type_name(&mapping_type.key_type.type_name, data_location)?;
                 let value_type_id =
                     self.resolve_type_name(&mapping_type.value_type.type_name, data_location)?;
+                // The key and value are `Parameter` nodes (they can be named
+                // since 0.8.18); type them with the resolved key/value types so
+                // they aren't left untyped, matching solc's `TypeName`
+                // type descriptions.
+                self.binder
+                    .set_node_type(mapping_type.key_type.id(), Some(key_type_id));
+                self.binder
+                    .set_node_type(mapping_type.value_type.id(), Some(value_type_id));
                 Some(self.types.register_type(Type::Mapping(MappingType {
                     key_type_id,
                     value_type_id,
