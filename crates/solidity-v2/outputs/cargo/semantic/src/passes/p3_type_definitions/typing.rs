@@ -266,6 +266,7 @@ impl Pass<'_> {
                 Type::Library(_)
                 | Type::Literal(_)
                 | Type::MetaType(_)
+                | Type::Super(_)
                 | Type::Tuple(_)
                 | Type::UserMetaType(_)
                 | Type::Void => {

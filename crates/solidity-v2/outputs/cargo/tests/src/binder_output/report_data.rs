@@ -453,11 +453,11 @@ fn type_display(type_: &Type) -> String {
                 value = type_display(&mapping.value_type()),
             )
         }
-        // Meta-types are expression-only typings (the type of an expression
-        // that refers to a type rather than a value). This report only renders
-        // the types of value-bearing definitions, so a meta-type never reaches
-        // here.
-        Type::MetaType(_) | Type::UserMetaType(_) => {
+        // Meta-types and `super` are expression-only typings (the type of an
+        // expression that refers to a type rather than a value). This report
+        // only renders the types of value-bearing definitions, so they never
+        // reach here.
+        Type::MetaType(_) | Type::UserMetaType(_) | Type::Super(_) => {
             unreachable!("meta-types are not rendered as definition types")
         }
         Type::String(string) => {

@@ -33,6 +33,7 @@ pub enum Type {
     MetaType(MetaType),
     String(StringType),
     Struct(StructType),
+    Super(SuperType),
     Tuple(TupleType),
     UserDefinedValue(UserDefinedValueType),
     UserMetaType(UserMetaType),
@@ -82,6 +83,7 @@ define_type_variant!(Library);
 define_type_variant!(Mapping);
 define_type_variant!(Meta);
 define_type_variant!(Struct);
+define_type_variant!(Super);
 define_type_variant!(Tuple);
 define_type_variant!(UserDefinedValue);
 define_type_variant!(UserMeta);
@@ -132,6 +134,7 @@ impl Type {
             types::Type::MetaType(inner) => Self::MetaType(MetaType { inner, semantic }),
             types::Type::String(inner) => Self::String(StringType { inner }),
             types::Type::Struct(inner) => Self::Struct(StructType { inner, semantic }),
+            types::Type::Super(inner) => Self::Super(SuperType { inner, semantic }),
             types::Type::Tuple(inner) => Self::Tuple(TupleType { inner, semantic }),
             types::Type::UserDefinedValue(inner) => {
                 Self::UserDefinedValue(UserDefinedValueType { inner, semantic })
@@ -344,6 +347,14 @@ impl UserMetaType {
     pub fn definition(&self) -> Definition {
         Definition::try_create(self.inner.definition_id, &self.semantic)
             .expect("invalid user meta-type definition")
+    }
+}
+
+impl SuperType {
+    /// Returns the enclosing contract type that `super` refers to. Member
+    /// lookups on `super` walk this contract's base contracts.
+    pub fn contract_type(&self) -> Type {
+        Type::create(self.inner.type_id, &self.semantic)
     }
 }
 

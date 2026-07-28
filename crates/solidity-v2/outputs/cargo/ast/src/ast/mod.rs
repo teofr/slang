@@ -18,8 +18,8 @@ mod types;
 pub use types::{
     AddressType, ArrayType, BooleanType, ByteArrayType, BytesType, ContractType, EnumType,
     FixedPointNumberType, FixedSizeArrayType, FunctionType, IntegerType, InterfaceType,
-    LiteralKind, LiteralType, MappingType, MetaType, Number, StringType, StructType, TupleType,
-    Type, UserDefinedValueType, UserMetaType, VoidType,
+    LiteralKind, LiteralType, MappingType, MetaType, Number, StringType, StructType, SuperType,
+    TupleType, Type, UserDefinedValueType, UserMetaType, VoidType,
 };
 
 #[path = "visitor.generated.rs"]

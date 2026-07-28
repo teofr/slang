@@ -76,37 +76,32 @@ impl Pass<'_> {
                 // the first one
                 self.resolve_symbol_in_type(type_ids[0], symbol)
             }
+            // `super` is typed as `Typing::Resolved(<Type::Super id>)`, so it
+            // flows through here and is handled by `resolve_symbol_in_type`.
             Typing::Resolved(type_id) => self.resolve_symbol_in_type(*type_id, symbol),
-            Typing::This(_) | Typing::Super => {
+            Typing::This(receiver_type_id) => {
                 // TODO: the contract scope here is not necessarily the current
                 // lexical scope; for compilation we should set it to the scope
                 // of the contract being compiled, as this will affect the
-                // linearisation and hence the result of this `super`
-                // resolution. This affects the first parameter to
-                // `resolve_in_contract_scope`, not the `node_id` of the
-                // resolution option which is always lexical.
+                // linearisation and hence the result of this resolution. This
+                // affects the first parameter to `resolve_in_contract_scope`,
+                // not the `node_id` of the resolution option which is always
+                // lexical.
                 if let Some(scope_id) = self.current_contract_scope_id() {
                     let node_id = self.binder.get_scope_by_id(scope_id).node_id();
-                    let options = if matches!(typing, Typing::This(_)) {
-                        ResolveOptions::This(node_id)
-                    } else {
-                        ResolveOptions::Super(node_id)
-                    };
                     // TODO(validation) SDR[34]: for `this` resolutions we need to check
                     // that the returned definitions are externally available
                     // (ie. either `external` or `public`)
                     let mut definition_ids = self
                         .binder
-                        .resolve_in_contract_scope(scope_id, symbol, options)
+                        .resolve_in_contract_scope(scope_id, symbol, ResolveOptions::This(node_id))
                         .get_definition_ids();
 
                     // Consider active `using` directives for `this`
-                    if let Typing::This(receiver_type_id) = typing
-                        && matches!(
-                            self.types.get_type_by_id(*receiver_type_id),
-                            Type::Contract(_)
-                        )
-                    {
+                    if matches!(
+                        self.types.get_type_by_id(*receiver_type_id),
+                        Type::Contract(_)
+                    ) {
                         self.add_attached_functions_for_type(
                             *receiver_type_id,
                             symbol,
@@ -131,6 +126,13 @@ impl Pass<'_> {
     }
 
     fn resolve_symbol_in_type(&mut self, type_id: TypeId, symbol: &str) -> Resolution {
+        // `super` looks up members by walking the enclosing contract's
+        // linearisation starting *above* the current contract, so it doesn't
+        // go through the regular member/using-directive resolution below.
+        if matches!(self.types.get_type_by_id(type_id), Type::Super(_)) {
+            return self.resolve_super_member(symbol);
+        }
+
         let type_ = self.types.get_type_by_id(type_id);
 
         // Resolve direct members of the type first
@@ -171,6 +173,27 @@ impl Pass<'_> {
                 .lookup_member_of_type_id(type_id, symbol)
                 .into()
         })
+    }
+
+    /// Resolves a member of `super`: an internal lookup in the enclosing
+    /// contract's linearisation starting at the contract *following* the
+    /// current one (via `ResolveOptions::Super`).
+    fn resolve_super_member(&self, symbol: &str) -> Resolution {
+        // TODO: the contract scope here is not necessarily the current lexical
+        // scope; for compilation we should set it to the scope of the contract
+        // being compiled, as this will affect the linearisation and hence the
+        // result of this `super` resolution. This affects the first parameter
+        // to `resolve_in_contract_scope`, not the `node_id` of the resolution
+        // option which is always lexical.
+        let Some(scope_id) = self.current_contract_scope_id() else {
+            return Resolution::Unresolved;
+        };
+        let node_id = self.binder.get_scope_by_id(scope_id).node_id();
+        Resolution::from(
+            self.binder
+                .resolve_in_contract_scope(scope_id, symbol, ResolveOptions::Super(node_id))
+                .get_definition_ids(),
+        )
     }
 
     fn add_attached_functions_for_type(
