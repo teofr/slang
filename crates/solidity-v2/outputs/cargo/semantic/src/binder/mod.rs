@@ -77,6 +77,8 @@ impl Typing {
         match self {
             Self::Resolved(type_id) => Some(*type_id),
             Self::This(type_id) => Some(*type_id),
+            // A `type(T)` expression carries the meta-type of `T` as its type.
+            Self::BuiltIn(InternalBuiltIn::Type(type_id)) => Some(*type_id),
             _ => None,
         }
     }

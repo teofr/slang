@@ -9,7 +9,9 @@ use crate::binder::{
     Definition, OperatorMapping, Reference, Resolution, Scope, Typing, UsingDirective,
 };
 use crate::built_ins::InternalBuiltIn;
-use crate::types::{ContractType, DataLocation, EnumType, InterfaceType, LibraryType, Type};
+use crate::types::{
+    ContractType, DataLocation, EnumType, InterfaceType, LibraryType, MetaType, Type,
+};
 
 impl Visitor for Pass<'_> {
     fn enter_source_unit(&mut self, node: &ir::SourceUnit) -> bool {
@@ -442,7 +444,14 @@ impl Visitor for Pass<'_> {
     fn leave_type_expression(&mut self, node: &ir::TypeExpression) {
         let type_id = self.resolve_type_name(&node.type_name, Some(DataLocation::Memory));
         let typing = type_id.map_or(Typing::Unresolved, |type_id| {
-            Typing::BuiltIn(InternalBuiltIn::Type(type_id))
+            // Carry the *meta-type* of `type_id` (so the `type(T)` expression
+            // itself types as `type(T)`, matching solc), while still routing
+            // member lookup (`.min`/`.max`/`.creationCode`/…) through the `Type`
+            // built-in, which unwraps this meta-type.
+            let meta_type_id = self
+                .types
+                .register_type(Type::MetaType(MetaType { type_id }));
+            Typing::BuiltIn(InternalBuiltIn::Type(meta_type_id))
         });
         self.binder.set_node_typing(node.id(), typing);
     }

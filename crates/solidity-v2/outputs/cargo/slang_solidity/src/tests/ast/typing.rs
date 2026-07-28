@@ -1,5 +1,55 @@
 use super::fixtures;
+use crate::ast::visitor::{Visitor, accept_source_unit};
 use crate::{ast, define_fixture};
+
+define_fixture!(
+    TypeMeta,
+    file: "main.sol", r#"
+// SPDX-License-Identifier: UNLICENSED
+pragma solidity ^0.8.0;
+
+contract C {
+    function f() public pure returns (uint8) {
+        return type(uint8).max;
+    }
+}
+"#,
+);
+
+/// Captures the resolved type of the (single) `type(...)` expression in a unit.
+#[derive(Default)]
+struct TypeExpressionType {
+    resolved: Option<ast::Type>,
+}
+
+impl Visitor for TypeExpressionType {
+    fn enter_type_expression(&mut self, node: &ast::TypeExpression) -> bool {
+        self.resolved = node.get_type();
+        true
+    }
+}
+
+#[test]
+fn test_type_expression_get_type() {
+    let unit = TypeMeta::build_compilation_unit();
+
+    let mut finder = TypeExpressionType::default();
+    for file in unit.files() {
+        accept_source_unit(&file.ast(), &mut finder);
+    }
+
+    // `type(uint8)` types as the meta-type of `uint8` (solc's `type(uint8)`).
+    let ast::Type::MetaType(meta) = finder
+        .resolved
+        .expect("the `type(...)` expression has a resolved type")
+    else {
+        panic!("expected `type(uint8)` to type as a meta-type");
+    };
+    assert!(
+        matches!(meta.meta_type(), ast::Type::Integer(i) if !i.is_signed() && i.bits() == 8),
+        "the meta-type is of `uint8`"
+    );
+}
 
 #[test]
 fn test_get_type() {
