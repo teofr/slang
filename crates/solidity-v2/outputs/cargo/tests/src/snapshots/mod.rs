@@ -1,11 +1,10 @@
 //! Shared snapshot infrastructure for v2 cargo test runners.
 //!
-//! Every snapshot kind implements [`SnapshotRunner`], supplying only its
-//! per-cell [`render`](SnapshotRunner::render) and, if needed, a cross-cell
-//! [`finish`](SnapshotRunner::finish) check. The provided
-//! [`run`](SnapshotRunner::run) handles everything shared: locating the test,
-//! reading `input.sol`, iterating the version/target matrix, collapsing
-//! unchanged consecutive outputs, and writing through [`CodegenFileSystem`].
+//! Each snapshot kind supplies a `render` closure and its output directory and
+//! file extension to [`run_snapshot`], which handles everything shared:
+//! locating the test, reading `input.sol`, iterating the version/target matrix,
+//! collapsing unchanged consecutive outputs, and writing through
+//! [`CodegenFileSystem`].
 
 mod compilation;
 mod config;
@@ -53,51 +52,39 @@ impl NamedOutput {
     }
 }
 
-/// The outputs a runner produced for one `(version, target)` matrix cell,
-/// passed to [`SnapshotRunner::finish`] for cross-cell assertions.
+/// The outputs a `render` closure produced for one `(version, target)` matrix
+/// cell, returned by [`run_snapshot`] for any cross-cell assertions the caller
+/// needs.
 pub(crate) struct CellOutcome {
     pub version: LanguageVersion,
     pub target: EvmTarget,
     pub outputs: Vec<NamedOutput>,
 }
 
-/// The `input.sol` under test, handed to each [`SnapshotRunner::render`].
+/// The `input.sol` under test, handed to each `render` closure.
 pub(crate) struct SnapshotInput<'a> {
     pub path: &'a Path,
     pub source: &'a str,
 }
 
-pub(crate) trait SnapshotRunner {
-    /// The snapshot suite directory under `testing/snapshots/` (eg.
-    /// `"binder_output"`).
-    const OUTPUT_DIR: &'static str;
-
-    /// The golden file extension (eg. `"txt"`, `"yml"`).
-    const EXTENSION: &'static str;
-
-    /// Renders the snapshot output(s) for a single matrix cell.
-    fn render(
-        &self,
-        input: &SnapshotInput<'_>,
-        version: LanguageVersion,
-        target: EvmTarget,
-    ) -> Result<Vec<NamedOutput>>;
-}
-
-/// Drives the full matrix for one test against a [`SnapshotRunner`], writing the
-/// golden files and returning every cell's outcome so the caller can run any
-/// cross-cell checks it needs (eg. `diagnostics_output` comparing streams).
+/// Drives the full matrix for one test, invoking `render` once per
+/// `(version, target)` cell, writing the golden files under `output_dir` with
+/// the given file `extension`, and returning every cell's outcome so the caller
+/// can run any cross-cell checks it needs (eg. `diagnostics_output` comparing
+/// streams).
 ///
-/// This is a free function rather than a provided trait method precisely so a
-/// kind can't override the shared plumbing — it only supplies `render` and the
-/// associated constants.
-pub(crate) fn run_snapshot<R: SnapshotRunner + ?Sized>(
-    runner: &R,
+/// `output_dir` is the snapshot suite directory under `testing/snapshots/` (eg.
+/// `"binder_output"`); `extension` is the golden file extension (eg. `"txt"`,
+/// `"yml"`).
+pub(crate) fn run_snapshot(
+    output_dir: &str,
+    extension: &str,
     group: &str,
     test: &str,
+    render: impl Fn(&SnapshotInput<'_>, LanguageVersion, EvmTarget) -> Result<Vec<NamedOutput>>,
 ) -> Result<Vec<CellOutcome>> {
     let test_dir = CargoWorkspace::locate_source_crate("solidity_v2_testing_snapshots")?
-        .join(R::OUTPUT_DIR)
+        .join(output_dir)
         .join(group)
         .join(test);
     let mut fs = CodegenFileSystem::default();
@@ -127,13 +114,13 @@ pub(crate) fn run_snapshot<R: SnapshotRunner + ?Sized>(
     let mut outcomes: Vec<CellOutcome> = Vec::with_capacity(cells.len());
 
     for (version, target) in cells {
-        let outputs = runner.render(&input, version, target)?;
+        let outputs = render(&input, version, target)?;
 
         for output in &outputs {
             if last_contents.get(&output.name).map(String::as_str) != Some(output.contents.as_str())
             {
                 let filename =
-                    snapshot_filename(config.matrix, version, target, output.status, R::EXTENSION);
+                    snapshot_filename(config.matrix, version, target, output.status, extension);
                 let dir = if output.name.is_empty() {
                     test_dir.join("generated")
                 } else {

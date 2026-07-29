@@ -4,42 +4,13 @@ use anyhow::{Result, bail};
 use infra_utils::cargo::CargoWorkspace;
 use semver::Version;
 use slang_solidity_v2_common::collections::SortedSet;
-use slang_solidity_v2_common::evm_targets::EvmTarget;
 use slang_solidity_v2_common::versions::LanguageVersion;
 
 use super::targets::{SlangTarget, SolcTarget, TestTarget};
 use crate::snapshots::render::diagnostics_summary;
 use crate::snapshots::{
-    CellOutcome, NamedOutput, SnapshotInput, SnapshotRunner, SnapshotStatus, TestConfig,
-    TestMatrix, files_of, run_snapshot,
+    CellOutcome, NamedOutput, SnapshotStatus, TestConfig, TestMatrix, files_of, run_snapshot,
 };
-
-struct DiagnosticsRunner {
-    slang: SlangTarget,
-    solc: SolcTarget,
-}
-
-impl SnapshotRunner for DiagnosticsRunner {
-    const OUTPUT_DIR: &'static str = "diagnostics_output";
-    const EXTENSION: &'static str = "txt";
-
-    fn render(
-        &self,
-        input: &SnapshotInput<'_>,
-        version: LanguageVersion,
-        target: EvmTarget,
-    ) -> Result<Vec<NamedOutput>> {
-        let files = files_of(input.source);
-
-        let slang_errors = self.slang.collect_diagnostics(&files, version, target)?;
-        let solc_errors = self.solc.collect_diagnostics(&files, version, target)?;
-
-        Ok(vec![
-            named_output(self.slang.name(), &slang_errors),
-            named_output(self.solc.name(), &solc_errors),
-        ])
-    }
-}
 
 fn named_output(name: &str, errors: &[String]) -> NamedOutput {
     let status = if errors.is_empty() {
@@ -107,10 +78,10 @@ fn check_agreement(
 }
 
 /// Does one-time setup before delegating to `run_snapshot`: resolves the config
-/// to learn which solc versions the matrix will cover, fetches those solc
+/// to learn which solc versions the matrix will cover, then fetches those solc
 /// binaries once via `SolcTarget::new` (a network call that would be wasteful to
-/// repeat per cell), and builds the runner. Afterwards it checks the captured
-/// cells for slang/solc agreement (rather than a `finish` hook on the trait).
+/// repeat per cell). The `render` closure captures both targets, and afterwards
+/// we check the captured cells for slang/solc agreement.
 pub(crate) fn run(group_name: &str, test_name: &str) -> Result<()> {
     let test_dir = CargoWorkspace::locate_source_crate("solidity_v2_testing_snapshots")?
         .join("diagnostics_output")
@@ -125,18 +96,32 @@ pub(crate) fn run(group_name: &str, test_name: &str) -> Result<()> {
         TestMatrix::SingleVersionAllTargets { version } => SortedSet::from_iter([version.into()]),
     };
 
-    let runner = DiagnosticsRunner {
-        slang: SlangTarget,
-        solc: SolcTarget::new(solc_versions)?,
-    };
+    let slang = SlangTarget;
+    let solc = SolcTarget::new(solc_versions)?;
 
-    let cells = run_snapshot(&runner, group_name, test_name)?;
+    let cells = run_snapshot(
+        "diagnostics_output",
+        "txt",
+        group_name,
+        test_name,
+        |input, version, target| {
+            let files = files_of(input.source);
+
+            let slang_errors = slang.collect_diagnostics(&files, version, target)?;
+            let solc_errors = solc.collect_diagnostics(&files, version, target)?;
+
+            Ok(vec![
+                named_output(slang.name(), &slang_errors),
+                named_output(solc.name(), &solc_errors),
+            ])
+        },
+    )?;
 
     check_agreement(
         &cells,
         config.matrix,
         &format!("{group_name}/{test_name}"),
-        runner.slang.name(),
-        runner.solc.name(),
+        slang.name(),
+        solc.name(),
     )
 }
