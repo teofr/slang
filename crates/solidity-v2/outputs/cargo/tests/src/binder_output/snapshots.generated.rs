@@ -1013,6 +1013,11 @@ mod modifiers {
     }
 
     #[test]
+    fn references() -> Result<()> {
+        run("modifiers", "references")
+    }
+
+    #[test]
     fn simple() -> Result<()> {
         run("modifiers", "simple")
     }

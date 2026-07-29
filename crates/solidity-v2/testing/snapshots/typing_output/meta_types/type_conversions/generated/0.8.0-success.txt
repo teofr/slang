@@ -1,0 +1,46 @@
+# This file is generated automatically by infrastructure scripts. Please don't edit by hand.
+
+Typings: 
+    ╭─[input.sol:1:1]
+    │
+  9 │         uint256 a;
+    │                 ┬  
+    │                 ╰── `a`: uint256
+    │ 
+ 12 │     function f(uint256 x, bytes memory b) internal pure {
+    │              ┬         ┬               ┬  
+    │              ╰──────────────────────────── `f`: function (uint256, bytes memory) returns void
+    │                        │               │  
+    │                        ╰────────────────── `x`: uint256
+    │                                        │  
+    │                                        ╰── `b`: bytes memory
+ 13 │         S(x);
+    │         ┬─┬─  
+    │         ╰───── `S`: type(S)
+    │           │   
+    │           ╰─── `x`: uint256
+    │           │   
+    │           ╰─── `S(x)`: S memory
+ 14 │         abi.decode(b, (uint256[]));
+    │         ─┬───┬─────┬─┬────┬┬──────  
+    │          ╰────────────────────────── `abi`: <no type>
+    │              │     │ │    ││        
+    │              ╰────────────────────── `abi.decode`: <no type>
+    │                    │ │    ││        
+    │                    ╰──────────────── `b`: bytes memory
+    │                      │    ││        
+    │                      ╰────────────── `abi.decode(b, (uint256[]))`: uint256[] memory
+    │                           ││        
+    │                           ╰───────── `uint256`: type(uint256)
+    │                            │        
+    │                            ╰──────── `uint256[]`: type(uint256[] memory)
+    │                            │        
+    │                            ╰──────── `(uint256[])`: type(uint256[] memory)
+ 15 │         uint256(x);
+    │         ───┬─┬──┬─  
+    │            ╰──────── `uint256`: type(uint256)
+    │              │  │   
+    │              ╰────── `uint256(x)`: uint256
+    │                 │   
+    │                 ╰─── `x`: uint256
+────╯

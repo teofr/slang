@@ -37,8 +37,22 @@ mod expressions {
     }
 
     #[test]
+    fn number_literals() -> Result<()> {
+        run("expressions", "number_literals")
+    }
+
+    #[test]
     fn references() -> Result<()> {
         run("expressions", "references")
+    }
+}
+
+mod meta_types {
+    use super::*;
+
+    #[test]
+    fn type_conversions() -> Result<()> {
+        run("meta_types", "type_conversions")
     }
 }
 

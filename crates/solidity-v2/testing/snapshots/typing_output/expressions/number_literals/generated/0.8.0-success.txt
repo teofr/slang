@@ -1,0 +1,35 @@
+# This file is generated automatically by infrastructure scripts. Please don't edit by hand.
+
+Typings: 
+    ╭─[input.sol:1:1]
+    │
+  7 │     uint256 constant HEX = 0xff;
+    │                      ─┬─   ──┬─  
+    │                       ╰────────── `HEX`: uint256
+    │                              │   
+    │                              ╰─── `0xff`: lit-hex(255, 1)
+  8 │     uint256 constant DEC_WITH_SEP = 1_000_000;
+    │                      ──────┬─────   ────┬────  
+    │                            ╰─────────────────── `DEC_WITH_SEP`: uint256
+    │                                         │      
+    │                                         ╰────── `1_000_000`: lit-integer(1000000)
+  9 │     uint256 constant EXPONENT = 1e3;
+    │                      ────┬───   ─┬─  
+    │                          ╰─────────── `EXPONENT`: uint256
+    │                                  │   
+    │                                  ╰─── `1e3`: lit-integer(1000)
+ 10 │     uint256 constant ONE_ETHER = 1 ether;
+    │                      ────┬────   ───┬───  
+    │                          ╰──────────────── `ONE_ETHER`: uint256
+    │                                     │     
+    │                                     ╰───── `1 ether`: lit-integer(1000000000000000000)
+ 11 │     uint256 constant FOLDED_RATIONAL = 0.5 * 4;
+    │                      ───────┬───────   ─┬─┬──┬  
+    │                             ╰─────────────────── `FOLDED_RATIONAL`: uint256
+    │                                         │ │  │  
+    │                                         ╰─────── `0.5`: lit-rational(1/2)
+    │                                           │  │  
+    │                                           ╰───── `0.5 * 4`: lit-integer(2)
+    │                                              │  
+    │                                              ╰── `4`: lit-integer(4)
+────╯

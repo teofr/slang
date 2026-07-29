@@ -1,0 +1,70 @@
+# This file is generated automatically by infrastructure scripts. Please don't edit by hand.
+
+Definitions (6):
+- Def: #1 ["Ownable" @ input.sol:7:10] (contract)
+- Def: #2 ["_owner" @ input.sol:8:13] (state var, type: address)
+- Def: #3 ["onlyOwner" @ input.sol:10:14] (modifier)
+- Def: #4 ["first" @ input.sol:15:14] (function, type: function () returns void)
+- Def: #5 ["second" @ input.sol:16:14] (function, type: function () returns void)
+- Def: #6 ["third" @ input.sol:17:14] (function, type: function () returns void)
+
+------------------------------------------------------------------------
+
+References (8):
+- Ref: ["require" @ input.sol:11:9] -> built-in
+- Ref: ["msg" @ input.sol:11:17] -> built-in
+- Ref: ["sender" @ input.sol:11:21] -> built-in
+- Ref: ["_owner" @ input.sol:11:31] -> #2
+- Ref: ["_" @ input.sol:12:9] -> built-in
+- Ref: ["onlyOwner" @ input.sol:15:29] -> #3
+- Ref: ["onlyOwner" @ input.sol:16:30] -> #3
+- Ref: ["onlyOwner" @ input.sol:17:29] -> #3
+
+------------------------------------------------------------------------
+
+Unbound identifiers (0):
+
+------------------------------------------------------------------------
+
+Bindings: 
+    ╭─[input.sol:1:1]
+    │
+  7 │ contract Ownable {
+    │          ───┬───  
+    │             ╰───── name: 1
+  8 │     address _owner;
+    │             ───┬──  
+    │                ╰──── name: 2
+    │ 
+ 10 │     modifier onlyOwner() {
+    │              ────┬────  
+    │                  ╰────── name: 3
+ 11 │         require(msg.sender == _owner);
+    │         ───┬─── ─┬─ ───┬──    ───┬──  
+    │            ╰────────────────────────── built-in
+    │                  │     │         │    
+    │                  ╰──────────────────── built-in
+    │                        │         │    
+    │                        ╰────────────── built-in
+    │                                  │    
+    │                                  ╰──── ref: 2
+ 12 │         _;
+    │         ┬  
+    │         ╰── built-in
+    │ 
+ 15 │     function first() public onlyOwner {}
+    │              ──┬──          ────┬────  
+    │                ╰─────────────────────── name: 4
+    │                                 │      
+    │                                 ╰────── ref: 3
+ 16 │     function second() public onlyOwner {}
+    │              ───┬──          ────┬────  
+    │                 ╰─────────────────────── name: 5
+    │                                  │      
+    │                                  ╰────── ref: 3
+ 17 │     function third() public onlyOwner {}
+    │              ──┬──          ────┬────  
+    │                ╰─────────────────────── name: 6
+    │                                 │      
+    │                                 ╰────── ref: 3
+────╯
