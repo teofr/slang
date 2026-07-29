@@ -11,7 +11,11 @@ contract C {
     }
 
     // Memory and calldata arrays still expose `length`.
-    function g(uint256[] memory arr) public pure returns (uint256) {
-        return arr.length;
+    function g(uint256[] memory memArr, uint256[] calldata cdArr)
+        external
+        pure
+        returns (uint256)
+    {
+        return memArr.length + cdArr.length;
     }
 }
