@@ -35,5 +35,6 @@ impl SnapshotRunner for CstRunner {
 }
 
 pub(crate) fn run(parser_name: &str, test_name: &str) -> Result<()> {
-    run_snapshot(&CstRunner, parser_name, test_name)
+    run_snapshot(&CstRunner, parser_name, test_name)?;
+    Ok(())
 }

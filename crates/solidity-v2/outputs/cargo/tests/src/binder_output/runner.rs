@@ -37,5 +37,6 @@ impl SnapshotRunner for BinderRunner {
 }
 
 pub(crate) fn run(group_name: &str, test_name: &str) -> Result<()> {
-    run_snapshot(&BinderRunner, group_name, test_name)
+    run_snapshot(&BinderRunner, group_name, test_name)?;
+    Ok(())
 }

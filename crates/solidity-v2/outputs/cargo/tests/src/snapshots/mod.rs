@@ -82,24 +82,20 @@ pub(crate) trait SnapshotRunner {
         version: LanguageVersion,
         target: EvmTarget,
     ) -> Result<Vec<NamedOutput>>;
-
-    /// Optional cross-cell assertion run after the whole matrix (eg. checking
-    /// that two streams agree). Defaults to a no-op.
-    fn finish(&self, _cells: &[CellOutcome]) -> Result<()> {
-        Ok(())
-    }
 }
 
-/// Drives the full matrix for one test against a [`SnapshotRunner`].
+/// Drives the full matrix for one test against a [`SnapshotRunner`], writing the
+/// golden files and returning every cell's outcome so the caller can run any
+/// cross-cell checks it needs (eg. `diagnostics_output` comparing streams).
 ///
 /// This is a free function rather than a provided trait method precisely so a
-/// kind can't override the shared plumbing — it only supplies `render`,
-/// `finish`, and the associated constants.
+/// kind can't override the shared plumbing — it only supplies `render` and the
+/// associated constants.
 pub(crate) fn run_snapshot<R: SnapshotRunner + ?Sized>(
     runner: &R,
     group: &str,
     test: &str,
-) -> Result<()> {
+) -> Result<Vec<CellOutcome>> {
     let test_dir = CargoWorkspace::locate_source_crate("solidity_v2_testing_snapshots")?
         .join(R::OUTPUT_DIR)
         .join(group)
@@ -155,7 +151,7 @@ pub(crate) fn run_snapshot<R: SnapshotRunner + ?Sized>(
         });
     }
 
-    runner.finish(&outcomes)
+    Ok(outcomes)
 }
 
 fn snapshot_filename(

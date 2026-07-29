@@ -17,9 +17,6 @@ use crate::snapshots::{
 struct DiagnosticsRunner {
     slang: SlangTarget,
     solc: SolcTarget,
-    matrix: TestMatrix,
-    /// `group/test`, only used to label a disagreement failure.
-    test_path: String,
 }
 
 impl SnapshotRunner for DiagnosticsRunner {
@@ -41,49 +38,6 @@ impl SnapshotRunner for DiagnosticsRunner {
             named_output(self.slang.name(), &slang_errors),
             named_output(self.solc.name(), &solc_errors),
         ])
-    }
-
-    /// Assert slang and solc agree on the success/failure status of every cell.
-    /// The golden files themselves are informational; this agreement is the
-    /// actual test.
-    fn finish(&self, cells: &[CellOutcome]) -> Result<()> {
-        let slang = self.slang.name();
-        let solc = self.solc.name();
-
-        if cells
-            .iter()
-            .all(|cell| status_of(cell, slang) == status_of(cell, solc))
-        {
-            return Ok(());
-        }
-
-        let mut message = String::new();
-        writeln!(
-            message,
-            "slang and solc disagree on the compilation status of `{path}`.",
-            path = self.test_path,
-        )?;
-        writeln!(message)?;
-
-        for cell in cells {
-            let label = match self.matrix {
-                TestMatrix::SingleTargetAllVersions { .. } => cell.version.to_string(),
-                TestMatrix::SingleVersionAllTargets { .. } => cell.target.to_string(),
-            };
-            let slang_status = status_of(cell, slang);
-            let solc_status = status_of(cell, solc);
-            let outcome = if slang_status == solc_status {
-                "match"
-            } else {
-                "differ"
-            };
-            writeln!(
-                message,
-                "  {label}: slang={slang_status:?}, solc={solc_status:?} ({outcome})"
-            )?;
-        }
-
-        bail!(message)
     }
 }
 
@@ -107,12 +61,56 @@ fn status_of(cell: &CellOutcome, name: &str) -> Option<SnapshotStatus> {
         .map(|output| output.status)
 }
 
-/// Unlike the other snapshot kinds, this does one-time setup before handing off
-/// to `run_snapshot`: it resolves the config to learn which solc versions the
-/// matrix will cover, fetches those solc binaries once via `SolcTarget::new`
-/// (a network call that would be wasteful to repeat per cell), and builds the
-/// runner holding both targets and the matrix. The per-cell work lives in
-/// `render`/`finish`.
+/// Assert slang and solc agree on the success/failure status of every cell. The
+/// golden files themselves are informational; this agreement is the actual
+/// test.
+fn check_agreement(
+    cells: &[CellOutcome],
+    matrix: TestMatrix,
+    test_path: &str,
+    slang: &str,
+    solc: &str,
+) -> Result<()> {
+    if cells
+        .iter()
+        .all(|cell| status_of(cell, slang) == status_of(cell, solc))
+    {
+        return Ok(());
+    }
+
+    let mut message = String::new();
+    writeln!(
+        message,
+        "slang and solc disagree on the compilation status of `{test_path}`."
+    )?;
+    writeln!(message)?;
+
+    for cell in cells {
+        let label = match matrix {
+            TestMatrix::SingleTargetAllVersions { .. } => cell.version.to_string(),
+            TestMatrix::SingleVersionAllTargets { .. } => cell.target.to_string(),
+        };
+        let slang_status = status_of(cell, slang);
+        let solc_status = status_of(cell, solc);
+        let outcome = if slang_status == solc_status {
+            "match"
+        } else {
+            "differ"
+        };
+        writeln!(
+            message,
+            "  {label}: slang={slang_status:?}, solc={solc_status:?} ({outcome})"
+        )?;
+    }
+
+    bail!(message)
+}
+
+/// Does one-time setup before delegating to `run_snapshot`: resolves the config
+/// to learn which solc versions the matrix will cover, fetches those solc
+/// binaries once via `SolcTarget::new` (a network call that would be wasteful to
+/// repeat per cell), and builds the runner. Afterwards it checks the captured
+/// cells for slang/solc agreement (rather than a `finish` hook on the trait).
 pub(crate) fn run(group_name: &str, test_name: &str) -> Result<()> {
     let test_dir = CargoWorkspace::locate_source_crate("solidity_v2_testing_snapshots")?
         .join("diagnostics_output")
@@ -130,9 +128,15 @@ pub(crate) fn run(group_name: &str, test_name: &str) -> Result<()> {
     let runner = DiagnosticsRunner {
         slang: SlangTarget,
         solc: SolcTarget::new(solc_versions)?,
-        matrix: config.matrix,
-        test_path: format!("{group_name}/{test_name}"),
     };
 
-    run_snapshot(&runner, group_name, test_name)
+    let cells = run_snapshot(&runner, group_name, test_name)?;
+
+    check_agreement(
+        &cells,
+        config.matrix,
+        &format!("{group_name}/{test_name}"),
+        runner.slang.name(),
+        runner.solc.name(),
+    )
 }
