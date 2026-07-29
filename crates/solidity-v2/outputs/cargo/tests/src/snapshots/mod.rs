@@ -31,12 +31,13 @@ pub(crate) enum SnapshotStatus {
 
 /// One rendered output of a snapshot cell.
 ///
-/// A kind usually produces a single output written into the test's `generated/`
-/// directory (`name` empty). Kinds that emit several parallel streams — like
-/// `diagnostics_output` (slang vs solc) — return one `NamedOutput` per stream,
-/// each written into its own `generated/<name>/` subdirectory.
+/// A kind usually produces a single unnamed output (`name` is `None`) written
+/// into the test's `generated/` directory. Kinds that emit several parallel
+/// streams — like `diagnostics_output` (slang vs solc) — return one
+/// `NamedOutput` per stream, each written into its own `generated/<name>/`
+/// subdirectory.
 pub(crate) struct NamedOutput {
-    pub name: String,
+    pub name: Option<String>,
     pub status: SnapshotStatus,
     pub contents: String,
 }
@@ -45,7 +46,7 @@ impl NamedOutput {
     /// A single unnamed output, written directly into `generated/`.
     pub(crate) fn single(status: SnapshotStatus, contents: String) -> Vec<Self> {
         vec![Self {
-            name: String::new(),
+            name: None,
             status,
             contents,
         }]
@@ -110,7 +111,7 @@ pub(crate) fn run_snapshot(
 
     // The last-written contents for each output stream, so consecutive
     // unchanged cells collapse into a single golden file (per stream).
-    let mut last_contents: Map<String, String> = Map::default();
+    let mut last_contents: Map<Option<String>, String> = Map::default();
     let mut outcomes: Vec<CellOutcome> = Vec::with_capacity(cells.len());
 
     for (version, target) in cells {
@@ -121,10 +122,9 @@ pub(crate) fn run_snapshot(
             {
                 let filename =
                     snapshot_filename(config.matrix, version, target, output.status, extension);
-                let dir = if output.name.is_empty() {
-                    test_dir.join("generated")
-                } else {
-                    test_dir.join("generated").join(&output.name)
+                let dir = match &output.name {
+                    Some(name) => test_dir.join("generated").join(name),
+                    None => test_dir.join("generated"),
                 };
                 fs.write_file_raw(dir.join(filename), &output.contents)?;
                 last_contents.insert(output.name.clone(), output.contents.clone());

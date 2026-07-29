@@ -19,7 +19,7 @@ fn named_output(name: &str, errors: &[String]) -> NamedOutput {
         SnapshotStatus::Failure
     };
     NamedOutput {
-        name: name.to_string(),
+        name: Some(name.to_string()),
         status,
         contents: diagnostics_summary(errors),
     }
@@ -28,7 +28,7 @@ fn named_output(name: &str, errors: &[String]) -> NamedOutput {
 fn status_of(cell: &CellOutcome, name: &str) -> Option<SnapshotStatus> {
     cell.outputs
         .iter()
-        .find(|output| output.name == name)
+        .find(|output| output.name.as_deref() == Some(name))
         .map(|output| output.status)
 }
 
