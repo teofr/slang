@@ -1,7 +1,26 @@
+use std::ops::Range;
+
 use slang_solidity_v2_semantic::types::literals;
 
 use super::super::{StringExpression, Type};
 use crate::ast::{HexStringLiteralsStruct, StringLiteralsStruct, UnicodeStringLiteralsStruct};
+
+/// Computes the byte range spanning a sequence of literal tokens, from the
+/// start of the first to the end of the last. Falls back to an empty range for
+/// an empty sequence (which the grammar does not produce).
+macro_rules! literals_range {
+    ($literals:expr) => {{
+        let start = $literals
+            .iter()
+            .next()
+            .map_or(0, |literal| literal.get_text_range().start);
+        let end = $literals
+            .iter()
+            .last()
+            .map_or(0, |literal| literal.get_text_range().end);
+        start..end
+    }};
+}
 
 impl StringExpression {
     /// Returns the type assigned to this string expression by the typing pass.
@@ -23,6 +42,16 @@ impl StringExpression {
             StringExpression::StringLiterals(literals) => literals.value(),
             StringExpression::HexStringLiterals(literals) => literals.value(),
             StringExpression::UnicodeStringLiterals(literals) => literals.value(),
+        }
+    }
+
+    /// Returns the byte range this string expression spans, covering the whole
+    /// sequence of adjacent string literals.
+    pub fn get_text_range(&self) -> Range<usize> {
+        match self {
+            StringExpression::StringLiterals(literals) => literals_range!(literals),
+            StringExpression::HexStringLiterals(literals) => literals_range!(literals),
+            StringExpression::UnicodeStringLiterals(literals) => literals_range!(literals),
         }
     }
 }

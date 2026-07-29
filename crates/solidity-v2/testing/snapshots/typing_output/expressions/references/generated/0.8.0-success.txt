@@ -1,0 +1,25 @@
+# This file is generated automatically by infrastructure scripts. Please don't edit by hand.
+
+Typings: 
+   ╭─[input.sol:1:1]
+   │
+ 2 │     uint256 stored;
+   │             ───┬──  
+   │                ╰──── `stored`: uint256
+   │ 
+ 4 │     function setAndGet(uint256 value) public returns (uint256) {
+   │              ────┬────         ──┬──  
+   │                  ╰──────────────────── `setAndGet`: function (uint256) returns uint256
+   │                                  │    
+   │                                  ╰──── `value`: uint256
+ 5 │         stored = value;
+   │         ───┬───┬───┬──  
+   │            ╰──────────── `stored`: uint256
+   │                │   │    
+   │                ╰──────── `stored = value`: uint256
+   │                    │    
+   │                    ╰──── `value`: uint256
+ 6 │         return stored;
+   │                ───┬──  
+   │                   ╰──── `stored`: uint256
+───╯

@@ -1,0 +1,25 @@
+# This file is generated automatically by infrastructure scripts. Please don't edit by hand.
+
+Typings: 
+   ╭─[input.sol:1:1]
+   │
+ 4 │     function test(bytes32 data) public pure returns (ShortString) {
+   │              ──┬─         ──┬─  
+   │                ╰──────────────── `test`: function (bytes32) returns ShortString
+   │                             │   
+   │                             ╰─── `data`: bytes32
+ 5 │         ShortString s = ShortString.wrap(data);
+   │                     ┬   ─────┬──┬──┬───────┬──  
+   │                     ╰─────────────────────────── `s`: ShortString
+   │                              │  │  │       │    
+   │                              ╰────────────────── `ShortString`: type(ShortString)
+   │                                 │  │       │    
+   │                                 ╰─────────────── `ShortString.wrap`: <no type>
+   │                                    │       │    
+   │                                    ╰──────────── `ShortString.wrap(data)`: ShortString
+   │                                            │    
+   │                                            ╰──── `data`: bytes32
+ 6 │         return s;
+   │                ┬  
+   │                ╰── `s`: ShortString
+───╯

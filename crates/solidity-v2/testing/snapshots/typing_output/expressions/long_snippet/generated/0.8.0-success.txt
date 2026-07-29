@@ -1,0 +1,32 @@
+# This file is generated automatically by infrastructure scripts. Please don't edit by hand.
+
+Typings: 
+   ╭─[input.sol:1:1]
+   │
+ 2 │     function f(uint256 aaaaaaaa, uint256 bbbbbbbb) public pure returns (uint256) {
+   │              ┬         ────┬───          ────┬───  
+   │              ╰───────────────────────────────────── `f`: function (uint256, uint256) returns uint256
+   │                            │                 │     
+   │                            ╰─────────────────────── `aaaaaaaa`: uint256
+   │                                              │     
+   │                                              ╰───── `bbbbbbbb`: uint256
+ 3 │         return aaaaaaaa + bbbbbbbb + aaaaaaaa + bbbbbbbb + aaaaaaaa;
+   │                ────┬────┬─────┬────┬─────┬──────────┬──────────┬───  
+   │                    ╰───────────────────────────────────────────────── `aaaaaaaa`: uint256
+   │                         │     │    │     │          │          │     
+   │                         ╰──────────────────────────────────────────── `aaaaaaaa + bbbbbbbb`: uint256
+   │                               │    │     │          │          │     
+   │                               ╰────────────────────────────────────── `bbbbbbbb`: uint256
+   │                               │    │     │          │          │     
+   │                               ╰────────────────────────────────────── `aaaaaaaa + bbbbbbbb + aaaaaaaa`: uint256
+   │                                    │     │          │          │     
+   │                                    ╰───────────────────────────────── `aaaaaaaa + bbbbbbbb + aaaaaaaa + bbbbbbb...`: uint256
+   │                                          │          │          │     
+   │                                          ╰─────────────────────────── `aaaaaaaa`: uint256
+   │                                          │          │          │     
+   │                                          ╰─────────────────────────── `aaaaaaaa + bbbbbbbb + aaaaaaaa + bbbbbbb...`: uint256
+   │                                                     │          │     
+   │                                                     ╰──────────────── `bbbbbbbb`: uint256
+   │                                                                │     
+   │                                                                ╰───── `aaaaaaaa`: uint256
+───╯
