@@ -4,7 +4,8 @@ use ruint::aliases::U256;
 use slang_solidity_v2_common::collections::Set;
 use slang_solidity_v2_common::diagnostics::kinds::DiagnosticKind;
 use slang_solidity_v2_common::diagnostics::kinds::type_system::{
-    StorageLayoutBaseNonInteger, StorageLayoutBaseNotConstant, StorageLayoutBaseOutOfRange,
+    MemberNotAvailableOutsideStorage, StorageLayoutBaseNonInteger, StorageLayoutBaseNotConstant,
+    StorageLayoutBaseOutOfRange,
 };
 use slang_solidity_v2_common::nodes::NodeId;
 use slang_solidity_v2_ir::ir;
@@ -20,7 +21,10 @@ use crate::passes::common::constant_evaluator::{
     ConstantResolver, EvaluationError, evaluate_compile_time_constant,
 };
 use crate::passes::common::{find_definition_namespace_scope_id, node_location};
-use crate::types::{ContractType, InterfaceType, StructType, Type, TypeId, UserMetaType};
+use crate::types::{
+    ArrayType, BytesType, ContractType, DataLocation, InterfaceType, StructType, Type, TypeId,
+    UserMetaType,
+};
 
 /// Lexical style resolution of symbols
 impl Pass<'_> {
@@ -128,6 +132,48 @@ impl Pass<'_> {
                 .lookup_member_of(built_in, symbol)
                 .into(),
         }
+    }
+
+    /// Explains *why* a member access `operand.symbol` failed to resolve, when
+    /// the reason is a known type-system constraint rather than the member
+    /// simply not existing. Returns `None` when there's no specific diagnostic
+    /// to attach (the caller then leaves the reference unresolved as before).
+    ///
+    /// Callers must only invoke this once the member is known to be unresolved
+    /// — a member reachable through the type, a built-in, or a `using`
+    /// directive is a successful resolution and never reaches here. Keeping the
+    /// reasoning here (rather than in the visitor) lets other member-lookup
+    /// diagnostics — eg. solc's `TypeError 5755`/`9582` — slot in alongside it.
+    pub(super) fn unavailable_member_diagnostic(
+        &self,
+        operand_typing: &Typing,
+        symbol: &str,
+    ) -> Option<DiagnosticKind> {
+        let type_id = operand_typing.as_type_id()?;
+
+        // `.push`/`.pop` are storage-only members of dynamic arrays and `bytes`
+        // (solc's `TypeError 4994`); on a `memory`/`calldata` value only
+        // `.length` is available.
+        if (symbol == "push" || symbol == "pop")
+            && matches!(
+                self.types.get_type_by_id(type_id),
+                Type::Array(ArrayType {
+                    location: DataLocation::Memory | DataLocation::Calldata,
+                    ..
+                }) | Type::Bytes(BytesType {
+                    location: DataLocation::Memory | DataLocation::Calldata,
+                })
+            )
+        {
+            return Some(
+                MemberNotAvailableOutsideStorage {
+                    member: symbol.to_owned(),
+                }
+                .into(),
+            );
+        }
+
+        None
     }
 
     fn resolve_symbol_in_type(&mut self, type_id: TypeId, symbol: &str) -> Resolution {

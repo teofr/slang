@@ -1,6 +1,5 @@
 use std::sync::Arc;
 
-use slang_solidity_v2_common::diagnostics::kinds::type_system::MemberNotAvailableOutsideStorage;
 use slang_solidity_v2_ir::ir;
 use slang_solidity_v2_ir::ir::NodeIdentity;
 use slang_solidity_v2_ir::ir::visitor::Visitor;
@@ -10,8 +9,8 @@ use crate::binder::{Reference, Resolution, Typing, UsingOperator};
 use crate::built_ins::InternalBuiltIn;
 use crate::passes::common::{filter_overriden_definitions, node_location};
 use crate::types::{
-    AddressType, ArrayType, BytesType, DataLocation, FixedSizeArrayType, MappingType, MetaType,
-    Number, TupleType, Type, UserMetaType,
+    AddressType, ArrayType, DataLocation, FixedSizeArrayType, MappingType, MetaType, Number,
+    TupleType, Type, UserMetaType,
 };
 
 impl Visitor for Pass<'_> {
@@ -374,37 +373,16 @@ impl Visitor for Pass<'_> {
             self.resolve_symbol_in_typing(&operand_typing, node.member.unparse());
         let resolution = filter_overriden_definitions(self.binder, self.types, member_resolution);
 
-        // solc TypeError 4994: `.push`/`.pop` are storage-only members of
-        // dynamic arrays and `bytes`. If the member didn't resolve and the
-        // operand is a `memory`/`calldata` array or `bytes` value, report it
-        // explicitly rather than leaving the member silently unresolved.
-        if resolution == Resolution::Unresolved {
-            let member = node.member.unparse();
-            if (member == "push" || member == "pop")
-                && operand_typing
-                    .as_type_id()
-                    .map(|type_id| self.types.get_type_by_id(type_id))
-                    .is_some_and(|type_| {
-                        matches!(
-                            type_,
-                            Type::Array(ArrayType {
-                                location: DataLocation::Memory | DataLocation::Calldata,
-                                ..
-                            }) | Type::Bytes(BytesType {
-                                location: DataLocation::Memory | DataLocation::Calldata,
-                            })
-                        )
-                    })
-            {
-                let (file_id, range) = node_location(node, self.file_node_mapper);
-                self.diagnostics.push(
-                    file_id,
-                    range,
-                    MemberNotAvailableOutsideStorage {
-                        member: member.to_owned(),
-                    },
-                );
-            }
+        // If the member stayed unresolved, ask the resolution layer whether
+        // there's a specific reason to report (eg. a storage-only array/bytes
+        // member reached on a `memory`/`calldata` value) rather than leaving it
+        // silently unresolved.
+        if resolution == Resolution::Unresolved
+            && let Some(diagnostic) =
+                self.unavailable_member_diagnostic(&operand_typing, node.member.unparse())
+        {
+            let (file_id, range) = node_location(node, self.file_node_mapper);
+            self.diagnostics.push(file_id, range, diagnostic);
         }
 
         // If the operand is either `this` or a contract/interface reference
