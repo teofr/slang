@@ -9,6 +9,7 @@ mod fallback_function_mutability;
 mod fallback_function_signature;
 mod incompatible_constant_operator;
 mod invalid_base;
+mod member_not_available_outside_storage;
 mod receive_function_parameters;
 mod storage_layout_base_non_integer;
 mod storage_layout_base_not_constant;
@@ -25,6 +26,7 @@ pub use fallback_function_mutability::FallbackFunctionMutability;
 pub use fallback_function_signature::FallbackFunctionSignature;
 pub use incompatible_constant_operator::IncompatibleConstantOperator;
 pub use invalid_base::InvalidBase;
+pub use member_not_available_outside_storage::MemberNotAvailableOutsideStorage;
 pub use receive_function_parameters::ReceiveFunctionParameters;
 use serde::Serialize;
 pub use storage_layout_base_non_integer::StorageLayoutBaseNonInteger;
@@ -79,5 +81,8 @@ define_diagnostic_kind! {
         /// A function is called through a contract/interface type name (eg.
         /// `C.f()`) rather than through an instance.
         CannotCallViaContractTypeName(CannotCallViaContractTypeName),
+        /// A storage-only member (`.push` / `.pop`) of a dynamic array or
+        /// `bytes` value is accessed on a `memory` or `calldata` value.
+        MemberNotAvailableOutsideStorage(MemberNotAvailableOutsideStorage),
     }
 }

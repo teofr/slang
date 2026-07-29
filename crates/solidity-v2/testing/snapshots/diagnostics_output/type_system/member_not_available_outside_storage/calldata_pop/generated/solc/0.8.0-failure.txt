@@ -1,0 +1,11 @@
+# This file is generated automatically by infrastructure scripts. Please don't edit by hand.
+
+Diagnostics: 1
+
+[TypeError 4994] Error: Member "pop" is not available in uint256[] calldata outside of storage.
+   ╭─[input.sol:6:9]
+   │
+ 6 │         arr.pop();
+   │         ───┬───  
+   │            ╰───── Error occurred here.
+───╯

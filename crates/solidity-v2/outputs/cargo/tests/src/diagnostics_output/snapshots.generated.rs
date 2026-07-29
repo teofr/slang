@@ -2028,6 +2028,47 @@ mod type_system {
         }
     }
 
+    mod member_not_available_outside_storage {
+        use super::*;
+
+        #[test]
+        fn calldata_pop() -> Result<()> {
+            run(
+                "type_system/member_not_available_outside_storage",
+                "calldata_pop",
+            )
+        }
+
+        #[test]
+        fn calldata_push() -> Result<()> {
+            run(
+                "type_system/member_not_available_outside_storage",
+                "calldata_push",
+            )
+        }
+
+        #[test]
+        fn memory_pop() -> Result<()> {
+            run(
+                "type_system/member_not_available_outside_storage",
+                "memory_pop",
+            )
+        }
+
+        #[test]
+        fn memory_push() -> Result<()> {
+            run(
+                "type_system/member_not_available_outside_storage",
+                "memory_push",
+            )
+        }
+
+        #[test]
+        fn valid() -> Result<()> {
+            run("type_system/member_not_available_outside_storage", "valid")
+        }
+    }
+
     mod receive_function_parameters {
         use super::*;
 

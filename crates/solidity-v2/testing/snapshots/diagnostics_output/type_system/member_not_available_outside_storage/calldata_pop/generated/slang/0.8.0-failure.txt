@@ -1,0 +1,11 @@
+# This file is generated automatically by infrastructure scripts. Please don't edit by hand.
+
+Diagnostics: 1
+
+[type-system/member-not-available-outside-storage] Error: Member "pop" is not available outside of storage.
+   ╭─[input.sol:6:9]
+   │
+ 6 │         arr.pop();
+   │         ───┬───  
+   │            ╰───── Error occurred here.
+───╯

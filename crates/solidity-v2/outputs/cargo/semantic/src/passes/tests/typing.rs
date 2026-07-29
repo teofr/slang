@@ -5,7 +5,7 @@ use slang_solidity_v2_common::diagnostics::DiagnosticCollection;
 use slang_solidity_v2_common::diagnostics::kinds::DiagnosticKind;
 use slang_solidity_v2_common::diagnostics::kinds::type_system::{
     ArrayLengthFractional, ArrayLengthNotConstant, ArrayLengthZero, ConstantArithmeticError,
-    IncompatibleConstantOperator, StorageLayoutBaseNotConstant,
+    IncompatibleConstantOperator, StorageLayoutBaseNotConstant, TypeSystemDiagnosticKind,
 };
 use slang_solidity_v2_common::evm_targets::EvmTarget;
 use slang_solidity_v2_common::versions::LanguageVersion;
@@ -2211,4 +2211,95 @@ fn test_overloaded_declaration_via_type_name_operand_narrows() {
     // `A.f()` selects the parameterless overload, `A.f(1)` the one-parameter one.
     assert_eq!(parameter_count(first), 0);
     assert_eq!(parameter_count(second), 1);
+}
+
+/// Returns the member name of the single `MemberNotAvailableOutsideStorage`
+/// diagnostic emitted for `source`, panicking if a different (or no) diagnostic
+/// was produced.
+fn member_not_available_outside_storage(source: &str) -> String {
+    let TypeAnalysis { diagnostics, .. } =
+        analyze_with_diagnostics(LanguageVersion::LATEST, source);
+    match diagnostic_kind(&diagnostics) {
+        Some(DiagnosticKind::TypeSystem(
+            TypeSystemDiagnosticKind::MemberNotAvailableOutsideStorage(diagnostic),
+        )) => diagnostic.member,
+        other => panic!("expected MemberNotAvailableOutsideStorage, got {other:?}"),
+    }
+}
+
+#[test]
+fn test_push_pop_on_non_storage_arrays_is_rejected() {
+    // `.push`/`.pop` on `memory`/`calldata` arrays are storage-only members
+    // and must be reported (mirrors solc's `TypeError 4994`).
+    assert_eq!(
+        "push",
+        member_not_available_outside_storage(
+            r#"
+            contract C {
+                function f(uint256[] memory arr) public pure {
+                    arr.push();
+                }
+            }
+            "#,
+        )
+    );
+    assert_eq!(
+        "pop",
+        member_not_available_outside_storage(
+            r#"
+            contract C {
+                function f(uint256[] memory arr) public pure {
+                    arr.pop();
+                }
+            }
+            "#,
+        )
+    );
+    assert_eq!(
+        "push",
+        member_not_available_outside_storage(
+            r#"
+            contract C {
+                function f(uint256[] calldata arr) external pure {
+                    arr.push();
+                }
+            }
+            "#,
+        )
+    );
+    assert_eq!(
+        "pop",
+        member_not_available_outside_storage(
+            r#"
+            contract C {
+                function f(uint256[] calldata arr) external pure {
+                    arr.pop();
+                }
+            }
+            "#,
+        )
+    );
+}
+
+#[test]
+fn test_push_pop_on_storage_arrays_and_length_on_memory_are_accepted() {
+    // Storage arrays keep `.push`/`.pop`, and `.length` stays available on
+    // every data location, so none of these produce a diagnostic.
+    analyze(
+        LanguageVersion::LATEST,
+        r#"
+        contract C {
+            uint256[] s;
+
+            function f() public {
+                s.push(1);
+                s.pop();
+            }
+
+            function g(uint256[] memory arr) public pure returns (uint256) {
+                return arr.length;
+            }
+        }
+        "#,
+    );
 }
