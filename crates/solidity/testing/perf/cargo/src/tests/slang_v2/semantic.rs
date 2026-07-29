@@ -132,7 +132,7 @@ pub fn count_resolved_references(output: &Output) -> usize {
     // projects are fully resolved
     for reference in references.values() {
         assert!(
-            !matches!(reference.resolution, Resolution::Unresolved),
+            !matches!(reference.resolution, Resolution::Unresolved(_)),
             "unresolved reference at node_id={:?}",
             reference.node_id(),
         );
