@@ -1,0 +1,20 @@
+# This file is generated automatically by infrastructure scripts. Please don't edit by hand.
+
+Typings: 
+   ╭─[input.sol:1:1]
+   │
+ 2 │     function info() public view returns (address, uint256) {
+   │              ──┬─  
+   │                ╰─── `info`: function () returns (address, uint256)
+ 3 │         return (msg.sender, block.timestamp);
+   │                ──┬───┬───────┬┬────┬────────  
+   │                  ╰──────────────────────────── `msg`: <no type>
+   │                      │       ││    │          
+   │                      ╰──────────────────────── `msg.sender`: address
+   │                              ││    │          
+   │                              ╰──────────────── `(msg.sender, block.timestamp)`: (address, uint256)
+   │                               │    │          
+   │                               ╰─────────────── `block`: <no type>
+   │                                    │          
+   │                                    ╰────────── `block.timestamp`: uint256
+───╯

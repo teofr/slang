@@ -1,0 +1,27 @@
+# This file is generated automatically by infrastructure scripts. Please don't edit by hand.
+
+Typings: 
+   ╭─[input.sol:1:1]
+   │
+ 2 │     function f(uint256 x) public pure returns (uint256) {
+   │              ┬         ┬  
+   │              ╰──────────── `f`: function (uint256) returns uint256
+   │                        │  
+   │                        ╰── `x`: uint256
+ 3 │         uint256 y = x + 1;
+   │                 ┬   ┬─┬─┬  
+   │                 ╰────────── `y`: uint256
+   │                     │ │ │  
+   │                     ╰────── `x`: uint256
+   │                       │ │  
+   │                       ╰──── `x + 1`: uint256
+   │                         │  
+   │                         ╰── `1`: lit-integer(1)
+ 4 │         return y * 2;
+   │                ┬─┬─┬  
+   │                ╰────── `y`: uint256
+   │                  │ │  
+   │                  ╰──── `y * 2`: uint256
+   │                    │  
+   │                    ╰── `2`: lit-integer(2)
+───╯

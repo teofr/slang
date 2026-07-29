@@ -1,0 +1,7 @@
+{
+  "matrix": {
+    "type": "SingleTargetAllVersions",
+    "target": "Istanbul",
+    "reason": "Expression typing varies across language versions, not EVM targets. Pinning the latest target supported by solc '0.8.0' avoids spurious 'Evm Version not supported' errors."
+  }
+}

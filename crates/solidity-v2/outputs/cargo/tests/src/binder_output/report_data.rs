@@ -2,9 +2,11 @@ use std::fmt::Display;
 use std::ops::Range;
 
 use slang_solidity_v2::ast::visitor::{Visitor, accept_source_unit};
-use slang_solidity_v2::ast::{DataLocation, Definition, Identifier, LiteralKind, NodeId, Type};
+use slang_solidity_v2::ast::{Definition, Identifier, NodeId};
 use slang_solidity_v2::compilation::{CompilationUnit, FileId};
 use slang_solidity_v2_common::collections::{Map, SortedMap};
+
+use crate::utils::type_display::{definition_value_type, type_or_unresolved};
 
 // Types
 
@@ -301,32 +303,30 @@ impl Display for CollectedIdentifier {
 
 // Data display helpers
 
-fn definition_name(definition: &Definition) -> String {
-    definition.identifier().name().to_string()
-}
-
 fn definition_type(definition: &Definition) -> String {
+    // The type of value-bearing definitions comes from the shared
+    // `definition_value_type`, so binder_output and typing_output agree.
     match definition {
-        Definition::Constant(constant) => {
+        Definition::Constant(_) => {
             format!(
                 "constant, type: {}",
-                type_or_unresolved(constant.get_type())
+                type_or_unresolved(definition_value_type(definition))
             )
         }
         Definition::Contract(_) => "contract".to_string(),
         Definition::Enum(_) => "enum".to_string(),
-        Definition::EnumMember(enum_member) => {
+        Definition::EnumMember(_) => {
             format!(
                 "enum member of {}",
-                type_or_unresolved(enum_member.get_type())
+                type_or_unresolved(definition_value_type(definition))
             )
         }
         Definition::Error(_) => "error".to_string(),
         Definition::Event(_) => "event".to_string(),
-        Definition::Function(function) => {
+        Definition::Function(_) => {
             format!(
                 "function, type: {}",
-                type_or_unresolved(function.get_type())
+                type_or_unresolved(definition_value_type(definition))
             )
         }
         Definition::Import(_) => "import".to_string(),
@@ -334,168 +334,37 @@ fn definition_type(definition: &Definition) -> String {
         Definition::Interface(_) => "interface".to_string(),
         Definition::Library(_) => "library".to_string(),
         Definition::Modifier(_) => "modifier".to_string(),
-        Definition::Parameter(parameter) => {
+        Definition::Parameter(_) => {
             format!(
                 "parameter, type: {}",
-                type_or_unresolved(parameter.get_type())
+                type_or_unresolved(definition_value_type(definition))
             )
         }
-        Definition::StateVariable(state_variable) => {
+        Definition::StateVariable(_) => {
             format!(
                 "state var, type: {}",
-                type_or_unresolved(state_variable.get_type())
+                type_or_unresolved(definition_value_type(definition))
             )
         }
         Definition::Struct(_) => "struct".to_string(),
-        Definition::StructMember(struct_member) => {
+        Definition::StructMember(_) => {
             format!(
                 "struct member, type: {}",
-                type_or_unresolved(struct_member.get_type())
+                type_or_unresolved(definition_value_type(definition))
             )
         }
         Definition::TypeParameter(_) => "type param".to_string(),
         // A user-defined value type definition names the type itself, so its
         // typing is always the meta-type (it has no value type of its own).
         Definition::UserDefinedValueType(_) => "udvt, type: meta-type".to_string(),
-        Definition::Variable(variable) => {
+        Definition::Variable(_) => {
             format!(
                 "variable, type: {}",
-                type_or_unresolved(variable.get_type())
+                type_or_unresolved(definition_value_type(definition))
             )
         }
         Definition::YulFunction(_) => "yul function".to_string(),
         Definition::YulParameter(_) => "yul parameter".to_string(),
         Definition::YulVariable(_) => "yul variable".to_string(),
-    }
-}
-
-fn type_or_unresolved(type_: Option<Type>) -> String {
-    match type_ {
-        Some(type_) => type_display(&type_),
-        None => "unresolved".to_string(),
-    }
-}
-
-#[allow(clippy::too_many_lines)]
-fn type_display(type_: &Type) -> String {
-    match type_ {
-        Type::Address(address) => {
-            if address.is_payable() {
-                "address payable".to_string()
-            } else {
-                "address".to_string()
-            }
-        }
-        Type::Array(array) => format!(
-            "{element_type}[] {location}",
-            element_type = type_display(&array.element_type()),
-            location = data_location_display(array.location()),
-        ),
-        Type::Boolean(_) => "bool".to_string(),
-        Type::ByteArray(byte_array) => format!("bytes{width}", width = byte_array.width()),
-        Type::Bytes(bytes) => {
-            format!(
-                "bytes {location}",
-                location = data_location_display(bytes.location())
-            )
-        }
-        Type::Contract(contract) => definition_name(&contract.definition()),
-        Type::Enum(enum_) => definition_name(&enum_.definition()),
-        Type::FixedPointNumber(fixed) => {
-            format!(
-                "{signed}fixed{bits}x{precision_bits}",
-                signed = if fixed.is_signed() { "" } else { "u" },
-                bits = fixed.bits(),
-                precision_bits = fixed.decimal_places(),
-            )
-        }
-        Type::FixedSizeArray(fixed_size_array) => format!(
-            "{element_type}[{size}] {location}",
-            element_type = type_display(&fixed_size_array.element_type()),
-            size = fixed_size_array.size(),
-            location = data_location_display(fixed_size_array.location()),
-        ),
-        Type::Function(function) => {
-            format!(
-                "function ({parameters}) returns {returns}",
-                parameters = function
-                    .parameter_types()
-                    .iter()
-                    .map(type_display)
-                    .collect::<Vec<_>>()
-                    .join(", "),
-                returns = type_display(&function.return_type()),
-            )
-        }
-        Type::Integer(integer) => {
-            format!(
-                "{signed}int{bits}",
-                signed = if integer.is_signed() { "" } else { "u" },
-                bits = integer.bits(),
-            )
-        }
-        Type::Interface(interface) => definition_name(&interface.definition()),
-        Type::Library(library) => definition_name(&library.definition()),
-        Type::Literal(literal) => match literal.kind() {
-            LiteralKind::Integer { value } => format!("lit-integer({value})"),
-            LiteralKind::HexInteger { value, bytes } => {
-                format!("lit-hex({value}, {bytes})")
-            }
-            LiteralKind::Rational { value } => format!("lit-rational({value})"),
-            LiteralKind::HexString { bytes } => format!("lit-hexstring({bytes})"),
-            LiteralKind::String { bytes } => format!("lit-string({bytes})"),
-            LiteralKind::Address { value } => format!("lit-address({value})"),
-        },
-        Type::Mapping(mapping) => {
-            format!(
-                "{key} => {value}",
-                key = type_display(&mapping.key_type()),
-                value = type_display(&mapping.value_type()),
-            )
-        }
-        // Meta-types are expression-only typings (the type of an expression
-        // that refers to a type rather than a value). This report only renders
-        // the types of value-bearing definitions, so a meta-type never reaches
-        // here.
-        Type::MetaType(_) | Type::UserMetaType(_) => {
-            unreachable!("meta-types are not rendered as definition types")
-        }
-        Type::String(string) => {
-            format!(
-                "string {location}",
-                location = data_location_display(string.location())
-            )
-        }
-        Type::Struct(struct_) => {
-            format!(
-                "{name} {location}",
-                name = definition_name(&struct_.definition()),
-                location = data_location_display(struct_.location()),
-            )
-        }
-        Type::Tuple(tuple) => {
-            format!(
-                "({types})",
-                types = tuple
-                    .types()
-                    .iter()
-                    .map(type_display)
-                    .collect::<Vec<_>>()
-                    .join(", ")
-            )
-        }
-        Type::UserDefinedValue(user_defined_value) => {
-            definition_name(&user_defined_value.definition())
-        }
-        Type::Void(_) => "void".to_string(),
-    }
-}
-
-fn data_location_display(location: DataLocation) -> &'static str {
-    match location {
-        DataLocation::Memory => "memory",
-        DataLocation::Storage => "storage",
-        DataLocation::Calldata => "calldata",
-        DataLocation::Inherited => "(inherited)",
     }
 }

@@ -1,0 +1,24 @@
+# This file is generated automatically by infrastructure scripts. Please don't edit by hand.
+
+Typings: 
+   ╭─[input.sol:1:1]
+   │
+ 2 │     function pick(bool cond, uint256 a, uint256 b) public pure returns (uint256) {
+   │              ──┬─      ──┬─          ┬          ┬  
+   │                ╰─────────────────────────────────── `pick`: function (bool, uint256, uint256) returns uint256
+   │                          │           │          │  
+   │                          ╰───────────────────────── `cond`: bool
+   │                                      │          │  
+   │                                      ╰───────────── `a`: uint256
+   │                                                 │  
+   │                                                 ╰── `b`: uint256
+ 3 │         return cond ? a : b;
+   │                ──┬───┬┬───┬  
+   │                  ╰─────────── `cond`: bool
+   │                      ││   │  
+   │                      ╰─────── `cond ? a : b`: uint256
+   │                       │   │  
+   │                       ╰────── `a`: uint256
+   │                           │  
+   │                           ╰── `b`: uint256
+───╯

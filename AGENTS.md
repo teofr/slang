@@ -135,6 +135,7 @@ For testing, we maintain snapshots checked into the repo:
     - Parser: `crates/solidity-v2/testing/snapshots/cst_output/`
     - Binder: `crates/solidity-v2/testing/snapshots/binder_output/`
     - Diagnostics: `crates/solidity-v2/testing/snapshots/diagnostics_output/`
+    - Typing: `crates/solidity-v2/testing/snapshots/typing_output/` (per-expression types + reference targets)
 
 When source changes cause snapshot mismatches, the test output shows the diff.
 Simply re-run the tests, and they will update the snapshot files on disk automatically.
