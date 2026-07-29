@@ -16,7 +16,7 @@ pub(crate) fn resolve_identifier_path_in_scope(
     starting_scope_id: ScopeId,
 ) -> Resolution {
     let mut scope_id = Some(starting_scope_id);
-    let mut resolution = Resolution::Unresolved;
+    let mut resolution = Resolution::Unresolved(None);
 
     for (index, identifier) in identifier_path.iter().enumerate() {
         let symbol = identifier.unparse();
@@ -28,7 +28,7 @@ pub(crate) fn resolve_identifier_path_in_scope(
                 binder.resolve_in_scope_as_namespace(scope_id, symbol)
             }
         } else {
-            Resolution::Unresolved
+            Resolution::Unresolved(None)
         };
 
         let reference = Reference::new(Arc::clone(identifier), resolution.clone());

@@ -71,7 +71,7 @@ impl Pass<'_> {
 
     pub(super) fn resolve_symbol_in_typing(&mut self, typing: &Typing, symbol: &str) -> Resolution {
         match typing {
-            Typing::Unresolved => Resolution::Unresolved,
+            Typing::Unresolved => Resolution::Unresolved(None),
             Typing::Undetermined(type_ids) => {
                 // We cannot use argument-type disambiguation here, so we will
                 // use the first result
@@ -120,12 +120,12 @@ impl Pass<'_> {
 
                     Resolution::from(definition_ids)
                 } else {
-                    Resolution::Unresolved
+                    Resolution::Unresolved(None)
                 }
             }
             Typing::NewExpression(_type_id) => {
                 // No legacy constructor call options in >= 0.8.0
-                Resolution::Unresolved
+                Resolution::Unresolved(None)
             }
             Typing::BuiltIn(built_in) => self
                 .built_ins_resolver()
@@ -134,23 +134,20 @@ impl Pass<'_> {
         }
     }
 
-    /// Explains *why* a member access `operand.symbol` failed to resolve, when
-    /// the reason is a known type-system constraint rather than the member
-    /// simply not existing. Returns `None` when there's no specific diagnostic
-    /// to attach (the caller then leaves the reference unresolved as before).
+    /// Explains *why* a member `type.symbol` failed to resolve, when the reason
+    /// is a known type-system constraint rather than the member simply not
+    /// existing. Returns `None` when there's no specific diagnostic to attach.
     ///
-    /// Callers must only invoke this once the member is known to be unresolved
-    /// — a member reachable through the type, a built-in, or a `using`
-    /// directive is a successful resolution and never reaches here. Keeping the
-    /// reasoning here (rather than in the visitor) lets other member-lookup
-    /// diagnostics — eg. solc's `TypeError 5755`/`9582` — slot in alongside it.
-    pub(super) fn unavailable_member_diagnostic(
+    /// Called only once the member is known to be unresolved (a member
+    /// reachable through the type, a built-in, or a `using` directive resolves
+    /// successfully and never reaches here). Centralising the reasoning here
+    /// lets other member-lookup diagnostics — eg. solc's `TypeError 5755` /
+    /// `9582` — slot in alongside it.
+    fn unavailable_member_diagnostic(
         &self,
-        operand_typing: &Typing,
+        type_id: TypeId,
         symbol: &str,
     ) -> Option<DiagnosticKind> {
-        let type_id = operand_typing.as_type_id()?;
-
         // `.push`/`.pop` are storage-only members of dynamic arrays and `bytes`
         // (solc's `TypeError 4994`); on a `memory`/`calldata` value only
         // `.length` is available.
@@ -200,23 +197,34 @@ impl Pass<'_> {
             }
             Type::UserMetaType(UserMetaType { definition_id }) => {
                 find_definition_namespace_scope_id(self.binder, *definition_id)
-                    .map_or(Resolution::Unresolved, |scope_id| {
+                    .map_or(Resolution::Unresolved(None), |scope_id| {
                         self.binder.resolve_in_scope_as_namespace(scope_id, symbol)
                     })
             }
-            _ => Resolution::Unresolved,
+            _ => Resolution::Unresolved(None),
         }
         .get_definition_ids();
 
         // Next, consider active `using` directives in the current context
         self.add_attached_functions_for_type(type_id, symbol, &mut definition_ids);
 
-        Resolution::from(definition_ids).or_else(|| {
+        let resolution = Resolution::from(definition_ids).or_else(|| {
             // If still unresolved, try with a built-in
             self.built_ins_resolver()
                 .lookup_member_of_type_id(type_id, symbol)
                 .into()
-        })
+        });
+
+        // If the member is still unresolved, attach a diagnostic when we know
+        // the specific reason (eg. a storage-only member on a memory/calldata
+        // value), so the caller can report it instead of failing silently.
+        match resolution {
+            Resolution::Unresolved(None) => Resolution::Unresolved(
+                self.unavailable_member_diagnostic(type_id, symbol)
+                    .map(Box::new),
+            ),
+            resolved => resolved,
+        }
     }
 
     fn add_attached_functions_for_type(
@@ -356,7 +364,7 @@ impl Pass<'_> {
     fn resolve_first_modifier(&self, resolution: &Resolution) -> Resolution {
         let definition_ids = resolution.get_definition_ids();
         if definition_ids.is_empty() {
-            return Resolution::Unresolved;
+            return Resolution::Unresolved(None);
         }
         // Find the first definition that is either a modifier or a contract
         // type, as that's how bases in constructors are parsed
@@ -387,7 +395,7 @@ impl Pass<'_> {
                     self.binder.resolve_in_scope_as_namespace(scope_id, symbol)
                 }
             } else {
-                Resolution::Unresolved
+                Resolution::Unresolved(None)
             };
 
             // TODO(validation) SDR[35]: the found definition(s) must be modifiers
@@ -430,7 +438,7 @@ impl Pass<'_> {
         for named_argument in named_arguments {
             let identifier = &named_argument.name;
             let resolution =
-                parameters_scope_id.map_or(Resolution::Unresolved, |parameters_scope_id| {
+                parameters_scope_id.map_or(Resolution::Unresolved(None), |parameters_scope_id| {
                     self.binder
                         .resolve_in_scope_as_namespace(parameters_scope_id, identifier.unparse())
                 });

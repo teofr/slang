@@ -105,7 +105,7 @@ impl Visitor for Pass<'_> {
                 .as_ref()
                 .and_then(|file_id| self.binder.scope_id_for_file_id(file_id));
 
-            let resolution = scope_id.map_or(Resolution::Unresolved, |scope_id| {
+            let resolution = scope_id.map_or(Resolution::Unresolved(None), |scope_id| {
                 self.binder
                     .resolve_in_scope(scope_id, symbol.name.unparse())
             });
@@ -342,7 +342,7 @@ impl Visitor for Pass<'_> {
                             let resolution = self
                                 .binder
                                 .find_reference_by_identifier_node_id(symbol_name.id())
-                                .map_or(Resolution::Unresolved, |reference| {
+                                .map_or(Resolution::Unresolved(None), |reference| {
                                     self.binder
                                         .follow_symbol_aliases(reference.resolution.clone())
                                 });
@@ -425,7 +425,7 @@ impl Visitor for Pass<'_> {
         if let Some(name) = &node.name {
             let resolution = match name.unparse() {
                 "Error" | "Panic" => Resolution::BuiltIn(InternalBuiltIn::ErrorOrPanic),
-                _ => Resolution::Unresolved,
+                _ => Resolution::Unresolved(None),
             };
             let reference = Reference::new(Arc::clone(name), resolution);
             self.binder.insert_reference(reference);

@@ -190,7 +190,7 @@ impl Pass<'_> {
                 self.binder
                     .find_reference_by_identifier_node_id(identifier.id())
             })
-            .map_or(Resolution::Unresolved, |reference| {
+            .map_or(Resolution::Unresolved(None), |reference| {
                 // reference may resolve to an imported library, so we need to
                 // follow aliases
                 self.binder
@@ -238,7 +238,7 @@ impl Pass<'_> {
             // Global built-ins are not visible in the scope where using
             // directives resolve, so a built-in never reaches here.
             Resolution::BuiltIn(_) => unreachable!("built-ins do not resolve in a using directive"),
-            Resolution::Unresolved | Resolution::Ambiguous(_) => {
+            Resolution::Unresolved(_) | Resolution::Ambiguous(_) => {
                 Some(IdentifierNotFunctionOrNotUnique.into())
             }
         }

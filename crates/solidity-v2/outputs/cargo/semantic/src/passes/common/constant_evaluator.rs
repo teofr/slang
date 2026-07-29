@@ -633,7 +633,7 @@ impl ConstantIdentifierResolver<ScopeId> for ConstantResolver<'_> {
             }
             Resolution::BuiltIn(_) => unreachable!("the binder doesn't resolve to built-ins"),
 
-            Resolution::Unresolved => {
+            Resolution::Unresolved(_) => {
                 // Try to resolve a built-in using the scope as context
                 let built_in = match self.binder.get_scope_by_id(*scope_id) {
                     Scope::Block(_)

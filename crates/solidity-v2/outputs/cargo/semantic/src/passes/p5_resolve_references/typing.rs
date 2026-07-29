@@ -211,7 +211,7 @@ impl Pass<'_> {
 
     pub(super) fn typing_of_resolution(&mut self, resolution: &Resolution) -> Typing {
         match resolution {
-            Resolution::Unresolved => Typing::Unresolved,
+            Resolution::Unresolved(_) => Typing::Unresolved,
             Resolution::BuiltIn(built_in) => self.built_ins_resolver().typing_of(built_in),
             Resolution::Definition(definition_id) => self.binder.node_typing(*definition_id),
             Resolution::Ambiguous(definitions) => {

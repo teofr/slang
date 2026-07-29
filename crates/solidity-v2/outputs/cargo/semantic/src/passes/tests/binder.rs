@@ -378,7 +378,7 @@ contract Test is Base {
 
     let unresolved_count = references
         .values()
-        .filter(|r| matches!(r.resolution, Resolution::Unresolved))
+        .filter(|r| matches!(r.resolution, Resolution::Unresolved(_)))
         .count();
     assert_eq!(
         0, unresolved_count,

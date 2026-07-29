@@ -318,7 +318,7 @@ impl Binder {
                         definitions.insert(*node_id, vec![*reference_id]);
                     }
                 }
-                Resolution::Ambiguous(_) | Resolution::BuiltIn(_) | Resolution::Unresolved => {}
+                Resolution::Ambiguous(_) | Resolution::BuiltIn(_) | Resolution::Unresolved(_) => {}
             }
         }
         self.definitions_to_references = definitions;
@@ -558,14 +558,14 @@ impl Binder {
                     if let Some(index) = linearisations.iter().position(|id| *id == node_id) {
                         &linearisations[index..]
                     } else {
-                        return Resolution::Unresolved;
+                        return Resolution::Unresolved(None);
                     }
                 }
                 ResolveOptions::Super(node_id) => {
                     if let Some(index) = linearisations.iter().position(|id| *id == node_id) {
                         &linearisations[index + 1..]
                     } else {
-                        return Resolution::Unresolved;
+                        return Resolution::Unresolved(None);
                     }
                 }
             };
@@ -612,7 +612,7 @@ impl Binder {
             // contracts should have a proper linearisation
             Resolution::from(definitions.clone())
         } else {
-            Resolution::Unresolved
+            Resolution::Unresolved(None)
         }
     }
 
@@ -666,7 +666,7 @@ impl Binder {
                 .symbols
                 .get(symbol)
                 .cloned()
-                .map_or(Resolution::Unresolved, Resolution::from),
+                .map_or(Resolution::Unresolved(None), Resolution::from),
             Scope::YulBlock(yul_block_scope) => yul_block_scope
                 .definitions
                 .get(symbol)
@@ -777,7 +777,7 @@ impl Binder {
                 .symbols
                 .get(symbol)
                 .cloned()
-                .map_or(Resolution::Unresolved, Resolution::from),
+                .map_or(Resolution::Unresolved(None), Resolution::from),
             Scope::Parameters(parameters_scope) => {
                 parameters_scope.lookup_definition(symbol).into()
             }
@@ -787,7 +787,7 @@ impl Binder {
             | Scope::Function(_)
             | Scope::Modifier(_)
             | Scope::YulBlock(_)
-            | Scope::YulFunction(_) => Resolution::Unresolved,
+            | Scope::YulFunction(_) => Resolution::Unresolved(None),
         }
     }
 
@@ -801,7 +801,7 @@ impl Binder {
         if let Scope::Contract(contract_scope) = scope {
             self.resolve_in_contract_scope_internal(contract_scope, symbol, options)
         } else {
-            Resolution::Unresolved
+            Resolution::Unresolved(None)
         }
     }
 

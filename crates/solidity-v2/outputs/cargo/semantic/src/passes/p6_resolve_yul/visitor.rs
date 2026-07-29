@@ -135,7 +135,7 @@ impl Visitor for Pass<'_> {
         for identifier in item_iter {
             self.binder.insert_reference(Reference::new(
                 Arc::clone(identifier),
-                Resolution::Unresolved,
+                Resolution::Unresolved(None),
             ));
         }
 

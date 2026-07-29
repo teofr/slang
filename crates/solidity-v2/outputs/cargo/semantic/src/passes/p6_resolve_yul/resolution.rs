@@ -58,11 +58,11 @@ impl Pass<'_> {
                 if let Some(definition) = self.binder.find_definition_by_id(*node_id) {
                     BuiltInsResolver::lookup_yul_suffix(definition, symbol).into()
                 } else {
-                    Resolution::Unresolved
+                    Resolution::Unresolved(None)
                 }
             }
-            Resolution::Unresolved | Resolution::Ambiguous(_) | Resolution::BuiltIn(_) => {
-                Resolution::Unresolved
+            Resolution::Unresolved(_) | Resolution::Ambiguous(_) | Resolution::BuiltIn(_) => {
+                Resolution::Unresolved(None)
             }
         }
     }

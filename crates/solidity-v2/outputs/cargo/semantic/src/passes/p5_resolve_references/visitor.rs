@@ -371,18 +371,16 @@ impl Visitor for Pass<'_> {
         let operand_typing = self.typing_of_expression(&node.operand);
         let member_resolution =
             self.resolve_symbol_in_typing(&operand_typing, node.member.unparse());
-        let resolution = filter_overriden_definitions(self.binder, self.types, member_resolution);
+        let mut resolution =
+            filter_overriden_definitions(self.binder, self.types, member_resolution);
 
-        // If the member stayed unresolved, ask the resolution layer whether
-        // there's a specific reason to report (eg. a storage-only array/bytes
-        // member reached on a `memory`/`calldata` value) rather than leaving it
-        // silently unresolved.
-        if resolution == Resolution::Unresolved
-            && let Some(diagnostic) =
-                self.unavailable_member_diagnostic(&operand_typing, node.member.unparse())
-        {
+        // An unresolved member may carry a diagnostic explaining why (eg. a
+        // storage-only array/bytes member reached on a `memory`/`calldata`
+        // value). Emit it and store a plain `Unresolved` in the reference.
+        if let Resolution::Unresolved(Some(diagnostic)) = resolution {
             let (file_id, range) = node_location(node, self.file_node_mapper);
-            self.diagnostics.push(file_id, range, diagnostic);
+            self.diagnostics.push(file_id, range, *diagnostic);
+            resolution = Resolution::Unresolved(None);
         }
 
         // If the operand is either `this` or a contract/interface reference

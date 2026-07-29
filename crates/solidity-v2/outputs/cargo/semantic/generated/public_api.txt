@@ -37,7 +37,7 @@ pub enum slang_solidity_v2_semantic::binder::Resolution
 pub slang_solidity_v2_semantic::binder::Resolution::Ambiguous(alloc::vec::Vec<slang_solidity_v2_common::nodes::NodeId>)
 pub slang_solidity_v2_semantic::binder::Resolution::BuiltIn(slang_solidity_v2_semantic::built_ins::InternalBuiltIn)
 pub slang_solidity_v2_semantic::binder::Resolution::Definition(slang_solidity_v2_common::nodes::NodeId)
-pub slang_solidity_v2_semantic::binder::Resolution::Unresolved
+pub slang_solidity_v2_semantic::binder::Resolution::Unresolved(core::option::Option<alloc::boxed::Box<slang_solidity_v2_common::diagnostics::kinds::DiagnosticKind>>)
 impl core::clone::Clone for slang_solidity_v2_semantic::binder::Resolution
 pub fn slang_solidity_v2_semantic::binder::Resolution::clone(&self) -> slang_solidity_v2_semantic::binder::Resolution
 impl core::cmp::Eq for slang_solidity_v2_semantic::binder::Resolution

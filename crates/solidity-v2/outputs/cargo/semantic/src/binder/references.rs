@@ -1,3 +1,4 @@
+use slang_solidity_v2_common::diagnostics::kinds::DiagnosticKind;
 use slang_solidity_v2_common::nodes::NodeId;
 use slang_solidity_v2_ir::ir;
 
@@ -16,8 +17,11 @@ pub struct Reference {
 /// where that reference occurs.
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum Resolution {
-    /// The identifier was not found.
-    Unresolved,
+    /// The identifier was not found. Carries an optional diagnostic explaining
+    /// *why* the lookup failed when a specific reason is known (eg. a
+    /// storage-only array/`bytes` member reached on a `memory`/`calldata`
+    /// value); `None` is a plain "not found" with nothing extra to report.
+    Unresolved(Option<Box<DiagnosticKind>>),
     /// A single definition identified by a `NodeId`.
     Definition(NodeId),
     /// When the lookup returns multiple possible definitions (eg. multiple
@@ -68,7 +72,13 @@ impl Resolution {
     where
         F: FnOnce() -> Self,
     {
-        if self == Self::Unresolved { f() } else { self }
+        // Only a plain "not found" falls through to the fallback. An
+        // `Unresolved` that already carries a diagnostic is a definitive
+        // failure and is preserved rather than discarded.
+        match self {
+            Self::Unresolved(None) => f(),
+            other => other,
+        }
     }
 }
 
@@ -77,7 +87,7 @@ impl From<Option<NodeId>> for Resolution {
         if let Some(definition_id) = value {
             Self::Definition(definition_id)
         } else {
-            Self::Unresolved
+            Self::Unresolved(None)
         }
     }
 }
@@ -87,7 +97,7 @@ impl From<Option<&NodeId>> for Resolution {
         if let Some(definition_id) = value {
             Self::Definition(*definition_id)
         } else {
-            Self::Unresolved
+            Self::Unresolved(None)
         }
     }
 }
@@ -95,7 +105,7 @@ impl From<Option<&NodeId>> for Resolution {
 impl From<Vec<NodeId>> for Resolution {
     fn from(mut value: Vec<NodeId>) -> Self {
         match value.len() {
-            0 => Resolution::Unresolved,
+            0 => Resolution::Unresolved(None),
             1 => Resolution::Definition(value.swap_remove(0)),
             _ => Resolution::Ambiguous(value),
         }
@@ -107,7 +117,7 @@ impl From<Option<InternalBuiltIn>> for Resolution {
         if let Some(built_in) = value {
             Self::BuiltIn(built_in)
         } else {
-            Self::Unresolved
+            Self::Unresolved(None)
         }
     }
 }
