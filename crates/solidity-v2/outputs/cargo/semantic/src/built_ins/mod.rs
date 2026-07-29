@@ -251,10 +251,18 @@ impl<'a> BuiltInsResolver<'a> {
             Type::Address(AddressType { is_payable }) => {
                 Self::lookup_member_of_address(symbol, *is_payable)
             }
-            Type::Array(ArrayType { element_type, .. }) => match symbol {
+            // `.push()`/`.pop()` are members of *storage* dynamic arrays only;
+            // memory and calldata arrays expose just `.length` (mirrors the
+            // `Bytes` arm below).
+            Type::Array(ArrayType {
+                element_type,
+                location,
+            }) => match symbol {
                 "length" => Some(InternalBuiltIn::Length),
-                "pop" => Some(InternalBuiltIn::ArrayPop),
-                "push" => Some(InternalBuiltIn::ArrayPush(*element_type)),
+                "pop" if *location == DataLocation::Storage => Some(InternalBuiltIn::ArrayPop),
+                "push" if *location == DataLocation::Storage => {
+                    Some(InternalBuiltIn::ArrayPush(*element_type))
+                }
                 _ => None,
             },
             Type::Boolean => None,
