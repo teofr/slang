@@ -4,7 +4,12 @@ use serde::Serialize;
 use thiserror::Error;
 
 /// All supported EVM targets of `{{ model.language.name }}`, in chronological order.
+///
+/// The string representations (`Display`, `TryFrom<&str>`, and `Serialize`) all
+/// use `solc`'s own `camelCase` spelling, so they agree with each other and can
+/// be passed to / parsed from `solc` directly.
 #[derive(Clone, Copy, Debug, Eq, Ord, PartialEq, PartialOrd, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub enum EvmTarget {
     {% for evm_target in model.language.evm_targets %}
         {{ evm_target }} = {{ loop.index0 }},
@@ -26,11 +31,14 @@ impl EvmTarget {
     ];
 }
 
+/// Formats the target using `solc`'s own spelling (the `camelCase` names its
+/// `--evm-version` flag and JSON API use), so the value round-trips through
+/// [`TryFrom<&str>`] and can be handed to `solc` as-is.
 impl Display for EvmTarget {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         match self {
             {%- for evm_target in model.language.evm_targets %}
-                EvmTarget::{{ evm_target }} => write!(f, "{{ evm_target }}"),
+                EvmTarget::{{ evm_target }} => write!(f, "{{ evm_target | camel_case }}"),
             {%- endfor %}
         }
     }
@@ -42,13 +50,15 @@ pub enum EvmTargetConversionError {
     UnrecognizedEvmTarget,
 }
 
+/// Parses `solc`'s own spelling of the target (the `camelCase` names its
+/// `--evm-version` flag and JSON API use), matching [`Display`].
 impl TryFrom<&str> for EvmTarget {
     type Error = EvmTargetConversionError;
 
     fn try_from(value: &str) -> Result<Self, Self::Error> {
         match value {
             {%- for evm_target in model.language.evm_targets %}
-                "{{ evm_target }}" => Ok(EvmTarget::{{ evm_target }}),
+                "{{ evm_target | camel_case }}" => Ok(EvmTarget::{{ evm_target }}),
             {%- endfor %}
             _ => Err(EvmTargetConversionError::UnrecognizedEvmTarget),
         }
