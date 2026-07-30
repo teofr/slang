@@ -30,6 +30,18 @@ pub struct BuiltInDefinition {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub evm_enabled: Option<EvmTargetSpecifier>,
 
+    /// The version range this built-in's *name* is reserved, i.e. can't be used
+    /// as a Yul identifier. Defaults to always, and is only narrower than
+    /// `enabled` for names `solc` has not promoted to reserved identifiers yet:
+    /// those may still be declared before the built-in exists, where `solc`
+    /// merely warns that the name will be promoted in the future.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub reserved: Option<VersionSpecifier>,
+
+    /// The EVM target range this built-in's *name* is reserved. See `reserved`.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub evm_reserved: Option<EvmTargetSpecifier>,
+
     /// A verbatim Rust type to use in the definition of the variant in the
     /// internal enum if required for correct resolution or typing.
     #[serde(skip_serializing_if = "Option::is_none")]

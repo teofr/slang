@@ -29,6 +29,22 @@ mod resolution {
         use super::*;
 
         #[test]
+        fn not_yet_reserved_until_fork() -> Result<()> {
+            run(
+                "resolution/built_in_redeclaration",
+                "not_yet_reserved_until_fork",
+            )
+        }
+
+        #[test]
+        fn reserved_before_own_fork() -> Result<()> {
+            run(
+                "resolution/built_in_redeclaration",
+                "reserved_before_own_fork",
+            )
+        }
+
+        #[test]
         fn supersedes_external_shadowing() -> Result<()> {
             run(
                 "resolution/built_in_redeclaration",

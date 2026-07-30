@@ -3,7 +3,7 @@
 //! [`find_conflicting_yul_definition`] is the scope-walk used when registering
 //! each Yul definition: it answers "may I declare this name here?". A reserved
 //! Yul built-in name (`add`, `mload`, ...) may never be declared, so that's
-//! checked first. Otherwise Yul forbids shadowing entirely *within* an assembly
+//! checked first (see the `reserved` module for which names count). Otherwise Yul forbids shadowing entirely *within* an assembly
 //! block, so the search walks every enclosing Yul scope first (a name can't be
 //! redeclared, and Yul functions and variables share one namespace).
 //!
@@ -25,7 +25,9 @@
 //!   separately, but both produce the same `ExternalDeclarationShadowing`
 //!   conflict (matching solc).
 
+use slang_solidity_v2_common::evm_targets::EvmTarget;
 use slang_solidity_v2_common::nodes::NodeId;
+use slang_solidity_v2_common::versions::LanguageVersion;
 
 use crate::binder::{Binder, Definition, Resolution, Scope, ScopeId};
 use crate::built_ins::BuiltInsResolver;
@@ -56,14 +58,19 @@ pub(super) fn find_conflicting_yul_definition(
     scope_id: ScopeId,
     symbol: &str,
     new_definition: &Definition,
+    language_version: LanguageVersion,
+    evm_target: EvmTarget,
 ) -> Option<YulConflict> {
     // A reserved Yul built-in name may never be declared, regardless of the
     // declaration kind or what's in scope; this takes precedence over any
     // redeclaration or shadowing conflict.
     //
-    // TODO: this checks against built-ins across all versions/targets, but we
-    // should restrict it to the current version/target.
-    if BuiltInsResolver::lookup_yul_global(symbol).is_some() {
+    // Most names are reserved on every target, but a few recently added ones may
+    // still be used as identifiers until the fork that introduces them; the
+    // `reserved`/`evm_reserved` ranges in the language definition say which.
+    if BuiltInsResolver::lookup_yul_global(symbol)
+        .is_some_and(|built_in| built_in.is_reserved(language_version, evm_target))
+    {
         return Some(YulConflict::BuiltInRedeclaration);
     }
 

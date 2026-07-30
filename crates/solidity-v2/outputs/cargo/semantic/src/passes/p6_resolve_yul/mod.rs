@@ -3,7 +3,9 @@ use slang_solidity_v2_common::diagnostics::kinds::DiagnosticKind;
 use slang_solidity_v2_common::diagnostics::kinds::resolution::{
     BuiltInRedeclaration, ExternalDeclarationShadowing, IdentifierRedeclaration,
 };
+use slang_solidity_v2_common::evm_targets::EvmTarget;
 use slang_solidity_v2_common::nodes::NodeId;
+use slang_solidity_v2_common::versions::LanguageVersion;
 use slang_solidity_v2_ir::ir;
 
 use crate::binder::{AssemblyBlock, Binder, Definition, Scope, ScopeId};
@@ -34,6 +36,8 @@ use conflicts::YulConflict;
 pub fn run(
     binder: &mut Binder,
     types: &TypeRegistry,
+    language_version: LanguageVersion,
+    evm_target: EvmTarget,
     file_node_mapper: &FileNodeMapper,
     diagnostics: &mut DiagnosticCollection,
 ) {
@@ -46,13 +50,26 @@ pub fn run(
     // mutable borrow of the rest of the binder. They're returned afterwards.
     let mut assembly_blocks = binder.take_assembly_blocks();
     for block in assembly_blocks.values_mut() {
-        Pass::visit_assembly_statement(binder, types, file_node_mapper, diagnostics, block);
+        Pass::visit_assembly_statement(
+            binder,
+            types,
+            language_version,
+            evm_target,
+            file_node_mapper,
+            diagnostics,
+            block,
+        );
     }
     binder.restore_assembly_blocks(assembly_blocks);
 }
 
 struct Pass<'a> {
     file_node_mapper: &'a FileNodeMapper,
+    /// Needed to tell whether a Yul built-in name is currently reserved: a few
+    /// recently added names may still be used as identifiers before the fork
+    /// that introduces them (see the `reserved` module).
+    language_version: LanguageVersion,
+    evm_target: EvmTarget,
     // We don't need to chain Yul scopes, so `ScopeId` is enough to track the scope stack
     scope_stack: Vec<ScopeId>,
     binder: &'a mut Binder,
@@ -69,6 +86,8 @@ impl<'a> Pass<'a> {
     fn visit_assembly_statement(
         binder: &'a mut Binder,
         types: &'a TypeRegistry,
+        language_version: LanguageVersion,
+        evm_target: EvmTarget,
         file_node_mapper: &'a FileNodeMapper,
         diagnostics: &'a mut DiagnosticCollection,
         block: &'a mut AssemblyBlock,
@@ -82,6 +101,8 @@ impl<'a> Pass<'a> {
         } = block;
         let mut pass = Self {
             file_node_mapper,
+            language_version,
+            evm_target,
             // Seed the stack with the enclosing Solidity scope (created in p1)
             // so the block's Yul scope parents correctly and Yul identifiers
             // chain up into the enclosing Solidity definitions.
@@ -160,6 +181,8 @@ impl<'a> Pass<'a> {
             scope_id,
             symbol,
             &definition,
+            self.language_version,
+            self.evm_target,
         ) {
             Some(YulConflict::BuiltInRedeclaration) => Some(
                 BuiltInRedeclaration {

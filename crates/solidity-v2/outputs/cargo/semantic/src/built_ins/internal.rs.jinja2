@@ -1,5 +1,10 @@
+{%- import "crates/solidity-v2/outputs/cargo/common/src/versions/_macros.rs.jinja2" as _versions -%}
+{%- import "crates/solidity-v2/outputs/cargo/common/src/evm_targets/_macros.rs.jinja2" as _evm_targets -%}
+
 use slang_solidity_v2_common::built_ins::BuiltIn;
+use slang_solidity_v2_common::evm_targets::{EvmTarget, EvmTargetSpecifier};
 use slang_solidity_v2_common::nodes::NodeId;
+use slang_solidity_v2_common::versions::{LanguageVersion, LanguageVersionSpecifier};
 use crate::types::TypeId;
 
 /// This is the internal representation of a built-in resolution and typing.
@@ -35,6 +40,46 @@ impl InternalBuiltIn {
             {%- endfor %}
             {% endfor -%}
             {% endfor %}
+        }
+    }
+
+    /// Whether this built-in's *name* is reserved for the given language version
+    /// and EVM target, i.e. may not be declared as a Yul identifier.
+    ///
+    /// Most names are reserved unconditionally, even on targets where the
+    /// built-in does not exist: `solc` rejects `let create2 := 1` when targeting
+    /// Homestead. The exceptions are names `solc` has not promoted to reserved
+    /// identifiers yet, which declare a narrower `reserved`/`evm_reserved` range
+    /// in the language definition; before that range `solc` only warns.
+    #[allow(clippy::too_many_lines)]
+    pub(crate) fn is_reserved(
+        self,
+        language_version: LanguageVersion,
+        evm_target: EvmTarget,
+    ) -> bool {
+        match self {
+            {%- for context in model.language.built_ins %}
+                {%- for scope in context.scopes %}
+                    {%- for definition in scope.definitions %}
+                        {%- if definition.reserved.type != "Always" and definition.evm_reserved.type != "Always" %}
+                            Self::{{ definition.name }}{% if definition.internal_parameter %}(_){% endif %} => {
+                                {{ _versions::specifier(s=definition.reserved) }}.contains(language_version)
+                                    && {{ _evm_targets::specifier(s=definition.evm_reserved) }}.contains(evm_target)
+                            }
+                        {%- elif definition.reserved.type != "Always" %}
+                            Self::{{ definition.name }}{% if definition.internal_parameter %}(_){% endif %} => {
+                                {{ _versions::specifier(s=definition.reserved) }}.contains(language_version)
+                            }
+                        {%- elif definition.evm_reserved.type != "Always" %}
+                            Self::{{ definition.name }}{% if definition.internal_parameter %}(_){% endif %} => {
+                                {{ _evm_targets::specifier(s=definition.evm_reserved) }}.contains(evm_target)
+                            }
+                        {%- endif %}
+                    {%- endfor %}
+                {%- endfor %}
+            {%- endfor %}
+
+            _ => true,
         }
     }
 }

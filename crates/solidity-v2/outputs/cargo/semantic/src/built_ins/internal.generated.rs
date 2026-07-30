@@ -1,7 +1,9 @@
 // This file is generated automatically by infrastructure scripts. Please don't edit by hand.
 
 use slang_solidity_v2_common::built_ins::BuiltIn;
+use slang_solidity_v2_common::evm_targets::{EvmTarget, EvmTargetSpecifier};
 use slang_solidity_v2_common::nodes::NodeId;
+use slang_solidity_v2_common::versions::{LanguageVersion, LanguageVersionSpecifier};
 
 use crate::types::TypeId;
 
@@ -352,6 +354,58 @@ impl InternalBuiltIn {
             Self::YulOffset => BuiltIn::YulOffset,
             Self::YulSelector => BuiltIn::YulSelector,
             Self::YulSlot => BuiltIn::YulSlot,
+        }
+    }
+
+    /// Whether this built-in's *name* is reserved for the given language version
+    /// and EVM target, i.e. may not be declared as a Yul identifier.
+    ///
+    /// Most names are reserved unconditionally, even on targets where the
+    /// built-in does not exist: `solc` rejects `let create2 := 1` when targeting
+    /// Homestead. The exceptions are names `solc` has not promoted to reserved
+    /// identifiers yet, which declare a narrower `reserved`/`evm_reserved` range
+    /// in the language definition; before that range `solc` only warns.
+    #[allow(clippy::too_many_lines)]
+    pub(crate) fn is_reserved(
+        self,
+        language_version: LanguageVersion,
+        evm_target: EvmTarget,
+    ) -> bool {
+        match self {
+            Self::YulBasefee => {
+                LanguageVersionSpecifier::from(LanguageVersion::V0_8_7).contains(language_version)
+                    && EvmTargetSpecifier::from(EvmTarget::London).contains(evm_target)
+            }
+            Self::YulBlobbasefee => {
+                LanguageVersionSpecifier::from(LanguageVersion::V0_8_24).contains(language_version)
+                    && EvmTargetSpecifier::from(EvmTarget::Cancun).contains(evm_target)
+            }
+            Self::YulBlobhash => {
+                LanguageVersionSpecifier::from(LanguageVersion::V0_8_24).contains(language_version)
+                    && EvmTargetSpecifier::from(EvmTarget::Cancun).contains(evm_target)
+            }
+            Self::YulClz => {
+                LanguageVersionSpecifier::from(LanguageVersion::V0_8_31).contains(language_version)
+                    && EvmTargetSpecifier::from(EvmTarget::Osaka).contains(evm_target)
+            }
+            Self::YulMcopy => {
+                LanguageVersionSpecifier::from(LanguageVersion::V0_8_24).contains(language_version)
+                    && EvmTargetSpecifier::from(EvmTarget::Cancun).contains(evm_target)
+            }
+            Self::YulPrevrandao => {
+                LanguageVersionSpecifier::from(LanguageVersion::V0_8_18).contains(language_version)
+                    && EvmTargetSpecifier::from(EvmTarget::Paris).contains(evm_target)
+            }
+            Self::YulTload => {
+                LanguageVersionSpecifier::from(LanguageVersion::V0_8_24).contains(language_version)
+                    && EvmTargetSpecifier::from(EvmTarget::Cancun).contains(evm_target)
+            }
+            Self::YulTstore => {
+                LanguageVersionSpecifier::from(LanguageVersion::V0_8_24).contains(language_version)
+                    && EvmTargetSpecifier::from(EvmTarget::Cancun).contains(evm_target)
+            }
+
+            _ => true,
         }
     }
 }
