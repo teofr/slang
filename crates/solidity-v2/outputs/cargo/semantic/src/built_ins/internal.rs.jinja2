@@ -46,11 +46,30 @@ impl InternalBuiltIn {
     /// Whether this built-in's *name* is reserved for the given language version
     /// and EVM target, i.e. may not be declared as a Yul identifier.
     ///
-    /// Most names are reserved unconditionally, even on targets where the
-    /// built-in does not exist: `solc` rejects `let create2 := 1` when targeting
-    /// Homestead. The exceptions are names `solc` has not promoted to reserved
-    /// identifiers yet, which declare a narrower `reserved`/`evm_reserved` range
-    /// in the language definition; before that range `solc` only warns.
+    /// `solc` keeps two classes of Yul built-in name:
+    ///
+    /// - Names it has *promoted* to reserved identifiers are rejected on every
+    ///   EVM target, even where the built-in does not exist: `let create2 := 1`
+    ///   is rejected targeting Homestead, and `let difficulty := 1` is rejected
+    ///   from Paris on, after `difficulty` itself stops being available.
+    /// - Recently added names are not promoted yet, so they may still be used as
+    ///   identifiers until the built-in exists; before that `solc` only warns
+    ///   that the name "will be promoted to Yul reserved identifier in the
+    ///   future".
+    ///
+    /// Those two classes happen to be distinguished by whether the definition
+    /// carries a language-version range: every not-yet-promoted name was added
+    /// in a known `0.8.x`, while the promoted ones predate the supported range
+    /// and are gated only by EVM target. So a built-in with no `enabled` range
+    /// is reserved unconditionally, and one with an `enabled` range is reserved
+    /// exactly while it is available.
+    ///
+    /// This is a correlation in `solc`'s current behaviour rather than a rule it
+    /// guarantees: if a name were promoted while keeping its version range, or
+    /// a new built-in were added gated only by target, the mapping would need to
+    /// become explicit (a `reserved`/`evm_reserved` pair alongside
+    /// `enabled`/`evm_enabled`). The `built_in_redeclaration` snapshot tests pin
+    /// both classes, so such a change would surface there.
     #[allow(clippy::too_many_lines)]
     pub(crate) fn is_reserved(
         self,
@@ -61,18 +80,14 @@ impl InternalBuiltIn {
             {%- for context in model.language.built_ins %}
                 {%- for scope in context.scopes %}
                     {%- for definition in scope.definitions %}
-                        {%- if definition.reserved.type != "Always" and definition.evm_reserved.type != "Always" %}
+                        {%- if definition.enabled.type != "Always" and definition.evm_enabled.type != "Always" %}
                             Self::{{ definition.name }}{% if definition.internal_parameter %}(_){% endif %} => {
-                                {{ _versions::specifier(s=definition.reserved) }}.contains(language_version)
-                                    && {{ _evm_targets::specifier(s=definition.evm_reserved) }}.contains(evm_target)
+                                {{ _versions::specifier(s=definition.enabled) }}.contains(language_version)
+                                    && {{ _evm_targets::specifier(s=definition.evm_enabled) }}.contains(evm_target)
                             }
-                        {%- elif definition.reserved.type != "Always" %}
+                        {%- elif definition.enabled.type != "Always" %}
                             Self::{{ definition.name }}{% if definition.internal_parameter %}(_){% endif %} => {
-                                {{ _versions::specifier(s=definition.reserved) }}.contains(language_version)
-                            }
-                        {%- elif definition.evm_reserved.type != "Always" %}
-                            Self::{{ definition.name }}{% if definition.internal_parameter %}(_){% endif %} => {
-                                {{ _evm_targets::specifier(s=definition.evm_reserved) }}.contains(evm_target)
+                                {{ _versions::specifier(s=definition.enabled) }}.contains(language_version)
                             }
                         {%- endif %}
                     {%- endfor %}

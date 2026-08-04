@@ -1,8 +1,3 @@
-// The macro builds the whole language model as one local value, which is large
-// enough to trip `large_stack_arrays`. It runs once at startup to hand the model
-// to codegen, so the stack size is not a concern here.
-#![allow(clippy::large_stack_arrays)]
-
 pub use solidity::SolidityDefinition;
 
 language_v2_macros::compile!(Language(
@@ -4640,23 +4635,17 @@ IdentifierPathTailElements: Vec<IdentifierPathElement> = {
                         BuiltInDefinition(
                             name = YulBasefee,
                             enabled = From("0.8.7"),
-                            evm_enabled = From(London),
-                            reserved = From("0.8.7"),
-                            evm_reserved = From(London)
+                            evm_enabled = From(London)
                         ),
                         BuiltInDefinition(
                             name = YulBlobbasefee,
                             enabled = From("0.8.24"),
-                            evm_enabled = From(Cancun),
-                            reserved = From("0.8.24"),
-                            evm_reserved = From(Cancun)
+                            evm_enabled = From(Cancun)
                         ),
                         BuiltInDefinition(
                             name = YulBlobhash,
                             enabled = From("0.8.24"),
-                            evm_enabled = From(Cancun),
-                            reserved = From("0.8.24"),
-                            evm_reserved = From(Cancun)
+                            evm_enabled = From(Cancun)
                         ),
                         BuiltInDefinition(name = YulBlockhash),
                         BuiltInDefinition(name = YulByte),
@@ -4671,9 +4660,7 @@ IdentifierPathTailElements: Vec<IdentifierPathElement> = {
                         BuiltInDefinition(
                             name = YulClz,
                             enabled = From("0.8.31"),
-                            evm_enabled = From(Osaka),
-                            reserved = From("0.8.31"),
-                            evm_reserved = From(Osaka)
+                            evm_enabled = From(Osaka)
                         ),
                         BuiltInDefinition(name = YulCodecopy),
                         BuiltInDefinition(name = YulCodesize),
@@ -4700,9 +4687,7 @@ IdentifierPathTailElements: Vec<IdentifierPathElement> = {
                         BuiltInDefinition(
                             name = YulMcopy,
                             enabled = From("0.8.24"),
-                            evm_enabled = From(Cancun),
-                            reserved = From("0.8.24"),
-                            evm_reserved = From(Cancun)
+                            evm_enabled = From(Cancun)
                         ),
                         BuiltInDefinition(name = YulMload),
                         BuiltInDefinition(name = YulMod),
@@ -4719,9 +4704,7 @@ IdentifierPathTailElements: Vec<IdentifierPathElement> = {
                         BuiltInDefinition(
                             name = YulPrevrandao,
                             enabled = From("0.8.18"),
-                            evm_enabled = From(Paris),
-                            reserved = From("0.8.18"),
-                            evm_reserved = From(Paris)
+                            evm_enabled = From(Paris)
                         ),
                         BuiltInDefinition(name = YulReturn),
                         BuiltInDefinition(name = YulReturndatacopy, evm_enabled = From(Byzantium)),
@@ -4746,16 +4729,12 @@ IdentifierPathTailElements: Vec<IdentifierPathElement> = {
                         BuiltInDefinition(
                             name = YulTload,
                             enabled = From("0.8.24"),
-                            evm_enabled = From(Cancun),
-                            reserved = From("0.8.24"),
-                            evm_reserved = From(Cancun)
+                            evm_enabled = From(Cancun)
                         ),
                         BuiltInDefinition(
                             name = YulTstore,
                             enabled = From("0.8.24"),
-                            evm_enabled = From(Cancun),
-                            reserved = From("0.8.24"),
-                            evm_reserved = From(Cancun)
+                            evm_enabled = From(Cancun)
                         ),
                         BuiltInDefinition(name = YulXor)
                     ]

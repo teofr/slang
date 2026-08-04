@@ -241,15 +241,11 @@ fn check_built_in_definition(analysis: &mut Analysis, definition: &SpannedBuiltI
         name: _,
         enabled,
         evm_enabled,
-        reserved,
-        evm_reserved,
         internal_parameter: _,
     } = definition;
 
     check_version_specifier(analysis, enabled.as_ref());
     check_evm_target_specifier(analysis, evm_enabled.as_ref());
-    check_version_specifier(analysis, reserved.as_ref());
-    check_evm_target_specifier(analysis, evm_reserved.as_ref());
 }
 
 fn check_version_specifier(

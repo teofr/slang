@@ -18,8 +18,6 @@ pub struct BuiltInDefinitionModel {
     pub name: String,
     pub enabled: VersionSpecifier,
     pub evm_enabled: EvmTargetSpecifier,
-    pub reserved: VersionSpecifier,
-    pub evm_reserved: EvmTargetSpecifier,
     pub internal_parameter: Option<String>,
 }
 
@@ -41,8 +39,6 @@ pub fn build_built_ins_model(language: &Language) -> Vec<BuiltInContextModel> {
                             name: def.name.to_string(),
                             enabled: def.enabled.clone().unwrap_or_default(),
                             evm_enabled: def.evm_enabled.clone().unwrap_or_default(),
-                            reserved: def.reserved.clone().unwrap_or_default(),
-                            evm_reserved: def.evm_reserved.clone().unwrap_or_default(),
                             internal_parameter: def
                                 .internal_parameter
                                 .as_ref()

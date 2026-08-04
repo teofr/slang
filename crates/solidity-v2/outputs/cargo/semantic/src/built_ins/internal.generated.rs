@@ -360,11 +360,30 @@ impl InternalBuiltIn {
     /// Whether this built-in's *name* is reserved for the given language version
     /// and EVM target, i.e. may not be declared as a Yul identifier.
     ///
-    /// Most names are reserved unconditionally, even on targets where the
-    /// built-in does not exist: `solc` rejects `let create2 := 1` when targeting
-    /// Homestead. The exceptions are names `solc` has not promoted to reserved
-    /// identifiers yet, which declare a narrower `reserved`/`evm_reserved` range
-    /// in the language definition; before that range `solc` only warns.
+    /// `solc` keeps two classes of Yul built-in name:
+    ///
+    /// - Names it has *promoted* to reserved identifiers are rejected on every
+    ///   EVM target, even where the built-in does not exist: `let create2 := 1`
+    ///   is rejected targeting Homestead, and `let difficulty := 1` is rejected
+    ///   from Paris on, after `difficulty` itself stops being available.
+    /// - Recently added names are not promoted yet, so they may still be used as
+    ///   identifiers until the built-in exists; before that `solc` only warns
+    ///   that the name "will be promoted to Yul reserved identifier in the
+    ///   future".
+    ///
+    /// Those two classes happen to be distinguished by whether the definition
+    /// carries a language-version range: every not-yet-promoted name was added
+    /// in a known `0.8.x`, while the promoted ones predate the supported range
+    /// and are gated only by EVM target. So a built-in with no `enabled` range
+    /// is reserved unconditionally, and one with an `enabled` range is reserved
+    /// exactly while it is available.
+    ///
+    /// This is a correlation in `solc`'s current behaviour rather than a rule it
+    /// guarantees: if a name were promoted while keeping its version range, or
+    /// a new built-in were added gated only by target, the mapping would need to
+    /// become explicit (a `reserved`/`evm_reserved` pair alongside
+    /// `enabled`/`evm_enabled`). The `built_in_redeclaration` snapshot tests pin
+    /// both classes, so such a change would surface there.
     #[allow(clippy::too_many_lines)]
     pub(crate) fn is_reserved(
         self,
@@ -372,6 +391,46 @@ impl InternalBuiltIn {
         evm_target: EvmTarget,
     ) -> bool {
         match self {
+            Self::Blobhash => {
+                LanguageVersionSpecifier::from(LanguageVersion::V0_8_24).contains(language_version)
+                    && EvmTargetSpecifier::from(EvmTarget::Cancun).contains(evm_target)
+            }
+            Self::Erc7201 => {
+                LanguageVersionSpecifier::from(LanguageVersion::V0_8_35).contains(language_version)
+            }
+            Self::AbiEncodeCall => {
+                LanguageVersionSpecifier::from(LanguageVersion::V0_8_11).contains(language_version)
+            }
+            Self::BlockBasefee => {
+                LanguageVersionSpecifier::from(LanguageVersion::V0_8_7).contains(language_version)
+                    && EvmTargetSpecifier::from(EvmTarget::London).contains(evm_target)
+            }
+            Self::BlockBlobbasefee => {
+                LanguageVersionSpecifier::from(LanguageVersion::V0_8_24).contains(language_version)
+                    && EvmTargetSpecifier::from(EvmTarget::Cancun).contains(evm_target)
+            }
+            Self::BlockPrevrandao => {
+                LanguageVersionSpecifier::from(LanguageVersion::V0_8_18).contains(language_version)
+                    && EvmTargetSpecifier::from(EvmTarget::Paris).contains(evm_target)
+            }
+            Self::TypeEnumMin(_) => {
+                LanguageVersionSpecifier::from(LanguageVersion::V0_8_8).contains(language_version)
+            }
+            Self::TypeEnumMax(_) => {
+                LanguageVersionSpecifier::from(LanguageVersion::V0_8_8).contains(language_version)
+            }
+            Self::ErrorSelector => {
+                LanguageVersionSpecifier::from(LanguageVersion::V0_8_4).contains(language_version)
+            }
+            Self::EventSelector => {
+                LanguageVersionSpecifier::from(LanguageVersion::V0_8_15).contains(language_version)
+            }
+            Self::Unwrap(_) => {
+                LanguageVersionSpecifier::from(LanguageVersion::V0_8_8).contains(language_version)
+            }
+            Self::Wrap(_) => {
+                LanguageVersionSpecifier::from(LanguageVersion::V0_8_8).contains(language_version)
+            }
             Self::YulBasefee => {
                 LanguageVersionSpecifier::from(LanguageVersion::V0_8_7).contains(language_version)
                     && EvmTargetSpecifier::from(EvmTarget::London).contains(evm_target)
