@@ -1,0 +1,19 @@
+{
+  "matrix": {
+    "type": "SingleVersionAllTargets",
+    "version": {
+      "value": "0.8.23",
+      "reason": "The release before `blobhash` becomes a Solidity global and Yul built-in in 0.8.24; iterating targets shows solc has no notion of the name here while slang still rejects it."
+    },
+    "expected_solc_divergence": [
+      {
+        "specifier": {
+          "type": "Range",
+          "from": "Constantinople",
+          "till": "Cancun"
+        },
+        "reason": "solc 0.8.23 accepts `let blobhash := 1` on every target it supports, since `blobhash` is neither a global nor a Yul built-in yet. slang rejects it as shadowing a Solidity global because its global lookup is not gated by version or target (the ungated `lookup_global` limitation). Below Constantinople and from Cancun on the two sides agree only because solc declines those targets outright at this version. Fixing the lookup gating will remove this divergence."
+      }
+    ]
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "matrix": {
+    "type": "SingleVersionAllTargets",
+    "version": {
+      "value": "0.8.24",
+      "reason": "The release that introduces both the `blobhash` Solidity global and the Cancun Yul built-in; iterating targets shows the shadowing rejection pre-Cancun and the Yul reservation from Cancun on."
+    },
+    "expected_solc_divergence": [
+      {
+        "specifier": {
+          "type": "Range",
+          "from": "Constantinople",
+          "till": "Cancun"
+        },
+        "reason": "On these pre-Cancun targets solc accepts `let blobhash := 1`, since the Yul built-in only exists from Cancun. slang rejects it as shadowing the Solidity `blobhash` global because its global lookup is not gated by version or target (the ungated `lookup_global` limitation). From Cancun on both reject it as a Yul built-in, and below Constantinople both reject because solc declines the target outright. Fixing the lookup gating will remove this divergence."
+      }
+    ]
+  }
+}

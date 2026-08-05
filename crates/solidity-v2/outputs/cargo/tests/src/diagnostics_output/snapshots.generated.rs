@@ -29,6 +29,22 @@ mod resolution {
         use super::*;
 
         #[test]
+        fn blobhash_before_introduction() -> Result<()> {
+            run(
+                "resolution/built_in_redeclaration",
+                "blobhash_before_introduction",
+            )
+        }
+
+        #[test]
+        fn blobhash_from_introduction() -> Result<()> {
+            run(
+                "resolution/built_in_redeclaration",
+                "blobhash_from_introduction",
+            )
+        }
+
+        #[test]
         fn not_yet_reserved_until_fork() -> Result<()> {
             run(
                 "resolution/built_in_redeclaration",
