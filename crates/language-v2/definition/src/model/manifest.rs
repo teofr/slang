@@ -3,7 +3,7 @@ use language_v2_internal_macros::{ParseInputTokens, WriteOutputTokens, derive_sp
 use semver::Version;
 use serde::{Deserialize, Serialize};
 
-use crate::model::{BuiltInContext, Identifier, Item};
+use crate::model::{BuiltInContext, Identifier, Item, YulReservedWord};
 
 /// A representation of a Language definition
 #[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
@@ -27,6 +27,12 @@ pub struct Language {
 
     /// Built-in definitions for the language, organized by context and scope.
     pub built_ins: Vec<BuiltInContext>,
+
+    /// Names reserved in Yul inline assembly that are not available built-ins
+    /// (opcode mnemonics like `dup1`/`push0`, object-access names like
+    /// `datasize`, and promoted-to-reserved names like `difficulty`). Checked
+    /// semantically in `p6_resolve_yul`, not reserved in the lexer.
+    pub yul_reserved_words: Vec<YulReservedWord>,
 }
 
 impl Language {

@@ -35,3 +35,30 @@ pub struct BuiltInDefinition {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub internal_parameter: Option<Code>,
 }
+
+/// A name that is reserved in Yul inline assembly but is *not* an available
+/// built-in function — so it may not be used as a Yul declaration, yet has no
+/// signature to resolve to. These are the opcode mnemonics that never became
+/// Yul built-ins (`dup1`, `push0`, `jump`, ...), the object-access names
+/// (`datasize`, `linkersymbol`, ...), and names promoted to reserved after they
+/// stopped being available (`difficulty` from Paris on).
+///
+/// Unlike keyword reservation, this is a *semantic* fact consumed in
+/// `p6_resolve_yul`: the name still lexes and parses as an ordinary
+/// `YulIdentifier` (preserving the grammar's version-independence and error
+/// recovery), and the reservation is reported as a resolution diagnostic rather
+/// than a parse error.
+#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
+#[derive_spanned_type(Clone, Debug, ParseInputTokens, WriteOutputTokens)]
+pub struct YulReservedWord {
+    /// The reserved name, written as the identifier itself (e.g. `dup1`).
+    pub name: Identifier,
+
+    /// The version range the name is reserved. Defaults to always.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub enabled: Option<VersionSpecifier>,
+
+    /// The EVM target range the name is reserved. Defaults to always.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub evm_enabled: Option<EvmTargetSpecifier>,
+}
