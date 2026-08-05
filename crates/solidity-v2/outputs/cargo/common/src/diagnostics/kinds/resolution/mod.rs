@@ -7,6 +7,7 @@ mod identifier_redeclaration;
 mod incompatible_built_in_target;
 mod incompatible_built_in_version;
 mod non_free_or_library_function_in_using_directive;
+mod reserved_identifier;
 
 pub use built_in_redeclaration::BuiltInRedeclaration;
 pub use external_declaration_shadowing::ExternalDeclarationShadowing;
@@ -17,6 +18,7 @@ pub use identifier_redeclaration::IdentifierRedeclaration;
 pub use incompatible_built_in_target::IncompatibleBuiltInTarget;
 pub use incompatible_built_in_version::IncompatibleBuiltInVersion;
 pub use non_free_or_library_function_in_using_directive::NonFreeOrLibraryFunctionInUsingDirective;
+pub use reserved_identifier::ReservedIdentifier;
 use serde::Serialize;
 
 use crate::diagnostics::kinds::DiagnosticKind;
@@ -36,6 +38,9 @@ define_diagnostic_kind! {
         IdentifierRedeclaration(IdentifierRedeclaration),
         /// A Yul declaration reused the reserved name of a Yul built-in.
         BuiltInRedeclaration(BuiltInRedeclaration),
+        /// A Yul declaration used a name that is reserved in inline assembly
+        /// but is not an available built-in (e.g. `dup1`, `push0`, `datasize`).
+        ReservedIdentifier(ReservedIdentifier),
         /// A Yul variable declaration shadows a declaration (Solidity or
         /// built-in) visible from outside the assembly block.
         ExternalDeclarationShadowing(ExternalDeclarationShadowing),
