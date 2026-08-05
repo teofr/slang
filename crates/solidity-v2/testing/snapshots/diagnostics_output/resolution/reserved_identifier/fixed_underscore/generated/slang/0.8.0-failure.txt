@@ -1,0 +1,11 @@
+# This file is generated automatically by infrastructure scripts. Please don't edit by hand.
+
+Diagnostics: 1
+
+[resolution/reserved-identifier] Error: The identifier '_' is reserved and can not be used.
+    ╭─[input.sol:16:17]
+    │
+ 16 │             let _ := 1
+    │                 ┬  
+    │                 ╰── Error occurred here.
+────╯

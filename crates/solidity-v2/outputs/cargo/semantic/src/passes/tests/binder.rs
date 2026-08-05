@@ -428,7 +428,13 @@ contract Test {
         &file_node_mapper,
         &mut diagnostics,
     );
-    p6_resolve_yul::run(&mut binder, &types, &file_node_mapper, &mut diagnostics);
+    p6_resolve_yul::run(
+        &mut binder,
+        language_version,
+        &types,
+        &file_node_mapper,
+        &mut diagnostics,
+    );
     assert!(
         diagnostics.is_empty(),
         "Semantic diagnostics: {diagnostics:?}"

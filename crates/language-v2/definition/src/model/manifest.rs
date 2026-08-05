@@ -31,8 +31,10 @@ pub struct Language {
     /// Names reserved in Yul inline assembly that are not available built-ins
     /// (opcode mnemonics like `dup1`/`push0`, object-access names like
     /// `datasize`, and promoted-to-reserved names like `difficulty`). Checked
-    /// semantically in `p6_resolve_yul`, not reserved in the lexer.
-    pub yul_reserved_words: Vec<YulReservedWord>,
+    /// semantically in `p6_resolve_yul`, not reserved in the lexer. Optional so
+    /// languages (and test fixtures) without Yul reserved words can omit it.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub yul_reserved_words: Option<Vec<YulReservedWord>>,
 }
 
 impl Language {

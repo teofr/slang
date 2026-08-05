@@ -109,6 +109,7 @@ fn definition() {
                 }],
             }],
             built_ins: vec![],
+            yul_reserved_words: None,
         }
         .into(),
     );

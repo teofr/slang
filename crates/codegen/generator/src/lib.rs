@@ -84,6 +84,7 @@ pub struct LanguageModelV2 {
     versions: IndexSet<Version>,
     evm_targets: IndexSet<Identifier>,
     built_ins: Vec<codegen_v2_semantic::built_ins::BuiltInContextModel>,
+    yul_reserved_words: Vec<codegen_v2_semantic::built_ins::YulReservedWordModel>,
 }
 
 impl LanguageModelV2 {
@@ -93,6 +94,9 @@ impl LanguageModelV2 {
             versions: language.versions.clone(),
             evm_targets: language.evm_targets.clone(),
             built_ins: codegen_v2_semantic::built_ins::build_built_ins_model(language),
+            yul_reserved_words: codegen_v2_semantic::built_ins::build_yul_reserved_words_model(
+                language,
+            ),
         }
     }
 }

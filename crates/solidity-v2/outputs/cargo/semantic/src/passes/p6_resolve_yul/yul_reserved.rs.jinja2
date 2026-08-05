@@ -1,0 +1,28 @@
+{%- import "crates/solidity-v2/outputs/cargo/common/src/versions/_macros.rs.jinja2" as _versions -%}
+
+use slang_solidity_v2_common::versions::{LanguageVersion, LanguageVersionSpecifier};
+
+/// Whether `name` is reserved as a Yul identifier for the given language
+/// version, without being an available built-in. These names may not be
+/// declared in inline assembly, yet have no built-in signature to resolve to
+/// (opcode mnemonics like `dup1`/`push0`/`jump`, object-access names like
+/// `datasize`, and names promoted to reserved such as `difficulty`).
+///
+/// This mirrors `solc`'s reserved-identifier check (error 5017): the name is
+/// still parsed as an ordinary identifier, and the reservation is a semantic
+/// fact keyed by name and language version.
+pub(crate) fn yul_reserved(name: &str, language_version: LanguageVersion) -> bool {
+    match name {
+        {%- for word in model.language.yul_reserved_words %}
+            {%- if word.evm_enabled.type != "Always" %}
+                {{ throw(message="yul_reserved has no EVM-target parameter yet; a reserved word gained an `evm_enabled` gate. Add an `evm_target` parameter and thread it in. Offending word: " ~ word.name) }}
+            {%- endif %}
+            {%- if word.enabled.type == "Always" %}
+                "{{ word.name }}" => true,
+            {%- else %}
+                "{{ word.name }}" => {{ _versions::specifier(s=word.enabled) }}.contains(language_version),
+            {%- endif %}
+        {%- endfor %}
+        _ => false,
+    }
+}

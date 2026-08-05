@@ -26,10 +26,24 @@
 //!   conflict (matching solc).
 
 use slang_solidity_v2_common::nodes::NodeId;
+use slang_solidity_v2_common::versions::LanguageVersion;
 
+use super::yul_reserved::yul_reserved;
 use crate::binder::{Binder, Definition, Resolution, Scope, ScopeId};
 use crate::built_ins::BuiltInsResolver;
 use crate::passes::common::conflicts::conflicting_definition;
+
+/// Names that are unconditionally reserved in inline assembly and may never be
+/// declared, regardless of language version or declaration kind (solc error
+/// 4113). Unlike the opcode/reserved-word inventory these are not opcodes, so
+/// they live here rather than in the generated `yul_reserved` table.
+///
+/// `this` and `super` are also 4113-reserved, but the grammar tokenises them as
+/// keywords (`YulThisKeyword`/`YulSuperKeyword`), so `let this := 1` fails to
+/// parse as a declaration and never reaches this check — the parse error
+/// already gives the correct (rejected) status. Only `_` parses as an ordinary
+/// identifier and so needs the semantic check here.
+const FIXED_RESERVED_NAMES: [&str; 1] = ["_"];
 
 /// Why a Yul declaration is not allowed, used to pick the diagnostic to report.
 /// See the module docs for the per-declaration-kind shadowing rules.
@@ -37,6 +51,11 @@ pub(super) enum YulConflict {
     /// The name is a reserved Yul built-in (e.g. `let add := 1`) and may not be
     /// declared at all.
     BuiltInRedeclaration,
+    /// The name is reserved in inline assembly but is not an available built-in
+    /// — an opcode mnemonic (`dup1`, `push0`, `jump`), an object-access name
+    /// (`datasize`), a promoted-to-reserved name (`difficulty`), or a fixed
+    /// reserved word (`this`, `super`, `_`). It may not be declared.
+    ReservedIdentifier,
     /// The name redeclares another definition in a scope where redeclaration is
     /// forbidden: another Yul definition in the same assembly block, or (for a
     /// parameter/return) a local Solidity variable it may not shadow.
@@ -53,10 +72,17 @@ pub(super) enum YulConflict {
 // shadowing rules.
 pub(super) fn find_conflicting_yul_definition(
     binder: &Binder,
+    language_version: LanguageVersion,
     scope_id: ScopeId,
     symbol: &str,
     new_definition: &Definition,
 ) -> Option<YulConflict> {
+    // A fixed reserved word (`this`, `super`, `_`) may never be declared,
+    // regardless of version, target, or declaration kind.
+    if FIXED_RESERVED_NAMES.contains(&symbol) {
+        return Some(YulConflict::ReservedIdentifier);
+    }
+
     // A reserved Yul built-in name may never be declared, regardless of the
     // declaration kind or what's in scope; this takes precedence over any
     // redeclaration or shadowing conflict.
@@ -65,6 +91,13 @@ pub(super) fn find_conflicting_yul_definition(
     // should restrict it to the current version/target.
     if BuiltInsResolver::lookup_yul_global(symbol).is_some() {
         return Some(YulConflict::BuiltInRedeclaration);
+    }
+
+    // A name reserved in inline assembly that isn't an available built-in (an
+    // opcode mnemonic, object-access name, or promoted-to-reserved name) may
+    // also never be declared.
+    if yul_reserved(symbol, language_version) {
+        return Some(YulConflict::ReservedIdentifier);
     }
 
     let scope = binder.get_scope_by_id(scope_id);

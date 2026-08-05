@@ -1,0 +1,11 @@
+# This file is generated automatically by infrastructure scripts. Please don't edit by hand.
+
+Diagnostics: 1
+
+[DeclarationError 4113] Error: The identifier name "_" is reserved.
+    ╭─[input.sol:16:17]
+    │
+ 16 │             let _ := 1
+    │                 ┬  
+    │                 ╰── Error occurred here.
+────╯

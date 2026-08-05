@@ -1,9 +1,10 @@
 use slang_solidity_v2_common::diagnostics::DiagnosticCollection;
 use slang_solidity_v2_common::diagnostics::kinds::DiagnosticKind;
 use slang_solidity_v2_common::diagnostics::kinds::resolution::{
-    BuiltInRedeclaration, ExternalDeclarationShadowing, IdentifierRedeclaration,
+    BuiltInRedeclaration, ExternalDeclarationShadowing, IdentifierRedeclaration, ReservedIdentifier,
 };
 use slang_solidity_v2_common::nodes::NodeId;
+use slang_solidity_v2_common::versions::LanguageVersion;
 use slang_solidity_v2_ir::ir;
 
 use crate::binder::{AssemblyBlock, Binder, Definition, Scope, ScopeId};
@@ -13,6 +14,8 @@ use crate::types::TypeRegistry;
 mod conflicts;
 mod resolution;
 mod visitor;
+#[path = "yul_reserved.generated.rs"]
+mod yul_reserved;
 
 use conflicts::YulConflict;
 
@@ -33,6 +36,7 @@ use conflicts::YulConflict;
 /// references a Yul definition.
 pub fn run(
     binder: &mut Binder,
+    language_version: LanguageVersion,
     types: &TypeRegistry,
     file_node_mapper: &FileNodeMapper,
     diagnostics: &mut DiagnosticCollection,
@@ -46,13 +50,21 @@ pub fn run(
     // mutable borrow of the rest of the binder. They're returned afterwards.
     let mut assembly_blocks = binder.take_assembly_blocks();
     for block in assembly_blocks.values_mut() {
-        Pass::visit_assembly_statement(binder, types, file_node_mapper, diagnostics, block);
+        Pass::visit_assembly_statement(
+            binder,
+            language_version,
+            types,
+            file_node_mapper,
+            diagnostics,
+            block,
+        );
     }
     binder.restore_assembly_blocks(assembly_blocks);
 }
 
 struct Pass<'a> {
     file_node_mapper: &'a FileNodeMapper,
+    language_version: LanguageVersion,
     // We don't need to chain Yul scopes, so `ScopeId` is enough to track the scope stack
     scope_stack: Vec<ScopeId>,
     binder: &'a mut Binder,
@@ -68,6 +80,7 @@ impl<'a> Pass<'a> {
     /// definitions it references directly into the block.
     fn visit_assembly_statement(
         binder: &'a mut Binder,
+        language_version: LanguageVersion,
         types: &'a TypeRegistry,
         file_node_mapper: &'a FileNodeMapper,
         diagnostics: &'a mut DiagnosticCollection,
@@ -82,6 +95,7 @@ impl<'a> Pass<'a> {
         } = block;
         let mut pass = Self {
             file_node_mapper,
+            language_version,
             // Seed the stack with the enclosing Solidity scope (created in p1)
             // so the block's Yul scope parents correctly and Yul identifiers
             // chain up into the enclosing Solidity definitions.
@@ -157,12 +171,19 @@ impl<'a> Pass<'a> {
 
         let conflict_kind: Option<DiagnosticKind> = match conflicts::find_conflicting_yul_definition(
             self.binder,
+            self.language_version,
             scope_id,
             symbol,
             &definition,
         ) {
             Some(YulConflict::BuiltInRedeclaration) => Some(
                 BuiltInRedeclaration {
+                    name: symbol.to_owned(),
+                }
+                .into(),
+            ),
+            Some(YulConflict::ReservedIdentifier) => Some(
+                ReservedIdentifier {
                     name: symbol.to_owned(),
                 }
                 .into(),

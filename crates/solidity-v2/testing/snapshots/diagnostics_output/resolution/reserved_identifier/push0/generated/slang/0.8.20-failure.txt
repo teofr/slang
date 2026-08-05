@@ -1,0 +1,11 @@
+# This file is generated automatically by infrastructure scripts. Please don't edit by hand.
+
+Diagnostics: 1
+
+[resolution/reserved-identifier] Error: The identifier 'push0' is reserved and can not be used.
+    ╭─[input.sol:14:17]
+    │
+ 14 │             let push0 := 1
+    │                 ──┬──  
+    │                   ╰──── Error occurred here.
+────╯

@@ -919,6 +919,30 @@ mod resolution {
             run("resolution/incompatible_built_in_version", "event_selector")
         }
     }
+
+    mod reserved_identifier {
+        use super::*;
+
+        #[test]
+        fn fixed_underscore() -> Result<()> {
+            run("resolution/reserved_identifier", "fixed_underscore")
+        }
+
+        #[test]
+        fn object_access_datasize() -> Result<()> {
+            run("resolution/reserved_identifier", "object_access_datasize")
+        }
+
+        #[test]
+        fn opcode_jump() -> Result<()> {
+            run("resolution/reserved_identifier", "opcode_jump")
+        }
+
+        #[test]
+        fn push0() -> Result<()> {
+            run("resolution/reserved_identifier", "push0")
+        }
+    }
 }
 
 mod semantic {

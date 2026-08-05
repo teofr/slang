@@ -2,6 +2,26 @@ use language_v2_definition::model::{EvmTargetSpecifier, Language, VersionSpecifi
 use serde::Serialize;
 
 #[derive(Serialize)]
+pub struct YulReservedWordModel {
+    pub name: String,
+    pub enabled: VersionSpecifier,
+    pub evm_enabled: EvmTargetSpecifier,
+}
+
+pub fn build_yul_reserved_words_model(language: &Language) -> Vec<YulReservedWordModel> {
+    language
+        .yul_reserved_words
+        .iter()
+        .flatten()
+        .map(|word| YulReservedWordModel {
+            name: word.name.to_string(),
+            enabled: word.enabled.clone().unwrap_or_default(),
+            evm_enabled: word.evm_enabled.clone().unwrap_or_default(),
+        })
+        .collect()
+}
+
+#[derive(Serialize)]
 pub struct BuiltInContextModel {
     pub name: String,
     pub scopes: Vec<BuiltInScopeModel>,

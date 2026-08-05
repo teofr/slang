@@ -1,0 +1,11 @@
+# This file is generated automatically by infrastructure scripts. Please don't edit by hand.
+
+Diagnostics: 1
+
+[resolution/reserved-identifier] Error: The identifier 'datasize' is reserved and can not be used.
+    ╭─[input.sol:13:17]
+    │
+ 13 │             let datasize := 1
+    │                 ────┬───  
+    │                     ╰───── Error occurred here.
+────╯

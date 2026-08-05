@@ -24,6 +24,9 @@ impl DiagnosticExtensions for ReservedIdentifier {
     }
 
     fn message(&self) -> String {
-        format!("The identifier '{}' is reserved and can not be used.", self.name)
+        format!(
+            "The identifier '{}' is reserved and can not be used.",
+            self.name
+        )
     }
 }
