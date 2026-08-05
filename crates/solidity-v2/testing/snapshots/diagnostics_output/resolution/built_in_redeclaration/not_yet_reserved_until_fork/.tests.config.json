@@ -1,8 +1,27 @@
 {
   "matrix": {
     "type": "SingleVersionAllTargets",
-    "version": "0.8.36",
-    "reason": "The EVM target is what decides whether the name is reserved, so iterating targets shows both sides of the Cancun boundary."
-  },
-  "expected_solc_divergence": "Before Cancun solc accepts the declaration with only a warning ('mcopy' will be promoted to Yul reserved identifier in the future), which the runner counts as a rejection; and solc 0.8.36 declines the Frontier target outright. slang correctly accepts the declaration on both, so the statuses differ until warnings are distinguished from errors."
+    "version": {
+      "value": "0.8.36",
+      "reason": "The EVM target is what decides whether the name is reserved, so iterating targets shows both sides of the Cancun boundary."
+    },
+    "expected_solc_divergence": [
+      {
+        "specifier": {
+          "type": "Range",
+          "from": "Frontier",
+          "till": "Homestead"
+        },
+        "reason": "solc 0.8.36 declines the Frontier target outright, which the runner counts as a rejection, while slang accepts the declaration."
+      },
+      {
+        "specifier": {
+          "type": "Range",
+          "from": "Homestead",
+          "till": "Cancun"
+        },
+        "reason": "Before Cancun solc accepts the declaration with only a warning ('mcopy' will be promoted to Yul reserved identifier in the future), which the runner counts as a rejection. slang correctly accepts it, so the statuses differ until warnings are distinguished from errors."
+      }
+    ]
+  }
 }

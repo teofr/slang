@@ -1,7 +1,9 @@
 {
   "matrix": {
     "type": "SingleTargetAllVersions",
-    "target": "Petersburg",
-    "reason": "Petersburg predates the Istanbul `chainid` opcode, and is accepted by every supported solc, so the name must still be reserved on every language version."
+    "target": {
+      "value": "Petersburg",
+      "reason": "Petersburg predates the Istanbul `chainid` opcode, and is accepted by every supported solc, so the name must still be reserved on every language version."
+    }
   }
 }
