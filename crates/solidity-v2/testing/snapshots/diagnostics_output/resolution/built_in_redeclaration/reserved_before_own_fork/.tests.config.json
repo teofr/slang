@@ -4,6 +4,15 @@
     "target": {
       "value": "Petersburg",
       "reason": "Petersburg predates the Istanbul `chainid` opcode and is accepted by every supported solc."
-    }
+    },
+    "expected_solc_divergence": [
+      {
+        "specifier": {
+          "type": "From",
+          "from": "0.8.0"
+        },
+        "reason": "solc rejects `let chainid := 1` on Petersburg on every version (DeclarationError 5017): `chainid` is a target-gated built-in whose name stays reserved even where the opcode does not exist yet. slang only rejects a built-in name where the built-in is *available*, so it accepts the declaration here. Reserving names that are not yet available needs a separate reserved-identifier check; remove this divergence once that lands."
+      }
+    ]
   }
 }
