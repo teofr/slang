@@ -9,13 +9,26 @@ use slang_solidity_v2_common::evm_targets::EvmTarget;
 use slang_solidity_v2_common::versions::LanguageVersion;
 pub(crate) use solc::SolcTarget;
 
+/// The outcome of running a target on a single input.
+pub(crate) struct TargetOutcome {
+    /// Every diagnostic, rendered for the snapshot body, regardless of
+    /// severity — so warnings still show up in the output.
+    pub diagnostics: Vec<String>,
+
+    /// Whether the target considers the input valid. Only error-severity
+    /// diagnostics count against this: lower-severity diagnostics (e.g.
+    /// warnings) are shown but don't make the input fail, so an input that
+    /// only produces warnings still succeeds.
+    pub compilation_succeeded: bool,
+}
+
 pub(crate) trait TestTarget {
     fn name(&self) -> &'static str;
 
-    fn collect_diagnostics(
+    fn compile(
         &self,
         files: &SortedMap<FileId, String>,
         version: LanguageVersion,
         evm_target: EvmTarget,
-    ) -> Result<Vec<String>>;
+    ) -> Result<TargetOutcome>;
 }
