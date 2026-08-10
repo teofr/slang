@@ -611,6 +611,11 @@ mod events {
     }
 
     #[test]
+    fn named_args_alias() -> Result<()> {
+        run("events", "named_args_alias")
+    }
+
+    #[test]
     fn overload_selection() -> Result<()> {
         run("events", "overload_selection")
     }
@@ -652,6 +657,11 @@ mod expressions {
     #[test]
     fn emit_named_args() -> Result<()> {
         run("expressions", "emit_named_args")
+    }
+
+    #[test]
+    fn event_named_args() -> Result<()> {
+        run("expressions", "event_named_args")
     }
 
     #[test]

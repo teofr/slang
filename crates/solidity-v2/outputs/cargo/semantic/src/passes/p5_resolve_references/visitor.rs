@@ -626,11 +626,16 @@ impl Visitor for Pass<'_> {
         let event_resolution = self
             .binder
             .find_reference_by_identifier_node_id(event_reference_id)
-            .map(|reference| &reference.resolution);
+            .map(|reference| {
+                // Follow symbol aliases as the event emitted could be an
+                // imported symbol
+                self.binder
+                    .follow_symbol_aliases(reference.resolution.clone())
+            });
         match &node.arguments {
             ir::ArgumentsDeclaration::PositionalArguments(positional_arguments) => {
                 // For positional arguments, resolve ambiguity of overloads only
-                if let Some(Resolution::Ambiguous(definition_ids)) = event_resolution {
+                if let Some(Resolution::Ambiguous(definition_ids)) = &event_resolution {
                     let argument_typings =
                         self.collect_positional_argument_typings(positional_arguments);
                     if let Some(candidate) = self.lookup_event_matching_positional_arguments(
@@ -645,7 +650,7 @@ impl Visitor for Pass<'_> {
             }
             ir::ArgumentsDeclaration::NamedArguments(named_arguments) => {
                 // For named arguments, we need to resolve ambiguity and the named arguments
-                let definition_id = match event_resolution {
+                let definition_id = match &event_resolution {
                     Some(Resolution::Ambiguous(definition_ids)) => {
                         let argument_typings = self.collect_named_argument_typings(named_arguments);
                         let candidate = self.lookup_event_matching_named_arguments(
