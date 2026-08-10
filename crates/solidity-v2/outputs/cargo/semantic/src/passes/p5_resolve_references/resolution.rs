@@ -369,6 +369,28 @@ impl Pass<'_> {
         }
     }
 
+    /// The resolution of the declaration named by the reference at
+    /// `identifier_node_id`, with symbol aliases followed.
+    ///
+    /// A reference deliberately resolves to the imported symbol so it points at
+    /// the name as written. Callers that need the declaration itself — to reach
+    /// its parameters, or to pick between overloads — have to look through the
+    /// alias. Expressions get this for free, since `enter_expression` types an
+    /// identifier from the followed resolution; the `emit` and `revert`
+    /// statements name their event/error outside expression position and so
+    /// resolve it here instead.
+    pub(super) fn declaration_resolution_of_reference(
+        &self,
+        identifier_node_id: NodeId,
+    ) -> Option<Resolution> {
+        self.binder
+            .find_reference_by_identifier_node_id(identifier_node_id)
+            .map(|reference| {
+                self.binder
+                    .follow_symbol_aliases(reference.resolution.clone())
+            })
+    }
+
     pub(super) fn resolve_named_arguments(
         &mut self,
         named_arguments: &[ir::NamedArgument],

@@ -567,6 +567,11 @@ mod errors {
     }
 
     #[test]
+    fn named_args_alias() -> Result<()> {
+        run("errors", "named_args_alias")
+    }
+
+    #[test]
     fn revert_as_function() -> Result<()> {
         run("errors", "revert_as_function")
     }

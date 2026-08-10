@@ -623,15 +623,7 @@ impl Visitor for Pass<'_> {
 
     fn leave_emit_statement(&mut self, node: &ir::EmitStatement) {
         let event_reference_id = node.event.last().unwrap().id();
-        let event_resolution = self
-            .binder
-            .find_reference_by_identifier_node_id(event_reference_id)
-            .map(|reference| {
-                // Follow symbol aliases as the event emitted could be an
-                // imported symbol
-                self.binder
-                    .follow_symbol_aliases(reference.resolution.clone())
-            });
+        let event_resolution = self.declaration_resolution_of_reference(event_reference_id);
         match &node.arguments {
             ir::ArgumentsDeclaration::PositionalArguments(positional_arguments) => {
                 // For positional arguments, resolve ambiguity of overloads only
@@ -678,15 +670,8 @@ impl Visitor for Pass<'_> {
     fn leave_revert_statement(&mut self, node: &ir::RevertStatement) {
         if let ir::ArgumentsDeclaration::NamedArguments(named_arguments) = &node.arguments {
             let definition_id = self
-                .binder
-                .find_reference_by_identifier_node_id(node.error.last().unwrap().id())
-                .and_then(|reference| {
-                    // Follow symbol aliases as the error type argument to
-                    // revert could be an imported symbol
-                    self.binder
-                        .follow_symbol_aliases(reference.resolution.clone())
-                        .as_definition_id()
-                });
+                .declaration_resolution_of_reference(node.error.last().unwrap().id())
+                .and_then(|resolution| resolution.as_definition_id());
             self.resolve_named_arguments(named_arguments, definition_id);
         }
     }
