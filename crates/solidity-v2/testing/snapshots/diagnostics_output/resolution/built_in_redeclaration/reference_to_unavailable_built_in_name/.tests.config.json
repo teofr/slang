@@ -1,0 +1,19 @@
+{
+  "matrix": {
+    "type": "SingleVersionAllTargets",
+    "version": {
+      "value": "0.8.34",
+      "reason": "Below the 0.8.35 future-reserved warning that slang does not model yet, so solc accepts the pre-Cancun declaration silently and the target axis alone decides the outcome."
+    },
+    "expected_solc_divergence": [
+      {
+        "specifier": {
+          "type": "Range",
+          "from": "Frontier",
+          "till": "Homestead"
+        },
+        "reason": "solc 0.8.34 declines the Frontier target outright ('Invalid EVM version requested'), which counts as a rejection, while slang accepts. Unrelated to `mcopy`."
+      }
+    ]
+  }
+}

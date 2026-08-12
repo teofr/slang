@@ -1,0 +1,18 @@
+{
+  "matrix": {
+    "type": "SingleVersionAllTargets",
+    "version": {
+      "value": "0.8.34",
+      "reason": "Matches the sibling test's pinned version so the two differ only in whether the name is declared. Before Cancun both slang and solc reject, though the wording differs: slang reports the `mcopy` availability error, solc reports `Identifier \"mcopy\" not found`."
+    },
+    "expected_solc_divergence": [
+      {
+        "specifier": {
+          "type": "From",
+          "from": "Cancun"
+        },
+        "reason": "From Cancun `mcopy` is available, so slang resolves the reference and reports nothing. solc rejects with 'Builtin function \"mcopy\" must be called' — slang does not yet check that a built-in function reference is actually called, which is a separate gap from this test's subject."
+      }
+    ]
+  }
+}

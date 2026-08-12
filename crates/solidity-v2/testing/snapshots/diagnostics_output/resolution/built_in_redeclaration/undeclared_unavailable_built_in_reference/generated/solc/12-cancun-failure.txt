@@ -1,0 +1,11 @@
+# This file is generated automatically by infrastructure scripts. Please don't edit by hand.
+
+Diagnostics: 1
+
+[ParserError 7104] Error: Builtin function "mcopy" must be called.
+    ╭─[input.sol:14:22]
+    │
+ 14 │             let x := mcopy
+    │                      ──┬──  
+    │                        ╰──── Error occurred here.
+────╯
