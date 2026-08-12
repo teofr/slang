@@ -105,6 +105,21 @@ fn parser(bencher: Bencher<'_, '_>, project_name: &str) {
         .bench(|| black_box(tests::slang_v2::parser::run(black_box(project))));
 }
 
+/// Compiles the same projects with [`solar`], through its semantic analysis, as
+/// a cross-implementation reference point for `compilation_unit` above.
+///
+/// Solar is multi-threaded by default, so this is the closest external analogue
+/// of what the v2 pipeline is working towards, and it belongs in this suite
+/// rather than the Valgrind one for the same reason: instruction counts cannot
+/// see the threading.
+#[divan::bench(args = PROJECTS, max_time = MAX_TIME_SECS)]
+fn solar_compiler(bencher: Bencher<'_, '_>, project_name: &str) {
+    let project = tests::solar::compiler::setup(project_name);
+
+    with_throughput_counters(bencher, project)
+        .bench(|| black_box(tests::solar::compiler::run(black_box(project))));
+}
+
 /// Reports bytes and files processed per second, so that results remain
 /// comparable across projects of very different sizes.
 fn with_throughput_counters<'a, 'b>(
