@@ -105,6 +105,64 @@ fn parser(bencher: Bencher<'_, '_>, project_name: &str) {
         .bench(|| black_box(tests::slang_v2::parser::run(black_box(project))));
 }
 
+/// How the pipeline scales with the number of threads it is given.
+///
+/// The benchmarks above run on `rayon`'s global pool, which uses every core.
+/// These instead pin one project to pools of increasing size, so the speedup a
+/// parallel stage actually delivers is visible — and so a stage that fails to
+/// scale (or regresses at high thread counts through contention) shows up.
+mod thread_scaling {
+    use divan::{Bencher, black_box};
+
+    use super::{MAX_TIME_SECS, with_throughput_counters};
+    use crate::tests;
+
+    /// The project to sweep. Deliberately one of the larger multi-file projects:
+    /// single-file projects have no file-level parallelism to exploit.
+    // __SLANG_INFRA_PROJECT_LIST__ (keep in sync)
+    const PROJECT: &str = "uniswap";
+
+    /// Thread counts to measure. `1` is the serial baseline every other number
+    /// should be compared against.
+    const THREAD_COUNTS: [usize; 5] = [1, 2, 4, 8, 16];
+
+    /// The whole pipeline. Bounded by the share of it that is parallel, so read
+    /// this together with `parser` below rather than on its own: a stage that
+    /// scales perfectly still only speeds up the total by its own share.
+    #[divan::bench(args = THREAD_COUNTS, max_time = MAX_TIME_SECS)]
+    fn compilation_unit(bencher: Bencher<'_, '_>, threads: usize) {
+        let project = tests::slang_v2::compilation_unit::setup(PROJECT);
+        let pool = pool_with(threads);
+
+        with_throughput_counters(bencher, project).bench(|| {
+            pool.install(|| black_box(tests::slang_v2::compilation_unit::run(black_box(project))))
+        });
+    }
+
+    /// The parse stage on its own, which is what isolates its scaling from the
+    /// still-sequential stages that follow it.
+    ///
+    /// Note that the top-level `parser` benchmark measures the *sequential* loop
+    /// instead, so it stays a fixed reference point; this one mirrors the
+    /// builder's parallel parse phase.
+    #[divan::bench(args = THREAD_COUNTS, max_time = MAX_TIME_SECS)]
+    fn parser(bencher: Bencher<'_, '_>, threads: usize) {
+        let project = tests::slang_v2::parser::setup(PROJECT);
+        let pool = pool_with(threads);
+
+        with_throughput_counters(bencher, project).bench(|| {
+            pool.install(|| black_box(tests::slang_v2::parser::run_in_parallel(black_box(project))))
+        });
+    }
+
+    fn pool_with(threads: usize) -> rayon::ThreadPool {
+        rayon::ThreadPoolBuilder::new()
+            .num_threads(threads)
+            .build()
+            .expect("thread pool builds")
+    }
+}
+
 /// Reports bytes and files processed per second, so that results remain
 /// comparable across projects of very different sizes.
 fn with_throughput_counters<'a, 'b>(

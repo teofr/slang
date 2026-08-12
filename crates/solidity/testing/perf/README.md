@@ -74,6 +74,25 @@ Arguments after `--` are forwarded to `divan`, which takes a substring filter an
 ./scripts/bin/infra perf cargo-wall-clock -- uniswap --sample-count 50
 ```
 
+The suite also has a `thread_scaling` group, which runs one project on `rayon` pools of 1, 2, 4, 8,
+and 16 threads. The `1` row is the serial baseline the others should be read against, so this is
+where you check whether a newly parallel stage actually pays off — and whether more threads start
+costing more than they save:
+
+```console
+./scripts/bin/infra perf wall-clock -- thread_scaling
+```
+
+It reports two things per thread count, and they answer different questions:
+
+- `parser` — the parse stage alone, which is what shows how well that stage itself scales.
+- `compilation_unit` — the whole pipeline, which is what a consumer actually sees.
+
+The second is always the smaller number, because of Amdahl's law: a stage that scales perfectly still
+only speeds the total up by its own share of the runtime, and the stages after parsing are still
+sequential. Don't read a modest end-to-end gain as a stage that failed to parallelize — compare the
+two rows to tell those apart.
+
 Because wall time on shared CI runners is too noisy to alert on, this suite is not uploaded to the
 Bencher dashboard; it is meant for local before/after comparisons. CI only builds it (as part of
 `infra check cargo`) so it can't rot.

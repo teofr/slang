@@ -2,8 +2,6 @@
 //!
 //! They shouldn't be used outside of the parser, and should be transformed into AST nodes.
 
-use std::rc::Rc;
-
 use slang_solidity_v2_common::diagnostics::kinds::syntax::ExpectedArrayLengthExpression;
 use slang_solidity_v2_cst::structured_cst::nodes::{
     CloseBracket, ElementaryType, Expression, FunctionType, FunctionTypeAttribute,
@@ -175,6 +173,10 @@ pub(crate) fn new_expression_identifier_path(identifier_path: IdentifierPath) ->
 /// We use this function to share attributes between a state variable that has a function type.
 /// We find and split the attributes from the function type as needed
 /// TODO(v2) fail gracefully if a wrong attribute is found
+// Takes the boxed node rather than `FunctionTypeStruct`, since `FunctionType` is
+// how the grammar hands nodes around; unboxing here just to re-box on return
+// would cost an allocation.
+#[allow(clippy::boxed_local)]
 pub(crate) fn extract_extra_attributes(
     fun_type: FunctionType,
 ) -> (FunctionType, Vec<StateVariableAttribute>) {
@@ -187,7 +189,7 @@ pub(crate) fn extract_extra_attributes(
         parameters,
         attributes,
         returns,
-    } = Rc::unwrap_or_clone(fun_type);
+    } = *fun_type;
     let mut vec = attributes.elements;
 
     let extracted = vec.extract_if(.., |attr| {

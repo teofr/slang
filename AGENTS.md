@@ -93,6 +93,34 @@ You can also use `nextest` directly for faster iteration on Rust tests:
 ./bin/cargo nextest run [FILTERS]         # Run tests that match specific filters (test names or file patterns)
 ```
 
+## Parallelism (v2)
+
+`CompilationBuilder::build()` parses source files in parallel over [`rayon`]'s global thread pool;
+IR building and semantic analysis are still sequential. Two invariants follow from that:
+
+- **Output must not depend on the thread count.** Files are lowered to IR in `FileId` order, which is
+  what makes node ids stable, and per-file diagnostics are merged in that same order. `rayon`'s
+  indexed `collect()` is what preserves it — reordering that collection silently changes node ids.
+  `tests::builder::output_is_independent_of_the_thread_count` guards this.
+- **The v2 CST is `Box`-based, not `Rc` or `Arc`.** A parsed `SourceUnit` is the return value of the
+  parallel parse, so it moves between threads and must be `Send` — which rules out `Rc`, however
+  single-threaded the construction is. It does not need _shared_ ownership though: the tree has one
+  owner throughout and is dropped once IR lowering is done, so `Box` is enough, and it beats `Rc` on
+  both counts (−0.19% instructions, −16.6% bytes allocated, −18.9% peak) by not carrying a refcount
+  header per node. `nodes.rs.jinja2` wraps nodes in `Box`, and `structured_cst/mod.rs` statically
+  asserts `SourceUnit: Send + Sync`. One consequence to keep in mind: `#[derive(Clone)]` on a boxed
+  node is a _deep_ clone, so cloning a CST node is O(subtree), not a refcount bump — nothing does
+  today. (v1's CST is unrelated and still uses `Rc`. The v2 IR uses `Arc`, since it is shared.)
+
+`CompilationBuilderConfig: Sync`, since one shared `&Config` serves every file's import resolution.
+
+Pick the benchmark suite by what you're measuring: `infra perf wall-clock` for anything to do with
+parallelism, since the Valgrind-based suites serialize threads and cannot see it — but `infra perf
+cargo` (Callgrind, deterministic) for small single-threaded deltas like refcount overhead, which
+wall-clock noise on a shared machine will not resolve. See `crates/solidity/testing/perf/README.md`.
+
+[`rayon`]: https://docs.rs/rayon
+
 ## Code Generation
 
 Many source files are auto-generated, and are either under a `/generated/` directory, or have `*.generated.*` in their name.

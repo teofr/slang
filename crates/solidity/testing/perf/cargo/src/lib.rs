@@ -79,6 +79,19 @@ mod unit_tests {
         // __SLANG_V2_INFRA_BENCHMARKS_LIST__ (keep in sync)
         define_payload_test_and_assert_count_eq!(parser, count_contracts, super::CONTRACT_COUNT);
 
+        /// The parallel parse the `thread_scaling` benchmarks measure has to be
+        /// the same work as the sequential one they are compared against —
+        /// otherwise the speedup is measuring a different workload.
+        #[test]
+        fn parser_parallel_matches_sequential() {
+            let project = crate::tests::slang_v2::parser::setup(super::PROJECT_TO_TEST);
+
+            let sequential = crate::tests::slang_v2::parser::run(project);
+            let parallel = crate::tests::slang_v2::parser::run_in_parallel(project);
+
+            assert_eq!(sequential, parallel);
+        }
+
         define_payload_test_and_assert_count_eq!(
             ir_builder,
             count_contracts,

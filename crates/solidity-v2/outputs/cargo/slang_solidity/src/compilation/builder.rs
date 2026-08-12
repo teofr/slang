@@ -1,5 +1,6 @@
 use std::ops::Range;
 
+use rayon::iter::{IntoParallelIterator, ParallelIterator};
 use slang_solidity_v2_common::collections::{SortedMap, SortedSet};
 use slang_solidity_v2_common::diagnostics::DiagnosticCollection;
 use slang_solidity_v2_common::diagnostics::kinds::compilation::{
@@ -20,7 +21,13 @@ use super::file::InternalFile;
 use super::unit::CompilationUnit;
 
 /// User-provided callbacks necessary for the `CompilationBuilder` to perform its job.
-pub trait CompilationBuilderConfig {
+///
+/// The builder resolves the imports of several files at once, on different
+/// threads, hence the [`Sync`] bound: a single shared `&Self` has to serve every
+/// [`resolve_import()`](CompilationBuilderConfig::resolve_import) call. An
+/// implementation that needs interior mutability (a cache, say) is free to use
+/// whatever synchronization it prefers.
+pub trait CompilationBuilderConfig: Sync {
     /// Callback used by this builder to resolve an import path.
     /// For example, if a source file contains the following statement:
     ///
@@ -51,6 +58,12 @@ pub trait CompilationBuilderConfig {
 /// only records them; all of the work (parsing, IR building, semantic analysis)
 /// happens in `build()`, and every problem it runs into is reported as a
 /// diagnostic on the resulting unit.
+///
+/// Parts of `build()` run in parallel on [`rayon`]'s global thread pool. To
+/// bound how many threads that is, either configure the global pool once with
+/// [`rayon::ThreadPoolBuilder::build_global`], or call `build()` inside
+/// [`rayon::ThreadPool::install`] to use a pool of your own. Results do not
+/// depend on the number of threads, or on the order in which they finish.
 pub struct CompilationBuilder<C: CompilationBuilderConfig> {
     language_version: LanguageVersion,
     evm_target: EvmTarget,
@@ -145,8 +158,15 @@ impl<C: CompilationBuilderConfig> CompilationBuilder<C> {
 
 /// Parses every source file, and resolves the import paths each one contains.
 ///
-/// Because the full set of files is known up front, an import resolving outside
-/// of it is reported here, rather than being discovered while loading files.
+/// Files are parsed in parallel: no file's parse observes another's, and the
+/// only thing they share is the read-only config and file set. This is why the
+/// full source list is collected up front — with recursive discovery, a file
+/// could not be parsed until its importer's imports had been resolved.
+///
+/// The result does not depend on how the work was scheduled. `collect()` on an
+/// indexed parallel iterator fills the output in input order, so the returned
+/// files stay sorted by id no matter which thread finishes first, and each
+/// file's diagnostics are merged in that same order afterwards.
 fn parse_files<C: CompilationBuilderConfig>(
     config: &C,
     sources: SortedMap<FileId, String>,
@@ -157,50 +177,74 @@ fn parse_files<C: CompilationBuilderConfig>(
     // around lets us consume `sources` without copying any file contents.
     let known_files: SortedSet<FileId> = sources.keys().cloned().collect();
 
-    let mut parsed_files = Vec::with_capacity(sources.len());
+    let parsed: Vec<(ParsedFile, DiagnosticCollection)> = sources
+        .into_iter()
+        .collect::<Vec<_>>()
+        .into_par_iter()
+        .map(|(file_id, contents)| {
+            parse_file(config, &known_files, language_version, file_id, contents)
+        })
+        .collect();
 
-    for (file_id, contents) in sources {
-        let ParseOutput {
-            source_unit,
-            diagnostics: parse_diagnostics,
-        } = Parser::parse(&file_id, &contents, language_version);
-        diagnostics.extend(parse_diagnostics);
-
-        let mut resolved_imports = SortedMap::new();
-        for (import_path, path_range) in extract_import_paths_from_cst(&source_unit, &contents) {
-            let imported_file_id = match config.resolve_import(&file_id, &import_path) {
-                Ok(imported_file_id) => imported_file_id,
-                Err(unresolved_import) => {
-                    diagnostics.push(file_id.clone(), path_range, unresolved_import);
-                    continue;
-                }
-            };
-
-            if !known_files.contains(&imported_file_id) {
-                diagnostics.push(
-                    file_id.clone(),
-                    path_range,
-                    MissingImportedFile {
-                        imported_file_id: imported_file_id.clone(),
-                    },
-                );
-            }
-
-            // Recorded even when the file is missing: the diagnostic above is
-            // what reports the problem, and the later stages are able to see
-            // that the target is not part of the compilation.
-            resolved_imports.insert(import_path, imported_file_id);
-        }
-
-        parsed_files.push(ParsedFile {
-            file_id,
-            contents,
-            source_unit,
-            resolved_imports,
-        });
+    let mut parsed_files = Vec::with_capacity(parsed.len());
+    for (parsed_file, file_diagnostics) in parsed {
+        diagnostics.extend(file_diagnostics);
+        parsed_files.push(parsed_file);
     }
 
     parsed_files
+}
+
+/// Parses a single source file, and resolves the import paths it contains.
+///
+/// Returns its diagnostics separately, rather than pushing them into a shared
+/// collection, so that this can run on its own thread.
+fn parse_file<C: CompilationBuilderConfig>(
+    config: &C,
+    known_files: &SortedSet<FileId>,
+    language_version: LanguageVersion,
+    file_id: FileId,
+    contents: String,
+) -> (ParsedFile, DiagnosticCollection) {
+    let ParseOutput {
+        source_unit,
+        mut diagnostics,
+    } = Parser::parse(&file_id, &contents, language_version);
+
+    let mut resolved_imports = SortedMap::new();
+    for (import_path, path_range) in extract_import_paths_from_cst(&source_unit, &contents) {
+        let imported_file_id = match config.resolve_import(&file_id, &import_path) {
+            Ok(imported_file_id) => imported_file_id,
+            Err(unresolved_import) => {
+                diagnostics.push(file_id.clone(), path_range, unresolved_import);
+                continue;
+            }
+        };
+
+        if !known_files.contains(&imported_file_id) {
+            diagnostics.push(
+                file_id.clone(),
+                path_range,
+                MissingImportedFile {
+                    imported_file_id: imported_file_id.clone(),
+                },
+            );
+        }
+
+        // Recorded even when the file is missing: the diagnostic above is what
+        // reports the problem, and the later stages are able to see that the
+        // target is not part of the compilation.
+        resolved_imports.insert(import_path, imported_file_id);
+    }
+
+    let parsed_file = ParsedFile {
+        file_id,
+        contents,
+        source_unit,
+        resolved_imports,
+    };
+
+    (parsed_file, diagnostics)
 }
 
 /// Lowers every parsed file into its IR representation, attaching the resolved

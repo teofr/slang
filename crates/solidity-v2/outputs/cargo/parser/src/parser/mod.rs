@@ -27,6 +27,8 @@ lalrpop_mod!(
     #[allow(clippy::cast_sign_loss)]
     #[allow(clippy::too_many_lines)]
     #[allow(clippy::unused_self)]
+    // CST nodes *are* `Box`es, so every action returning one trips this
+    #[allow(clippy::unnecessary_box_returns)]
     // We use this to allow wildcard import of node constructors
     #[allow(clippy::wildcard_imports)]
     pub(crate) grammar, "/parser/grammar.generated.rs"); // synthesized by LALRPOP
