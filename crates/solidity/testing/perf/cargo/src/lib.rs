@@ -5,6 +5,7 @@ pub mod dataset;
 pub mod tests;
 
 mod __dependencies_used_in_benches__ {
+    use divan as _;
     use gungraun as _;
     use infra_utils as _;
 }
@@ -122,6 +123,21 @@ mod unit_tests {
             ast_analysis,
             count_typed_expressions,
             super::TYPED_EXPRESSIONS_COUNT
+        );
+
+        // The whole pipeline behind the public API. Its counts must agree with
+        // the individual stages measured above. Benchmarked by the wall-clock
+        // (`divan`) suite rather than by `gungraun`, so it is deliberately
+        // outside the benchmark list marked above.
+        define_payload_test_and_assert_count_eq!(
+            compilation_unit,
+            count_concrete_contracts,
+            super::CONCRETE_CONTRACT_COUNT
+        );
+        define_payload_test_and_assert_count_eq!(
+            compilation_unit,
+            count_resolved_references,
+            super::RESOLVED_REFERENCES_COUNT
         );
     }
 
