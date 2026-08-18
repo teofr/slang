@@ -1,0 +1,11 @@
+# This file is generated automatically by infrastructure scripts. Please don't edit by hand.
+
+Diagnostics: 1
+
+[syntax/unexpected-terminal] Error: Unexpected YulJumpKeyword. One of YulIdentifier was expected
+    ╭─[input.sol:10:22]
+    │
+ 10 │             function jump(jumpi) -> jumpdest {
+    │                      ──┬─  
+    │                        ╰─── Error occurred here.
+────╯

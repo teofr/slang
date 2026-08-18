@@ -4364,11 +4364,65 @@ IdentifierPathTailElements: Vec<IdentifierPathElement> = {
                     ),
                     Topic(
                         title = "Yul Keywords",
+                        // Besides the keywords Yul actually uses, this topic also holds the
+                        // names Yul only *reserves*: they are `enabled = Never` (so they never
+                        // appear in the grammar) but stay reserved, which is what stops them
+                        // from being lexed as a `YulIdentifier` and thus from being declared or
+                        // referenced. Solidity keywords Yul reserves (`hex`, `super`, `this`)
+                        // and the EVM opcodes Yul does not expose as built-ins (`jump`, `jumpi`,
+                        // `jumpdest`, `pc`, `push*`, `dup*`, `swap*`) both live here, as do the
+                        // Yul object built-ins that only exist in standalone Yul objects
+                        // (`datacopy`, `dataoffset`, `datasize`, `linkersymbol`, `loadimmutable`,
+                        // `setimmutable`) — solc reserves all of those in inline assembly too.
+                        //
+                        // Names that *are* Yul built-ins on some version/target can't be
+                        // reserved this way, since they have to keep lexing as identifiers to be
+                        // callable; see `p6_resolve_yul::conflicts` for that check.
                         items = [
                             Keyword(name = YulBreakKeyword, scanner = Atom("break")),
                             Keyword(name = YulCaseKeyword, scanner = Atom("case")),
                             Keyword(name = YulContinueKeyword, scanner = Atom("continue")),
+                            Keyword(
+                                name = YulDataCopyKeyword,
+                                enabled = Never,
+                                scanner = Atom("datacopy")
+                            ),
+                            Keyword(
+                                name = YulDataOffsetKeyword,
+                                enabled = Never,
+                                scanner = Atom("dataoffset")
+                            ),
+                            Keyword(
+                                name = YulDataSizeKeyword,
+                                enabled = Never,
+                                scanner = Atom("datasize")
+                            ),
                             Keyword(name = YulDefaultKeyword, scanner = Atom("default")),
+                            Keyword(
+                                name = YulDupKeyword,
+                                enabled = Never,
+                                scanner = Sequence([
+                                    Atom("dup"),
+                                    Choice([
+                                        Atom("1"),
+                                        Atom("2"),
+                                        Atom("3"),
+                                        Atom("4"),
+                                        Atom("5"),
+                                        Atom("6"),
+                                        Atom("7"),
+                                        Atom("8"),
+                                        Atom("9"),
+                                        Atom("10"),
+                                        Atom("11"),
+                                        Atom("12"),
+                                        Atom("13"),
+                                        Atom("14"),
+                                        Atom("15"),
+                                        Atom("16")
+                                    ])
+                                ])
+                            ),
                             Keyword(name = YulFalseKeyword, scanner = Atom("false")),
                             Keyword(name = YulForKeyword, scanner = Atom("for")),
                             Keyword(name = YulFunctionKeyword, scanner = Atom("function")),
@@ -4378,12 +4432,121 @@ IdentifierPathTailElements: Vec<IdentifierPathElement> = {
                                 scanner = Atom("hex")
                             ),
                             Keyword(name = YulIfKeyword, scanner = Atom("if")),
+                            Keyword(
+                                name = YulJumpDestKeyword,
+                                enabled = Never,
+                                scanner = Atom("jumpdest")
+                            ),
+                            Keyword(
+                                name = YulJumpIKeyword,
+                                enabled = Never,
+                                scanner = Atom("jumpi")
+                            ),
+                            Keyword(
+                                name = YulJumpKeyword,
+                                enabled = Never,
+                                scanner = Atom("jump")
+                            ),
                             Keyword(name = YulLeaveKeyword, scanner = Atom("leave")),
                             Keyword(name = YulLetKeyword, scanner = Atom("let")),
+                            Keyword(
+                                name = YulLinkerSymbolKeyword,
+                                enabled = Never,
+                                scanner = Atom("linkersymbol")
+                            ),
+                            Keyword(
+                                name = YulLoadImmutableKeyword,
+                                enabled = Never,
+                                scanner = Atom("loadimmutable")
+                            ),
+                            Keyword(
+                                name = YulPcKeyword,
+                                enabled = Never,
+                                scanner = Atom("pc")
+                            ),
+                            Keyword(
+                                // `push0` only names an opcode from Shanghai, which solc learned about
+                                // in `0.8.20`; before that the name is not reserved.
+                                name = YulPush0Keyword,
+                                enabled = Never,
+                                reserved = From("0.8.20"),
+                                scanner = Atom("push0")
+                            ),
+                            Keyword(
+                                name = YulPushKeyword,
+                                enabled = Never,
+                                scanner = Sequence([
+                                    Atom("push"),
+                                    Choice([
+                                        Atom("1"),
+                                        Atom("2"),
+                                        Atom("3"),
+                                        Atom("4"),
+                                        Atom("5"),
+                                        Atom("6"),
+                                        Atom("7"),
+                                        Atom("8"),
+                                        Atom("9"),
+                                        Atom("10"),
+                                        Atom("11"),
+                                        Atom("12"),
+                                        Atom("13"),
+                                        Atom("14"),
+                                        Atom("15"),
+                                        Atom("16"),
+                                        Atom("17"),
+                                        Atom("18"),
+                                        Atom("19"),
+                                        Atom("20"),
+                                        Atom("21"),
+                                        Atom("22"),
+                                        Atom("23"),
+                                        Atom("24"),
+                                        Atom("25"),
+                                        Atom("26"),
+                                        Atom("27"),
+                                        Atom("28"),
+                                        Atom("29"),
+                                        Atom("30"),
+                                        Atom("31"),
+                                        Atom("32")
+                                    ])
+                                ])
+                            ),
+                            Keyword(
+                                name = YulSetImmutableKeyword,
+                                enabled = Never,
+                                scanner = Atom("setimmutable")
+                            ),
                             Keyword(
                                 name = YulSuperKeyword,
                                 enabled = Never,
                                 scanner = Atom("super")
+                            ),
+                            Keyword(
+                                name = YulSwapKeyword,
+                                enabled = Never,
+                                scanner = Sequence([
+                                    Atom("swap"),
+                                    Choice([
+                                        Atom("1"),
+                                        Atom("2"),
+                                        Atom("3"),
+                                        Atom("4"),
+                                        Atom("5"),
+                                        Atom("6"),
+                                        Atom("7"),
+                                        Atom("8"),
+                                        Atom("9"),
+                                        Atom("10"),
+                                        Atom("11"),
+                                        Atom("12"),
+                                        Atom("13"),
+                                        Atom("14"),
+                                        Atom("15"),
+                                        Atom("16")
+                                    ])
+                                ])
                             ),
                             Keyword(name = YulSwitchKeyword, scanner = Atom("switch")),
                             Keyword(

@@ -6398,6 +6398,33 @@ pub fn new_yul_continue_keyword(range: Range<usize>, _source: &str) -> YulContin
 }
 
 #[derive(Clone, Debug, PartialEq)]
+pub struct YulDataCopyKeyword {
+    pub range: Range<usize>,
+}
+
+pub fn new_yul_data_copy_keyword(range: Range<usize>, _source: &str) -> YulDataCopyKeyword {
+    YulDataCopyKeyword { range }
+}
+
+#[derive(Clone, Debug, PartialEq)]
+pub struct YulDataOffsetKeyword {
+    pub range: Range<usize>,
+}
+
+pub fn new_yul_data_offset_keyword(range: Range<usize>, _source: &str) -> YulDataOffsetKeyword {
+    YulDataOffsetKeyword { range }
+}
+
+#[derive(Clone, Debug, PartialEq)]
+pub struct YulDataSizeKeyword {
+    pub range: Range<usize>,
+}
+
+pub fn new_yul_data_size_keyword(range: Range<usize>, _source: &str) -> YulDataSizeKeyword {
+    YulDataSizeKeyword { range }
+}
+
+#[derive(Clone, Debug, PartialEq)]
 pub struct YulDecimalLiteral {
     pub range: Range<usize>,
 }
@@ -6413,6 +6440,15 @@ pub struct YulDefaultKeyword {
 
 pub fn new_yul_default_keyword(range: Range<usize>, _source: &str) -> YulDefaultKeyword {
     YulDefaultKeyword { range }
+}
+
+#[derive(Clone, Debug, PartialEq)]
+pub struct YulDupKeyword {
+    pub range: Range<usize>,
+}
+
+pub fn new_yul_dup_keyword(range: Range<usize>, _source: &str) -> YulDupKeyword {
+    YulDupKeyword { range }
 }
 
 #[derive(Clone, Debug, PartialEq)]
@@ -6488,6 +6524,33 @@ pub fn new_yul_if_keyword(range: Range<usize>, _source: &str) -> YulIfKeyword {
 }
 
 #[derive(Clone, Debug, PartialEq)]
+pub struct YulJumpDestKeyword {
+    pub range: Range<usize>,
+}
+
+pub fn new_yul_jump_dest_keyword(range: Range<usize>, _source: &str) -> YulJumpDestKeyword {
+    YulJumpDestKeyword { range }
+}
+
+#[derive(Clone, Debug, PartialEq)]
+pub struct YulJumpIKeyword {
+    pub range: Range<usize>,
+}
+
+pub fn new_yul_jump_i_keyword(range: Range<usize>, _source: &str) -> YulJumpIKeyword {
+    YulJumpIKeyword { range }
+}
+
+#[derive(Clone, Debug, PartialEq)]
+pub struct YulJumpKeyword {
+    pub range: Range<usize>,
+}
+
+pub fn new_yul_jump_keyword(range: Range<usize>, _source: &str) -> YulJumpKeyword {
+    YulJumpKeyword { range }
+}
+
+#[derive(Clone, Debug, PartialEq)]
 pub struct YulLeaveKeyword {
     pub range: Range<usize>,
 }
@@ -6503,6 +6566,27 @@ pub struct YulLetKeyword {
 
 pub fn new_yul_let_keyword(range: Range<usize>, _source: &str) -> YulLetKeyword {
     YulLetKeyword { range }
+}
+
+#[derive(Clone, Debug, PartialEq)]
+pub struct YulLinkerSymbolKeyword {
+    pub range: Range<usize>,
+}
+
+pub fn new_yul_linker_symbol_keyword(range: Range<usize>, _source: &str) -> YulLinkerSymbolKeyword {
+    YulLinkerSymbolKeyword { range }
+}
+
+#[derive(Clone, Debug, PartialEq)]
+pub struct YulLoadImmutableKeyword {
+    pub range: Range<usize>,
+}
+
+pub fn new_yul_load_immutable_keyword(
+    range: Range<usize>,
+    _source: &str,
+) -> YulLoadImmutableKeyword {
+    YulLoadImmutableKeyword { range }
 }
 
 #[derive(Clone, Debug, PartialEq)]
@@ -6533,12 +6617,48 @@ pub fn new_yul_open_paren(range: Range<usize>, _source: &str) -> YulOpenParen {
 }
 
 #[derive(Clone, Debug, PartialEq)]
+pub struct YulPcKeyword {
+    pub range: Range<usize>,
+}
+
+pub fn new_yul_pc_keyword(range: Range<usize>, _source: &str) -> YulPcKeyword {
+    YulPcKeyword { range }
+}
+
+#[derive(Clone, Debug, PartialEq)]
 pub struct YulPeriod {
     pub range: Range<usize>,
 }
 
 pub fn new_yul_period(range: Range<usize>, _source: &str) -> YulPeriod {
     YulPeriod { range }
+}
+
+#[derive(Clone, Debug, PartialEq)]
+pub struct YulPush0Keyword {
+    pub range: Range<usize>,
+}
+
+pub fn new_yul_push_0_keyword(range: Range<usize>, _source: &str) -> YulPush0Keyword {
+    YulPush0Keyword { range }
+}
+
+#[derive(Clone, Debug, PartialEq)]
+pub struct YulPushKeyword {
+    pub range: Range<usize>,
+}
+
+pub fn new_yul_push_keyword(range: Range<usize>, _source: &str) -> YulPushKeyword {
+    YulPushKeyword { range }
+}
+
+#[derive(Clone, Debug, PartialEq)]
+pub struct YulSetImmutableKeyword {
+    pub range: Range<usize>,
+}
+
+pub fn new_yul_set_immutable_keyword(range: Range<usize>, _source: &str) -> YulSetImmutableKeyword {
+    YulSetImmutableKeyword { range }
 }
 
 #[derive(Clone, Debug, PartialEq)]
@@ -6557,6 +6677,15 @@ pub struct YulSuperKeyword {
 
 pub fn new_yul_super_keyword(range: Range<usize>, _source: &str) -> YulSuperKeyword {
     YulSuperKeyword { range }
+}
+
+#[derive(Clone, Debug, PartialEq)]
+pub struct YulSwapKeyword {
+    pub range: Range<usize>,
+}
+
+pub fn new_yul_swap_keyword(range: Range<usize>, _source: &str) -> YulSwapKeyword {
+    YulSwapKeyword { range }
 }
 
 #[derive(Clone, Debug, PartialEq)]

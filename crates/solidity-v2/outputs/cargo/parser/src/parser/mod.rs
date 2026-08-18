@@ -114,7 +114,7 @@ fn convert_parse_error(
             .iter()
             .map(|str| str.strip_prefix("L_").unwrap())
             .map(|str| str.parse::<LexemeKind>().unwrap())
-            .map(|lexeme| TerminalKind::from(&lexeme))
+            .map(|lexeme| lexeme.expected_terminal())
             .collect()
     }
 

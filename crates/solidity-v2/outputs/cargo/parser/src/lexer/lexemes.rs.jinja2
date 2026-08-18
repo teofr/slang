@@ -20,6 +20,21 @@ pub enum LexemeKind {
 }
 
 impl LexemeKind {
+    /// The terminal to name when reporting this lexeme in the list of terminals
+    /// the parser expected.
+    ///
+    /// That is the lexeme's own terminal, except for the unreserved lexeme of a
+    /// keyword the grammar never uses: the parser only ever accepts it in place
+    /// of an identifier, so naming the keyword would be noise.
+    pub fn expected_terminal(&self) -> TerminalKind {
+        match self {
+            {% for lexeme, identifier in model.parser.lexer.identifier_stand_in_lexemes -%}
+                Self::{{ lexeme }} => TerminalKind::{{ identifier }},
+            {% endfor -%}
+            _ => TerminalKind::from(self),
+        }
+    }
+
     pub fn is_trivia(&self) -> bool {
         matches!(
             self,

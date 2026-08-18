@@ -2475,6 +2475,24 @@ impl TextRange for YulContinueKeyword {
     }
 }
 
+impl TextRange for YulDataCopyKeyword {
+    fn calculate_text_range(&self) -> Option<Range<usize>> {
+        Some(self.calculate_text_start()?..self.calculate_text_end()?)
+    }
+}
+
+impl TextRange for YulDataOffsetKeyword {
+    fn calculate_text_range(&self) -> Option<Range<usize>> {
+        Some(self.calculate_text_start()?..self.calculate_text_end()?)
+    }
+}
+
+impl TextRange for YulDataSizeKeyword {
+    fn calculate_text_range(&self) -> Option<Range<usize>> {
+        Some(self.calculate_text_start()?..self.calculate_text_end()?)
+    }
+}
+
 impl TextRange for YulDecimalLiteral {
     fn calculate_text_range(&self) -> Option<Range<usize>> {
         Some(self.calculate_text_start()?..self.calculate_text_end()?)
@@ -2482,6 +2500,12 @@ impl TextRange for YulDecimalLiteral {
 }
 
 impl TextRange for YulDefaultKeyword {
+    fn calculate_text_range(&self) -> Option<Range<usize>> {
+        Some(self.calculate_text_start()?..self.calculate_text_end()?)
+    }
+}
+
+impl TextRange for YulDupKeyword {
     fn calculate_text_range(&self) -> Option<Range<usize>> {
         Some(self.calculate_text_start()?..self.calculate_text_end()?)
     }
@@ -2535,6 +2559,24 @@ impl TextRange for YulIfKeyword {
     }
 }
 
+impl TextRange for YulJumpDestKeyword {
+    fn calculate_text_range(&self) -> Option<Range<usize>> {
+        Some(self.calculate_text_start()?..self.calculate_text_end()?)
+    }
+}
+
+impl TextRange for YulJumpIKeyword {
+    fn calculate_text_range(&self) -> Option<Range<usize>> {
+        Some(self.calculate_text_start()?..self.calculate_text_end()?)
+    }
+}
+
+impl TextRange for YulJumpKeyword {
+    fn calculate_text_range(&self) -> Option<Range<usize>> {
+        Some(self.calculate_text_start()?..self.calculate_text_end()?)
+    }
+}
+
 impl TextRange for YulLeaveKeyword {
     fn calculate_text_range(&self) -> Option<Range<usize>> {
         Some(self.calculate_text_start()?..self.calculate_text_end()?)
@@ -2542,6 +2584,18 @@ impl TextRange for YulLeaveKeyword {
 }
 
 impl TextRange for YulLetKeyword {
+    fn calculate_text_range(&self) -> Option<Range<usize>> {
+        Some(self.calculate_text_start()?..self.calculate_text_end()?)
+    }
+}
+
+impl TextRange for YulLinkerSymbolKeyword {
+    fn calculate_text_range(&self) -> Option<Range<usize>> {
+        Some(self.calculate_text_start()?..self.calculate_text_end()?)
+    }
+}
+
+impl TextRange for YulLoadImmutableKeyword {
     fn calculate_text_range(&self) -> Option<Range<usize>> {
         Some(self.calculate_text_start()?..self.calculate_text_end()?)
     }
@@ -2565,7 +2619,31 @@ impl TextRange for YulOpenParen {
     }
 }
 
+impl TextRange for YulPcKeyword {
+    fn calculate_text_range(&self) -> Option<Range<usize>> {
+        Some(self.calculate_text_start()?..self.calculate_text_end()?)
+    }
+}
+
 impl TextRange for YulPeriod {
+    fn calculate_text_range(&self) -> Option<Range<usize>> {
+        Some(self.calculate_text_start()?..self.calculate_text_end()?)
+    }
+}
+
+impl TextRange for YulPush0Keyword {
+    fn calculate_text_range(&self) -> Option<Range<usize>> {
+        Some(self.calculate_text_start()?..self.calculate_text_end()?)
+    }
+}
+
+impl TextRange for YulPushKeyword {
+    fn calculate_text_range(&self) -> Option<Range<usize>> {
+        Some(self.calculate_text_start()?..self.calculate_text_end()?)
+    }
+}
+
+impl TextRange for YulSetImmutableKeyword {
     fn calculate_text_range(&self) -> Option<Range<usize>> {
         Some(self.calculate_text_start()?..self.calculate_text_end()?)
     }
@@ -2578,6 +2656,12 @@ impl TextRange for YulStringLiteral {
 }
 
 impl TextRange for YulSuperKeyword {
+    fn calculate_text_range(&self) -> Option<Range<usize>> {
+        Some(self.calculate_text_start()?..self.calculate_text_end()?)
+    }
+}
+
+impl TextRange for YulSwapKeyword {
     fn calculate_text_range(&self) -> Option<Range<usize>> {
         Some(self.calculate_text_start()?..self.calculate_text_end()?)
     }

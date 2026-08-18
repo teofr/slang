@@ -22539,6 +22539,90 @@ impl NodeChecker for YulContinueKeyword {
 }
 
 /// Generic `NodeChecker` for terminals
+impl NodeChecker for YulDataCopyKeyword {
+    fn check_node_with_offset(&self, node: &Node, text_offset: TextIndex) -> Vec<NodeCheckerError> {
+        let node_range = text_offset..(text_offset + node.text_len());
+        let mut errors = vec![];
+        if let NodeKind::Terminal(terminal_kind) = node.kind() {
+            let v1_kind = terminal_kind.as_ref();
+            let v2_kind = "YulDataCopyKeyword";
+
+            if v1_kind != v2_kind {
+                errors.push(NodeCheckerError::new(
+                    format!("Expected node kind to be {v2_kind}, but it was {v1_kind}"),
+                    node_range,
+                ));
+            }
+        } else {
+            errors.push(NodeCheckerError::new(
+                format!(
+                    "Expected node kind to be a terminal, but it was {}",
+                    node.kind()
+                ),
+                node_range,
+            ));
+        }
+        errors
+    }
+}
+
+/// Generic `NodeChecker` for terminals
+impl NodeChecker for YulDataOffsetKeyword {
+    fn check_node_with_offset(&self, node: &Node, text_offset: TextIndex) -> Vec<NodeCheckerError> {
+        let node_range = text_offset..(text_offset + node.text_len());
+        let mut errors = vec![];
+        if let NodeKind::Terminal(terminal_kind) = node.kind() {
+            let v1_kind = terminal_kind.as_ref();
+            let v2_kind = "YulDataOffsetKeyword";
+
+            if v1_kind != v2_kind {
+                errors.push(NodeCheckerError::new(
+                    format!("Expected node kind to be {v2_kind}, but it was {v1_kind}"),
+                    node_range,
+                ));
+            }
+        } else {
+            errors.push(NodeCheckerError::new(
+                format!(
+                    "Expected node kind to be a terminal, but it was {}",
+                    node.kind()
+                ),
+                node_range,
+            ));
+        }
+        errors
+    }
+}
+
+/// Generic `NodeChecker` for terminals
+impl NodeChecker for YulDataSizeKeyword {
+    fn check_node_with_offset(&self, node: &Node, text_offset: TextIndex) -> Vec<NodeCheckerError> {
+        let node_range = text_offset..(text_offset + node.text_len());
+        let mut errors = vec![];
+        if let NodeKind::Terminal(terminal_kind) = node.kind() {
+            let v1_kind = terminal_kind.as_ref();
+            let v2_kind = "YulDataSizeKeyword";
+
+            if v1_kind != v2_kind {
+                errors.push(NodeCheckerError::new(
+                    format!("Expected node kind to be {v2_kind}, but it was {v1_kind}"),
+                    node_range,
+                ));
+            }
+        } else {
+            errors.push(NodeCheckerError::new(
+                format!(
+                    "Expected node kind to be a terminal, but it was {}",
+                    node.kind()
+                ),
+                node_range,
+            ));
+        }
+        errors
+    }
+}
+
+/// Generic `NodeChecker` for terminals
 impl NodeChecker for YulDecimalLiteral {
     fn check_node_with_offset(&self, node: &Node, text_offset: TextIndex) -> Vec<NodeCheckerError> {
         let node_range = text_offset..(text_offset + node.text_len());
@@ -22574,6 +22658,34 @@ impl NodeChecker for YulDefaultKeyword {
         if let NodeKind::Terminal(terminal_kind) = node.kind() {
             let v1_kind = terminal_kind.as_ref();
             let v2_kind = "YulDefaultKeyword";
+
+            if v1_kind != v2_kind {
+                errors.push(NodeCheckerError::new(
+                    format!("Expected node kind to be {v2_kind}, but it was {v1_kind}"),
+                    node_range,
+                ));
+            }
+        } else {
+            errors.push(NodeCheckerError::new(
+                format!(
+                    "Expected node kind to be a terminal, but it was {}",
+                    node.kind()
+                ),
+                node_range,
+            ));
+        }
+        errors
+    }
+}
+
+/// Generic `NodeChecker` for terminals
+impl NodeChecker for YulDupKeyword {
+    fn check_node_with_offset(&self, node: &Node, text_offset: TextIndex) -> Vec<NodeCheckerError> {
+        let node_range = text_offset..(text_offset + node.text_len());
+        let mut errors = vec![];
+        if let NodeKind::Terminal(terminal_kind) = node.kind() {
+            let v1_kind = terminal_kind.as_ref();
+            let v2_kind = "YulDupKeyword";
 
             if v1_kind != v2_kind {
                 errors.push(NodeCheckerError::new(
@@ -22844,6 +22956,90 @@ impl NodeChecker for YulIfKeyword {
 }
 
 /// Generic `NodeChecker` for terminals
+impl NodeChecker for YulJumpDestKeyword {
+    fn check_node_with_offset(&self, node: &Node, text_offset: TextIndex) -> Vec<NodeCheckerError> {
+        let node_range = text_offset..(text_offset + node.text_len());
+        let mut errors = vec![];
+        if let NodeKind::Terminal(terminal_kind) = node.kind() {
+            let v1_kind = terminal_kind.as_ref();
+            let v2_kind = "YulJumpDestKeyword";
+
+            if v1_kind != v2_kind {
+                errors.push(NodeCheckerError::new(
+                    format!("Expected node kind to be {v2_kind}, but it was {v1_kind}"),
+                    node_range,
+                ));
+            }
+        } else {
+            errors.push(NodeCheckerError::new(
+                format!(
+                    "Expected node kind to be a terminal, but it was {}",
+                    node.kind()
+                ),
+                node_range,
+            ));
+        }
+        errors
+    }
+}
+
+/// Generic `NodeChecker` for terminals
+impl NodeChecker for YulJumpIKeyword {
+    fn check_node_with_offset(&self, node: &Node, text_offset: TextIndex) -> Vec<NodeCheckerError> {
+        let node_range = text_offset..(text_offset + node.text_len());
+        let mut errors = vec![];
+        if let NodeKind::Terminal(terminal_kind) = node.kind() {
+            let v1_kind = terminal_kind.as_ref();
+            let v2_kind = "YulJumpIKeyword";
+
+            if v1_kind != v2_kind {
+                errors.push(NodeCheckerError::new(
+                    format!("Expected node kind to be {v2_kind}, but it was {v1_kind}"),
+                    node_range,
+                ));
+            }
+        } else {
+            errors.push(NodeCheckerError::new(
+                format!(
+                    "Expected node kind to be a terminal, but it was {}",
+                    node.kind()
+                ),
+                node_range,
+            ));
+        }
+        errors
+    }
+}
+
+/// Generic `NodeChecker` for terminals
+impl NodeChecker for YulJumpKeyword {
+    fn check_node_with_offset(&self, node: &Node, text_offset: TextIndex) -> Vec<NodeCheckerError> {
+        let node_range = text_offset..(text_offset + node.text_len());
+        let mut errors = vec![];
+        if let NodeKind::Terminal(terminal_kind) = node.kind() {
+            let v1_kind = terminal_kind.as_ref();
+            let v2_kind = "YulJumpKeyword";
+
+            if v1_kind != v2_kind {
+                errors.push(NodeCheckerError::new(
+                    format!("Expected node kind to be {v2_kind}, but it was {v1_kind}"),
+                    node_range,
+                ));
+            }
+        } else {
+            errors.push(NodeCheckerError::new(
+                format!(
+                    "Expected node kind to be a terminal, but it was {}",
+                    node.kind()
+                ),
+                node_range,
+            ));
+        }
+        errors
+    }
+}
+
+/// Generic `NodeChecker` for terminals
 impl NodeChecker for YulLeaveKeyword {
     fn check_node_with_offset(&self, node: &Node, text_offset: TextIndex) -> Vec<NodeCheckerError> {
         let node_range = text_offset..(text_offset + node.text_len());
@@ -22879,6 +23075,62 @@ impl NodeChecker for YulLetKeyword {
         if let NodeKind::Terminal(terminal_kind) = node.kind() {
             let v1_kind = terminal_kind.as_ref();
             let v2_kind = "YulLetKeyword";
+
+            if v1_kind != v2_kind {
+                errors.push(NodeCheckerError::new(
+                    format!("Expected node kind to be {v2_kind}, but it was {v1_kind}"),
+                    node_range,
+                ));
+            }
+        } else {
+            errors.push(NodeCheckerError::new(
+                format!(
+                    "Expected node kind to be a terminal, but it was {}",
+                    node.kind()
+                ),
+                node_range,
+            ));
+        }
+        errors
+    }
+}
+
+/// Generic `NodeChecker` for terminals
+impl NodeChecker for YulLinkerSymbolKeyword {
+    fn check_node_with_offset(&self, node: &Node, text_offset: TextIndex) -> Vec<NodeCheckerError> {
+        let node_range = text_offset..(text_offset + node.text_len());
+        let mut errors = vec![];
+        if let NodeKind::Terminal(terminal_kind) = node.kind() {
+            let v1_kind = terminal_kind.as_ref();
+            let v2_kind = "YulLinkerSymbolKeyword";
+
+            if v1_kind != v2_kind {
+                errors.push(NodeCheckerError::new(
+                    format!("Expected node kind to be {v2_kind}, but it was {v1_kind}"),
+                    node_range,
+                ));
+            }
+        } else {
+            errors.push(NodeCheckerError::new(
+                format!(
+                    "Expected node kind to be a terminal, but it was {}",
+                    node.kind()
+                ),
+                node_range,
+            ));
+        }
+        errors
+    }
+}
+
+/// Generic `NodeChecker` for terminals
+impl NodeChecker for YulLoadImmutableKeyword {
+    fn check_node_with_offset(&self, node: &Node, text_offset: TextIndex) -> Vec<NodeCheckerError> {
+        let node_range = text_offset..(text_offset + node.text_len());
+        let mut errors = vec![];
+        if let NodeKind::Terminal(terminal_kind) = node.kind() {
+            let v1_kind = terminal_kind.as_ref();
+            let v2_kind = "YulLoadImmutableKeyword";
 
             if v1_kind != v2_kind {
                 errors.push(NodeCheckerError::new(
@@ -22984,6 +23236,34 @@ impl NodeChecker for YulOpenParen {
 }
 
 /// Generic `NodeChecker` for terminals
+impl NodeChecker for YulPcKeyword {
+    fn check_node_with_offset(&self, node: &Node, text_offset: TextIndex) -> Vec<NodeCheckerError> {
+        let node_range = text_offset..(text_offset + node.text_len());
+        let mut errors = vec![];
+        if let NodeKind::Terminal(terminal_kind) = node.kind() {
+            let v1_kind = terminal_kind.as_ref();
+            let v2_kind = "YulPcKeyword";
+
+            if v1_kind != v2_kind {
+                errors.push(NodeCheckerError::new(
+                    format!("Expected node kind to be {v2_kind}, but it was {v1_kind}"),
+                    node_range,
+                ));
+            }
+        } else {
+            errors.push(NodeCheckerError::new(
+                format!(
+                    "Expected node kind to be a terminal, but it was {}",
+                    node.kind()
+                ),
+                node_range,
+            ));
+        }
+        errors
+    }
+}
+
+/// Generic `NodeChecker` for terminals
 impl NodeChecker for YulPeriod {
     fn check_node_with_offset(&self, node: &Node, text_offset: TextIndex) -> Vec<NodeCheckerError> {
         let node_range = text_offset..(text_offset + node.text_len());
@@ -22991,6 +23271,90 @@ impl NodeChecker for YulPeriod {
         if let NodeKind::Terminal(terminal_kind) = node.kind() {
             let v1_kind = terminal_kind.as_ref();
             let v2_kind = "Period";
+
+            if v1_kind != v2_kind {
+                errors.push(NodeCheckerError::new(
+                    format!("Expected node kind to be {v2_kind}, but it was {v1_kind}"),
+                    node_range,
+                ));
+            }
+        } else {
+            errors.push(NodeCheckerError::new(
+                format!(
+                    "Expected node kind to be a terminal, but it was {}",
+                    node.kind()
+                ),
+                node_range,
+            ));
+        }
+        errors
+    }
+}
+
+/// Generic `NodeChecker` for terminals
+impl NodeChecker for YulPush0Keyword {
+    fn check_node_with_offset(&self, node: &Node, text_offset: TextIndex) -> Vec<NodeCheckerError> {
+        let node_range = text_offset..(text_offset + node.text_len());
+        let mut errors = vec![];
+        if let NodeKind::Terminal(terminal_kind) = node.kind() {
+            let v1_kind = terminal_kind.as_ref();
+            let v2_kind = "YulPush0Keyword";
+
+            if v1_kind != v2_kind {
+                errors.push(NodeCheckerError::new(
+                    format!("Expected node kind to be {v2_kind}, but it was {v1_kind}"),
+                    node_range,
+                ));
+            }
+        } else {
+            errors.push(NodeCheckerError::new(
+                format!(
+                    "Expected node kind to be a terminal, but it was {}",
+                    node.kind()
+                ),
+                node_range,
+            ));
+        }
+        errors
+    }
+}
+
+/// Generic `NodeChecker` for terminals
+impl NodeChecker for YulPushKeyword {
+    fn check_node_with_offset(&self, node: &Node, text_offset: TextIndex) -> Vec<NodeCheckerError> {
+        let node_range = text_offset..(text_offset + node.text_len());
+        let mut errors = vec![];
+        if let NodeKind::Terminal(terminal_kind) = node.kind() {
+            let v1_kind = terminal_kind.as_ref();
+            let v2_kind = "YulPushKeyword";
+
+            if v1_kind != v2_kind {
+                errors.push(NodeCheckerError::new(
+                    format!("Expected node kind to be {v2_kind}, but it was {v1_kind}"),
+                    node_range,
+                ));
+            }
+        } else {
+            errors.push(NodeCheckerError::new(
+                format!(
+                    "Expected node kind to be a terminal, but it was {}",
+                    node.kind()
+                ),
+                node_range,
+            ));
+        }
+        errors
+    }
+}
+
+/// Generic `NodeChecker` for terminals
+impl NodeChecker for YulSetImmutableKeyword {
+    fn check_node_with_offset(&self, node: &Node, text_offset: TextIndex) -> Vec<NodeCheckerError> {
+        let node_range = text_offset..(text_offset + node.text_len());
+        let mut errors = vec![];
+        if let NodeKind::Terminal(terminal_kind) = node.kind() {
+            let v1_kind = terminal_kind.as_ref();
+            let v2_kind = "YulSetImmutableKeyword";
 
             if v1_kind != v2_kind {
                 errors.push(NodeCheckerError::new(
@@ -23072,6 +23436,34 @@ impl NodeChecker for YulSuperKeyword {
         if let NodeKind::Terminal(terminal_kind) = node.kind() {
             let v1_kind = terminal_kind.as_ref();
             let v2_kind = "YulSuperKeyword";
+
+            if v1_kind != v2_kind {
+                errors.push(NodeCheckerError::new(
+                    format!("Expected node kind to be {v2_kind}, but it was {v1_kind}"),
+                    node_range,
+                ));
+            }
+        } else {
+            errors.push(NodeCheckerError::new(
+                format!(
+                    "Expected node kind to be a terminal, but it was {}",
+                    node.kind()
+                ),
+                node_range,
+            ));
+        }
+        errors
+    }
+}
+
+/// Generic `NodeChecker` for terminals
+impl NodeChecker for YulSwapKeyword {
+    fn check_node_with_offset(&self, node: &Node, text_offset: TextIndex) -> Vec<NodeCheckerError> {
+        let node_range = text_offset..(text_offset + node.text_len());
+        let mut errors = vec![];
+        if let NodeKind::Terminal(terminal_kind) = node.kind() {
+            let v1_kind = terminal_kind.as_ref();
+            let v2_kind = "YulSwapKeyword";
 
             if v1_kind != v2_kind {
                 errors.push(NodeCheckerError::new(

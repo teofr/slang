@@ -102,3 +102,16 @@ The new lexer isolates each lexical context completely, and they cannot referenc
 unless `switch_lexical_context` was used.
 So, new `Yul*` and `Pragma*` prefixed terminals (strings, numbers, some keywords) were added,
 with their structure/grammar mostly matching the original Solidity ones.
+
+### Reserved Yul identifiers
+
+solc reserves every EVM instruction name inside inline assembly, plus the Yul object built-ins
+(`datacopy`, `dataoffset`, `datasize`, `linkersymbol`, `loadimmutable`, `setimmutable`), so none of
+them can be declared or referenced there. v1 left the names that Yul does not expose as built-ins
+usable as identifiers; v2 reserves them with keywords that are never enabled in the grammar
+(`YulJumpKeyword`, `YulPcKeyword`, `YulPushKeyword`, ...), the same shape already used for the
+Solidity keywords Yul reserves (`hex`, `super`, `this`).
+
+The names that _are_ Yul built-ins on some version/EVM target are not reserved this way: they have
+to keep lexing as a `YulIdentifier` to stay callable, and their reservation follows the EVM target,
+which keyword reservation has no notion of.

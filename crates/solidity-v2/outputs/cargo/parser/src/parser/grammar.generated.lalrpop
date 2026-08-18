@@ -2823,6 +2823,24 @@ YulContinueKeyword: YulContinueKeyword = {
 
 };
 #[inline]
+YulDataCopyKeyword: YulDataCopyKeyword = {
+
+        <l:@L> L_YulDataCopyKeyword_Reserved <r:@L> => new_yul_data_copy_keyword(l..r, ctx.source),
+
+};
+#[inline]
+YulDataOffsetKeyword: YulDataOffsetKeyword = {
+
+        <l:@L> L_YulDataOffsetKeyword_Reserved <r:@L> => new_yul_data_offset_keyword(l..r, ctx.source),
+
+};
+#[inline]
+YulDataSizeKeyword: YulDataSizeKeyword = {
+
+        <l:@L> L_YulDataSizeKeyword_Reserved <r:@L> => new_yul_data_size_keyword(l..r, ctx.source),
+
+};
+#[inline]
 YulDecimalLiteral: YulDecimalLiteral = {
 
         <l:@L> L_YulDecimalLiteral <r:@L> => new_yul_decimal_literal(l..r, ctx.source),
@@ -2832,6 +2850,12 @@ YulDecimalLiteral: YulDecimalLiteral = {
 YulDefaultKeyword: YulDefaultKeyword = {
 
         <l:@L> L_YulDefaultKeyword_Reserved <r:@L> => new_yul_default_keyword(l..r, ctx.source),
+
+};
+#[inline]
+YulDupKeyword: YulDupKeyword = {
+
+        <l:@L> L_YulDupKeyword_Reserved <r:@L> => new_yul_dup_keyword(l..r, ctx.source),
 
 };
 #[inline]
@@ -2875,11 +2899,31 @@ YulIdentifier: YulIdentifier = {
 
         <l:@L> L_YulIdentifier <r:@L> => new_yul_identifier(l..r, ctx.source),
 
+        <l:@L> L_YulPush0Keyword_Unreserved <r:@L> => new_yul_identifier(l..r, ctx.source),
+
 };
 #[inline]
 YulIfKeyword: YulIfKeyword = {
 
         <l:@L> L_YulIfKeyword_Reserved <r:@L> => new_yul_if_keyword(l..r, ctx.source),
+
+};
+#[inline]
+YulJumpDestKeyword: YulJumpDestKeyword = {
+
+        <l:@L> L_YulJumpDestKeyword_Reserved <r:@L> => new_yul_jump_dest_keyword(l..r, ctx.source),
+
+};
+#[inline]
+YulJumpIKeyword: YulJumpIKeyword = {
+
+        <l:@L> L_YulJumpIKeyword_Reserved <r:@L> => new_yul_jump_i_keyword(l..r, ctx.source),
+
+};
+#[inline]
+YulJumpKeyword: YulJumpKeyword = {
+
+        <l:@L> L_YulJumpKeyword_Reserved <r:@L> => new_yul_jump_keyword(l..r, ctx.source),
 
 };
 #[inline]
@@ -2892,6 +2936,18 @@ YulLeaveKeyword: YulLeaveKeyword = {
 YulLetKeyword: YulLetKeyword = {
 
         <l:@L> L_YulLetKeyword_Reserved <r:@L> => new_yul_let_keyword(l..r, ctx.source),
+
+};
+#[inline]
+YulLinkerSymbolKeyword: YulLinkerSymbolKeyword = {
+
+        <l:@L> L_YulLinkerSymbolKeyword_Reserved <r:@L> => new_yul_linker_symbol_keyword(l..r, ctx.source),
+
+};
+#[inline]
+YulLoadImmutableKeyword: YulLoadImmutableKeyword = {
+
+        <l:@L> L_YulLoadImmutableKeyword_Reserved <r:@L> => new_yul_load_immutable_keyword(l..r, ctx.source),
 
 };
 #[inline]
@@ -2913,9 +2969,35 @@ YulOpenParen: YulOpenParen = {
 
 };
 #[inline]
+YulPcKeyword: YulPcKeyword = {
+
+        <l:@L> L_YulPcKeyword_Reserved <r:@L> => new_yul_pc_keyword(l..r, ctx.source),
+
+};
+#[inline]
 YulPeriod: YulPeriod = {
 
         <l:@L> L_YulPeriod <r:@L> => new_yul_period(l..r, ctx.source),
+
+};
+#[inline]
+YulPush0Keyword: YulPush0Keyword = {
+
+        <l:@L> L_YulPush0Keyword_Reserved <r:@L> => new_yul_push_0_keyword(l..r, ctx.source),
+
+        <l:@L> L_YulPush0Keyword_Unreserved <r:@L> => new_yul_push_0_keyword(l..r, ctx.source),
+
+};
+#[inline]
+YulPushKeyword: YulPushKeyword = {
+
+        <l:@L> L_YulPushKeyword_Reserved <r:@L> => new_yul_push_keyword(l..r, ctx.source),
+
+};
+#[inline]
+YulSetImmutableKeyword: YulSetImmutableKeyword = {
+
+        <l:@L> L_YulSetImmutableKeyword_Reserved <r:@L> => new_yul_set_immutable_keyword(l..r, ctx.source),
 
 };
 #[inline]
@@ -2928,6 +3010,12 @@ YulStringLiteral: YulStringLiteral = {
 YulSuperKeyword: YulSuperKeyword = {
 
         <l:@L> L_YulSuperKeyword_Reserved <r:@L> => new_yul_super_keyword(l..r, ctx.source),
+
+};
+#[inline]
+YulSwapKeyword: YulSwapKeyword = {
+
+        <l:@L> L_YulSwapKeyword_Reserved <r:@L> => new_yul_swap_keyword(l..r, ctx.source),
 
 };
 #[inline]
@@ -3162,8 +3250,12 @@ extern {
         L_YulColonEqual => LexemeKind::YulColonEqual,
         L_YulComma => LexemeKind::YulComma,
         L_YulContinueKeyword_Reserved => LexemeKind::YulContinueKeyword_Reserved,
+        L_YulDataCopyKeyword_Reserved => LexemeKind::YulDataCopyKeyword_Reserved,
+        L_YulDataOffsetKeyword_Reserved => LexemeKind::YulDataOffsetKeyword_Reserved,
+        L_YulDataSizeKeyword_Reserved => LexemeKind::YulDataSizeKeyword_Reserved,
         L_YulDecimalLiteral => LexemeKind::YulDecimalLiteral,
         L_YulDefaultKeyword_Reserved => LexemeKind::YulDefaultKeyword_Reserved,
+        L_YulDupKeyword_Reserved => LexemeKind::YulDupKeyword_Reserved,
         L_YulEndOfLine => LexemeKind::YulEndOfLine,
         L_YulFalseKeyword_Reserved => LexemeKind::YulFalseKeyword_Reserved,
         L_YulForKeyword_Reserved => LexemeKind::YulForKeyword_Reserved,
@@ -3173,18 +3265,29 @@ extern {
         L_YulHexStringLiteral => LexemeKind::YulHexStringLiteral,
         L_YulIdentifier => LexemeKind::YulIdentifier,
         L_YulIfKeyword_Reserved => LexemeKind::YulIfKeyword_Reserved,
+        L_YulJumpDestKeyword_Reserved => LexemeKind::YulJumpDestKeyword_Reserved,
+        L_YulJumpIKeyword_Reserved => LexemeKind::YulJumpIKeyword_Reserved,
+        L_YulJumpKeyword_Reserved => LexemeKind::YulJumpKeyword_Reserved,
         L_YulLeaveKeyword_Reserved => LexemeKind::YulLeaveKeyword_Reserved,
         L_YulLetKeyword_Reserved => LexemeKind::YulLetKeyword_Reserved,
+        L_YulLinkerSymbolKeyword_Reserved => LexemeKind::YulLinkerSymbolKeyword_Reserved,
+        L_YulLoadImmutableKeyword_Reserved => LexemeKind::YulLoadImmutableKeyword_Reserved,
         L_YulMinusGreaterThan => LexemeKind::YulMinusGreaterThan,
         L_YulMultiLineComment => LexemeKind::YulMultiLineComment,
         L_YulMultiLineNatSpecComment => LexemeKind::YulMultiLineNatSpecComment,
         L_YulOpenBrace => LexemeKind::YulOpenBrace,
         L_YulOpenParen => LexemeKind::YulOpenParen,
+        L_YulPcKeyword_Reserved => LexemeKind::YulPcKeyword_Reserved,
         L_YulPeriod => LexemeKind::YulPeriod,
+        L_YulPush0Keyword_Reserved => LexemeKind::YulPush0Keyword_Reserved,
+        L_YulPush0Keyword_Unreserved => LexemeKind::YulPush0Keyword_Unreserved,
+        L_YulPushKeyword_Reserved => LexemeKind::YulPushKeyword_Reserved,
+        L_YulSetImmutableKeyword_Reserved => LexemeKind::YulSetImmutableKeyword_Reserved,
         L_YulSingleLineComment => LexemeKind::YulSingleLineComment,
         L_YulSingleLineNatSpecComment => LexemeKind::YulSingleLineNatSpecComment,
         L_YulStringLiteral => LexemeKind::YulStringLiteral,
         L_YulSuperKeyword_Reserved => LexemeKind::YulSuperKeyword_Reserved,
+        L_YulSwapKeyword_Reserved => LexemeKind::YulSwapKeyword_Reserved,
         L_YulSwitchKeyword_Reserved => LexemeKind::YulSwitchKeyword_Reserved,
         L_YulThisKeyword_Reserved => LexemeKind::YulThisKeyword_Reserved,
         L_YulTrueKeyword_Reserved => LexemeKind::YulTrueKeyword_Reserved,
