@@ -1,17 +1,12 @@
 // This file is generated automatically by infrastructure scripts. Please don't edit by hand.
 
 use logos::{FilterResult, Lexer, Logos};
-use slang_solidity_v2_common::versions::LanguageVersion;
+use slang_solidity_v2_common::versions::{LanguageVersion, LanguageVersionSpecifier};
 
 use crate::lexer::lexemes::{Lexeme, LexemeKind};
 
 #[derive(Clone)]
 pub struct ContextExtras {
-    // Since we restricted Slang v2 lexer to only support Solidity 0.8.0+, all the remaining keywords
-    // are either `Always` or `Never` versioned in the remaining versions, so we don't need this
-    // information today. However, that might always change with new version releases.
-    // So, let's keep it for now, even if we don't generate code that uses it yet.
-    #[allow(dead_code)]
     pub language_version: LanguageVersion,
 }
 
@@ -405,31 +400,54 @@ pub enum YulContext {
     #[regex(r#"break"#, |_| { LexemeKind::YulBreakKeyword_Reserved }, priority = 3000006)]
     #[regex(r#"case"#, |_| { LexemeKind::YulCaseKeyword_Reserved }, priority = 3000007)]
     #[regex(r#"continue"#, |_| { LexemeKind::YulContinueKeyword_Reserved }, priority = 3000008)]
-    #[regex(r#"default"#, |_| { LexemeKind::YulDefaultKeyword_Reserved }, priority = 3000009)]
-    #[regex(r#"false"#, |_| { LexemeKind::YulFalseKeyword_Reserved }, priority = 3000010)]
-    #[regex(r#"for"#, |_| { LexemeKind::YulForKeyword_Reserved }, priority = 3000011)]
-    #[regex(r#"function"#, |_| { LexemeKind::YulFunctionKeyword_Reserved }, priority = 3000012)]
-    #[regex(r#"hex"#, |_| { LexemeKind::YulHexKeyword_Reserved }, priority = 3000013)]
-    #[regex(r#"if"#, |_| { LexemeKind::YulIfKeyword_Reserved }, priority = 3000014)]
-    #[regex(r#"leave"#, |_| { LexemeKind::YulLeaveKeyword_Reserved }, priority = 3000015)]
-    #[regex(r#"let"#, |_| { LexemeKind::YulLetKeyword_Reserved }, priority = 3000016)]
-    #[regex(r#"super"#, |_| { LexemeKind::YulSuperKeyword_Reserved }, priority = 3000017)]
-    #[regex(r#"switch"#, |_| { LexemeKind::YulSwitchKeyword_Reserved }, priority = 3000018)]
-    #[regex(r#"this"#, |_| { LexemeKind::YulThisKeyword_Reserved }, priority = 3000019)]
-    #[regex(r#"true"#, |_| { LexemeKind::YulTrueKeyword_Reserved }, priority = 3000020)]
-    #[regex(r#"\}"#, |_| { LexemeKind::YulCloseBrace }, priority = 2000021)]
-    #[regex(r#"\)"#, |_| { LexemeKind::YulCloseParen }, priority = 2000022)]
-    #[regex(r#":="#, |_| { LexemeKind::YulColonEqual }, priority = 2000023)]
-    #[regex(r#","#, |_| { LexemeKind::YulComma }, priority = 2000024)]
-    #[regex(r#"->"#, |_| { LexemeKind::YulMinusGreaterThan }, priority = 2000025)]
-    #[regex(r#"\{"#, |_| { LexemeKind::YulOpenBrace }, priority = 2000026)]
-    #[regex(r#"\("#, |_| { LexemeKind::YulOpenParen }, priority = 2000027)]
-    #[regex(r#"\."#, |_| { LexemeKind::YulPeriod }, priority = 2000028)]
-    #[regex(r#"( |\t)+"#, |_| { LexemeKind::YulWhitespace }, priority = 1000029, allow_greedy = true)]
-    #[regex(r#"\n|(\r\n?)"#, |_| { LexemeKind::YulEndOfLine }, priority = 1000030, allow_greedy = true)]
-    #[regex(r#"//[^\r\n]*"#, |_| { LexemeKind::YulSingleLineComment }, priority = 1000031, allow_greedy = true)]
-    #[regex(r#"/\*[^\*]*\*+([^/\*][^\*]*\*+)*/"#, |_| { LexemeKind::YulMultiLineComment }, priority = 1000032, allow_greedy = true)]
-    #[regex(r#"///[^\r\n]*"#, |_| { LexemeKind::YulSingleLineNatSpecComment }, priority = 1000033, allow_greedy = true)]
-    #[regex(r#"/\*\*([^/\*][^\*]*)?\*+([^/\*][^\*]*\*+)*/"#, |_| { LexemeKind::YulMultiLineNatSpecComment }, priority = 1000034, allow_greedy = true)]
+    #[regex(r#"datacopy"#, |_| { LexemeKind::YulDataCopyKeyword_Reserved }, priority = 3000009)]
+    #[regex(r#"dataoffset"#, |_| { LexemeKind::YulDataOffsetKeyword_Reserved }, priority = 3000010)]
+    #[regex(r#"datasize"#, |_| { LexemeKind::YulDataSizeKeyword_Reserved }, priority = 3000011)]
+    #[regex(r#"default"#, |_| { LexemeKind::YulDefaultKeyword_Reserved }, priority = 3000012)]
+    #[regex(r#"dup(1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16)"#, |_| { LexemeKind::YulDupKeyword_Reserved }, priority = 3000013)]
+    #[regex(r#"false"#, |_| { LexemeKind::YulFalseKeyword_Reserved }, priority = 3000014)]
+    #[regex(r#"for"#, |_| { LexemeKind::YulForKeyword_Reserved }, priority = 3000015)]
+    #[regex(r#"function"#, |_| { LexemeKind::YulFunctionKeyword_Reserved }, priority = 3000016)]
+    #[regex(r#"hex"#, |_| { LexemeKind::YulHexKeyword_Reserved }, priority = 3000017)]
+    #[regex(r#"if"#, |_| { LexemeKind::YulIfKeyword_Reserved }, priority = 3000018)]
+    #[regex(r#"jumpdest"#, |_| { LexemeKind::YulJumpDestKeyword_Reserved }, priority = 3000019)]
+    #[regex(r#"jumpi"#, |_| { LexemeKind::YulJumpIKeyword_Reserved }, priority = 3000020)]
+    #[regex(r#"jump"#, |_| { LexemeKind::YulJumpKeyword_Reserved }, priority = 3000021)]
+    #[regex(r#"leave"#, |_| { LexemeKind::YulLeaveKeyword_Reserved }, priority = 3000022)]
+    #[regex(r#"let"#, |_| { LexemeKind::YulLetKeyword_Reserved }, priority = 3000023)]
+    #[regex(r#"linkersymbol"#, |_| { LexemeKind::YulLinkerSymbolKeyword_Reserved }, priority = 3000024)]
+    #[regex(r#"loadimmutable"#, |_| { LexemeKind::YulLoadImmutableKeyword_Reserved }, priority = 3000025)]
+    #[regex(r#"pc"#, |_| { LexemeKind::YulPcKeyword_Reserved }, priority = 3000026)]
+    #[regex(r#"push0"#, |lexer| {
+                            if LanguageVersionSpecifier::from(
+            LanguageVersion::V0_8_20
+        ).contains(lexer.extras.language_version) {
+                                LexemeKind::YulPush0Keyword_Reserved
+                            }
+                            else {
+                                LexemeKind::YulPush0Keyword_Unreserved
+                            }
+                        }, priority = 3000027)]
+    #[regex(r#"push(1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16|17|18|19|20|21|22|23|24|25|26|27|28|29|30|31|32)"#, |_| { LexemeKind::YulPushKeyword_Reserved }, priority = 3000028)]
+    #[regex(r#"setimmutable"#, |_| { LexemeKind::YulSetImmutableKeyword_Reserved }, priority = 3000029)]
+    #[regex(r#"super"#, |_| { LexemeKind::YulSuperKeyword_Reserved }, priority = 3000030)]
+    #[regex(r#"swap(1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16)"#, |_| { LexemeKind::YulSwapKeyword_Reserved }, priority = 3000031)]
+    #[regex(r#"switch"#, |_| { LexemeKind::YulSwitchKeyword_Reserved }, priority = 3000032)]
+    #[regex(r#"this"#, |_| { LexemeKind::YulThisKeyword_Reserved }, priority = 3000033)]
+    #[regex(r#"true"#, |_| { LexemeKind::YulTrueKeyword_Reserved }, priority = 3000034)]
+    #[regex(r#"\}"#, |_| { LexemeKind::YulCloseBrace }, priority = 2000035)]
+    #[regex(r#"\)"#, |_| { LexemeKind::YulCloseParen }, priority = 2000036)]
+    #[regex(r#":="#, |_| { LexemeKind::YulColonEqual }, priority = 2000037)]
+    #[regex(r#","#, |_| { LexemeKind::YulComma }, priority = 2000038)]
+    #[regex(r#"->"#, |_| { LexemeKind::YulMinusGreaterThan }, priority = 2000039)]
+    #[regex(r#"\{"#, |_| { LexemeKind::YulOpenBrace }, priority = 2000040)]
+    #[regex(r#"\("#, |_| { LexemeKind::YulOpenParen }, priority = 2000041)]
+    #[regex(r#"\."#, |_| { LexemeKind::YulPeriod }, priority = 2000042)]
+    #[regex(r#"( |\t)+"#, |_| { LexemeKind::YulWhitespace }, priority = 1000043, allow_greedy = true)]
+    #[regex(r#"\n|(\r\n?)"#, |_| { LexemeKind::YulEndOfLine }, priority = 1000044, allow_greedy = true)]
+    #[regex(r#"//[^\r\n]*"#, |_| { LexemeKind::YulSingleLineComment }, priority = 1000045, allow_greedy = true)]
+    #[regex(r#"/\*[^\*]*\*+([^/\*][^\*]*\*+)*/"#, |_| { LexemeKind::YulMultiLineComment }, priority = 1000046, allow_greedy = true)]
+    #[regex(r#"///[^\r\n]*"#, |_| { LexemeKind::YulSingleLineNatSpecComment }, priority = 1000047, allow_greedy = true)]
+    #[regex(r#"/\*\*([^/\*][^\*]*)?\*+([^/\*][^\*]*\*+)*/"#, |_| { LexemeKind::YulMultiLineNatSpecComment }, priority = 1000048, allow_greedy = true)]
     Lexeme(LexemeKind),
 }

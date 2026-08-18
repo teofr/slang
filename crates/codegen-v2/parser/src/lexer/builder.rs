@@ -21,12 +21,42 @@ impl LexerModelBuilder {
 
         let all_lexeme_kinds = Self::collect_all_lexeme_kinds(&contexts);
         let trivia_lexeme_kinds = Self::collect_trivia_lexeme_kinds(&contexts);
+        let identifier_stand_in_lexemes = Self::collect_identifier_stand_in_lexemes(&contexts);
 
         LexerModel {
             contexts,
             all_lexeme_kinds,
             trivia_lexeme_kinds,
+            identifier_stand_in_lexemes,
         }
+    }
+
+    /// Collects the unreserved lexemes that can only ever be an identifier: they
+    /// belong to a keyword the grammar never uses, so the parser accepts them
+    /// nowhere else. See [`LexerModel::identifier_stand_in_lexemes`].
+    fn collect_identifier_stand_in_lexemes(
+        contexts: &[LexicalContext],
+    ) -> IndexMap<String, String> {
+        let mut lexemes = IndexMap::new();
+
+        for context in contexts {
+            for lexeme in &context.lexemes {
+                if let Lexeme::Keyword {
+                    kind,
+                    identifier: Some(identifier),
+                    enabled,
+                    reserved,
+                    ..
+                } = lexeme
+                    && *enabled == VersionSpecifier::Never
+                    && *reserved != VersionSpecifier::Always
+                {
+                    lexemes.insert(format!("{kind}_Unreserved"), identifier.clone());
+                }
+            }
+        }
+
+        lexemes
     }
 
     fn collect_all_lexeme_kinds(contexts: &[LexicalContext]) -> BTreeSet<String> {
@@ -172,6 +202,7 @@ impl LexicalContextBuilder {
             kind: item.name.to_string(),
             identifier: identifier.map(|id| id.to_string()),
             regex: Self::convert_keyword_scanner(&item.scanner),
+            enabled: item.enabled.clone().unwrap_or_default(),
             reserved: item.reserved.clone().unwrap_or_default(),
         }
     }

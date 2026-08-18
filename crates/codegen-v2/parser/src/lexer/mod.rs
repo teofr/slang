@@ -13,6 +13,12 @@ pub struct LexerModel {
     pub contexts: Vec<LexicalContext>,
     pub all_lexeme_kinds: BTreeSet<String>,
     pub trivia_lexeme_kinds: BTreeSet<String>,
+
+    /// Maps the unreserved lexeme of every keyword the grammar never uses
+    /// (`enabled = Never`) to the identifier terminal of its lexical context.
+    /// Such a lexeme is only ever accepted in place of an identifier, so that
+    /// is the terminal to name when reporting what the parser expected.
+    pub identifier_stand_in_lexemes: IndexMap<String, String>,
 }
 
 impl LexerModel {
@@ -44,6 +50,7 @@ pub enum Lexeme {
         kind: String,
         identifier: Option<String>,
         regex: String,
+        enabled: VersionSpecifier,
         reserved: VersionSpecifier,
     },
 }

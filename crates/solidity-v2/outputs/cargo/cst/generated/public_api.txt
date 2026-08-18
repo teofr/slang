@@ -4715,6 +4715,39 @@ pub fn slang_solidity_v2_cst::structured_cst::nodes::YulContinueStatementStruct:
 impl core::marker::StructuralPartialEq for slang_solidity_v2_cst::structured_cst::nodes::YulContinueStatementStruct
 impl slang_solidity_v2_cst::structured_cst::TextRange for slang_solidity_v2_cst::structured_cst::nodes::YulContinueStatementStruct
 pub fn slang_solidity_v2_cst::structured_cst::nodes::YulContinueStatementStruct::calculate_text_range(&self) -> core::option::Option<core::ops::range::Range<usize>>
+pub struct slang_solidity_v2_cst::structured_cst::nodes::YulDataCopyKeyword
+pub slang_solidity_v2_cst::structured_cst::nodes::YulDataCopyKeyword::range: core::ops::range::Range<usize>
+impl core::clone::Clone for slang_solidity_v2_cst::structured_cst::nodes::YulDataCopyKeyword
+pub fn slang_solidity_v2_cst::structured_cst::nodes::YulDataCopyKeyword::clone(&self) -> slang_solidity_v2_cst::structured_cst::nodes::YulDataCopyKeyword
+impl core::cmp::PartialEq for slang_solidity_v2_cst::structured_cst::nodes::YulDataCopyKeyword
+pub fn slang_solidity_v2_cst::structured_cst::nodes::YulDataCopyKeyword::eq(&self, &slang_solidity_v2_cst::structured_cst::nodes::YulDataCopyKeyword) -> bool
+impl core::fmt::Debug for slang_solidity_v2_cst::structured_cst::nodes::YulDataCopyKeyword
+pub fn slang_solidity_v2_cst::structured_cst::nodes::YulDataCopyKeyword::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::StructuralPartialEq for slang_solidity_v2_cst::structured_cst::nodes::YulDataCopyKeyword
+impl slang_solidity_v2_cst::structured_cst::TextRange for slang_solidity_v2_cst::structured_cst::nodes::YulDataCopyKeyword
+pub fn slang_solidity_v2_cst::structured_cst::nodes::YulDataCopyKeyword::calculate_text_range(&self) -> core::option::Option<core::ops::range::Range<usize>>
+pub struct slang_solidity_v2_cst::structured_cst::nodes::YulDataOffsetKeyword
+pub slang_solidity_v2_cst::structured_cst::nodes::YulDataOffsetKeyword::range: core::ops::range::Range<usize>
+impl core::clone::Clone for slang_solidity_v2_cst::structured_cst::nodes::YulDataOffsetKeyword
+pub fn slang_solidity_v2_cst::structured_cst::nodes::YulDataOffsetKeyword::clone(&self) -> slang_solidity_v2_cst::structured_cst::nodes::YulDataOffsetKeyword
+impl core::cmp::PartialEq for slang_solidity_v2_cst::structured_cst::nodes::YulDataOffsetKeyword
+pub fn slang_solidity_v2_cst::structured_cst::nodes::YulDataOffsetKeyword::eq(&self, &slang_solidity_v2_cst::structured_cst::nodes::YulDataOffsetKeyword) -> bool
+impl core::fmt::Debug for slang_solidity_v2_cst::structured_cst::nodes::YulDataOffsetKeyword
+pub fn slang_solidity_v2_cst::structured_cst::nodes::YulDataOffsetKeyword::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::StructuralPartialEq for slang_solidity_v2_cst::structured_cst::nodes::YulDataOffsetKeyword
+impl slang_solidity_v2_cst::structured_cst::TextRange for slang_solidity_v2_cst::structured_cst::nodes::YulDataOffsetKeyword
+pub fn slang_solidity_v2_cst::structured_cst::nodes::YulDataOffsetKeyword::calculate_text_range(&self) -> core::option::Option<core::ops::range::Range<usize>>
+pub struct slang_solidity_v2_cst::structured_cst::nodes::YulDataSizeKeyword
+pub slang_solidity_v2_cst::structured_cst::nodes::YulDataSizeKeyword::range: core::ops::range::Range<usize>
+impl core::clone::Clone for slang_solidity_v2_cst::structured_cst::nodes::YulDataSizeKeyword
+pub fn slang_solidity_v2_cst::structured_cst::nodes::YulDataSizeKeyword::clone(&self) -> slang_solidity_v2_cst::structured_cst::nodes::YulDataSizeKeyword
+impl core::cmp::PartialEq for slang_solidity_v2_cst::structured_cst::nodes::YulDataSizeKeyword
+pub fn slang_solidity_v2_cst::structured_cst::nodes::YulDataSizeKeyword::eq(&self, &slang_solidity_v2_cst::structured_cst::nodes::YulDataSizeKeyword) -> bool
+impl core::fmt::Debug for slang_solidity_v2_cst::structured_cst::nodes::YulDataSizeKeyword
+pub fn slang_solidity_v2_cst::structured_cst::nodes::YulDataSizeKeyword::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::StructuralPartialEq for slang_solidity_v2_cst::structured_cst::nodes::YulDataSizeKeyword
+impl slang_solidity_v2_cst::structured_cst::TextRange for slang_solidity_v2_cst::structured_cst::nodes::YulDataSizeKeyword
+pub fn slang_solidity_v2_cst::structured_cst::nodes::YulDataSizeKeyword::calculate_text_range(&self) -> core::option::Option<core::ops::range::Range<usize>>
 pub struct slang_solidity_v2_cst::structured_cst::nodes::YulDecimalLiteral
 pub slang_solidity_v2_cst::structured_cst::nodes::YulDecimalLiteral::range: core::ops::range::Range<usize>
 impl core::clone::Clone for slang_solidity_v2_cst::structured_cst::nodes::YulDecimalLiteral
@@ -4749,6 +4782,17 @@ pub fn slang_solidity_v2_cst::structured_cst::nodes::YulDefaultKeyword::fmt(&sel
 impl core::marker::StructuralPartialEq for slang_solidity_v2_cst::structured_cst::nodes::YulDefaultKeyword
 impl slang_solidity_v2_cst::structured_cst::TextRange for slang_solidity_v2_cst::structured_cst::nodes::YulDefaultKeyword
 pub fn slang_solidity_v2_cst::structured_cst::nodes::YulDefaultKeyword::calculate_text_range(&self) -> core::option::Option<core::ops::range::Range<usize>>
+pub struct slang_solidity_v2_cst::structured_cst::nodes::YulDupKeyword
+pub slang_solidity_v2_cst::structured_cst::nodes::YulDupKeyword::range: core::ops::range::Range<usize>
+impl core::clone::Clone for slang_solidity_v2_cst::structured_cst::nodes::YulDupKeyword
+pub fn slang_solidity_v2_cst::structured_cst::nodes::YulDupKeyword::clone(&self) -> slang_solidity_v2_cst::structured_cst::nodes::YulDupKeyword
+impl core::cmp::PartialEq for slang_solidity_v2_cst::structured_cst::nodes::YulDupKeyword
+pub fn slang_solidity_v2_cst::structured_cst::nodes::YulDupKeyword::eq(&self, &slang_solidity_v2_cst::structured_cst::nodes::YulDupKeyword) -> bool
+impl core::fmt::Debug for slang_solidity_v2_cst::structured_cst::nodes::YulDupKeyword
+pub fn slang_solidity_v2_cst::structured_cst::nodes::YulDupKeyword::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::StructuralPartialEq for slang_solidity_v2_cst::structured_cst::nodes::YulDupKeyword
+impl slang_solidity_v2_cst::structured_cst::TextRange for slang_solidity_v2_cst::structured_cst::nodes::YulDupKeyword
+pub fn slang_solidity_v2_cst::structured_cst::nodes::YulDupKeyword::calculate_text_range(&self) -> core::option::Option<core::ops::range::Range<usize>>
 pub struct slang_solidity_v2_cst::structured_cst::nodes::YulFalseKeyword
 pub slang_solidity_v2_cst::structured_cst::nodes::YulFalseKeyword::range: core::ops::range::Range<usize>
 impl core::clone::Clone for slang_solidity_v2_cst::structured_cst::nodes::YulFalseKeyword
@@ -4918,6 +4962,39 @@ pub fn slang_solidity_v2_cst::structured_cst::nodes::YulIfStatementStruct::fmt(&
 impl core::marker::StructuralPartialEq for slang_solidity_v2_cst::structured_cst::nodes::YulIfStatementStruct
 impl slang_solidity_v2_cst::structured_cst::TextRange for slang_solidity_v2_cst::structured_cst::nodes::YulIfStatementStruct
 pub fn slang_solidity_v2_cst::structured_cst::nodes::YulIfStatementStruct::calculate_text_range(&self) -> core::option::Option<core::ops::range::Range<usize>>
+pub struct slang_solidity_v2_cst::structured_cst::nodes::YulJumpDestKeyword
+pub slang_solidity_v2_cst::structured_cst::nodes::YulJumpDestKeyword::range: core::ops::range::Range<usize>
+impl core::clone::Clone for slang_solidity_v2_cst::structured_cst::nodes::YulJumpDestKeyword
+pub fn slang_solidity_v2_cst::structured_cst::nodes::YulJumpDestKeyword::clone(&self) -> slang_solidity_v2_cst::structured_cst::nodes::YulJumpDestKeyword
+impl core::cmp::PartialEq for slang_solidity_v2_cst::structured_cst::nodes::YulJumpDestKeyword
+pub fn slang_solidity_v2_cst::structured_cst::nodes::YulJumpDestKeyword::eq(&self, &slang_solidity_v2_cst::structured_cst::nodes::YulJumpDestKeyword) -> bool
+impl core::fmt::Debug for slang_solidity_v2_cst::structured_cst::nodes::YulJumpDestKeyword
+pub fn slang_solidity_v2_cst::structured_cst::nodes::YulJumpDestKeyword::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::StructuralPartialEq for slang_solidity_v2_cst::structured_cst::nodes::YulJumpDestKeyword
+impl slang_solidity_v2_cst::structured_cst::TextRange for slang_solidity_v2_cst::structured_cst::nodes::YulJumpDestKeyword
+pub fn slang_solidity_v2_cst::structured_cst::nodes::YulJumpDestKeyword::calculate_text_range(&self) -> core::option::Option<core::ops::range::Range<usize>>
+pub struct slang_solidity_v2_cst::structured_cst::nodes::YulJumpIKeyword
+pub slang_solidity_v2_cst::structured_cst::nodes::YulJumpIKeyword::range: core::ops::range::Range<usize>
+impl core::clone::Clone for slang_solidity_v2_cst::structured_cst::nodes::YulJumpIKeyword
+pub fn slang_solidity_v2_cst::structured_cst::nodes::YulJumpIKeyword::clone(&self) -> slang_solidity_v2_cst::structured_cst::nodes::YulJumpIKeyword
+impl core::cmp::PartialEq for slang_solidity_v2_cst::structured_cst::nodes::YulJumpIKeyword
+pub fn slang_solidity_v2_cst::structured_cst::nodes::YulJumpIKeyword::eq(&self, &slang_solidity_v2_cst::structured_cst::nodes::YulJumpIKeyword) -> bool
+impl core::fmt::Debug for slang_solidity_v2_cst::structured_cst::nodes::YulJumpIKeyword
+pub fn slang_solidity_v2_cst::structured_cst::nodes::YulJumpIKeyword::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::StructuralPartialEq for slang_solidity_v2_cst::structured_cst::nodes::YulJumpIKeyword
+impl slang_solidity_v2_cst::structured_cst::TextRange for slang_solidity_v2_cst::structured_cst::nodes::YulJumpIKeyword
+pub fn slang_solidity_v2_cst::structured_cst::nodes::YulJumpIKeyword::calculate_text_range(&self) -> core::option::Option<core::ops::range::Range<usize>>
+pub struct slang_solidity_v2_cst::structured_cst::nodes::YulJumpKeyword
+pub slang_solidity_v2_cst::structured_cst::nodes::YulJumpKeyword::range: core::ops::range::Range<usize>
+impl core::clone::Clone for slang_solidity_v2_cst::structured_cst::nodes::YulJumpKeyword
+pub fn slang_solidity_v2_cst::structured_cst::nodes::YulJumpKeyword::clone(&self) -> slang_solidity_v2_cst::structured_cst::nodes::YulJumpKeyword
+impl core::cmp::PartialEq for slang_solidity_v2_cst::structured_cst::nodes::YulJumpKeyword
+pub fn slang_solidity_v2_cst::structured_cst::nodes::YulJumpKeyword::eq(&self, &slang_solidity_v2_cst::structured_cst::nodes::YulJumpKeyword) -> bool
+impl core::fmt::Debug for slang_solidity_v2_cst::structured_cst::nodes::YulJumpKeyword
+pub fn slang_solidity_v2_cst::structured_cst::nodes::YulJumpKeyword::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::StructuralPartialEq for slang_solidity_v2_cst::structured_cst::nodes::YulJumpKeyword
+impl slang_solidity_v2_cst::structured_cst::TextRange for slang_solidity_v2_cst::structured_cst::nodes::YulJumpKeyword
+pub fn slang_solidity_v2_cst::structured_cst::nodes::YulJumpKeyword::calculate_text_range(&self) -> core::option::Option<core::ops::range::Range<usize>>
 pub struct slang_solidity_v2_cst::structured_cst::nodes::YulLeaveKeyword
 pub slang_solidity_v2_cst::structured_cst::nodes::YulLeaveKeyword::range: core::ops::range::Range<usize>
 impl core::clone::Clone for slang_solidity_v2_cst::structured_cst::nodes::YulLeaveKeyword
@@ -4951,6 +5028,28 @@ pub fn slang_solidity_v2_cst::structured_cst::nodes::YulLetKeyword::fmt(&self, &
 impl core::marker::StructuralPartialEq for slang_solidity_v2_cst::structured_cst::nodes::YulLetKeyword
 impl slang_solidity_v2_cst::structured_cst::TextRange for slang_solidity_v2_cst::structured_cst::nodes::YulLetKeyword
 pub fn slang_solidity_v2_cst::structured_cst::nodes::YulLetKeyword::calculate_text_range(&self) -> core::option::Option<core::ops::range::Range<usize>>
+pub struct slang_solidity_v2_cst::structured_cst::nodes::YulLinkerSymbolKeyword
+pub slang_solidity_v2_cst::structured_cst::nodes::YulLinkerSymbolKeyword::range: core::ops::range::Range<usize>
+impl core::clone::Clone for slang_solidity_v2_cst::structured_cst::nodes::YulLinkerSymbolKeyword
+pub fn slang_solidity_v2_cst::structured_cst::nodes::YulLinkerSymbolKeyword::clone(&self) -> slang_solidity_v2_cst::structured_cst::nodes::YulLinkerSymbolKeyword
+impl core::cmp::PartialEq for slang_solidity_v2_cst::structured_cst::nodes::YulLinkerSymbolKeyword
+pub fn slang_solidity_v2_cst::structured_cst::nodes::YulLinkerSymbolKeyword::eq(&self, &slang_solidity_v2_cst::structured_cst::nodes::YulLinkerSymbolKeyword) -> bool
+impl core::fmt::Debug for slang_solidity_v2_cst::structured_cst::nodes::YulLinkerSymbolKeyword
+pub fn slang_solidity_v2_cst::structured_cst::nodes::YulLinkerSymbolKeyword::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::StructuralPartialEq for slang_solidity_v2_cst::structured_cst::nodes::YulLinkerSymbolKeyword
+impl slang_solidity_v2_cst::structured_cst::TextRange for slang_solidity_v2_cst::structured_cst::nodes::YulLinkerSymbolKeyword
+pub fn slang_solidity_v2_cst::structured_cst::nodes::YulLinkerSymbolKeyword::calculate_text_range(&self) -> core::option::Option<core::ops::range::Range<usize>>
+pub struct slang_solidity_v2_cst::structured_cst::nodes::YulLoadImmutableKeyword
+pub slang_solidity_v2_cst::structured_cst::nodes::YulLoadImmutableKeyword::range: core::ops::range::Range<usize>
+impl core::clone::Clone for slang_solidity_v2_cst::structured_cst::nodes::YulLoadImmutableKeyword
+pub fn slang_solidity_v2_cst::structured_cst::nodes::YulLoadImmutableKeyword::clone(&self) -> slang_solidity_v2_cst::structured_cst::nodes::YulLoadImmutableKeyword
+impl core::cmp::PartialEq for slang_solidity_v2_cst::structured_cst::nodes::YulLoadImmutableKeyword
+pub fn slang_solidity_v2_cst::structured_cst::nodes::YulLoadImmutableKeyword::eq(&self, &slang_solidity_v2_cst::structured_cst::nodes::YulLoadImmutableKeyword) -> bool
+impl core::fmt::Debug for slang_solidity_v2_cst::structured_cst::nodes::YulLoadImmutableKeyword
+pub fn slang_solidity_v2_cst::structured_cst::nodes::YulLoadImmutableKeyword::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::StructuralPartialEq for slang_solidity_v2_cst::structured_cst::nodes::YulLoadImmutableKeyword
+impl slang_solidity_v2_cst::structured_cst::TextRange for slang_solidity_v2_cst::structured_cst::nodes::YulLoadImmutableKeyword
+pub fn slang_solidity_v2_cst::structured_cst::nodes::YulLoadImmutableKeyword::calculate_text_range(&self) -> core::option::Option<core::ops::range::Range<usize>>
 pub struct slang_solidity_v2_cst::structured_cst::nodes::YulMinusGreaterThan
 pub slang_solidity_v2_cst::structured_cst::nodes::YulMinusGreaterThan::range: core::ops::range::Range<usize>
 impl core::clone::Clone for slang_solidity_v2_cst::structured_cst::nodes::YulMinusGreaterThan
@@ -5030,6 +5129,17 @@ pub fn slang_solidity_v2_cst::structured_cst::nodes::YulPaths::fmt(&self, &mut c
 impl core::marker::StructuralPartialEq for slang_solidity_v2_cst::structured_cst::nodes::YulPaths
 impl slang_solidity_v2_cst::structured_cst::TextRange for slang_solidity_v2_cst::structured_cst::nodes::YulPaths
 pub fn slang_solidity_v2_cst::structured_cst::nodes::YulPaths::calculate_text_range(&self) -> core::option::Option<core::ops::range::Range<usize>>
+pub struct slang_solidity_v2_cst::structured_cst::nodes::YulPcKeyword
+pub slang_solidity_v2_cst::structured_cst::nodes::YulPcKeyword::range: core::ops::range::Range<usize>
+impl core::clone::Clone for slang_solidity_v2_cst::structured_cst::nodes::YulPcKeyword
+pub fn slang_solidity_v2_cst::structured_cst::nodes::YulPcKeyword::clone(&self) -> slang_solidity_v2_cst::structured_cst::nodes::YulPcKeyword
+impl core::cmp::PartialEq for slang_solidity_v2_cst::structured_cst::nodes::YulPcKeyword
+pub fn slang_solidity_v2_cst::structured_cst::nodes::YulPcKeyword::eq(&self, &slang_solidity_v2_cst::structured_cst::nodes::YulPcKeyword) -> bool
+impl core::fmt::Debug for slang_solidity_v2_cst::structured_cst::nodes::YulPcKeyword
+pub fn slang_solidity_v2_cst::structured_cst::nodes::YulPcKeyword::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::StructuralPartialEq for slang_solidity_v2_cst::structured_cst::nodes::YulPcKeyword
+impl slang_solidity_v2_cst::structured_cst::TextRange for slang_solidity_v2_cst::structured_cst::nodes::YulPcKeyword
+pub fn slang_solidity_v2_cst::structured_cst::nodes::YulPcKeyword::calculate_text_range(&self) -> core::option::Option<core::ops::range::Range<usize>>
 pub struct slang_solidity_v2_cst::structured_cst::nodes::YulPeriod
 pub slang_solidity_v2_cst::structured_cst::nodes::YulPeriod::range: core::ops::range::Range<usize>
 impl core::clone::Clone for slang_solidity_v2_cst::structured_cst::nodes::YulPeriod
@@ -5041,6 +5151,28 @@ pub fn slang_solidity_v2_cst::structured_cst::nodes::YulPeriod::fmt(&self, &mut 
 impl core::marker::StructuralPartialEq for slang_solidity_v2_cst::structured_cst::nodes::YulPeriod
 impl slang_solidity_v2_cst::structured_cst::TextRange for slang_solidity_v2_cst::structured_cst::nodes::YulPeriod
 pub fn slang_solidity_v2_cst::structured_cst::nodes::YulPeriod::calculate_text_range(&self) -> core::option::Option<core::ops::range::Range<usize>>
+pub struct slang_solidity_v2_cst::structured_cst::nodes::YulPush0Keyword
+pub slang_solidity_v2_cst::structured_cst::nodes::YulPush0Keyword::range: core::ops::range::Range<usize>
+impl core::clone::Clone for slang_solidity_v2_cst::structured_cst::nodes::YulPush0Keyword
+pub fn slang_solidity_v2_cst::structured_cst::nodes::YulPush0Keyword::clone(&self) -> slang_solidity_v2_cst::structured_cst::nodes::YulPush0Keyword
+impl core::cmp::PartialEq for slang_solidity_v2_cst::structured_cst::nodes::YulPush0Keyword
+pub fn slang_solidity_v2_cst::structured_cst::nodes::YulPush0Keyword::eq(&self, &slang_solidity_v2_cst::structured_cst::nodes::YulPush0Keyword) -> bool
+impl core::fmt::Debug for slang_solidity_v2_cst::structured_cst::nodes::YulPush0Keyword
+pub fn slang_solidity_v2_cst::structured_cst::nodes::YulPush0Keyword::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::StructuralPartialEq for slang_solidity_v2_cst::structured_cst::nodes::YulPush0Keyword
+impl slang_solidity_v2_cst::structured_cst::TextRange for slang_solidity_v2_cst::structured_cst::nodes::YulPush0Keyword
+pub fn slang_solidity_v2_cst::structured_cst::nodes::YulPush0Keyword::calculate_text_range(&self) -> core::option::Option<core::ops::range::Range<usize>>
+pub struct slang_solidity_v2_cst::structured_cst::nodes::YulPushKeyword
+pub slang_solidity_v2_cst::structured_cst::nodes::YulPushKeyword::range: core::ops::range::Range<usize>
+impl core::clone::Clone for slang_solidity_v2_cst::structured_cst::nodes::YulPushKeyword
+pub fn slang_solidity_v2_cst::structured_cst::nodes::YulPushKeyword::clone(&self) -> slang_solidity_v2_cst::structured_cst::nodes::YulPushKeyword
+impl core::cmp::PartialEq for slang_solidity_v2_cst::structured_cst::nodes::YulPushKeyword
+pub fn slang_solidity_v2_cst::structured_cst::nodes::YulPushKeyword::eq(&self, &slang_solidity_v2_cst::structured_cst::nodes::YulPushKeyword) -> bool
+impl core::fmt::Debug for slang_solidity_v2_cst::structured_cst::nodes::YulPushKeyword
+pub fn slang_solidity_v2_cst::structured_cst::nodes::YulPushKeyword::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::StructuralPartialEq for slang_solidity_v2_cst::structured_cst::nodes::YulPushKeyword
+impl slang_solidity_v2_cst::structured_cst::TextRange for slang_solidity_v2_cst::structured_cst::nodes::YulPushKeyword
+pub fn slang_solidity_v2_cst::structured_cst::nodes::YulPushKeyword::calculate_text_range(&self) -> core::option::Option<core::ops::range::Range<usize>>
 pub struct slang_solidity_v2_cst::structured_cst::nodes::YulReturnsDeclarationStruct
 pub slang_solidity_v2_cst::structured_cst::nodes::YulReturnsDeclarationStruct::minus_greater_than: slang_solidity_v2_cst::structured_cst::nodes::YulMinusGreaterThan
 pub slang_solidity_v2_cst::structured_cst::nodes::YulReturnsDeclarationStruct::variables: slang_solidity_v2_cst::structured_cst::nodes::YulVariableNames
@@ -5053,6 +5185,17 @@ pub fn slang_solidity_v2_cst::structured_cst::nodes::YulReturnsDeclarationStruct
 impl core::marker::StructuralPartialEq for slang_solidity_v2_cst::structured_cst::nodes::YulReturnsDeclarationStruct
 impl slang_solidity_v2_cst::structured_cst::TextRange for slang_solidity_v2_cst::structured_cst::nodes::YulReturnsDeclarationStruct
 pub fn slang_solidity_v2_cst::structured_cst::nodes::YulReturnsDeclarationStruct::calculate_text_range(&self) -> core::option::Option<core::ops::range::Range<usize>>
+pub struct slang_solidity_v2_cst::structured_cst::nodes::YulSetImmutableKeyword
+pub slang_solidity_v2_cst::structured_cst::nodes::YulSetImmutableKeyword::range: core::ops::range::Range<usize>
+impl core::clone::Clone for slang_solidity_v2_cst::structured_cst::nodes::YulSetImmutableKeyword
+pub fn slang_solidity_v2_cst::structured_cst::nodes::YulSetImmutableKeyword::clone(&self) -> slang_solidity_v2_cst::structured_cst::nodes::YulSetImmutableKeyword
+impl core::cmp::PartialEq for slang_solidity_v2_cst::structured_cst::nodes::YulSetImmutableKeyword
+pub fn slang_solidity_v2_cst::structured_cst::nodes::YulSetImmutableKeyword::eq(&self, &slang_solidity_v2_cst::structured_cst::nodes::YulSetImmutableKeyword) -> bool
+impl core::fmt::Debug for slang_solidity_v2_cst::structured_cst::nodes::YulSetImmutableKeyword
+pub fn slang_solidity_v2_cst::structured_cst::nodes::YulSetImmutableKeyword::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::StructuralPartialEq for slang_solidity_v2_cst::structured_cst::nodes::YulSetImmutableKeyword
+impl slang_solidity_v2_cst::structured_cst::TextRange for slang_solidity_v2_cst::structured_cst::nodes::YulSetImmutableKeyword
+pub fn slang_solidity_v2_cst::structured_cst::nodes::YulSetImmutableKeyword::calculate_text_range(&self) -> core::option::Option<core::ops::range::Range<usize>>
 pub struct slang_solidity_v2_cst::structured_cst::nodes::YulStatements
 pub slang_solidity_v2_cst::structured_cst::nodes::YulStatements::elements: alloc::vec::Vec<slang_solidity_v2_cst::structured_cst::nodes::YulStatement>
 impl core::clone::Clone for slang_solidity_v2_cst::structured_cst::nodes::YulStatements
@@ -5086,6 +5229,17 @@ pub fn slang_solidity_v2_cst::structured_cst::nodes::YulSuperKeyword::fmt(&self,
 impl core::marker::StructuralPartialEq for slang_solidity_v2_cst::structured_cst::nodes::YulSuperKeyword
 impl slang_solidity_v2_cst::structured_cst::TextRange for slang_solidity_v2_cst::structured_cst::nodes::YulSuperKeyword
 pub fn slang_solidity_v2_cst::structured_cst::nodes::YulSuperKeyword::calculate_text_range(&self) -> core::option::Option<core::ops::range::Range<usize>>
+pub struct slang_solidity_v2_cst::structured_cst::nodes::YulSwapKeyword
+pub slang_solidity_v2_cst::structured_cst::nodes::YulSwapKeyword::range: core::ops::range::Range<usize>
+impl core::clone::Clone for slang_solidity_v2_cst::structured_cst::nodes::YulSwapKeyword
+pub fn slang_solidity_v2_cst::structured_cst::nodes::YulSwapKeyword::clone(&self) -> slang_solidity_v2_cst::structured_cst::nodes::YulSwapKeyword
+impl core::cmp::PartialEq for slang_solidity_v2_cst::structured_cst::nodes::YulSwapKeyword
+pub fn slang_solidity_v2_cst::structured_cst::nodes::YulSwapKeyword::eq(&self, &slang_solidity_v2_cst::structured_cst::nodes::YulSwapKeyword) -> bool
+impl core::fmt::Debug for slang_solidity_v2_cst::structured_cst::nodes::YulSwapKeyword
+pub fn slang_solidity_v2_cst::structured_cst::nodes::YulSwapKeyword::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::marker::StructuralPartialEq for slang_solidity_v2_cst::structured_cst::nodes::YulSwapKeyword
+impl slang_solidity_v2_cst::structured_cst::TextRange for slang_solidity_v2_cst::structured_cst::nodes::YulSwapKeyword
+pub fn slang_solidity_v2_cst::structured_cst::nodes::YulSwapKeyword::calculate_text_range(&self) -> core::option::Option<core::ops::range::Range<usize>>
 pub struct slang_solidity_v2_cst::structured_cst::nodes::YulSwitchCases
 pub slang_solidity_v2_cst::structured_cst::nodes::YulSwitchCases::elements: alloc::vec::Vec<slang_solidity_v2_cst::structured_cst::nodes::YulSwitchCase>
 impl core::clone::Clone for slang_solidity_v2_cst::structured_cst::nodes::YulSwitchCases
@@ -5783,9 +5937,13 @@ pub fn slang_solidity_v2_cst::structured_cst::nodes::new_yul_colon_equal(core::o
 pub fn slang_solidity_v2_cst::structured_cst::nodes::new_yul_comma(core::ops::range::Range<usize>, &str) -> slang_solidity_v2_cst::structured_cst::nodes::YulComma
 pub fn slang_solidity_v2_cst::structured_cst::nodes::new_yul_continue_keyword(core::ops::range::Range<usize>, &str) -> slang_solidity_v2_cst::structured_cst::nodes::YulContinueKeyword
 pub fn slang_solidity_v2_cst::structured_cst::nodes::new_yul_continue_statement(slang_solidity_v2_cst::structured_cst::nodes::YulContinueKeyword) -> slang_solidity_v2_cst::structured_cst::nodes::YulContinueStatement
+pub fn slang_solidity_v2_cst::structured_cst::nodes::new_yul_data_copy_keyword(core::ops::range::Range<usize>, &str) -> slang_solidity_v2_cst::structured_cst::nodes::YulDataCopyKeyword
+pub fn slang_solidity_v2_cst::structured_cst::nodes::new_yul_data_offset_keyword(core::ops::range::Range<usize>, &str) -> slang_solidity_v2_cst::structured_cst::nodes::YulDataOffsetKeyword
+pub fn slang_solidity_v2_cst::structured_cst::nodes::new_yul_data_size_keyword(core::ops::range::Range<usize>, &str) -> slang_solidity_v2_cst::structured_cst::nodes::YulDataSizeKeyword
 pub fn slang_solidity_v2_cst::structured_cst::nodes::new_yul_decimal_literal(core::ops::range::Range<usize>, &str) -> slang_solidity_v2_cst::structured_cst::nodes::YulDecimalLiteral
 pub fn slang_solidity_v2_cst::structured_cst::nodes::new_yul_default_case(slang_solidity_v2_cst::structured_cst::nodes::YulDefaultKeyword, slang_solidity_v2_cst::structured_cst::nodes::YulBlock) -> slang_solidity_v2_cst::structured_cst::nodes::YulDefaultCase
 pub fn slang_solidity_v2_cst::structured_cst::nodes::new_yul_default_keyword(core::ops::range::Range<usize>, &str) -> slang_solidity_v2_cst::structured_cst::nodes::YulDefaultKeyword
+pub fn slang_solidity_v2_cst::structured_cst::nodes::new_yul_dup_keyword(core::ops::range::Range<usize>, &str) -> slang_solidity_v2_cst::structured_cst::nodes::YulDupKeyword
 pub fn slang_solidity_v2_cst::structured_cst::nodes::new_yul_expression_yul_function_call_expression(slang_solidity_v2_cst::structured_cst::nodes::YulFunctionCallExpression) -> slang_solidity_v2_cst::structured_cst::nodes::YulExpression
 pub fn slang_solidity_v2_cst::structured_cst::nodes::new_yul_expression_yul_literal(slang_solidity_v2_cst::structured_cst::nodes::YulLiteral) -> slang_solidity_v2_cst::structured_cst::nodes::YulExpression
 pub fn slang_solidity_v2_cst::structured_cst::nodes::new_yul_expression_yul_path(slang_solidity_v2_cst::structured_cst::nodes::YulPath) -> slang_solidity_v2_cst::structured_cst::nodes::YulExpression
@@ -5803,15 +5961,20 @@ pub fn slang_solidity_v2_cst::structured_cst::nodes::new_yul_hex_string_literal(
 pub fn slang_solidity_v2_cst::structured_cst::nodes::new_yul_identifier(core::ops::range::Range<usize>, &str) -> slang_solidity_v2_cst::structured_cst::nodes::YulIdentifier
 pub fn slang_solidity_v2_cst::structured_cst::nodes::new_yul_if_keyword(core::ops::range::Range<usize>, &str) -> slang_solidity_v2_cst::structured_cst::nodes::YulIfKeyword
 pub fn slang_solidity_v2_cst::structured_cst::nodes::new_yul_if_statement(slang_solidity_v2_cst::structured_cst::nodes::YulIfKeyword, slang_solidity_v2_cst::structured_cst::nodes::YulExpression, slang_solidity_v2_cst::structured_cst::nodes::YulBlock) -> slang_solidity_v2_cst::structured_cst::nodes::YulIfStatement
+pub fn slang_solidity_v2_cst::structured_cst::nodes::new_yul_jump_dest_keyword(core::ops::range::Range<usize>, &str) -> slang_solidity_v2_cst::structured_cst::nodes::YulJumpDestKeyword
+pub fn slang_solidity_v2_cst::structured_cst::nodes::new_yul_jump_i_keyword(core::ops::range::Range<usize>, &str) -> slang_solidity_v2_cst::structured_cst::nodes::YulJumpIKeyword
+pub fn slang_solidity_v2_cst::structured_cst::nodes::new_yul_jump_keyword(core::ops::range::Range<usize>, &str) -> slang_solidity_v2_cst::structured_cst::nodes::YulJumpKeyword
 pub fn slang_solidity_v2_cst::structured_cst::nodes::new_yul_leave_keyword(core::ops::range::Range<usize>, &str) -> slang_solidity_v2_cst::structured_cst::nodes::YulLeaveKeyword
 pub fn slang_solidity_v2_cst::structured_cst::nodes::new_yul_leave_statement(slang_solidity_v2_cst::structured_cst::nodes::YulLeaveKeyword) -> slang_solidity_v2_cst::structured_cst::nodes::YulLeaveStatement
 pub fn slang_solidity_v2_cst::structured_cst::nodes::new_yul_let_keyword(core::ops::range::Range<usize>, &str) -> slang_solidity_v2_cst::structured_cst::nodes::YulLetKeyword
+pub fn slang_solidity_v2_cst::structured_cst::nodes::new_yul_linker_symbol_keyword(core::ops::range::Range<usize>, &str) -> slang_solidity_v2_cst::structured_cst::nodes::YulLinkerSymbolKeyword
 pub fn slang_solidity_v2_cst::structured_cst::nodes::new_yul_literal_yul_decimal_literal(slang_solidity_v2_cst::structured_cst::nodes::YulDecimalLiteral) -> slang_solidity_v2_cst::structured_cst::nodes::YulLiteral
 pub fn slang_solidity_v2_cst::structured_cst::nodes::new_yul_literal_yul_false_keyword(slang_solidity_v2_cst::structured_cst::nodes::YulFalseKeyword) -> slang_solidity_v2_cst::structured_cst::nodes::YulLiteral
 pub fn slang_solidity_v2_cst::structured_cst::nodes::new_yul_literal_yul_hex_literal(slang_solidity_v2_cst::structured_cst::nodes::YulHexLiteral) -> slang_solidity_v2_cst::structured_cst::nodes::YulLiteral
 pub fn slang_solidity_v2_cst::structured_cst::nodes::new_yul_literal_yul_hex_string_literal(slang_solidity_v2_cst::structured_cst::nodes::YulHexStringLiteral) -> slang_solidity_v2_cst::structured_cst::nodes::YulLiteral
 pub fn slang_solidity_v2_cst::structured_cst::nodes::new_yul_literal_yul_string_literal(slang_solidity_v2_cst::structured_cst::nodes::YulStringLiteral) -> slang_solidity_v2_cst::structured_cst::nodes::YulLiteral
 pub fn slang_solidity_v2_cst::structured_cst::nodes::new_yul_literal_yul_true_keyword(slang_solidity_v2_cst::structured_cst::nodes::YulTrueKeyword) -> slang_solidity_v2_cst::structured_cst::nodes::YulLiteral
+pub fn slang_solidity_v2_cst::structured_cst::nodes::new_yul_load_immutable_keyword(core::ops::range::Range<usize>, &str) -> slang_solidity_v2_cst::structured_cst::nodes::YulLoadImmutableKeyword
 pub fn slang_solidity_v2_cst::structured_cst::nodes::new_yul_minus_greater_than(core::ops::range::Range<usize>, &str) -> slang_solidity_v2_cst::structured_cst::nodes::YulMinusGreaterThan
 pub fn slang_solidity_v2_cst::structured_cst::nodes::new_yul_open_brace(core::ops::range::Range<usize>, &str) -> slang_solidity_v2_cst::structured_cst::nodes::YulOpenBrace
 pub fn slang_solidity_v2_cst::structured_cst::nodes::new_yul_open_paren(core::ops::range::Range<usize>, &str) -> slang_solidity_v2_cst::structured_cst::nodes::YulOpenParen
@@ -5819,8 +5982,12 @@ pub fn slang_solidity_v2_cst::structured_cst::nodes::new_yul_parameters(alloc::v
 pub fn slang_solidity_v2_cst::structured_cst::nodes::new_yul_parameters_declaration(slang_solidity_v2_cst::structured_cst::nodes::YulOpenParen, slang_solidity_v2_cst::structured_cst::nodes::YulParameters, slang_solidity_v2_cst::structured_cst::nodes::YulCloseParen) -> slang_solidity_v2_cst::structured_cst::nodes::YulParametersDeclaration
 pub fn slang_solidity_v2_cst::structured_cst::nodes::new_yul_path(alloc::vec::Vec<slang_solidity_v2_cst::structured_cst::nodes::YulIdentifier>) -> slang_solidity_v2_cst::structured_cst::nodes::YulPath
 pub fn slang_solidity_v2_cst::structured_cst::nodes::new_yul_paths(alloc::vec::Vec<slang_solidity_v2_cst::structured_cst::nodes::YulPath>) -> slang_solidity_v2_cst::structured_cst::nodes::YulPaths
+pub fn slang_solidity_v2_cst::structured_cst::nodes::new_yul_pc_keyword(core::ops::range::Range<usize>, &str) -> slang_solidity_v2_cst::structured_cst::nodes::YulPcKeyword
 pub fn slang_solidity_v2_cst::structured_cst::nodes::new_yul_period(core::ops::range::Range<usize>, &str) -> slang_solidity_v2_cst::structured_cst::nodes::YulPeriod
+pub fn slang_solidity_v2_cst::structured_cst::nodes::new_yul_push_0_keyword(core::ops::range::Range<usize>, &str) -> slang_solidity_v2_cst::structured_cst::nodes::YulPush0Keyword
+pub fn slang_solidity_v2_cst::structured_cst::nodes::new_yul_push_keyword(core::ops::range::Range<usize>, &str) -> slang_solidity_v2_cst::structured_cst::nodes::YulPushKeyword
 pub fn slang_solidity_v2_cst::structured_cst::nodes::new_yul_returns_declaration(slang_solidity_v2_cst::structured_cst::nodes::YulMinusGreaterThan, slang_solidity_v2_cst::structured_cst::nodes::YulVariableNames) -> slang_solidity_v2_cst::structured_cst::nodes::YulReturnsDeclaration
+pub fn slang_solidity_v2_cst::structured_cst::nodes::new_yul_set_immutable_keyword(core::ops::range::Range<usize>, &str) -> slang_solidity_v2_cst::structured_cst::nodes::YulSetImmutableKeyword
 pub fn slang_solidity_v2_cst::structured_cst::nodes::new_yul_statement_yul_block(slang_solidity_v2_cst::structured_cst::nodes::YulBlock) -> slang_solidity_v2_cst::structured_cst::nodes::YulStatement
 pub fn slang_solidity_v2_cst::structured_cst::nodes::new_yul_statement_yul_break_statement(slang_solidity_v2_cst::structured_cst::nodes::YulBreakStatement) -> slang_solidity_v2_cst::structured_cst::nodes::YulStatement
 pub fn slang_solidity_v2_cst::structured_cst::nodes::new_yul_statement_yul_continue_statement(slang_solidity_v2_cst::structured_cst::nodes::YulContinueStatement) -> slang_solidity_v2_cst::structured_cst::nodes::YulStatement
@@ -5835,6 +6002,7 @@ pub fn slang_solidity_v2_cst::structured_cst::nodes::new_yul_statement_yul_varia
 pub fn slang_solidity_v2_cst::structured_cst::nodes::new_yul_statements(alloc::vec::Vec<slang_solidity_v2_cst::structured_cst::nodes::YulStatement>) -> slang_solidity_v2_cst::structured_cst::nodes::YulStatements
 pub fn slang_solidity_v2_cst::structured_cst::nodes::new_yul_string_literal(core::ops::range::Range<usize>, &str) -> slang_solidity_v2_cst::structured_cst::nodes::YulStringLiteral
 pub fn slang_solidity_v2_cst::structured_cst::nodes::new_yul_super_keyword(core::ops::range::Range<usize>, &str) -> slang_solidity_v2_cst::structured_cst::nodes::YulSuperKeyword
+pub fn slang_solidity_v2_cst::structured_cst::nodes::new_yul_swap_keyword(core::ops::range::Range<usize>, &str) -> slang_solidity_v2_cst::structured_cst::nodes::YulSwapKeyword
 pub fn slang_solidity_v2_cst::structured_cst::nodes::new_yul_switch_case_yul_default_case(slang_solidity_v2_cst::structured_cst::nodes::YulDefaultCase) -> slang_solidity_v2_cst::structured_cst::nodes::YulSwitchCase
 pub fn slang_solidity_v2_cst::structured_cst::nodes::new_yul_switch_case_yul_value_case(slang_solidity_v2_cst::structured_cst::nodes::YulValueCase) -> slang_solidity_v2_cst::structured_cst::nodes::YulSwitchCase
 pub fn slang_solidity_v2_cst::structured_cst::nodes::new_yul_switch_cases(alloc::vec::Vec<slang_solidity_v2_cst::structured_cst::nodes::YulSwitchCase>) -> slang_solidity_v2_cst::structured_cst::nodes::YulSwitchCases
@@ -6740,12 +6908,20 @@ impl slang_solidity_v2_cst::structured_cst::TextRange for slang_solidity_v2_cst:
 pub fn slang_solidity_v2_cst::structured_cst::nodes::YulContinueKeyword::calculate_text_range(&self) -> core::option::Option<core::ops::range::Range<usize>>
 impl slang_solidity_v2_cst::structured_cst::TextRange for slang_solidity_v2_cst::structured_cst::nodes::YulContinueStatementStruct
 pub fn slang_solidity_v2_cst::structured_cst::nodes::YulContinueStatementStruct::calculate_text_range(&self) -> core::option::Option<core::ops::range::Range<usize>>
+impl slang_solidity_v2_cst::structured_cst::TextRange for slang_solidity_v2_cst::structured_cst::nodes::YulDataCopyKeyword
+pub fn slang_solidity_v2_cst::structured_cst::nodes::YulDataCopyKeyword::calculate_text_range(&self) -> core::option::Option<core::ops::range::Range<usize>>
+impl slang_solidity_v2_cst::structured_cst::TextRange for slang_solidity_v2_cst::structured_cst::nodes::YulDataOffsetKeyword
+pub fn slang_solidity_v2_cst::structured_cst::nodes::YulDataOffsetKeyword::calculate_text_range(&self) -> core::option::Option<core::ops::range::Range<usize>>
+impl slang_solidity_v2_cst::structured_cst::TextRange for slang_solidity_v2_cst::structured_cst::nodes::YulDataSizeKeyword
+pub fn slang_solidity_v2_cst::structured_cst::nodes::YulDataSizeKeyword::calculate_text_range(&self) -> core::option::Option<core::ops::range::Range<usize>>
 impl slang_solidity_v2_cst::structured_cst::TextRange for slang_solidity_v2_cst::structured_cst::nodes::YulDecimalLiteral
 pub fn slang_solidity_v2_cst::structured_cst::nodes::YulDecimalLiteral::calculate_text_range(&self) -> core::option::Option<core::ops::range::Range<usize>>
 impl slang_solidity_v2_cst::structured_cst::TextRange for slang_solidity_v2_cst::structured_cst::nodes::YulDefaultCaseStruct
 pub fn slang_solidity_v2_cst::structured_cst::nodes::YulDefaultCaseStruct::calculate_text_range(&self) -> core::option::Option<core::ops::range::Range<usize>>
 impl slang_solidity_v2_cst::structured_cst::TextRange for slang_solidity_v2_cst::structured_cst::nodes::YulDefaultKeyword
 pub fn slang_solidity_v2_cst::structured_cst::nodes::YulDefaultKeyword::calculate_text_range(&self) -> core::option::Option<core::ops::range::Range<usize>>
+impl slang_solidity_v2_cst::structured_cst::TextRange for slang_solidity_v2_cst::structured_cst::nodes::YulDupKeyword
+pub fn slang_solidity_v2_cst::structured_cst::nodes::YulDupKeyword::calculate_text_range(&self) -> core::option::Option<core::ops::range::Range<usize>>
 impl slang_solidity_v2_cst::structured_cst::TextRange for slang_solidity_v2_cst::structured_cst::nodes::YulExpression
 pub fn slang_solidity_v2_cst::structured_cst::nodes::YulExpression::calculate_text_range(&self) -> core::option::Option<core::ops::range::Range<usize>>
 impl slang_solidity_v2_cst::structured_cst::TextRange for slang_solidity_v2_cst::structured_cst::nodes::YulFalseKeyword
@@ -6776,14 +6952,24 @@ impl slang_solidity_v2_cst::structured_cst::TextRange for slang_solidity_v2_cst:
 pub fn slang_solidity_v2_cst::structured_cst::nodes::YulIfKeyword::calculate_text_range(&self) -> core::option::Option<core::ops::range::Range<usize>>
 impl slang_solidity_v2_cst::structured_cst::TextRange for slang_solidity_v2_cst::structured_cst::nodes::YulIfStatementStruct
 pub fn slang_solidity_v2_cst::structured_cst::nodes::YulIfStatementStruct::calculate_text_range(&self) -> core::option::Option<core::ops::range::Range<usize>>
+impl slang_solidity_v2_cst::structured_cst::TextRange for slang_solidity_v2_cst::structured_cst::nodes::YulJumpDestKeyword
+pub fn slang_solidity_v2_cst::structured_cst::nodes::YulJumpDestKeyword::calculate_text_range(&self) -> core::option::Option<core::ops::range::Range<usize>>
+impl slang_solidity_v2_cst::structured_cst::TextRange for slang_solidity_v2_cst::structured_cst::nodes::YulJumpIKeyword
+pub fn slang_solidity_v2_cst::structured_cst::nodes::YulJumpIKeyword::calculate_text_range(&self) -> core::option::Option<core::ops::range::Range<usize>>
+impl slang_solidity_v2_cst::structured_cst::TextRange for slang_solidity_v2_cst::structured_cst::nodes::YulJumpKeyword
+pub fn slang_solidity_v2_cst::structured_cst::nodes::YulJumpKeyword::calculate_text_range(&self) -> core::option::Option<core::ops::range::Range<usize>>
 impl slang_solidity_v2_cst::structured_cst::TextRange for slang_solidity_v2_cst::structured_cst::nodes::YulLeaveKeyword
 pub fn slang_solidity_v2_cst::structured_cst::nodes::YulLeaveKeyword::calculate_text_range(&self) -> core::option::Option<core::ops::range::Range<usize>>
 impl slang_solidity_v2_cst::structured_cst::TextRange for slang_solidity_v2_cst::structured_cst::nodes::YulLeaveStatementStruct
 pub fn slang_solidity_v2_cst::structured_cst::nodes::YulLeaveStatementStruct::calculate_text_range(&self) -> core::option::Option<core::ops::range::Range<usize>>
 impl slang_solidity_v2_cst::structured_cst::TextRange for slang_solidity_v2_cst::structured_cst::nodes::YulLetKeyword
 pub fn slang_solidity_v2_cst::structured_cst::nodes::YulLetKeyword::calculate_text_range(&self) -> core::option::Option<core::ops::range::Range<usize>>
+impl slang_solidity_v2_cst::structured_cst::TextRange for slang_solidity_v2_cst::structured_cst::nodes::YulLinkerSymbolKeyword
+pub fn slang_solidity_v2_cst::structured_cst::nodes::YulLinkerSymbolKeyword::calculate_text_range(&self) -> core::option::Option<core::ops::range::Range<usize>>
 impl slang_solidity_v2_cst::structured_cst::TextRange for slang_solidity_v2_cst::structured_cst::nodes::YulLiteral
 pub fn slang_solidity_v2_cst::structured_cst::nodes::YulLiteral::calculate_text_range(&self) -> core::option::Option<core::ops::range::Range<usize>>
+impl slang_solidity_v2_cst::structured_cst::TextRange for slang_solidity_v2_cst::structured_cst::nodes::YulLoadImmutableKeyword
+pub fn slang_solidity_v2_cst::structured_cst::nodes::YulLoadImmutableKeyword::calculate_text_range(&self) -> core::option::Option<core::ops::range::Range<usize>>
 impl slang_solidity_v2_cst::structured_cst::TextRange for slang_solidity_v2_cst::structured_cst::nodes::YulMinusGreaterThan
 pub fn slang_solidity_v2_cst::structured_cst::nodes::YulMinusGreaterThan::calculate_text_range(&self) -> core::option::Option<core::ops::range::Range<usize>>
 impl slang_solidity_v2_cst::structured_cst::TextRange for slang_solidity_v2_cst::structured_cst::nodes::YulOpenBrace
@@ -6798,10 +6984,18 @@ impl slang_solidity_v2_cst::structured_cst::TextRange for slang_solidity_v2_cst:
 pub fn slang_solidity_v2_cst::structured_cst::nodes::YulPath::calculate_text_range(&self) -> core::option::Option<core::ops::range::Range<usize>>
 impl slang_solidity_v2_cst::structured_cst::TextRange for slang_solidity_v2_cst::structured_cst::nodes::YulPaths
 pub fn slang_solidity_v2_cst::structured_cst::nodes::YulPaths::calculate_text_range(&self) -> core::option::Option<core::ops::range::Range<usize>>
+impl slang_solidity_v2_cst::structured_cst::TextRange for slang_solidity_v2_cst::structured_cst::nodes::YulPcKeyword
+pub fn slang_solidity_v2_cst::structured_cst::nodes::YulPcKeyword::calculate_text_range(&self) -> core::option::Option<core::ops::range::Range<usize>>
 impl slang_solidity_v2_cst::structured_cst::TextRange for slang_solidity_v2_cst::structured_cst::nodes::YulPeriod
 pub fn slang_solidity_v2_cst::structured_cst::nodes::YulPeriod::calculate_text_range(&self) -> core::option::Option<core::ops::range::Range<usize>>
+impl slang_solidity_v2_cst::structured_cst::TextRange for slang_solidity_v2_cst::structured_cst::nodes::YulPush0Keyword
+pub fn slang_solidity_v2_cst::structured_cst::nodes::YulPush0Keyword::calculate_text_range(&self) -> core::option::Option<core::ops::range::Range<usize>>
+impl slang_solidity_v2_cst::structured_cst::TextRange for slang_solidity_v2_cst::structured_cst::nodes::YulPushKeyword
+pub fn slang_solidity_v2_cst::structured_cst::nodes::YulPushKeyword::calculate_text_range(&self) -> core::option::Option<core::ops::range::Range<usize>>
 impl slang_solidity_v2_cst::structured_cst::TextRange for slang_solidity_v2_cst::structured_cst::nodes::YulReturnsDeclarationStruct
 pub fn slang_solidity_v2_cst::structured_cst::nodes::YulReturnsDeclarationStruct::calculate_text_range(&self) -> core::option::Option<core::ops::range::Range<usize>>
+impl slang_solidity_v2_cst::structured_cst::TextRange for slang_solidity_v2_cst::structured_cst::nodes::YulSetImmutableKeyword
+pub fn slang_solidity_v2_cst::structured_cst::nodes::YulSetImmutableKeyword::calculate_text_range(&self) -> core::option::Option<core::ops::range::Range<usize>>
 impl slang_solidity_v2_cst::structured_cst::TextRange for slang_solidity_v2_cst::structured_cst::nodes::YulStatement
 pub fn slang_solidity_v2_cst::structured_cst::nodes::YulStatement::calculate_text_range(&self) -> core::option::Option<core::ops::range::Range<usize>>
 impl slang_solidity_v2_cst::structured_cst::TextRange for slang_solidity_v2_cst::structured_cst::nodes::YulStatements
@@ -6810,6 +7004,8 @@ impl slang_solidity_v2_cst::structured_cst::TextRange for slang_solidity_v2_cst:
 pub fn slang_solidity_v2_cst::structured_cst::nodes::YulStringLiteral::calculate_text_range(&self) -> core::option::Option<core::ops::range::Range<usize>>
 impl slang_solidity_v2_cst::structured_cst::TextRange for slang_solidity_v2_cst::structured_cst::nodes::YulSuperKeyword
 pub fn slang_solidity_v2_cst::structured_cst::nodes::YulSuperKeyword::calculate_text_range(&self) -> core::option::Option<core::ops::range::Range<usize>>
+impl slang_solidity_v2_cst::structured_cst::TextRange for slang_solidity_v2_cst::structured_cst::nodes::YulSwapKeyword
+pub fn slang_solidity_v2_cst::structured_cst::nodes::YulSwapKeyword::calculate_text_range(&self) -> core::option::Option<core::ops::range::Range<usize>>
 impl slang_solidity_v2_cst::structured_cst::TextRange for slang_solidity_v2_cst::structured_cst::nodes::YulSwitchCase
 pub fn slang_solidity_v2_cst::structured_cst::nodes::YulSwitchCase::calculate_text_range(&self) -> core::option::Option<core::ops::range::Range<usize>>
 impl slang_solidity_v2_cst::structured_cst::TextRange for slang_solidity_v2_cst::structured_cst::nodes::YulSwitchCases
@@ -7604,12 +7800,20 @@ impl slang_solidity_v2_cst::structured_cst::TextRange for slang_solidity_v2_cst:
 pub fn slang_solidity_v2_cst::structured_cst::nodes::YulContinueKeyword::calculate_text_range(&self) -> core::option::Option<core::ops::range::Range<usize>>
 impl slang_solidity_v2_cst::structured_cst::TextRange for slang_solidity_v2_cst::structured_cst::nodes::YulContinueStatementStruct
 pub fn slang_solidity_v2_cst::structured_cst::nodes::YulContinueStatementStruct::calculate_text_range(&self) -> core::option::Option<core::ops::range::Range<usize>>
+impl slang_solidity_v2_cst::structured_cst::TextRange for slang_solidity_v2_cst::structured_cst::nodes::YulDataCopyKeyword
+pub fn slang_solidity_v2_cst::structured_cst::nodes::YulDataCopyKeyword::calculate_text_range(&self) -> core::option::Option<core::ops::range::Range<usize>>
+impl slang_solidity_v2_cst::structured_cst::TextRange for slang_solidity_v2_cst::structured_cst::nodes::YulDataOffsetKeyword
+pub fn slang_solidity_v2_cst::structured_cst::nodes::YulDataOffsetKeyword::calculate_text_range(&self) -> core::option::Option<core::ops::range::Range<usize>>
+impl slang_solidity_v2_cst::structured_cst::TextRange for slang_solidity_v2_cst::structured_cst::nodes::YulDataSizeKeyword
+pub fn slang_solidity_v2_cst::structured_cst::nodes::YulDataSizeKeyword::calculate_text_range(&self) -> core::option::Option<core::ops::range::Range<usize>>
 impl slang_solidity_v2_cst::structured_cst::TextRange for slang_solidity_v2_cst::structured_cst::nodes::YulDecimalLiteral
 pub fn slang_solidity_v2_cst::structured_cst::nodes::YulDecimalLiteral::calculate_text_range(&self) -> core::option::Option<core::ops::range::Range<usize>>
 impl slang_solidity_v2_cst::structured_cst::TextRange for slang_solidity_v2_cst::structured_cst::nodes::YulDefaultCaseStruct
 pub fn slang_solidity_v2_cst::structured_cst::nodes::YulDefaultCaseStruct::calculate_text_range(&self) -> core::option::Option<core::ops::range::Range<usize>>
 impl slang_solidity_v2_cst::structured_cst::TextRange for slang_solidity_v2_cst::structured_cst::nodes::YulDefaultKeyword
 pub fn slang_solidity_v2_cst::structured_cst::nodes::YulDefaultKeyword::calculate_text_range(&self) -> core::option::Option<core::ops::range::Range<usize>>
+impl slang_solidity_v2_cst::structured_cst::TextRange for slang_solidity_v2_cst::structured_cst::nodes::YulDupKeyword
+pub fn slang_solidity_v2_cst::structured_cst::nodes::YulDupKeyword::calculate_text_range(&self) -> core::option::Option<core::ops::range::Range<usize>>
 impl slang_solidity_v2_cst::structured_cst::TextRange for slang_solidity_v2_cst::structured_cst::nodes::YulExpression
 pub fn slang_solidity_v2_cst::structured_cst::nodes::YulExpression::calculate_text_range(&self) -> core::option::Option<core::ops::range::Range<usize>>
 impl slang_solidity_v2_cst::structured_cst::TextRange for slang_solidity_v2_cst::structured_cst::nodes::YulFalseKeyword
@@ -7640,14 +7844,24 @@ impl slang_solidity_v2_cst::structured_cst::TextRange for slang_solidity_v2_cst:
 pub fn slang_solidity_v2_cst::structured_cst::nodes::YulIfKeyword::calculate_text_range(&self) -> core::option::Option<core::ops::range::Range<usize>>
 impl slang_solidity_v2_cst::structured_cst::TextRange for slang_solidity_v2_cst::structured_cst::nodes::YulIfStatementStruct
 pub fn slang_solidity_v2_cst::structured_cst::nodes::YulIfStatementStruct::calculate_text_range(&self) -> core::option::Option<core::ops::range::Range<usize>>
+impl slang_solidity_v2_cst::structured_cst::TextRange for slang_solidity_v2_cst::structured_cst::nodes::YulJumpDestKeyword
+pub fn slang_solidity_v2_cst::structured_cst::nodes::YulJumpDestKeyword::calculate_text_range(&self) -> core::option::Option<core::ops::range::Range<usize>>
+impl slang_solidity_v2_cst::structured_cst::TextRange for slang_solidity_v2_cst::structured_cst::nodes::YulJumpIKeyword
+pub fn slang_solidity_v2_cst::structured_cst::nodes::YulJumpIKeyword::calculate_text_range(&self) -> core::option::Option<core::ops::range::Range<usize>>
+impl slang_solidity_v2_cst::structured_cst::TextRange for slang_solidity_v2_cst::structured_cst::nodes::YulJumpKeyword
+pub fn slang_solidity_v2_cst::structured_cst::nodes::YulJumpKeyword::calculate_text_range(&self) -> core::option::Option<core::ops::range::Range<usize>>
 impl slang_solidity_v2_cst::structured_cst::TextRange for slang_solidity_v2_cst::structured_cst::nodes::YulLeaveKeyword
 pub fn slang_solidity_v2_cst::structured_cst::nodes::YulLeaveKeyword::calculate_text_range(&self) -> core::option::Option<core::ops::range::Range<usize>>
 impl slang_solidity_v2_cst::structured_cst::TextRange for slang_solidity_v2_cst::structured_cst::nodes::YulLeaveStatementStruct
 pub fn slang_solidity_v2_cst::structured_cst::nodes::YulLeaveStatementStruct::calculate_text_range(&self) -> core::option::Option<core::ops::range::Range<usize>>
 impl slang_solidity_v2_cst::structured_cst::TextRange for slang_solidity_v2_cst::structured_cst::nodes::YulLetKeyword
 pub fn slang_solidity_v2_cst::structured_cst::nodes::YulLetKeyword::calculate_text_range(&self) -> core::option::Option<core::ops::range::Range<usize>>
+impl slang_solidity_v2_cst::structured_cst::TextRange for slang_solidity_v2_cst::structured_cst::nodes::YulLinkerSymbolKeyword
+pub fn slang_solidity_v2_cst::structured_cst::nodes::YulLinkerSymbolKeyword::calculate_text_range(&self) -> core::option::Option<core::ops::range::Range<usize>>
 impl slang_solidity_v2_cst::structured_cst::TextRange for slang_solidity_v2_cst::structured_cst::nodes::YulLiteral
 pub fn slang_solidity_v2_cst::structured_cst::nodes::YulLiteral::calculate_text_range(&self) -> core::option::Option<core::ops::range::Range<usize>>
+impl slang_solidity_v2_cst::structured_cst::TextRange for slang_solidity_v2_cst::structured_cst::nodes::YulLoadImmutableKeyword
+pub fn slang_solidity_v2_cst::structured_cst::nodes::YulLoadImmutableKeyword::calculate_text_range(&self) -> core::option::Option<core::ops::range::Range<usize>>
 impl slang_solidity_v2_cst::structured_cst::TextRange for slang_solidity_v2_cst::structured_cst::nodes::YulMinusGreaterThan
 pub fn slang_solidity_v2_cst::structured_cst::nodes::YulMinusGreaterThan::calculate_text_range(&self) -> core::option::Option<core::ops::range::Range<usize>>
 impl slang_solidity_v2_cst::structured_cst::TextRange for slang_solidity_v2_cst::structured_cst::nodes::YulOpenBrace
@@ -7662,10 +7876,18 @@ impl slang_solidity_v2_cst::structured_cst::TextRange for slang_solidity_v2_cst:
 pub fn slang_solidity_v2_cst::structured_cst::nodes::YulPath::calculate_text_range(&self) -> core::option::Option<core::ops::range::Range<usize>>
 impl slang_solidity_v2_cst::structured_cst::TextRange for slang_solidity_v2_cst::structured_cst::nodes::YulPaths
 pub fn slang_solidity_v2_cst::structured_cst::nodes::YulPaths::calculate_text_range(&self) -> core::option::Option<core::ops::range::Range<usize>>
+impl slang_solidity_v2_cst::structured_cst::TextRange for slang_solidity_v2_cst::structured_cst::nodes::YulPcKeyword
+pub fn slang_solidity_v2_cst::structured_cst::nodes::YulPcKeyword::calculate_text_range(&self) -> core::option::Option<core::ops::range::Range<usize>>
 impl slang_solidity_v2_cst::structured_cst::TextRange for slang_solidity_v2_cst::structured_cst::nodes::YulPeriod
 pub fn slang_solidity_v2_cst::structured_cst::nodes::YulPeriod::calculate_text_range(&self) -> core::option::Option<core::ops::range::Range<usize>>
+impl slang_solidity_v2_cst::structured_cst::TextRange for slang_solidity_v2_cst::structured_cst::nodes::YulPush0Keyword
+pub fn slang_solidity_v2_cst::structured_cst::nodes::YulPush0Keyword::calculate_text_range(&self) -> core::option::Option<core::ops::range::Range<usize>>
+impl slang_solidity_v2_cst::structured_cst::TextRange for slang_solidity_v2_cst::structured_cst::nodes::YulPushKeyword
+pub fn slang_solidity_v2_cst::structured_cst::nodes::YulPushKeyword::calculate_text_range(&self) -> core::option::Option<core::ops::range::Range<usize>>
 impl slang_solidity_v2_cst::structured_cst::TextRange for slang_solidity_v2_cst::structured_cst::nodes::YulReturnsDeclarationStruct
 pub fn slang_solidity_v2_cst::structured_cst::nodes::YulReturnsDeclarationStruct::calculate_text_range(&self) -> core::option::Option<core::ops::range::Range<usize>>
+impl slang_solidity_v2_cst::structured_cst::TextRange for slang_solidity_v2_cst::structured_cst::nodes::YulSetImmutableKeyword
+pub fn slang_solidity_v2_cst::structured_cst::nodes::YulSetImmutableKeyword::calculate_text_range(&self) -> core::option::Option<core::ops::range::Range<usize>>
 impl slang_solidity_v2_cst::structured_cst::TextRange for slang_solidity_v2_cst::structured_cst::nodes::YulStatement
 pub fn slang_solidity_v2_cst::structured_cst::nodes::YulStatement::calculate_text_range(&self) -> core::option::Option<core::ops::range::Range<usize>>
 impl slang_solidity_v2_cst::structured_cst::TextRange for slang_solidity_v2_cst::structured_cst::nodes::YulStatements
@@ -7674,6 +7896,8 @@ impl slang_solidity_v2_cst::structured_cst::TextRange for slang_solidity_v2_cst:
 pub fn slang_solidity_v2_cst::structured_cst::nodes::YulStringLiteral::calculate_text_range(&self) -> core::option::Option<core::ops::range::Range<usize>>
 impl slang_solidity_v2_cst::structured_cst::TextRange for slang_solidity_v2_cst::structured_cst::nodes::YulSuperKeyword
 pub fn slang_solidity_v2_cst::structured_cst::nodes::YulSuperKeyword::calculate_text_range(&self) -> core::option::Option<core::ops::range::Range<usize>>
+impl slang_solidity_v2_cst::structured_cst::TextRange for slang_solidity_v2_cst::structured_cst::nodes::YulSwapKeyword
+pub fn slang_solidity_v2_cst::structured_cst::nodes::YulSwapKeyword::calculate_text_range(&self) -> core::option::Option<core::ops::range::Range<usize>>
 impl slang_solidity_v2_cst::structured_cst::TextRange for slang_solidity_v2_cst::structured_cst::nodes::YulSwitchCase
 pub fn slang_solidity_v2_cst::structured_cst::nodes::YulSwitchCase::calculate_text_range(&self) -> core::option::Option<core::ops::range::Range<usize>>
 impl slang_solidity_v2_cst::structured_cst::TextRange for slang_solidity_v2_cst::structured_cst::nodes::YulSwitchCases

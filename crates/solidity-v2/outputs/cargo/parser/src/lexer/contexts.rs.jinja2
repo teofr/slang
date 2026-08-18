@@ -1,15 +1,32 @@
+{#- Whether any keyword's `reserved` specifier is version-dependent, i.e. neither
+    `Always` nor `Never`. Only then does the lexer need to consult the language
+    version (and hence `LanguageVersionSpecifier`) to pick between the reserved
+    and unreserved lexeme of a keyword. -#}
+{%- set_global uses_language_version = false -%}
+{%- for context in model.parser.lexer.contexts -%}
+    {%- for lexeme in context.lexemes -%}
+        {%- if lexeme.type == "Keyword" and lexeme.reserved.type != "Always" and lexeme.reserved.type != "Never" -%}
+            {%- set_global uses_language_version = true -%}
+        {%- endif -%}
+    {%- endfor -%}
+{%- endfor -%}
 use logos::{FilterResult, Lexer, Logos};
+{% if uses_language_version -%}
+use slang_solidity_v2_common::versions::{LanguageVersion, LanguageVersionSpecifier};
+{%- else -%}
 use slang_solidity_v2_common::versions::LanguageVersion;
+{%- endif %}
 
 use crate::lexer::lexemes::{Lexeme, LexemeKind};
 
 #[derive(Clone)]
 pub struct ContextExtras {
-    // Since we restricted Slang v2 lexer to only support Solidity 0.8.0+, all the remaining keywords
-    // are either `Always` or `Never` versioned in the remaining versions, so we don't need this
-    // information today. However, that might always change with new version releases.
-    // So, let's keep it for now, even if we don't generate code that uses it yet.
+    {% if not uses_language_version -%}
+    // No keyword is reserved only for a range of the supported versions right now, so
+    // nothing generated below reads this. Keep it anyway: a new release can make a
+    // keyword's reservation version-dependent at any point.
     #[allow(dead_code)]
+    {% endif -%}
     pub language_version: LanguageVersion,
 }
 

@@ -1,0 +1,11 @@
+# This file is generated automatically by infrastructure scripts. Please don't edit by hand.
+
+Diagnostics: 1
+
+[DeclarationError 5017] Error: The identifier "datasize" is reserved and can not be used.
+   ╭─[input.sol:9:17]
+   │
+ 9 │             let datasize := 1
+   │                 ────┬───  
+   │                     ╰───── Error occurred here.
+───╯

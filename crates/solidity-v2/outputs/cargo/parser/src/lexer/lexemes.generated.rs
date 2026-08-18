@@ -221,8 +221,12 @@ pub enum LexemeKind {
     YulColonEqual,
     YulComma,
     YulContinueKeyword_Reserved,
+    YulDataCopyKeyword_Reserved,
+    YulDataOffsetKeyword_Reserved,
+    YulDataSizeKeyword_Reserved,
     YulDecimalLiteral,
     YulDefaultKeyword_Reserved,
+    YulDupKeyword_Reserved,
     YulEndOfLine,
     YulFalseKeyword_Reserved,
     YulForKeyword_Reserved,
@@ -232,18 +236,29 @@ pub enum LexemeKind {
     YulHexStringLiteral,
     YulIdentifier,
     YulIfKeyword_Reserved,
+    YulJumpDestKeyword_Reserved,
+    YulJumpIKeyword_Reserved,
+    YulJumpKeyword_Reserved,
     YulLeaveKeyword_Reserved,
     YulLetKeyword_Reserved,
+    YulLinkerSymbolKeyword_Reserved,
+    YulLoadImmutableKeyword_Reserved,
     YulMinusGreaterThan,
     YulMultiLineComment,
     YulMultiLineNatSpecComment,
     YulOpenBrace,
     YulOpenParen,
+    YulPcKeyword_Reserved,
     YulPeriod,
+    YulPush0Keyword_Reserved,
+    YulPush0Keyword_Unreserved,
+    YulPushKeyword_Reserved,
+    YulSetImmutableKeyword_Reserved,
     YulSingleLineComment,
     YulSingleLineNatSpecComment,
     YulStringLiteral,
     YulSuperKeyword_Reserved,
+    YulSwapKeyword_Reserved,
     YulSwitchKeyword_Reserved,
     YulThisKeyword_Reserved,
     YulTrueKeyword_Reserved,
@@ -251,6 +266,19 @@ pub enum LexemeKind {
 }
 
 impl LexemeKind {
+    /// The terminal to name when reporting this lexeme in the list of terminals
+    /// the parser expected.
+    ///
+    /// That is the lexeme's own terminal, except for the unreserved lexeme of a
+    /// keyword the grammar never uses: the parser only ever accepts it in place
+    /// of an identifier, so naming the keyword would be noise.
+    pub fn expected_terminal(&self) -> TerminalKind {
+        match self {
+            Self::YulPush0Keyword_Unreserved => TerminalKind::YulIdentifier,
+            _ => TerminalKind::from(self),
+        }
+    }
+
     pub fn is_trivia(&self) -> bool {
         matches!(
             self,
@@ -479,8 +507,12 @@ impl From<&LexemeKind> for TerminalKind {
             LexemeKind::YulColonEqual => TerminalKind::YulColonEqual,
             LexemeKind::YulComma => TerminalKind::YulComma,
             LexemeKind::YulContinueKeyword_Reserved => TerminalKind::YulContinueKeyword,
+            LexemeKind::YulDataCopyKeyword_Reserved => TerminalKind::YulDataCopyKeyword,
+            LexemeKind::YulDataOffsetKeyword_Reserved => TerminalKind::YulDataOffsetKeyword,
+            LexemeKind::YulDataSizeKeyword_Reserved => TerminalKind::YulDataSizeKeyword,
             LexemeKind::YulDecimalLiteral => TerminalKind::YulDecimalLiteral,
             LexemeKind::YulDefaultKeyword_Reserved => TerminalKind::YulDefaultKeyword,
+            LexemeKind::YulDupKeyword_Reserved => TerminalKind::YulDupKeyword,
             LexemeKind::YulFalseKeyword_Reserved => TerminalKind::YulFalseKeyword,
             LexemeKind::YulForKeyword_Reserved => TerminalKind::YulForKeyword,
             LexemeKind::YulFunctionKeyword_Reserved => TerminalKind::YulFunctionKeyword,
@@ -489,14 +521,25 @@ impl From<&LexemeKind> for TerminalKind {
             LexemeKind::YulHexStringLiteral => TerminalKind::YulHexStringLiteral,
             LexemeKind::YulIdentifier => TerminalKind::YulIdentifier,
             LexemeKind::YulIfKeyword_Reserved => TerminalKind::YulIfKeyword,
+            LexemeKind::YulJumpDestKeyword_Reserved => TerminalKind::YulJumpDestKeyword,
+            LexemeKind::YulJumpIKeyword_Reserved => TerminalKind::YulJumpIKeyword,
+            LexemeKind::YulJumpKeyword_Reserved => TerminalKind::YulJumpKeyword,
             LexemeKind::YulLeaveKeyword_Reserved => TerminalKind::YulLeaveKeyword,
             LexemeKind::YulLetKeyword_Reserved => TerminalKind::YulLetKeyword,
+            LexemeKind::YulLinkerSymbolKeyword_Reserved => TerminalKind::YulLinkerSymbolKeyword,
+            LexemeKind::YulLoadImmutableKeyword_Reserved => TerminalKind::YulLoadImmutableKeyword,
             LexemeKind::YulMinusGreaterThan => TerminalKind::YulMinusGreaterThan,
             LexemeKind::YulOpenBrace => TerminalKind::YulOpenBrace,
             LexemeKind::YulOpenParen => TerminalKind::YulOpenParen,
+            LexemeKind::YulPcKeyword_Reserved => TerminalKind::YulPcKeyword,
             LexemeKind::YulPeriod => TerminalKind::YulPeriod,
+            LexemeKind::YulPush0Keyword_Reserved => TerminalKind::YulPush0Keyword,
+            LexemeKind::YulPush0Keyword_Unreserved => TerminalKind::YulPush0Keyword,
+            LexemeKind::YulPushKeyword_Reserved => TerminalKind::YulPushKeyword,
+            LexemeKind::YulSetImmutableKeyword_Reserved => TerminalKind::YulSetImmutableKeyword,
             LexemeKind::YulStringLiteral => TerminalKind::YulStringLiteral,
             LexemeKind::YulSuperKeyword_Reserved => TerminalKind::YulSuperKeyword,
+            LexemeKind::YulSwapKeyword_Reserved => TerminalKind::YulSwapKeyword,
             LexemeKind::YulSwitchKeyword_Reserved => TerminalKind::YulSwitchKeyword,
             LexemeKind::YulThisKeyword_Reserved => TerminalKind::YulThisKeyword,
             LexemeKind::YulTrueKeyword_Reserved => TerminalKind::YulTrueKeyword,

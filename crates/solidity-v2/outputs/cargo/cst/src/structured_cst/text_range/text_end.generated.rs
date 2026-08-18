@@ -3249,6 +3249,24 @@ impl TextEnd for YulContinueKeyword {
     }
 }
 
+impl TextEnd for YulDataCopyKeyword {
+    fn calculate_text_end(&self) -> Option<usize> {
+        Some(self.range.end)
+    }
+}
+
+impl TextEnd for YulDataOffsetKeyword {
+    fn calculate_text_end(&self) -> Option<usize> {
+        Some(self.range.end)
+    }
+}
+
+impl TextEnd for YulDataSizeKeyword {
+    fn calculate_text_end(&self) -> Option<usize> {
+        Some(self.range.end)
+    }
+}
+
 impl TextEnd for YulDecimalLiteral {
     fn calculate_text_end(&self) -> Option<usize> {
         Some(self.range.end)
@@ -3256,6 +3274,12 @@ impl TextEnd for YulDecimalLiteral {
 }
 
 impl TextEnd for YulDefaultKeyword {
+    fn calculate_text_end(&self) -> Option<usize> {
+        Some(self.range.end)
+    }
+}
+
+impl TextEnd for YulDupKeyword {
     fn calculate_text_end(&self) -> Option<usize> {
         Some(self.range.end)
     }
@@ -3309,6 +3333,24 @@ impl TextEnd for YulIfKeyword {
     }
 }
 
+impl TextEnd for YulJumpDestKeyword {
+    fn calculate_text_end(&self) -> Option<usize> {
+        Some(self.range.end)
+    }
+}
+
+impl TextEnd for YulJumpIKeyword {
+    fn calculate_text_end(&self) -> Option<usize> {
+        Some(self.range.end)
+    }
+}
+
+impl TextEnd for YulJumpKeyword {
+    fn calculate_text_end(&self) -> Option<usize> {
+        Some(self.range.end)
+    }
+}
+
 impl TextEnd for YulLeaveKeyword {
     fn calculate_text_end(&self) -> Option<usize> {
         Some(self.range.end)
@@ -3316,6 +3358,18 @@ impl TextEnd for YulLeaveKeyword {
 }
 
 impl TextEnd for YulLetKeyword {
+    fn calculate_text_end(&self) -> Option<usize> {
+        Some(self.range.end)
+    }
+}
+
+impl TextEnd for YulLinkerSymbolKeyword {
+    fn calculate_text_end(&self) -> Option<usize> {
+        Some(self.range.end)
+    }
+}
+
+impl TextEnd for YulLoadImmutableKeyword {
     fn calculate_text_end(&self) -> Option<usize> {
         Some(self.range.end)
     }
@@ -3339,7 +3393,31 @@ impl TextEnd for YulOpenParen {
     }
 }
 
+impl TextEnd for YulPcKeyword {
+    fn calculate_text_end(&self) -> Option<usize> {
+        Some(self.range.end)
+    }
+}
+
 impl TextEnd for YulPeriod {
+    fn calculate_text_end(&self) -> Option<usize> {
+        Some(self.range.end)
+    }
+}
+
+impl TextEnd for YulPush0Keyword {
+    fn calculate_text_end(&self) -> Option<usize> {
+        Some(self.range.end)
+    }
+}
+
+impl TextEnd for YulPushKeyword {
+    fn calculate_text_end(&self) -> Option<usize> {
+        Some(self.range.end)
+    }
+}
+
+impl TextEnd for YulSetImmutableKeyword {
     fn calculate_text_end(&self) -> Option<usize> {
         Some(self.range.end)
     }
@@ -3352,6 +3430,12 @@ impl TextEnd for YulStringLiteral {
 }
 
 impl TextEnd for YulSuperKeyword {
+    fn calculate_text_end(&self) -> Option<usize> {
+        Some(self.range.end)
+    }
+}
+
+impl TextEnd for YulSwapKeyword {
     fn calculate_text_end(&self) -> Option<usize> {
         Some(self.range.end)
     }

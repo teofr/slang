@@ -1,0 +1,11 @@
+# This file is generated automatically by infrastructure scripts. Please don't edit by hand.
+
+Diagnostics: 1
+
+[syntax/unexpected-terminal] Error: Unexpected YulDataSizeKeyword. One of YulIdentifier was expected
+   ╭─[input.sol:9:17]
+   │
+ 9 │             let datasize := 1
+   │                 ────┬───  
+   │                     ╰───── Error occurred here.
+───╯

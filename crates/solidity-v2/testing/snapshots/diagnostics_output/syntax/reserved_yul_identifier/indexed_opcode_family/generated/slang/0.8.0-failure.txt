@@ -1,0 +1,11 @@
+# This file is generated automatically by infrastructure scripts. Please don't edit by hand.
+
+Diagnostics: 1
+
+[syntax/unexpected-terminal] Error: Unexpected YulDupKeyword. One of YulIdentifier was expected
+    ╭─[input.sol:11:17]
+    │
+ 11 │             let dup16 := 1
+    │                 ──┬──  
+    │                   ╰──── Error occurred here.
+────╯

@@ -3217,6 +3217,24 @@ impl TextStart for YulContinueKeyword {
     }
 }
 
+impl TextStart for YulDataCopyKeyword {
+    fn calculate_text_start(&self) -> Option<usize> {
+        Some(self.range.start)
+    }
+}
+
+impl TextStart for YulDataOffsetKeyword {
+    fn calculate_text_start(&self) -> Option<usize> {
+        Some(self.range.start)
+    }
+}
+
+impl TextStart for YulDataSizeKeyword {
+    fn calculate_text_start(&self) -> Option<usize> {
+        Some(self.range.start)
+    }
+}
+
 impl TextStart for YulDecimalLiteral {
     fn calculate_text_start(&self) -> Option<usize> {
         Some(self.range.start)
@@ -3224,6 +3242,12 @@ impl TextStart for YulDecimalLiteral {
 }
 
 impl TextStart for YulDefaultKeyword {
+    fn calculate_text_start(&self) -> Option<usize> {
+        Some(self.range.start)
+    }
+}
+
+impl TextStart for YulDupKeyword {
     fn calculate_text_start(&self) -> Option<usize> {
         Some(self.range.start)
     }
@@ -3277,6 +3301,24 @@ impl TextStart for YulIfKeyword {
     }
 }
 
+impl TextStart for YulJumpDestKeyword {
+    fn calculate_text_start(&self) -> Option<usize> {
+        Some(self.range.start)
+    }
+}
+
+impl TextStart for YulJumpIKeyword {
+    fn calculate_text_start(&self) -> Option<usize> {
+        Some(self.range.start)
+    }
+}
+
+impl TextStart for YulJumpKeyword {
+    fn calculate_text_start(&self) -> Option<usize> {
+        Some(self.range.start)
+    }
+}
+
 impl TextStart for YulLeaveKeyword {
     fn calculate_text_start(&self) -> Option<usize> {
         Some(self.range.start)
@@ -3284,6 +3326,18 @@ impl TextStart for YulLeaveKeyword {
 }
 
 impl TextStart for YulLetKeyword {
+    fn calculate_text_start(&self) -> Option<usize> {
+        Some(self.range.start)
+    }
+}
+
+impl TextStart for YulLinkerSymbolKeyword {
+    fn calculate_text_start(&self) -> Option<usize> {
+        Some(self.range.start)
+    }
+}
+
+impl TextStart for YulLoadImmutableKeyword {
     fn calculate_text_start(&self) -> Option<usize> {
         Some(self.range.start)
     }
@@ -3307,7 +3361,31 @@ impl TextStart for YulOpenParen {
     }
 }
 
+impl TextStart for YulPcKeyword {
+    fn calculate_text_start(&self) -> Option<usize> {
+        Some(self.range.start)
+    }
+}
+
 impl TextStart for YulPeriod {
+    fn calculate_text_start(&self) -> Option<usize> {
+        Some(self.range.start)
+    }
+}
+
+impl TextStart for YulPush0Keyword {
+    fn calculate_text_start(&self) -> Option<usize> {
+        Some(self.range.start)
+    }
+}
+
+impl TextStart for YulPushKeyword {
+    fn calculate_text_start(&self) -> Option<usize> {
+        Some(self.range.start)
+    }
+}
+
+impl TextStart for YulSetImmutableKeyword {
     fn calculate_text_start(&self) -> Option<usize> {
         Some(self.range.start)
     }
@@ -3320,6 +3398,12 @@ impl TextStart for YulStringLiteral {
 }
 
 impl TextStart for YulSuperKeyword {
+    fn calculate_text_start(&self) -> Option<usize> {
+        Some(self.range.start)
+    }
+}
+
+impl TextStart for YulSwapKeyword {
     fn calculate_text_start(&self) -> Option<usize> {
         Some(self.range.start)
     }

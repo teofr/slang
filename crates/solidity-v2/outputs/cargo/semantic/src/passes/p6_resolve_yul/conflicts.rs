@@ -68,9 +68,15 @@ pub(super) fn find_conflicting_yul_definition(
     // Cancun) is not a built-in here — matching solc, which only rejects the name
     // once the built-in exists.
     //
-    // TODO(validation) SDR[1180, 859]: solc also reserves names where the built-in
-    // isn't available yet. Those names are currently accepted; they need a separate
-    // reserved-identifier check.
+    // TODO(validation) SDR[1180, 859]: solc also reserves the name of a built-in
+    // that isn't available yet (`chainid` before Istanbul), and keeps reserving
+    // one whose built-in is gone (`difficulty` from Paris). Those names are
+    // currently accepted here. They can't be reserved the way the names that are
+    // *never* built-ins are — as `enabled = Never` keywords in the Yul lexical
+    // context, see the "Yul Keywords" topic in the language definition — since a
+    // built-in name has to keep lexing as a `YulIdentifier` to stay callable, and
+    // reservation follows the EVM target, which keyword reservation has no notion
+    // of. So they still need a reserved-identifier check of their own here.
     if let Some(built_in) = BuiltInsResolver::lookup_yul_global(symbol)
         && is_built_in_available(built_in, language_version, evm_target)
     {

@@ -2906,6 +2906,49 @@ mod syntax {
         }
     }
 
+    mod reserved_yul_identifier {
+        use super::*;
+
+        #[test]
+        fn as_function_definition_name() -> Result<()> {
+            run(
+                "syntax/reserved_yul_identifier",
+                "as_function_definition_name",
+            )
+        }
+
+        #[test]
+        fn indexed_opcode_family() -> Result<()> {
+            run("syntax/reserved_yul_identifier", "indexed_opcode_family")
+        }
+
+        #[test]
+        fn lookalikes_are_not_reserved() -> Result<()> {
+            run(
+                "syntax/reserved_yul_identifier",
+                "lookalikes_are_not_reserved",
+            )
+        }
+
+        #[test]
+        fn reserved_from_own_version() -> Result<()> {
+            run(
+                "syntax/reserved_yul_identifier",
+                "reserved_from_own_version",
+            )
+        }
+
+        #[test]
+        fn unexposed_opcode() -> Result<()> {
+            run("syntax/reserved_yul_identifier", "unexposed_opcode")
+        }
+
+        #[test]
+        fn yul_object_built_in() -> Result<()> {
+            run("syntax/reserved_yul_identifier", "yul_object_built_in")
+        }
+    }
+
     #[test]
     fn unexpected_eof() -> Result<()> {
         run("syntax", "unexpected_eof")

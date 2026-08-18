@@ -1,0 +1,29 @@
+# This file is generated automatically by infrastructure scripts. Please don't edit by hand.
+
+Diagnostics: 3
+
+[DeclarationError 5017] Error: The identifier "jump" is reserved and can not be used.
+    ╭─[input.sol:10:13]
+    │
+ 10 │ ╭─▶             function jump(jumpi) -> jumpdest {
+    ┆ ┆   
+ 12 │ ├─▶             }
+    │ │                   
+    │ ╰─────────────────── Error occurred here.
+────╯
+
+[DeclarationError 5017] Error: The identifier "jumpi" is reserved and can not be used.
+    ╭─[input.sol:10:27]
+    │
+ 10 │             function jump(jumpi) -> jumpdest {
+    │                           ──┬──  
+    │                             ╰──── Error occurred here.
+────╯
+
+[DeclarationError 5017] Error: The identifier "jumpdest" is reserved and can not be used.
+    ╭─[input.sol:10:37]
+    │
+ 10 │             function jump(jumpi) -> jumpdest {
+    │                                     ────┬───  
+    │                                         ╰───── Error occurred here.
+────╯
