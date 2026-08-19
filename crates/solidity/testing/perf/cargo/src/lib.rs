@@ -126,9 +126,13 @@ mod unit_tests {
         );
 
         // The whole pipeline behind the public API. Its counts must agree with
-        // the individual stages measured above. Benchmarked by the wall-clock
-        // (`divan`) suite rather than by `gungraun`, so it is deliberately
-        // outside the benchmark list marked above.
+        // the individual stages measured above.
+        //
+        // Outside the benchmark list marked above because that list pairs with
+        // the `pipeline` group, one entry per stage. This module is driven by
+        // the wall-clock (`divan`) suite, and by `gungraun`'s `threads` group,
+        // which runs the same pipeline but collects only the parse stage — so it
+        // is not a stage benchmark of its own.
         define_payload_test_and_assert_count_eq!(
             compilation_unit,
             count_concrete_contracts,
