@@ -3072,6 +3072,11 @@ mod syntax {
         fn receive_function() -> Result<()> {
             run("syntax/invalid_mutability", "receive_function")
         }
+
+        #[test]
+        fn state_variable_function_type() -> Result<()> {
+            run("syntax/invalid_mutability", "state_variable_function_type")
+        }
     }
 
     mod invalid_visibility {
@@ -3124,6 +3129,11 @@ mod syntax {
         #[test]
         fn receive_function() -> Result<()> {
             run("syntax/invalid_visibility", "receive_function")
+        }
+
+        #[test]
+        fn state_variable_function_type() -> Result<()> {
+            run("syntax/invalid_visibility", "state_variable_function_type")
         }
     }
 
