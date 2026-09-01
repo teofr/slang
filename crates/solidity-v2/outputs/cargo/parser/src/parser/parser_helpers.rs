@@ -184,7 +184,7 @@ pub(crate) fn new_expression_index_access_path(index_access_path: IndexAccessPat
     expression
 }
 
-/// Consumes an identifier path and returns the equivalent chain of member accesses
+/// Consumes a separated identifier path and returns the equivalent chain of member accesses
 pub(crate) fn new_expression_separated_identifier_path(
     separated_identifier_path: SeparatedIdentifierPath,
 ) -> Expression {
