@@ -2,13 +2,16 @@
 //!
 //! They shouldn't be used outside of the parser, and should be transformed into AST nodes.
 
+use std::iter::once;
+
 use slang_solidity_v2_common::diagnostics::kinds::syntax::ExpectedArrayLengthExpression;
 use slang_solidity_v2_cst::structured_cst::nodes::{
     CloseBracket, ElementaryType, Expression, FunctionTypeAttribute, FunctionTypeStruct,
-    IdentifierPath, IdentifierPathElement, IndexAccessEnd, OpenBracket, Period,
+    Identifier, IdentifierPath, IdentifierPathElement, IndexAccessEnd, OpenBracket, Period,
     StateVariableAttribute, TypeName, new_array_type_name, new_expression_elementary_type,
     new_expression_identifier, new_expression_index_access_expression,
-    new_expression_member_access_expression, new_index_access_expression,
+    new_expression_member_access_expression, new_identifier_path,
+    new_identifier_path_element_identifier, new_index_access_expression,
     new_member_access_expression, new_type_name_array_type_name, new_type_name_elementary_type,
     new_type_name_identifier_path,
 };
@@ -28,8 +31,42 @@ pub(crate) struct IndexAccessPath {
 
 #[derive(Debug)]
 pub(crate) enum Path {
-    IdentifierPath(IdentifierPath),
+    SeparatedIdentifierPath(SeparatedIdentifierPath),
     ElementaryType(ElementaryType),
+}
+
+/// An identifier path that keeps the `Period`s separating its elements.
+///
+/// The `IdentifierPath` node doesn't keep its separators, but a path can also be
+/// reinterpreted as a chain of member accesses, which does need them. So we hold
+/// on to them while parsing, until we know which of the two we're building.
+#[derive(Debug)]
+pub(crate) struct SeparatedIdentifierPath {
+    /// Only the elements after the first one can be an `AddressKeyword`
+    pub head: Identifier,
+    /// The remaining elements, each one with the period that precedes it
+    pub tail: Vec<(Period, IdentifierPathElement)>,
+}
+
+impl SeparatedIdentifierPath {
+    /// Creates a path of a single element
+    pub fn single(head: Identifier) -> Self {
+        Self { head, tail: vec![] }
+    }
+
+    /// Creates a path from its head and the elements that follow it
+    pub fn new(head: Identifier, tail: Vec<(Period, IdentifierPathElement)>) -> Self {
+        Self { head, tail }
+    }
+
+    /// Consumes the path and creates an `IdentifierPath`, dropping the separators
+    pub fn into_identifier_path(self) -> IdentifierPath {
+        let elements = once(new_identifier_path_element_identifier(self.head))
+            .chain(self.tail.into_iter().map(|(_, element)| element))
+            .collect();
+
+        new_identifier_path(elements)
+    }
 }
 
 #[derive(Debug)]
@@ -58,11 +95,11 @@ pub(crate) fn index_access_path_add_index(
 }
 
 /// Creates an IAP from an identifier path
-pub(crate) fn new_index_access_path_from_identifier_path(
-    identifier_path: IdentifierPath,
+pub(crate) fn new_index_access_path_from_separated_identifier_path(
+    separated_identifier_path: SeparatedIdentifierPath,
 ) -> IndexAccessPath {
     IndexAccessPath {
-        path: Path::IdentifierPath(identifier_path),
+        path: Path::SeparatedIdentifierPath(separated_identifier_path),
         indices: vec![],
     }
 }
@@ -95,7 +132,9 @@ pub(crate) fn new_type_name_index_access_path(
     let IndexAccessPath { path, indices } = index_access_path;
 
     let mut type_name = match path {
-        Path::IdentifierPath(path) => new_type_name_identifier_path(path),
+        Path::SeparatedIdentifierPath(path) => {
+            new_type_name_identifier_path(path.into_identifier_path())
+        }
         Path::ElementaryType(elem_type) => new_type_name_elementary_type(elem_type),
     };
 
@@ -127,7 +166,7 @@ pub(crate) fn new_expression_index_access_path(index_access_path: IndexAccessPat
     let IndexAccessPath { path, indices } = index_access_path;
 
     let mut expression = match path {
-        Path::IdentifierPath(path) => new_expression_identifier_path(path),
+        Path::SeparatedIdentifierPath(path) => new_expression_separated_identifier_path(path),
         Path::ElementaryType(elem_type) => new_expression_elementary_type(elem_type),
     };
 
@@ -145,29 +184,20 @@ pub(crate) fn new_expression_index_access_path(index_access_path: IndexAccessPat
     expression
 }
 
-pub(crate) fn new_expression_identifier_path(identifier_path: IdentifierPath) -> Expression {
-    identifier_path
-        .elements
-        .into_iter()
-        .fold(None, |acc, id| {
-            match acc {
-                None => Some(match id {
-                    IdentifierPathElement::AddressKeyword(_) => {
-                        unreachable!("Address should never be the first element in an identifier path, the parser shouldn't allow it");
-                    }
-                    IdentifierPathElement::Identifier(id) => new_expression_identifier(id),
-                }),
-                Some(acc) => Some(new_expression_member_access_expression(
-                    new_member_access_expression(
-                        acc,
-                        // TODO(v2) use real range
-                        Period { range: 0..0 },
-                        id,
-                    ),
-                )),
-            }
-        })
-        .expect("IdentifierPath should have at least one element!")
+/// Consumes an identifier path and returns the equivalent chain of member accesses
+pub(crate) fn new_expression_separated_identifier_path(
+    separated_identifier_path: SeparatedIdentifierPath,
+) -> Expression {
+    let SeparatedIdentifierPath { head, tail } = separated_identifier_path;
+
+    let mut expression = new_expression_identifier(head);
+    for (period, element) in tail {
+        expression = new_expression_member_access_expression(new_member_access_expression(
+            expression, period, element,
+        ));
+    }
+
+    expression
 }
 
 /// We use this function to share attributes between a state variable that has a function type.
