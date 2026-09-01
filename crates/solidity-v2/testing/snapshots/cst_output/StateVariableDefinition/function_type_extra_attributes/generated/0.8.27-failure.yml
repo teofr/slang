@@ -13,7 +13,7 @@ Source: >
 
 Errors: # 3 total
   - >
-    [syntax/invalid-mutability] Error: Invalid mutability for this definition. Expected 'ConstantKeyword' or 'ImmutableKeyword'.
+    [syntax/invalid-mutability] Error: Invalid mutability for this definition. Expected 'ConstantKeyword' or 'ImmutableKeyword' or 'TransientKeyword'.
        ╭─[crates/solidity-v2/testing/snapshots/cst_output/StateVariableDefinition/function_type_extra_attributes/input.sol:6:32]
        │
      6 │     function() internal public payable y;
@@ -29,7 +29,7 @@ Errors: # 3 total
        │                                    ╰───── Error occurred here.
     ───╯
   - >
-    [syntax/invalid-mutability] Error: Invalid mutability for this definition. Expected 'ConstantKeyword' or 'ImmutableKeyword'.
+    [syntax/invalid-mutability] Error: Invalid mutability for this definition. Expected 'ConstantKeyword' or 'ImmutableKeyword' or 'TransientKeyword'.
        ╭─[crates/solidity-v2/testing/snapshots/cst_output/StateVariableDefinition/function_type_extra_attributes/input.sol:8:32]
        │
      8 │     function() internal public view constant w = f;

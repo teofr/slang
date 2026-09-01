@@ -2,7 +2,7 @@
 
 Diagnostics: 1
 
-[syntax/invalid-mutability] Error: Invalid mutability for this definition. Expected 'ConstantKeyword' or 'ImmutableKeyword'.
+[syntax/invalid-mutability] Error: Invalid mutability for this definition. Expected 'ConstantKeyword' or 'ImmutableKeyword' or 'TransientKeyword'.
    ╭─[input.sol:8:32]
    │
  8 │     function() internal public payable x;

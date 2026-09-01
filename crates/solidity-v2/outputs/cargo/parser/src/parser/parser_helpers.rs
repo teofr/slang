@@ -6,6 +6,7 @@ use slang_solidity_v2_common::diagnostics::kinds::syntax::{
     ExpectedArrayLengthExpression, InvalidMutability, InvalidVisibility,
 };
 use slang_solidity_v2_common::terminals::TerminalKind;
+use slang_solidity_v2_common::versions::LanguageVersion;
 use slang_solidity_v2_cst::structured_cst::nodes::{
     CloseBracket, ElementaryType, Expression, FunctionTypeAttribute, FunctionTypeStruct,
     IdentifierPath, IdentifierPathElement, IndexAccessEnd, OpenBracket, Period,
@@ -249,16 +250,20 @@ pub(crate) fn extract_extra_attributes(
                     let range = attr
                         .calculate_text_range()
                         .expect("Function type attributes always have a range");
+                    // `transient` only exists from 0.8.27 onwards, so offering it
+                    // below that would name a keyword the version check rejects.
+                    let mut valid = vec![
+                        TerminalKind::ConstantKeyword,
+                        TerminalKind::ImmutableKeyword,
+                    ];
+                    if ctx.language_version >= LanguageVersion::V0_8_27 {
+                        valid.push(TerminalKind::TransientKeyword);
+                    }
+
                     ctx.diagnostics.push(
                         ctx.file_id.to_owned(),
                         range,
-                        InvalidMutability {
-                            valid: vec![
-                                TerminalKind::ConstantKeyword,
-                                TerminalKind::ImmutableKeyword,
-                                TerminalKind::TransientKeyword,
-                            ],
-                        },
+                        InvalidMutability { valid },
                     );
                     None
                 }
