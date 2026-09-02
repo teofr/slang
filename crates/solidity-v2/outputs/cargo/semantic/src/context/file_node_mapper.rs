@@ -3,52 +3,40 @@ use slang_solidity_v2_common::nodes::NodeId;
 
 use super::SemanticFile;
 
-struct FileNodeInfo {
-    /// File ID to map `NodeId`s to
-    file_id: FileId,
-    /// `NodeId` of the first node in the file, which should always correspond
-    /// to the ID of the root `SourceUnit` (by construction)
-    first_node_id: NodeId,
-}
-
-/// An ordered collection of file IDs + first `NodeId` of the files a
-/// `SemanticContext` was built from. The order is ascending `first_node_id`
-/// which allows us to efficiently determine which file a node belongs to. This
-/// is by construction of the IR trees and the use of a monotonic
-/// `NodeIdGenerator`.
+/// Maps a [`NodeId`] back to the file it belongs to.
+///
+/// Every node id carries its file's position in its high half (see [`NodeId`]),
+/// so this is a direct index into a `Vec<FileId>` keyed by that position — no
+/// search. The files a `SemanticContext` is built from occupy contiguous
+/// positions `0..n`, by construction of the IR trees.
 pub(crate) struct FileNodeMapper {
-    files: Vec<FileNodeInfo>,
+    /// File IDs indexed by the `file` half of a node id.
+    files_by_index: Vec<FileId>,
 }
 
 impl FileNodeMapper {
     pub(crate) fn build_from(files: &[impl SemanticFile]) -> Self {
-        let mut files: Vec<FileNodeInfo> = files
-            .iter()
-            .map(|file| {
-                let file_id = file.id().clone();
-                let first_node_id = file.ir_root().id();
-                FileNodeInfo {
-                    file_id,
-                    first_node_id,
-                }
-            })
+        // Place each file at the slot its own nodes name (its root's `file`
+        // half), so the result is correct regardless of the order `files` are
+        // given in.
+        let mut files_by_index: Vec<Option<FileId>> = Vec::with_capacity(files.len());
+        for file in files {
+            let index = file.ir_root().id().file() as usize;
+            if index >= files_by_index.len() {
+                files_by_index.resize(index + 1, None);
+            }
+            files_by_index[index] = Some(file.id().clone());
+        }
+
+        let files_by_index = files_by_index
+            .into_iter()
+            .map(|file_id| file_id.expect("file positions are contiguous from 0"))
             .collect();
-        files.sort_by_key(|file| file.first_node_id);
-        Self { files }
+
+        Self { files_by_index }
     }
 
     pub(crate) fn file_id_from_node_id(&self, node_id: NodeId) -> &FileId {
-        let index = match self
-            .files
-            .binary_search_by_key(&node_id, |file| file.first_node_id)
-        {
-            Ok(index) => index,
-            Err(index) => {
-                // NB. this cannot possibly underflow because there should be no
-                // valid node before the `SourceUnit` of the first file
-                index - 1
-            }
-        };
-        &self.files[index].file_id
+        &self.files_by_index[node_id.file() as usize]
     }
 }
