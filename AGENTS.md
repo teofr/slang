@@ -99,22 +99,23 @@ You can also use `nextest` directly for faster iteration on Rust tests:
 
 ## Parallelism (v2)
 
-`CompilationUnit::create()` parses source files in parallel over `rayon`'s ambient thread pool
-(the caller's installed pool, or the global one otherwise); IR building and semantic analysis are
-still sequential. **Output must not depend on the pool size**, and the load-bearing invariant is
-how node ids are handed out:
+`CompilationUnit::create()` parses source files **and** lowers them to IR in parallel over `rayon`'s
+ambient thread pool (the caller's installed pool, or the global one otherwise); only semantic
+analysis is still sequential. **Output must not depend on the pool size**, and the load-bearing
+invariant is how node ids are handed out:
 
 - **Every file has its own node-id index space.** A `NodeId` is a 64-bit `(file, index)` pair
   (`common::nodes::NodeId`): the high 32 bits are the file's position in the sorted file list, the
   low 32 bits its index within that file. Each file is lowered with its own
   `ir::NodeIdGenerator::for_file(position)`, so a file's ids depend only on its position and the
-  order it is built in — never on scheduling. This is what will let IR building parallelize; today
-  it is still a sequential loop, but the ids are already independent per file.
+  order it is built in — never on which thread lowers it, or when.
 - Because the file half _is_ the sorted position, `FileNodeMapper` maps a node back to its file by a
   direct `Vec<FileId>` index (O(1), no search), and the parse phase must still return files in
-  `FileId` order (it collects from an _indexed_ parallel iterator) so those positions line up.
+  `FileId` order (it collects from an _indexed_ parallel iterator) so those positions line up. IR
+  building likewise collects from an indexed parallel iterator to restore file order.
 - Per-file node-kind histograms are merged (`NodeKindHistogram::merge`) into one for pre-sizing the
-  binder.
+  binder. Import resolution stays sequential — the `ImportResolver` is `&mut` — running as a second
+  pass over the lowered files in `FileId` order, which also keeps its diagnostics deterministic.
 
 `slang_solidity/src/tests/thread_safety.rs` guards output-vs-pool-size, both across pool sizes and
 across concurrent builds.

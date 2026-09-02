@@ -1,4 +1,4 @@
-use rayon::iter::{IntoParallelIterator, ParallelIterator};
+use rayon::iter::{IndexedParallelIterator, IntoParallelIterator, ParallelIterator};
 use slang_solidity_v2_common::collections::{Set, SortedMap};
 use slang_solidity_v2_common::diagnostics::DiagnosticCollection;
 use slang_solidity_v2_common::diagnostics::kinds::compilation::{
@@ -34,10 +34,10 @@ impl CompilationUnit {
     /// returned unit. Parse errors, unresolvable imports, and missing imported
     /// files are all collected this way — see [`CompilationUnit::diagnostics`].
     ///
-    /// Parsing runs in parallel on [`rayon`]'s global thread pool. The result
-    /// does not depend on how large that pool is, so this is only ever a
-    /// question of speed; to bound it, call this inside
-    /// [`rayon::ThreadPool::install`] on a pool of your own.
+    /// Parsing and IR building both run in parallel on [`rayon`]'s global thread
+    /// pool; only semantic analysis is sequential. The result does not depend on
+    /// how large that pool is, so this is only ever a question of speed; to bound
+    /// it, call this inside [`rayon::ThreadPool::install`] on a pool of your own.
     // TODO(wasm): `rayon` falls back to the calling
     // thread for its *implicit* global pool — which is why this already builds
     // for `wasm32-wasip1`, but a pool built
@@ -168,11 +168,16 @@ fn parse_file(
 /// Because the full set of files is known up front, an import resolving outside
 /// of it is reported here, rather than being discovered while loading files.
 ///
+/// Lowering runs in parallel on [`rayon`]'s thread pool, like the parse phase.
 /// Each file is lowered with its own [`ir::NodeIdGenerator`], keyed by the
 /// file's position in the (sorted) input, so a file's node ids depend only on
-/// that position — not on the order or concurrency of lowering. The per-file
-/// node-kind histograms are folded into one whole-compilation histogram for
-/// pre-sizing later stages.
+/// that position — not on which thread lowers it, or when; the *indexed*
+/// `collect()` then restores input (file-id) order. Import resolution stays
+/// sequential, in a second pass over the files in order: the resolver is
+/// `&mut`, and resolving is a cheap callback next to the lowering, so this keeps
+/// its diagnostics deterministic without contending on the worker threads. The
+/// per-file node-kind histograms are folded into one whole-compilation
+/// histogram for pre-sizing later stages.
 fn build_ir<R: ImportResolver>(
     resolver: &mut R,
     parsed_files: Vec<ParsedFile<'_>>,
@@ -186,65 +191,107 @@ fn build_ir<R: ImportResolver>(
         .map(|parsed_file| parsed_file.file_id.clone())
         .collect();
 
-    let mut node_kinds = ir::NodeKindHistogram::default();
-
-    let files = parsed_files
-        .into_iter()
+    // Phase 1, parallel: lower each file into its own node-id space, keeping its
+    // unresolved imports, build diagnostics, and node-kind histogram to merge in
+    // order afterwards.
+    let lowered: Vec<LoweredFile> = parsed_files
+        .into_par_iter()
         .enumerate()
-        .map(|(file_index, parsed_file)| {
-            let ParsedFile {
-                file_id,
-                contents,
-                source_unit,
-            } = parsed_file;
-
-            let mut id_generator = ir::NodeIdGenerator::for_file(file_index);
-            let BuildOutput {
-                ir_root,
-                diagnostics: ir_diagnostics,
-            } = ir::build(
-                &file_id,
-                &source_unit,
-                &contents,
-                language_version,
-                &mut id_generator,
-            );
-            diagnostics.extend(ir_diagnostics);
-            node_kinds.merge(id_generator.histogram());
-
-            let mut file = InternalFile::new(file_id, ir_root);
-            for SourceUnitImport {
-                node_id,
-                path,
-                range,
-            } in extract_imports_from_source_unit(file.ir_root())
-            {
-                let imported_file_id = match resolver.resolve_import(file.id(), &path) {
-                    Ok(imported_file_id) => imported_file_id,
-                    Err(unresolved_import) => {
-                        diagnostics.push(file.id().clone(), range, unresolved_import);
-                        continue;
-                    }
-                };
-
-                if !known_files.contains(&imported_file_id) {
-                    diagnostics.push(
-                        file.id().clone(),
-                        range,
-                        MissingImportedFile {
-                            imported_file_id: imported_file_id.clone(),
-                        },
-                    );
-                }
-
-                // Recorded even when the file is missing: the diagnostic above
-                // is what reports the problem, and the later stages are able to
-                // see that the target is not part of the compilation.
-                file.add_resolved_import(node_id, imported_file_id);
-            }
-            file
-        })
+        .map(|(file_index, parsed_file)| lower_file(file_index, parsed_file, language_version))
         .collect();
 
+    // Phase 2, sequential: merge per-file outputs in file order, and resolve
+    // each file's imports against the full set (the `&mut` resolver rules out
+    // doing this on the worker threads).
+    let mut node_kinds = ir::NodeKindHistogram::default();
+    let mut files = Vec::with_capacity(lowered.len());
+    for LoweredFile {
+        mut file,
+        imports,
+        diagnostics: build_diagnostics,
+        node_kinds: file_node_kinds,
+    } in lowered
+    {
+        diagnostics.extend(build_diagnostics);
+        node_kinds.merge(&file_node_kinds);
+
+        for SourceUnitImport {
+            node_id,
+            path,
+            range,
+        } in imports
+        {
+            let imported_file_id = match resolver.resolve_import(file.id(), &path) {
+                Ok(imported_file_id) => imported_file_id,
+                Err(unresolved_import) => {
+                    diagnostics.push(file.id().clone(), range, unresolved_import);
+                    continue;
+                }
+            };
+
+            if !known_files.contains(&imported_file_id) {
+                diagnostics.push(
+                    file.id().clone(),
+                    range,
+                    MissingImportedFile {
+                        imported_file_id: imported_file_id.clone(),
+                    },
+                );
+            }
+
+            // Recorded even when the file is missing: the diagnostic above
+            // is what reports the problem, and the later stages are able to
+            // see that the target is not part of the compilation.
+            file.add_resolved_import(node_id, imported_file_id);
+        }
+
+        files.push(file);
+    }
+
     (files, node_kinds)
+}
+
+/// The output of lowering one file to IR, before its imports are resolved.
+struct LoweredFile {
+    file: InternalFile,
+    imports: Vec<SourceUnitImport>,
+    diagnostics: DiagnosticCollection,
+    node_kinds: ir::NodeKindHistogram,
+}
+
+/// Lowers one parsed file to IR within its own node-id space, returning its
+/// unresolved imports, diagnostics, and node-kind histogram separately so that
+/// it can run on any thread.
+fn lower_file(
+    file_index: usize,
+    parsed_file: ParsedFile<'_>,
+    language_version: LanguageVersion,
+) -> LoweredFile {
+    let ParsedFile {
+        file_id,
+        contents,
+        source_unit,
+    } = parsed_file;
+
+    let mut id_generator = ir::NodeIdGenerator::for_file(file_index);
+    let BuildOutput {
+        ir_root,
+        diagnostics,
+    } = ir::build(
+        &file_id,
+        &source_unit,
+        &contents,
+        language_version,
+        &mut id_generator,
+    );
+
+    let file = InternalFile::new(file_id, ir_root);
+    let imports = extract_imports_from_source_unit(file.ir_root());
+
+    LoweredFile {
+        file,
+        imports,
+        diagnostics,
+        node_kinds: id_generator.into_histogram(),
+    }
 }
