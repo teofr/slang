@@ -137,22 +137,23 @@ impl DependencyGraph {
 mod tests {
     use super::*;
 
+    /// Builds a `NodeId` from a small test index. The `file` half is irrelevant
+    /// to cycle detection, so these all sit in file 0.
+    fn node(index: usize) -> NodeId {
+        NodeId::new(0, u32::try_from(index).expect("test index fits in a u32"))
+    }
+
     fn graph(edges: Vec<(usize, Vec<usize>)>) -> DependencyGraph {
         DependencyGraph::new(
             edges
                 .into_iter()
-                .map(|(id, successors)| {
-                    (
-                        NodeId::from(id),
-                        successors.into_iter().map(NodeId::from).collect(),
-                    )
-                })
+                .map(|(id, successors)| (node(id), successors.into_iter().map(node).collect()))
                 .collect(),
         )
     }
 
     fn find_cycle(graph: &DependencyGraph, root: usize) -> CycleSearchResult {
-        graph.find_cycle(NodeId::from(root))
+        graph.find_cycle(node(root))
     }
 
     /// An acyclic chain `0 -> 1 -> ... -> length - 1`.
@@ -186,9 +187,7 @@ mod tests {
 
         assert_eq!(
             find_cycle(&graph, 0),
-            CycleSearchResult::Cycle {
-                via: NodeId::from(0)
-            }
+            CycleSearchResult::Cycle { via: node(0) }
         );
     }
 
@@ -198,15 +197,11 @@ mod tests {
 
         assert_eq!(
             find_cycle(&graph, 0),
-            CycleSearchResult::Cycle {
-                via: NodeId::from(1)
-            }
+            CycleSearchResult::Cycle { via: node(1) }
         );
         assert_eq!(
             find_cycle(&graph, 1),
-            CycleSearchResult::Cycle {
-                via: NodeId::from(0)
-            }
+            CycleSearchResult::Cycle { via: node(0) }
         );
     }
 
@@ -217,9 +212,7 @@ mod tests {
 
         assert_eq!(
             find_cycle(&graph, 0),
-            CycleSearchResult::Cycle {
-                via: NodeId::from(1)
-            }
+            CycleSearchResult::Cycle { via: node(1) }
         );
     }
 
@@ -230,9 +223,7 @@ mod tests {
 
         assert_eq!(
             find_cycle(&graph, 0),
-            CycleSearchResult::Cycle {
-                via: NodeId::from(2)
-            }
+            CycleSearchResult::Cycle { via: node(2) }
         );
     }
 
@@ -251,9 +242,7 @@ mod tests {
 
         assert_eq!(
             find_cycle(&graph, 0),
-            CycleSearchResult::Cycle {
-                via: NodeId::from(2)
-            }
+            CycleSearchResult::Cycle { via: node(2) }
         );
     }
 
@@ -264,7 +253,7 @@ mod tests {
         assert_eq!(
             find_cycle(&graph, 0),
             CycleSearchResult::DepthExceeded {
-                node: NodeId::from(DependencyGraph::MAX_DEPTH - 1)
+                node: node(DependencyGraph::MAX_DEPTH - 1)
             }
         );
     }
@@ -276,7 +265,7 @@ mod tests {
         assert_eq!(
             find_cycle(&graph, 0),
             CycleSearchResult::DepthExceeded {
-                node: NodeId::from(DependencyGraph::MAX_DEPTH - 1)
+                node: node(DependencyGraph::MAX_DEPTH - 1)
             }
         );
     }
@@ -311,9 +300,9 @@ mod tests {
         assert_eq!(
             graph.find_all_cycles().collect::<Vec<_>>(),
             vec![(
-                NodeId::from(0),
+                node(0),
                 CycleSearchResult::DepthExceeded {
-                    node: NodeId::from(DependencyGraph::MAX_DEPTH)
+                    node: node(DependencyGraph::MAX_DEPTH)
                 }
             )]
         );
@@ -331,23 +320,13 @@ mod tests {
             graph.find_all_cycles().collect::<Vec<_>>(),
             vec![
                 (
-                    NodeId::from(0),
+                    node(0),
                     CycleSearchResult::DepthExceeded {
-                        node: NodeId::from(DependencyGraph::MAX_DEPTH)
+                        node: node(DependencyGraph::MAX_DEPTH)
                     }
                 ),
-                (
-                    NodeId::from(first),
-                    CycleSearchResult::Cycle {
-                        via: NodeId::from(second)
-                    }
-                ),
-                (
-                    NodeId::from(second),
-                    CycleSearchResult::Cycle {
-                        via: NodeId::from(first)
-                    }
-                ),
+                (node(first), CycleSearchResult::Cycle { via: node(second) }),
+                (node(second), CycleSearchResult::Cycle { via: node(first) }),
             ]
         );
     }

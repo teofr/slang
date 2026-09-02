@@ -101,12 +101,23 @@ You can also use `nextest` directly for faster iteration on Rust tests:
 
 `CompilationUnit::create()` parses source files in parallel over `rayon`'s ambient thread pool
 (the caller's installed pool, or the global one otherwise); IR building and semantic analysis are
-still sequential. `Concurrency::Inline` in the `Configuration` pins the whole compilation to the
-calling thread instead. One invariant holds it together: **output must not depend on the
-concurrency choice.** Files are lowered to IR in `FileId` order, and that is what makes node ids
-stable — so the parse phase has to hand them back in that order, which is why it collects from an
-_indexed_ parallel iterator. `slang_solidity/src/tests/thread_safety.rs` guards this, both across
-pool sizes and across concurrent builds.
+still sequential. **Output must not depend on the pool size**, and the load-bearing invariant is
+how node ids are handed out:
+
+- **Every file has its own node-id index space.** A `NodeId` is a 64-bit `(file, index)` pair
+  (`common::nodes::NodeId`): the high 32 bits are the file's position in the sorted file list, the
+  low 32 bits its index within that file. Each file is lowered with its own
+  `ir::NodeIdGenerator::for_file(position)`, so a file's ids depend only on its position and the
+  order it is built in — never on scheduling. This is what will let IR building parallelize; today
+  it is still a sequential loop, but the ids are already independent per file.
+- Because the file half _is_ the sorted position, `FileNodeMapper` maps a node back to its file by a
+  direct `Vec<FileId>` index (O(1), no search), and the parse phase must still return files in
+  `FileId` order (it collects from an _indexed_ parallel iterator) so those positions line up.
+- Per-file node-kind histograms are merged (`NodeKindHistogram::merge`) into one for pre-sizing the
+  binder.
+
+`slang_solidity/src/tests/thread_safety.rs` guards output-vs-pool-size, both across pool sizes and
+across concurrent builds.
 
 ## Code Generation
 
