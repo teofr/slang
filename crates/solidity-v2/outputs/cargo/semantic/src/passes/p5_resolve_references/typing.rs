@@ -704,25 +704,47 @@ impl Pass<'_> {
         &mut self,
         resolution: &Resolution,
     ) -> Typing {
+        match resolution {
+            Resolution::Definition(definition_id) => {
+                self.typing_of_definition_as_contract_member(*definition_id)
+            }
+            // Each overload is accessed externally too, so the call that
+            // selects one sees the candidates as they are reached here.
+            Resolution::Ambiguous(definition_ids) => {
+                let mut type_ids = Vec::new();
+                for definition_id in definition_ids {
+                    if let Typing::Resolved(type_id) =
+                        self.typing_of_definition_as_contract_member(*definition_id)
+                    {
+                        type_ids.push(type_id);
+                    }
+                }
+                Typing::Undetermined(type_ids)
+            }
+            Resolution::Unresolved | Resolution::BuiltIn(_) => {
+                let typing = self.typing_of_resolution(resolution);
+                self.externalize_member_typing(typing)
+            }
+        }
+    }
+
+    fn typing_of_definition_as_contract_member(&mut self, definition_id: NodeId) -> Typing {
         // Check if the target is a state variable with a getter or a function
         // with an externalized type; the member is accessed through that type.
-        if let Resolution::Definition(definition_id) = resolution
-            && let Some(member_type_id) =
-                match self.binder.find_definition_by_id(*definition_id).unwrap() {
-                    Definition::StateVariable(state_var_definition) => {
-                        state_var_definition.getter_type_id
-                    }
-                    Definition::Function(function_definition) => {
-                        function_definition.externalized_type_id
-                    }
-                    _ => None,
-                }
+        if let Some(member_type_id) = match self.binder.find_definition_by_id(definition_id).unwrap()
         {
+            Definition::StateVariable(state_var_definition) => state_var_definition.getter_type_id,
+            Definition::Function(function_definition) => function_definition.externalized_type_id,
+            _ => None,
+        } {
             return Typing::Resolved(member_type_id);
         }
 
-        let mut typing = self.typing_of_resolution(resolution);
+        let typing = self.binder.node_typing(definition_id).clone();
+        self.externalize_member_typing(typing)
+    }
 
+    fn externalize_member_typing(&mut self, typing: Typing) -> Typing {
         // If the resolved type is a function and the operand is either
         // `this` or something of an address type, the function is being
         // used as an external function: change the expression typing to
@@ -731,7 +753,7 @@ impl Pass<'_> {
             && let Type::Function(function_type) = self.types.get_type_by_id(type_id)
             && function_type.is_externally_visible()
         {
-            typing = Typing::Resolved(self.types.externalize_function_type(type_id));
+            return Typing::Resolved(self.types.externalize_function_type(type_id));
         }
 
         typing
