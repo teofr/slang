@@ -109,7 +109,7 @@ impl FunctionDefinitionStruct {
     }
 
     pub fn compute_selector(&self) -> Option<u32> {
-        if !self.is_externally_visible() {
+        if !self.ir_node.is_part_of_external_interface() {
             return None;
         }
         self.compute_selector_signature()

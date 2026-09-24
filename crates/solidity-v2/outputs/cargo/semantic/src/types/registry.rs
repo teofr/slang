@@ -23,8 +23,9 @@ pub struct TypeRegistry {
     // between contract/interface types. The `NodeId`s correspond to the
     // `definition_id` in the respective `Type` variants.
     super_types: Map<NodeId, Vec<NodeId>>,
-    // Each function type `externalize_function_type` was given, mapped to its
-    // answer, identity included.
+    // Every externally visible function type registered, mapped to its
+    // externalized form (itself, when it already has that shape). Filled in
+    // by `register_type`, so the lookup never depends on who asked first.
     externalized_function_types: Map<TypeId, TypeId>,
     // Some implicit conversion rules are version dependant. The version is
     // threaded in here so we can gate those rules on it.
@@ -123,8 +124,15 @@ impl TypeRegistry {
     }
 
     pub(crate) fn register_type(&mut self, type_: Type) -> TypeId {
-        let (index, _) = self.types.insert_full(type_);
-        TypeId(index)
+        let (index, inserted) = self.types.insert_full(type_);
+        let type_id = TypeId(index);
+        if inserted
+            && let Type::Function(function_type) = self.get_type_by_id(type_id)
+            && function_type.is_externally_visible()
+        {
+            self.externalize_function_type(type_id);
+        }
+        type_id
     }
 
     pub(crate) fn register_super_types(&mut self, type_id: TypeId, super_types: &[TypeId]) {
@@ -500,7 +508,7 @@ impl TypeRegistry {
     // results normalized for that (ie. `calldata` location is changed to `memory`),
     // returning the interned result's id, which is the input itself when the
     // type already has that shape.
-    pub(crate) fn externalize_function_type(&mut self, type_id: TypeId) -> TypeId {
+    fn externalize_function_type(&mut self, type_id: TypeId) -> TypeId {
         let Type::Function(function_type) = self.get_type_by_id(type_id) else {
             unreachable!("can only externalize a function type");
         };
@@ -531,8 +539,10 @@ impl TypeRegistry {
         externalized_type_id
     }
 
-    /// The externalized form of the function type `type_id`, if analysis asked
-    /// for it. `None` means it was never externalized, not that it has no such form.
+    /// The externalized form of the function type `type_id`: external
+    /// visibility, with `calldata` locations changed to `memory`. `Some` for
+    /// every externally visible (`public` or `external`) function type, `None`
+    /// for any other type.
     pub fn externalized_function_type_id(&self, type_id: TypeId) -> Option<TypeId> {
         self.externalized_function_types.get(&type_id).copied()
     }

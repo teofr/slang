@@ -3,6 +3,7 @@ use slang_solidity_v2_semantic::built_ins::InternalBuiltIn;
 use slang_solidity_v2_semantic::{binder, types};
 
 use super::super::{FunctionCallExpressionStruct, Type};
+use super::function_definition::externalized_type_id_of_definition;
 
 impl FunctionCallExpressionStruct {
     /// Returns `true` if this call is a type conversion (e.g. `uint256(x)`,
@@ -35,7 +36,8 @@ impl FunctionCallExpressionStruct {
             .node_typing(arguments.first()?.node_id()?)
             .as_type_id()?;
         let type_id = match semantic.types().get_type_by_id(callee_type_id) {
-            // A `Public` function value was named without a receiver, so it is internal.
+            // Only an external function value is encoded against: an internal
+            // reference is not, nor is a library member (called by `delegatecall`).
             types::Type::Function(function_type)
                 if function_type.visibility == types::FunctionTypeVisibility::External =>
             {
@@ -43,14 +45,9 @@ impl FunctionCallExpressionStruct {
                     .types()
                     .externalized_function_type_id(callee_type_id)
             }
-            // A declaration reached through a type name carries its externalized type.
+            // A declaration reached through a type name.
             types::Type::UserMetaType(types::UserMetaType { definition_id }) => {
-                match semantic.binder().find_definition_by_id(*definition_id) {
-                    Some(binder::Definition::Function(definition)) => {
-                        definition.externalized_type_id
-                    }
-                    _ => None,
-                }
+                externalized_type_id_of_definition(semantic, *definition_id)
             }
             _ => None,
         }?;

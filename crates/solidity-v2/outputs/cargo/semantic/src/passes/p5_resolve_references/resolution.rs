@@ -197,9 +197,7 @@ impl Pass<'_> {
         else {
             return false;
         };
-        if !function_definition.ir_node.is_externally_visible()
-            || !matches!(function_definition.ir_node.kind, ir::FunctionKind::Regular)
-        {
+        if !function_definition.ir_node.is_part_of_external_interface() {
             return false;
         }
         let Some(declaring_contract_id) = self.binder.enclosing_definition_node_id(*definition_id)
