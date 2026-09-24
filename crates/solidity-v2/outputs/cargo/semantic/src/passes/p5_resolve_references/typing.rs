@@ -808,6 +808,16 @@ impl Pass<'_> {
             .is_some_and(|bases| bases.contains(&contract_id))
     }
 
+    /// Whether `contract_id` is accessed from a contract deriving from it: the
+    /// part of solc's "Local" access that is not the contract itself.
+    pub(crate) fn is_deriving_contract_access(&self, contract_id: NodeId) -> bool {
+        let Some(scope_id) = self.current_contract_scope_id() else {
+            return false;
+        };
+        self.binder.get_scope_by_id(scope_id).node_id() != contract_id
+            && !self.is_foreign_contract(contract_id)
+    }
+
     /// Returns the typing of the *receiver* of a call — the operand of the
     /// member access being called (eg. for `a.f(...)`, the typing of `a`).
     /// Returns `None` when the call target is not a member access.

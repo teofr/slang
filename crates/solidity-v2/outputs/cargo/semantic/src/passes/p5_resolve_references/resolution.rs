@@ -179,7 +179,9 @@ impl Pass<'_> {
 
     /// solc gives an internal reference to a function that is part of the
     /// external interface a `selector`, but only when reached from a contract
-    /// other than the one declaring it (ie. a deriving one).
+    /// deriving from the one declaring it. An internal reference is always a
+    /// local access: a foreign contract's function types as its declaration
+    /// instead, whose `selector` is a regular built-in member.
     fn has_internal_reference_selector(&self, type_id: TypeId, symbol: &str) -> bool {
         if symbol != "selector" {
             return false;
@@ -204,9 +206,7 @@ impl Pass<'_> {
         else {
             return false;
         };
-        self.current_contract_scope_id().is_some_and(|scope_id| {
-            self.binder.get_scope_by_id(scope_id).node_id() != declaring_contract_id
-        })
+        self.is_deriving_contract_access(declaring_contract_id)
     }
 
     fn add_attached_functions_for_type(
