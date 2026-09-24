@@ -147,7 +147,7 @@ impl Pass<'_> {
                 } else {
                     self.types.void()
                 };
-                Some(self.types.register_type(Type::Function(FunctionType {
+                Some(self.types.register_function_type(FunctionType {
                     definition_id: None,
                     implicit_receiver_type: None,
                     parameter_types,
@@ -155,7 +155,7 @@ impl Pass<'_> {
                     visibility: (&function_type.attributes.visibility).into(),
                     mutability: (&function_type.attributes.mutability).into(),
                     partially_applied: false,
-                })))
+                }))
             }
             ir::TypeName::MappingType(mapping_type) => {
                 let key_type_id = self.resolve_type_name(

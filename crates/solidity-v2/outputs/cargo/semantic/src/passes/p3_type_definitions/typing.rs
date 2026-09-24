@@ -152,7 +152,7 @@ impl Pass<'_> {
         } else {
             self.types.void()
         };
-        Some(self.types.register_type(Type::Function(FunctionType {
+        Some(self.types.register_function_type(FunctionType {
             definition_id: Some(function_definition.id()),
             implicit_receiver_type,
             parameter_types,
@@ -160,7 +160,7 @@ impl Pass<'_> {
             visibility: (&function_definition.attributes.visibility).into(),
             mutability: (&function_definition.attributes.mutability).into(),
             partially_applied: false,
-        })))
+        }))
     }
 
     /// Computes the type of the getter generated for a public state variable,
@@ -281,7 +281,7 @@ impl Pass<'_> {
             }
         }
 
-        let getter_type = Type::Function(FunctionType {
+        let getter_type_id = self.types.register_function_type(FunctionType {
             definition_id: Some(definition_id),
             implicit_receiver_type: receiver_type_id,
             parameter_types,
@@ -290,7 +290,7 @@ impl Pass<'_> {
             mutability: FunctionTypeMutability::View,
             partially_applied: false,
         });
-        Some((self.types.register_type(getter_type), returned_member_ids))
+        Some((getter_type_id, returned_member_ids))
     }
 
     pub(super) fn visit_parameters(&mut self, parameters: &ir::Parameters) {

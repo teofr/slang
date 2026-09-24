@@ -23,9 +23,9 @@ pub struct TypeRegistry {
     // between contract/interface types. The `NodeId`s correspond to the
     // `definition_id` in the respective `Type` variants.
     super_types: Map<NodeId, Vec<NodeId>>,
-    // Every externally visible function type registered, mapped to its
-    // externalized form (itself, when it already has that shape). Filled in
-    // by `register_type`, so the lookup never depends on who asked first.
+    // Every externally visible function type registered through
+    // `register_function_type`, and each externalized form, mapped to its
+    // externalized form (itself, when it already has that shape).
     externalized_function_types: Map<TypeId, TypeId>,
     // Some implicit conversion rules are version dependant. The version is
     // threaded in here so we can gate those rules on it.
@@ -124,12 +124,20 @@ impl TypeRegistry {
     }
 
     pub(crate) fn register_type(&mut self, type_: Type) -> TypeId {
-        let (index, inserted) = self.types.insert_full(type_);
-        let type_id = TypeId(index);
-        if inserted
-            && let Type::Function(function_type) = self.get_type_by_id(type_id)
-            && function_type.is_externally_visible()
-        {
+        let (index, _) = self.types.insert_full(type_);
+        TypeId(index)
+    }
+
+    /// Registers a function type as declared (by a function definition, a
+    /// function type name, or a getter), together with its externalized form
+    /// when it is externally visible, so that
+    /// [`Self::externalized_function_type_id`] can look it up. Function types
+    /// derived from these (internal references, partial applications) are
+    /// registered with [`Self::register_type`] instead.
+    pub(crate) fn register_function_type(&mut self, function_type: FunctionType) -> TypeId {
+        let is_externally_visible = function_type.is_externally_visible();
+        let type_id = self.register_type(Type::Function(function_type));
+        if is_externally_visible {
             self.externalize_function_type(type_id);
         }
         type_id
@@ -536,15 +544,29 @@ impl TypeRegistry {
         let externalized_type_id = self.register_type(Type::Function(externalized_function_type));
         self.externalized_function_types
             .insert(type_id, externalized_type_id);
+        // A value of the externalized type (eg. `this.f`) is external already.
+        self.externalized_function_types
+            .insert(externalized_type_id, externalized_type_id);
         externalized_type_id
     }
 
     /// The externalized form of the function type `type_id`: external
     /// visibility, with `calldata` locations changed to `memory`. `Some` for
-    /// every externally visible (`public` or `external`) function type, `None`
-    /// for any other type.
+    /// every externally visible (`public` or `external`) function type that is
+    /// declared or externalized, `None` for any other type (including a
+    /// partially applied one).
     pub fn externalized_function_type_id(&self, type_id: TypeId) -> Option<TypeId> {
-        self.externalized_function_types.get(&type_id).copied()
+        let externalized_type_id = self.externalized_function_types.get(&type_id).copied();
+        debug_assert!(
+            externalized_type_id.is_some()
+                || !matches!(
+                    self.get_type_by_id(type_id),
+                    Type::Function(function_type)
+                        if function_type.is_externally_visible() && !function_type.partially_applied
+                ),
+            "an externally visible function type was not registered with `register_function_type`"
+        );
+        externalized_type_id
     }
 
     // A public function named without an external receiver (bare, through
