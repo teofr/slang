@@ -1265,3 +1265,33 @@ contract C {
         "no overload of `f` takes a `bytes memory` internally"
     );
 }
+
+/// A public library function reached through the library's name is called by
+/// `delegatecall`, so solc does not let it convert to an internal function.
+#[test]
+fn test_public_library_member_does_not_convert_to_internal() {
+    let unit = support::compile([(
+        "main.sol".into(),
+        r#"
+// SPDX-License-Identifier: UNLICENSED
+pragma solidity ^0.8.0;
+
+library L {
+    function lib(uint256 x) public pure returns (uint256) {
+        return x;
+    }
+}
+
+contract C {
+    function g() external pure returns (uint256) {
+        function(uint256) internal pure returns (uint256) p = L.lib;
+        return p(1);
+    }
+}
+"#,
+    )]);
+    assert!(
+        !unit.diagnostics().is_empty(),
+        "`L.lib` is not an internal function"
+    );
+}
