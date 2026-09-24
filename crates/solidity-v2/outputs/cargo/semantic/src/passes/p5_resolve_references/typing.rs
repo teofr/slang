@@ -704,37 +704,94 @@ impl Pass<'_> {
         &mut self,
         resolution: &Resolution,
     ) -> Typing {
-        // Check if the target is a state variable with a getter or a function
-        // with an externalized type; the member is accessed through that type.
-        if let Resolution::Definition(definition_id) = resolution
-            && let Some(member_type_id) =
-                match self.binder.find_definition_by_id(*definition_id).unwrap() {
-                    Definition::StateVariable(state_var_definition) => {
-                        state_var_definition.getter_type_id
+        match resolution {
+            Resolution::Definition(definition_id) => {
+                self.typing_of_definition_as_contract_member(*definition_id)
+            }
+            // Each overload is accessed externally too, so the call that
+            // selects one sees the candidates as they are reached here.
+            Resolution::Ambiguous(definition_ids) => {
+                let mut type_ids = Vec::new();
+                for definition_id in definition_ids {
+                    if let Typing::Resolved(type_id) =
+                        self.typing_of_definition_as_contract_member(*definition_id)
+                    {
+                        type_ids.push(type_id);
                     }
-                    Definition::Function(function_definition) => {
-                        function_definition.externalized_type_id
-                    }
-                    _ => None,
                 }
+                Typing::Undetermined(type_ids)
+            }
+            Resolution::Unresolved | Resolution::BuiltIn(_) => {
+                let typing = self.typing_of_resolution(resolution);
+                self.externalize_member_typing(typing)
+            }
+        }
+    }
+
+    fn typing_of_definition_as_contract_member(&mut self, definition_id: NodeId) -> Typing {
+        // A state variable with a getter is accessed through the getter's type.
+        if let Some(Definition::StateVariable(state_var_definition)) =
+            self.binder.find_definition_by_id(definition_id)
+            && let Some(getter_type_id) = state_var_definition.getter_type_id
         {
-            return Typing::Resolved(member_type_id);
+            return Typing::Resolved(getter_type_id);
         }
 
-        let mut typing = self.typing_of_resolution(resolution);
+        let typing = self.binder.node_typing(definition_id).clone();
+        self.externalize_member_typing(typing)
+    }
 
+    fn externalize_member_typing(&mut self, typing: Typing) -> Typing {
         // If the resolved type is a function and the operand is either
         // `this` or something of an address type, the function is being
         // used as an external function: change the expression typing to
         // indicate the external access.
-        if let Some(type_id) = typing.as_type_id()
-            && let Type::Function(function_type) = self.types.get_type_by_id(type_id)
-            && function_type.is_externally_visible()
+        if let Some(externalized_type_id) = typing
+            .as_type_id()
+            .and_then(|type_id| self.types.externalized_function_type_id(type_id))
         {
-            typing = Typing::Resolved(self.types.externalize_function_type(type_id));
+            return Typing::Resolved(externalized_type_id);
         }
 
         typing
+    }
+
+    /// Types an internal reference to a function: see
+    /// `TypeRegistry::internalize_function_type`.
+    pub(super) fn internalize_typing(&mut self, typing: Typing) -> Typing {
+        match typing {
+            Typing::Resolved(type_id) => {
+                Typing::Resolved(self.types.internalize_function_type(type_id))
+            }
+            Typing::Undetermined(type_ids) => Typing::Undetermined(
+                type_ids
+                    .into_iter()
+                    .map(|type_id| self.types.internalize_function_type(type_id))
+                    .collect(),
+            ),
+            Typing::Unresolved
+            | Typing::This(_)
+            | Typing::Super
+            | Typing::BuiltIn(_)
+            | Typing::NewExpression(_) => typing,
+        }
+    }
+
+    /// Whether a member of `operand_typing` is reached internally: through
+    /// `super`, or through the name of a contract (a library member is not,
+    /// nor is a foreign contract's, which types as its declaration instead).
+    pub(super) fn is_internal_member_access(&self, operand_typing: &Typing) -> bool {
+        match operand_typing {
+            Typing::Super => true,
+            Typing::Resolved(type_id) => match self.types.get_type_by_id(*type_id) {
+                Type::UserMetaType(UserMetaType { definition_id }) => matches!(
+                    self.binder.find_definition_by_id(*definition_id),
+                    Some(Definition::Contract(_))
+                ),
+                _ => false,
+            },
+            _ => false,
+        }
     }
 
     /// Whether `contract_id` is accessed from a scope that neither is it nor
@@ -749,6 +806,16 @@ impl Pass<'_> {
             .binder
             .get_linearised_bases(current_contract_id)
             .is_some_and(|bases| bases.contains(&contract_id))
+    }
+
+    /// Whether `contract_id` is accessed from a contract deriving from it: the
+    /// part of solc's "Local" access that is not the contract itself.
+    pub(crate) fn is_deriving_contract_access(&self, contract_id: NodeId) -> bool {
+        let Some(scope_id) = self.current_contract_scope_id() else {
+            return false;
+        };
+        self.binder.get_scope_by_id(scope_id).node_id() != contract_id
+            && !self.is_foreign_contract(contract_id)
     }
 
     /// Returns the typing of the *receiver* of a call — the operand of the

@@ -959,7 +959,8 @@ fn test_encode_call_function_value_callee_type() {
 }
 
 /// Compiled directly rather than through the fixture macro, which asserts the
-/// unit has no diagnostics; rejecting this callee is a diagnostic of its own.
+/// unit has no diagnostics: solc rejects this callee (slang does not report it
+/// yet, see `test_encode_call_rejects_internal_reference_callee`).
 #[test]
 fn test_encode_call_internal_reference_callee_has_no_type() {
     let unit = support::compile([(
@@ -987,5 +988,521 @@ contract C {
     assert!(
         callee.is_none(),
         "a bare `publicFn` callee is an internal reference, with no type to encode against"
+    );
+}
+
+/// Captures the type of every `this.<member>` access, in source order.
+#[derive(Default)]
+struct ThisMemberTypes {
+    types: Vec<Option<ast::Type>>,
+}
+
+impl Visitor for ThisMemberTypes {
+    fn enter_member_access_expression(&mut self, node: &ast::MemberAccessExpression) -> bool {
+        if matches!(node.operand(), ast::Expression::ThisKeyword(_)) {
+            self.types.push(node.get_type());
+        }
+        true
+    }
+}
+
+/// Accessing a public function through `this` externalizes it (`External`,
+/// `calldata` → `memory`), whether or not its name is overloaded.
+#[test]
+fn test_this_member_is_externalized_when_overloaded() {
+    let unit = support::compile([(
+        "main.sol".into(),
+        r#"
+// SPDX-License-Identifier: UNLICENSED
+pragma solidity ^0.8.0;
+
+contract C {
+    function single(bytes calldata data) public pure returns (uint256) {
+        return data.length;
+    }
+
+    function overloaded(bytes calldata data) public pure returns (uint256) {
+        return data.length;
+    }
+
+    function overloaded(uint256 value) public pure returns (uint256) {
+        return value;
+    }
+
+    function callSingle(bytes calldata data) external view returns (uint256) {
+        return this.single(data);
+    }
+
+    function callOverloaded(bytes calldata data) external view returns (uint256) {
+        return this.overloaded(data);
+    }
+}
+"#,
+    )]);
+
+    let mut finder = ThisMemberTypes::default();
+    for file in unit.files() {
+        accept_source_unit(&file.ast(), &mut finder);
+    }
+    let [single, overloaded]: [Option<ast::Type>; 2] = finder
+        .types
+        .try_into()
+        .unwrap_or_else(|types: Vec<_>| panic!("two `this.` accesses, found {}", types.len()));
+    assert_external_taking_bytes_in_memory("this.single", single);
+    assert_external_taking_bytes_in_memory("this.overloaded", overloaded);
+}
+
+/// Captures the type of every identifier and member access expression, keyed
+/// by its source shape (`f`, `super.f`, `Base.f`, ...).
+#[derive(Default)]
+struct ReferenceTypes {
+    types: Vec<(String, Option<ast::Type>)>,
+}
+
+impl ReferenceTypes {
+    fn label(expression: &ast::Expression) -> String {
+        match expression {
+            ast::Expression::Identifier(identifier) => identifier.unparse().to_owned(),
+            ast::Expression::SuperKeyword(_) => "super".to_owned(),
+            ast::Expression::ThisKeyword(_) => "this".to_owned(),
+            ast::Expression::MemberAccessExpression(member_access) => format!(
+                "{}.{}",
+                Self::label(&member_access.operand()),
+                member_access.member().unparse()
+            ),
+            _ => "?".to_owned(),
+        }
+    }
+
+    fn of(unit: &CompilationUnit) -> Self {
+        let mut finder = Self::default();
+        for file in unit.files() {
+            accept_source_unit(&file.ast(), &mut finder);
+        }
+        finder
+    }
+
+    fn function_visibility(&self, label: &str) -> ast::FunctionTypeVisibility {
+        let Some((_, Some(ast::Type::Function(function)))) =
+            self.types.iter().find(|(found, _)| found == label)
+        else {
+            panic!("`{label}` should be typed as a function");
+        };
+        function.visibility()
+    }
+}
+
+impl Visitor for ReferenceTypes {
+    fn enter_expression(&mut self, node: &ast::Expression) -> bool {
+        match node {
+            ast::Expression::Identifier(identifier) => {
+                self.types.push((Self::label(node), identifier.get_type()));
+            }
+            ast::Expression::MemberAccessExpression(member_access) => {
+                self.types
+                    .push((Self::label(node), member_access.get_type()));
+            }
+            _ => {}
+        }
+        true
+    }
+}
+
+/// A public function named without an external receiver is an internal
+/// reference, as in solc: bare, through `super`, or through a base contract's
+/// name. A public library function reached through the library's name is not:
+/// it is called by `delegatecall`.
+#[test]
+fn test_internal_references_to_public_functions_are_internal() {
+    let unit = support::compile([(
+        "main.sol".into(),
+        r#"
+// SPDX-License-Identifier: UNLICENSED
+pragma solidity ^0.8.0;
+
+library L {
+    function lib(uint256 x) public pure returns (uint256) {
+        return x;
+    }
+}
+
+contract Base {
+    function f(bytes calldata data) public pure virtual returns (uint256) {
+        return data.length;
+    }
+}
+
+contract C is Base {
+    function f(bytes calldata data) public pure override returns (uint256) {
+        return data.length + 1;
+    }
+
+    function g(bytes calldata data) external pure returns (uint256, uint256, uint256, uint256) {
+        function(bytes calldata) internal pure returns (uint256) p = f;
+        return (p(data), super.f(data), Base.f(data), L.lib(1));
+    }
+}
+"#,
+    )]);
+    assert!(unit.diagnostics().is_empty(), "{:#?}", unit.diagnostics());
+
+    let references = ReferenceTypes::of(&unit);
+    for label in ["f", "super.f", "Base.f"] {
+        assert_eq!(
+            references.function_visibility(label),
+            ast::FunctionTypeVisibility::Internal,
+            "`{label}` is an internal reference"
+        );
+    }
+    assert_ne!(
+        references.function_visibility("L.lib"),
+        ast::FunctionTypeVisibility::Internal,
+        "`L.lib` is called by `delegatecall`"
+    );
+}
+
+/// solc gives an internal reference to a public function a `selector` only
+/// when it is reached from a contract other than the one declaring it.
+#[test]
+fn test_internal_reference_selector_needs_a_deriving_scope() {
+    let inherited = support::compile([(
+        "main.sol".into(),
+        r#"
+// SPDX-License-Identifier: UNLICENSED
+pragma solidity ^0.8.0;
+
+contract Base {
+    function f() public {}
+}
+
+contract C is Base {
+    function selectors() external pure returns (bytes4, bytes4) {
+        return (f.selector, Base.f.selector);
+    }
+}
+"#,
+    )]);
+    assert!(
+        inherited.diagnostics().is_empty(),
+        "{:#?}",
+        inherited.diagnostics()
+    );
+
+    // Inside the declaring contract, whether named bare or through its own
+    // name, and for an internal library function (not part of the external
+    // interface), there is no `selector`: solc's `484_function_types_selector_1`
+    // and `library_function_selector_internal` syntax tests.
+    for (shape, source) in [
+        (
+            "f.selector",
+            r#"
+contract C {
+    function f() public {}
+
+    function selector() external pure returns (bytes4) {
+        return f.selector;
+    }
+}
+"#,
+        ),
+        (
+            "C.f.selector",
+            r#"
+contract C {
+    function f() public {}
+
+    function selector() external pure returns (bytes4) {
+        return C.f.selector;
+    }
+}
+"#,
+        ),
+        (
+            "L.f.selector",
+            r#"
+library L {
+    function f(uint256) internal {}
+}
+
+contract C {
+    function selector() external pure returns (bytes4) {
+        return L.f.selector;
+    }
+}
+"#,
+        ),
+    ] {
+        let source =
+            format!("// SPDX-License-Identifier: UNLICENSED\npragma solidity ^0.8.0;\n{source}");
+        let unit = support::compile([("main.sol".into(), source.as_str())]);
+        assert!(
+            !unit.diagnostics().is_empty(),
+            "`{shape}` has no `selector` member"
+        );
+    }
+}
+
+/// solc never gives an internal reference an `address`.
+#[test]
+fn test_internal_reference_has_no_address() {
+    let unit = support::compile([(
+        "main.sol".into(),
+        r#"
+// SPDX-License-Identifier: UNLICENSED
+pragma solidity ^0.8.0;
+
+contract Base {
+    function f() public {}
+}
+
+contract C is Base {
+    function target() external view returns (address) {
+        return f.address;
+    }
+}
+"#,
+    )]);
+    assert!(
+        !unit.diagnostics().is_empty(),
+        "an internal reference to `f` has no `address` member"
+    );
+}
+
+/// An internal call passes arguments without crossing the ABI boundary, so a
+/// `memory` argument cannot select a `calldata` parameter.
+#[test]
+fn test_internal_call_does_not_match_calldata_with_memory() {
+    let unit = support::compile([(
+        "main.sol".into(),
+        r#"
+// SPDX-License-Identifier: UNLICENSED
+pragma solidity ^0.8.0;
+
+contract C {
+    function f(bytes calldata data) public pure returns (uint256) {
+        return data.length;
+    }
+
+    function f(uint256 value) public pure returns (uint256) {
+        return value;
+    }
+
+    function g() public pure returns (uint256) {
+        bytes memory data = new bytes(1);
+        return f(data);
+    }
+}
+"#,
+    )]);
+    assert!(
+        !unit.diagnostics().is_empty(),
+        "no overload of `f` takes a `bytes memory` internally"
+    );
+}
+
+/// A public library function reached through the library's name is called by
+/// `delegatecall`, so solc does not let it convert to an internal function.
+///
+/// Expected to fail: `L.lib` keeps its declared `Public` type, which converts
+/// to `Internal`. Remove the `should_panic` once library members are typed as
+/// `delegatecall`s.
+#[test]
+#[should_panic(expected = "`L.lib` is not an internal function")]
+fn test_public_library_member_does_not_convert_to_internal() {
+    let unit = support::compile([(
+        "main.sol".into(),
+        r#"
+// SPDX-License-Identifier: UNLICENSED
+pragma solidity ^0.8.0;
+
+library L {
+    function lib(uint256 x) public pure returns (uint256) {
+        return x;
+    }
+}
+
+contract C {
+    function g() external pure returns (uint256) {
+        function(uint256) internal pure returns (uint256) p = L.lib;
+        return p(1);
+    }
+}
+"#,
+    )]);
+    assert!(
+        !unit.diagnostics().is_empty(),
+        "`L.lib` is not an internal function"
+    );
+}
+
+/// Only the overloads that type can be candidates, so an overloaded
+/// `this.<member>` can be left with a single one (here `Missing` does not
+/// resolve). A call still selects it, externalized, while naming the member
+/// without calling it stays ambiguous, as in solc ("not unique").
+#[test]
+fn test_this_member_with_one_typed_overload() {
+    let call = support::compile([(
+        "main.sol".into(),
+        r#"
+// SPDX-License-Identifier: UNLICENSED
+pragma solidity ^0.8.0;
+
+contract C {
+    function f(bytes calldata data) public pure returns (uint256) {
+        return data.length;
+    }
+
+    function f(Missing value) public pure returns (uint256) {
+        return 0;
+    }
+
+    function g(bytes calldata data) external view returns (uint256) {
+        return this.f(data);
+    }
+}
+"#,
+    )]);
+    let mut finder = ThisMemberTypes::default();
+    for file in call.files() {
+        accept_source_unit(&file.ast(), &mut finder);
+    }
+    let [member]: [Option<ast::Type>; 1] = finder
+        .types
+        .try_into()
+        .unwrap_or_else(|types: Vec<_>| panic!("one `this.` access, found {}", types.len()));
+    assert_external_taking_bytes_in_memory("this.f", member);
+
+    let selector = support::compile([(
+        "main.sol".into(),
+        r#"
+// SPDX-License-Identifier: UNLICENSED
+pragma solidity ^0.8.0;
+
+contract C {
+    function f(uint256 value) public {}
+
+    function f(Missing value) public {}
+
+    function g() external view returns (bytes4) {
+        return this.f.selector;
+    }
+}
+"#,
+    )]);
+    assert!(
+        !selector.diagnostics().is_empty(),
+        "`this.f` names two declarations"
+    );
+}
+
+/// With no overload of `this.<member>` typing, there is no candidate: a call
+/// reports that nothing matches, and naming the member reports it ambiguous.
+#[test]
+fn test_this_member_with_no_typed_overload() {
+    for access in ["this.f(1)", "this.f.selector"] {
+        let source = format!(
+            r#"
+// SPDX-License-Identifier: UNLICENSED
+pragma solidity ^0.8.0;
+
+contract C {{
+    function f(Missing1 value) public {{}}
+
+    function f(Missing2 value) public {{}}
+
+    function g() external view {{
+        {access};
+    }}
+}}
+"#
+        );
+        let unit = support::compile([("main.sol".into(), source.as_str())]);
+        assert!(
+            !unit.diagnostics().is_empty(),
+            "`{access}` has no overload to resolve to"
+        );
+    }
+}
+
+/// solc rejects an internal reference as the `abi.encodeCall` callee ("Expected
+/// regular external function type").
+///
+/// Expected to fail: slang does not validate the callee yet. Remove the
+/// `should_panic` once it does.
+#[test]
+#[should_panic(expected = "an internal reference is not an `abi.encodeCall` callee")]
+fn test_encode_call_rejects_internal_reference_callee() {
+    let unit = support::compile([(
+        "main.sol".into(),
+        r#"
+// SPDX-License-Identifier: UNLICENSED
+pragma solidity ^0.8.0;
+
+contract C {
+    function publicFn(bytes calldata data) public pure returns (uint256) {
+        return data.length;
+    }
+
+    function encode(bytes calldata data) external pure returns (bytes memory) {
+        return abi.encodeCall(publicFn, (data));
+    }
+}
+"#,
+    )]);
+    assert!(
+        !unit.diagnostics().is_empty(),
+        "an internal reference is not an `abi.encodeCall` callee"
+    );
+}
+
+/// solc reports a parameter whose type name does not resolve ("Identifier not
+/// found or not unique").
+///
+/// Expected to fail: slang does not report unresolved type names yet. Remove
+/// the `should_panic` once it does.
+#[test]
+#[should_panic(expected = "`Missing` is not declared")]
+fn test_undeclared_parameter_type_is_reported() {
+    let unit = support::compile([(
+        "main.sol".into(),
+        r#"
+// SPDX-License-Identifier: UNLICENSED
+pragma solidity ^0.8.0;
+
+contract C {
+    function f(Missing value) public {}
+}
+"#,
+    )]);
+    assert!(!unit.diagnostics().is_empty(), "`Missing` is not declared");
+}
+
+/// solc reports a range access on something that is not an array or an array
+/// slice ("Index range access is only possible for arrays and array slices").
+///
+/// Expected to fail: slang only leaves it untyped. Remove the `should_panic`
+/// once it is reported; the `OpenEndedSliceOfNonSliceable` fixture, which
+/// asserts no diagnostics, will then need to be compiled directly.
+#[test]
+#[should_panic(expected = "a `bytes32` cannot be sliced")]
+fn test_range_access_on_non_sliceable_is_reported() {
+    let unit = support::compile([(
+        "main.sol".into(),
+        r#"
+// SPDX-License-Identifier: UNLICENSED
+pragma solidity ^0.8.0;
+
+contract C {
+    bytes32 b;
+
+    function f() internal view {
+        b[1:];
+    }
+}
+"#,
+    )]);
+    assert!(
+        !unit.diagnostics().is_empty(),
+        "a `bytes32` cannot be sliced"
     );
 }

@@ -152,7 +152,7 @@ impl Pass<'_> {
         } else {
             self.types.void()
         };
-        Some(self.types.register_type(Type::Function(FunctionType {
+        Some(self.types.register_function_type(FunctionType {
             definition_id: Some(function_definition.id()),
             implicit_receiver_type,
             parameter_types,
@@ -160,27 +160,7 @@ impl Pass<'_> {
             visibility: (&function_definition.attributes.visibility).into(),
             mutability: (&function_definition.attributes.mutability).into(),
             partially_applied: false,
-        })))
-    }
-
-    /// Computes the type an externally visible function is dispatched through,
-    /// or `None` if it is never dispatched by selector. Only a `Regular`
-    /// function is: a constructor, fallback or receive carries no name to
-    /// select on.
-    pub(super) fn compute_externalized_type(
-        &mut self,
-        function_definition: &ir::FunctionDefinition,
-        type_id: TypeId,
-    ) -> Option<TypeId> {
-        let Type::Function(function_type) = self.types.get_type_by_id(type_id) else {
-            unreachable!("function definition is not typed as a function");
-        };
-        if !function_type.is_externally_visible()
-            || !matches!(function_definition.kind, ir::FunctionKind::Regular)
-        {
-            return None;
-        }
-        Some(self.types.externalize_function_type(type_id))
+        }))
     }
 
     /// Computes the type of the getter generated for a public state variable,
@@ -301,7 +281,7 @@ impl Pass<'_> {
             }
         }
 
-        let getter_type = Type::Function(FunctionType {
+        let getter_type_id = self.types.register_function_type(FunctionType {
             definition_id: Some(definition_id),
             implicit_receiver_type: receiver_type_id,
             parameter_types,
@@ -310,7 +290,7 @@ impl Pass<'_> {
             mutability: FunctionTypeMutability::View,
             partially_applied: false,
         });
-        Some((self.types.register_type(getter_type), returned_member_ids))
+        Some((getter_type_id, returned_member_ids))
     }
 
     pub(super) fn visit_parameters(&mut self, parameters: &ir::Parameters) {

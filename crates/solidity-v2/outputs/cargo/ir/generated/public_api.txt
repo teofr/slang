@@ -2185,6 +2185,7 @@ impl slang_solidity_v2_ir::ir::FunctionDefinitionStruct
 pub fn slang_solidity_v2_ir::ir::FunctionDefinitionStruct::id(&self) -> slang_solidity_v2_common::nodes::NodeId
 impl slang_solidity_v2_ir::ir::FunctionDefinitionStruct
 pub fn slang_solidity_v2_ir::ir::FunctionDefinitionStruct::is_externally_visible(&self) -> bool
+pub fn slang_solidity_v2_ir::ir::FunctionDefinitionStruct::is_part_of_external_interface(&self) -> bool
 pub fn slang_solidity_v2_ir::ir::FunctionDefinitionStruct::signature_text_range(&self) -> core::ops::range::Range<usize>
 impl core::fmt::Debug for slang_solidity_v2_ir::ir::FunctionDefinitionStruct
 pub fn slang_solidity_v2_ir::ir::FunctionDefinitionStruct::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
