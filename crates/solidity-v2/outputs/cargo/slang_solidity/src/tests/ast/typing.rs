@@ -1300,3 +1300,92 @@ contract C {
         "`L.lib` is not an internal function"
     );
 }
+
+/// Only the overloads that type can be candidates, so an overloaded
+/// `this.<member>` can be left with a single one (here `Missing` does not
+/// resolve). A call still selects it, externalized, while naming the member
+/// without calling it stays ambiguous, as in solc ("not unique").
+#[test]
+fn test_this_member_with_one_typed_overload() {
+    let call = support::compile([(
+        "main.sol".into(),
+        r#"
+// SPDX-License-Identifier: UNLICENSED
+pragma solidity ^0.8.0;
+
+contract C {
+    function f(bytes calldata data) public pure returns (uint256) {
+        return data.length;
+    }
+
+    function f(Missing value) public pure returns (uint256) {
+        return 0;
+    }
+
+    function g(bytes calldata data) external view returns (uint256) {
+        return this.f(data);
+    }
+}
+"#,
+    )]);
+    let mut finder = ThisMemberTypes::default();
+    for file in call.files() {
+        accept_source_unit(&file.ast(), &mut finder);
+    }
+    let [member]: [Option<ast::Type>; 1] = finder
+        .types
+        .try_into()
+        .unwrap_or_else(|types: Vec<_>| panic!("one `this.` access, found {}", types.len()));
+    assert_external_taking_bytes_in_memory("this.f", member);
+
+    let selector = support::compile([(
+        "main.sol".into(),
+        r#"
+// SPDX-License-Identifier: UNLICENSED
+pragma solidity ^0.8.0;
+
+contract C {
+    function f(uint256 value) public {}
+
+    function f(Missing value) public {}
+
+    function g() external view returns (bytes4) {
+        return this.f.selector;
+    }
+}
+"#,
+    )]);
+    assert!(
+        !selector.diagnostics().is_empty(),
+        "`this.f` names two declarations"
+    );
+}
+
+/// With no overload of `this.<member>` typing, there is no candidate: a call
+/// reports that nothing matches, and naming the member reports it ambiguous.
+#[test]
+fn test_this_member_with_no_typed_overload() {
+    for access in ["this.f(1)", "this.f.selector"] {
+        let source = format!(
+            r#"
+// SPDX-License-Identifier: UNLICENSED
+pragma solidity ^0.8.0;
+
+contract C {{
+    function f(Missing1 value) public {{}}
+
+    function f(Missing2 value) public {{}}
+
+    function g() external view {{
+        {access};
+    }}
+}}
+"#
+        );
+        let unit = support::compile([("main.sol".into(), source.as_str())]);
+        assert!(
+            !unit.diagnostics().is_empty(),
+            "`{access}` has no overload to resolve to"
+        );
+    }
+}
