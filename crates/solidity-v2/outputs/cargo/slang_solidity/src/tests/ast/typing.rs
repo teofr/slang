@@ -989,3 +989,64 @@ contract C {
         "a bare `publicFn` callee is an internal reference, with no type to encode against"
     );
 }
+
+/// Captures the type of every `this.<member>` access, in source order.
+#[derive(Default)]
+struct ThisMemberTypes {
+    types: Vec<Option<ast::Type>>,
+}
+
+impl Visitor for ThisMemberTypes {
+    fn enter_member_access_expression(&mut self, node: &ast::MemberAccessExpression) -> bool {
+        if matches!(node.operand(), ast::Expression::ThisKeyword(_)) {
+            self.types.push(node.get_type());
+        }
+        true
+    }
+}
+
+/// Accessing a public function through `this` externalizes it (`External`,
+/// `calldata` → `memory`), whether or not its name is overloaded.
+#[test]
+fn test_this_member_is_externalized_when_overloaded() {
+    let unit = support::compile([(
+        "main.sol".into(),
+        r#"
+// SPDX-License-Identifier: UNLICENSED
+pragma solidity ^0.8.0;
+
+contract C {
+    function single(bytes calldata data) public pure returns (uint256) {
+        return data.length;
+    }
+
+    function overloaded(bytes calldata data) public pure returns (uint256) {
+        return data.length;
+    }
+
+    function overloaded(uint256 value) public pure returns (uint256) {
+        return value;
+    }
+
+    function callSingle(bytes calldata data) external view returns (uint256) {
+        return this.single(data);
+    }
+
+    function callOverloaded(bytes calldata data) external view returns (uint256) {
+        return this.overloaded(data);
+    }
+}
+"#,
+    )]);
+
+    let mut finder = ThisMemberTypes::default();
+    for file in unit.files() {
+        accept_source_unit(&file.ast(), &mut finder);
+    }
+    let [single, overloaded]: [Option<ast::Type>; 2] = finder
+        .types
+        .try_into()
+        .unwrap_or_else(|types: Vec<_>| panic!("two `this.` accesses, found {}", types.len()));
+    assert_external_taking_bytes_in_memory("this.single", single);
+    assert_external_taking_bytes_in_memory("this.overloaded", overloaded);
+}
