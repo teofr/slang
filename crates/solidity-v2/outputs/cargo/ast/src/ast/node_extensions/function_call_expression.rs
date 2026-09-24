@@ -3,7 +3,7 @@ use slang_solidity_v2_semantic::built_ins::InternalBuiltIn;
 use slang_solidity_v2_semantic::{binder, types};
 
 use super::super::{FunctionCallExpressionStruct, Type};
-use super::function_definition::externalized_type_id_of_definition;
+use super::common::externalized_type_id_of_definition;
 
 impl FunctionCallExpressionStruct {
     /// Returns `true` if this call is a type conversion (e.g. `uint256(x)`,
