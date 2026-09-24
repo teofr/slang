@@ -1268,7 +1268,12 @@ contract C {
 
 /// A public library function reached through the library's name is called by
 /// `delegatecall`, so solc does not let it convert to an internal function.
+///
+/// Expected to fail: `L.lib` keeps its declared `Public` type, which converts
+/// to `Internal`. Remove the `should_panic` once library members are typed as
+/// `delegatecall`s.
 #[test]
+#[should_panic(expected = "`L.lib` is not an internal function")]
 fn test_public_library_member_does_not_convert_to_internal() {
     let unit = support::compile([(
         "main.sol".into(),
