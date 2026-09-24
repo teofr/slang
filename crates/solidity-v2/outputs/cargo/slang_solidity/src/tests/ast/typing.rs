@@ -1050,3 +1050,217 @@ contract C {
     assert_external_taking_bytes_in_memory("this.single", single);
     assert_external_taking_bytes_in_memory("this.overloaded", overloaded);
 }
+
+/// Captures the type of every identifier and member access expression, keyed
+/// by its source shape (`f`, `super.f`, `Base.f`, ...).
+#[derive(Default)]
+struct ReferenceTypes {
+    types: Vec<(String, Option<ast::Type>)>,
+}
+
+impl ReferenceTypes {
+    fn label(expression: &ast::Expression) -> String {
+        match expression {
+            ast::Expression::Identifier(identifier) => identifier.unparse().to_owned(),
+            ast::Expression::SuperKeyword(_) => "super".to_owned(),
+            ast::Expression::ThisKeyword(_) => "this".to_owned(),
+            ast::Expression::MemberAccessExpression(member_access) => format!(
+                "{}.{}",
+                Self::label(&member_access.operand()),
+                member_access.member().unparse()
+            ),
+            _ => "?".to_owned(),
+        }
+    }
+
+    fn of(unit: &CompilationUnit) -> Self {
+        let mut finder = Self::default();
+        for file in unit.files() {
+            accept_source_unit(&file.ast(), &mut finder);
+        }
+        finder
+    }
+
+    fn function_visibility(&self, label: &str) -> ast::FunctionTypeVisibility {
+        let Some((_, Some(ast::Type::Function(function)))) =
+            self.types.iter().find(|(found, _)| found == label)
+        else {
+            panic!("`{label}` should be typed as a function");
+        };
+        function.visibility()
+    }
+}
+
+impl Visitor for ReferenceTypes {
+    fn enter_expression(&mut self, node: &ast::Expression) -> bool {
+        match node {
+            ast::Expression::Identifier(identifier) => {
+                self.types.push((Self::label(node), identifier.get_type()));
+            }
+            ast::Expression::MemberAccessExpression(member_access) => {
+                self.types.push((Self::label(node), member_access.get_type()));
+            }
+            _ => {}
+        }
+        true
+    }
+}
+
+/// A public function named without an external receiver is an internal
+/// reference, as in solc: bare, through `super`, or through a base contract's
+/// name. A public library function reached through the library's name is not:
+/// it is called by `delegatecall`.
+#[test]
+fn test_internal_references_to_public_functions_are_internal() {
+    let unit = support::compile([(
+        "main.sol".into(),
+        r#"
+// SPDX-License-Identifier: UNLICENSED
+pragma solidity ^0.8.0;
+
+library L {
+    function lib(uint256 x) public pure returns (uint256) {
+        return x;
+    }
+}
+
+contract Base {
+    function f(bytes calldata data) public pure virtual returns (uint256) {
+        return data.length;
+    }
+}
+
+contract C is Base {
+    function f(bytes calldata data) public pure override returns (uint256) {
+        return data.length + 1;
+    }
+
+    function g(bytes calldata data) external pure returns (uint256, uint256, uint256, uint256) {
+        function(bytes calldata) internal pure returns (uint256) p = f;
+        return (p(data), super.f(data), Base.f(data), L.lib(1));
+    }
+}
+"#,
+    )]);
+    assert!(unit.diagnostics().is_empty(), "{:#?}", unit.diagnostics());
+
+    let references = ReferenceTypes::of(&unit);
+    for label in ["f", "super.f", "Base.f"] {
+        assert_eq!(
+            references.function_visibility(label),
+            ast::FunctionTypeVisibility::Internal,
+            "`{label}` is an internal reference"
+        );
+    }
+    assert_ne!(
+        references.function_visibility("L.lib"),
+        ast::FunctionTypeVisibility::Internal,
+        "`L.lib` is called by `delegatecall`"
+    );
+}
+
+/// solc gives an internal reference to a public function a `selector` only
+/// when it is reached from a contract other than the one declaring it.
+#[test]
+fn test_internal_reference_selector_needs_a_deriving_scope() {
+    let inherited = support::compile([(
+        "main.sol".into(),
+        r#"
+// SPDX-License-Identifier: UNLICENSED
+pragma solidity ^0.8.0;
+
+contract Base {
+    function f() public {}
+}
+
+contract C is Base {
+    function selectors() external pure returns (bytes4, bytes4) {
+        return (f.selector, Base.f.selector);
+    }
+}
+"#,
+    )]);
+    assert!(
+        inherited.diagnostics().is_empty(),
+        "{:#?}",
+        inherited.diagnostics()
+    );
+
+    let own = support::compile([(
+        "main.sol".into(),
+        r#"
+// SPDX-License-Identifier: UNLICENSED
+pragma solidity ^0.8.0;
+
+contract C {
+    function f() public {}
+
+    function selector() external pure returns (bytes4) {
+        return f.selector;
+    }
+}
+"#,
+    )]);
+    assert!(
+        !own.diagnostics().is_empty(),
+        "`f.selector` inside the contract declaring `f` has no `selector` member"
+    );
+}
+
+/// solc never gives an internal reference an `address`.
+#[test]
+fn test_internal_reference_has_no_address() {
+    let unit = support::compile([(
+        "main.sol".into(),
+        r#"
+// SPDX-License-Identifier: UNLICENSED
+pragma solidity ^0.8.0;
+
+contract Base {
+    function f() public {}
+}
+
+contract C is Base {
+    function target() external view returns (address) {
+        return f.address;
+    }
+}
+"#,
+    )]);
+    assert!(
+        !unit.diagnostics().is_empty(),
+        "an internal reference to `f` has no `address` member"
+    );
+}
+
+/// An internal call passes arguments without crossing the ABI boundary, so a
+/// `memory` argument cannot select a `calldata` parameter.
+#[test]
+fn test_internal_call_does_not_match_calldata_with_memory() {
+    let unit = support::compile([(
+        "main.sol".into(),
+        r#"
+// SPDX-License-Identifier: UNLICENSED
+pragma solidity ^0.8.0;
+
+contract C {
+    function f(bytes calldata data) public pure returns (uint256) {
+        return data.length;
+    }
+
+    function f(uint256 value) public pure returns (uint256) {
+        return value;
+    }
+
+    function g() public pure returns (uint256) {
+        bytes memory data = new bytes(1);
+        return f(data);
+    }
+}
+"#,
+    )]);
+    assert!(
+        !unit.diagnostics().is_empty(),
+        "no overload of `f` takes a `bytes memory` internally"
+    );
+}
