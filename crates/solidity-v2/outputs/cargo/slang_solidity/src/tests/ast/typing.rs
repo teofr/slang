@@ -959,7 +959,8 @@ fn test_encode_call_function_value_callee_type() {
 }
 
 /// Compiled directly rather than through the fixture macro, which asserts the
-/// unit has no diagnostics; rejecting this callee is a diagnostic of its own.
+/// unit has no diagnostics: solc rejects this callee (slang does not report it
+/// yet, see `test_encode_call_rejects_internal_reference_callee`).
 #[test]
 fn test_encode_call_internal_reference_callee_has_no_type() {
     let unit = support::compile([(
@@ -1388,4 +1389,87 @@ contract C {{
             "`{access}` has no overload to resolve to"
         );
     }
+}
+
+/// solc rejects an internal reference as the `abi.encodeCall` callee ("Expected
+/// regular external function type").
+///
+/// Expected to fail: slang does not validate the callee yet. Remove the
+/// `should_panic` once it does.
+#[test]
+#[should_panic(expected = "an internal reference is not an `abi.encodeCall` callee")]
+fn test_encode_call_rejects_internal_reference_callee() {
+    let unit = support::compile([(
+        "main.sol".into(),
+        r#"
+// SPDX-License-Identifier: UNLICENSED
+pragma solidity ^0.8.0;
+
+contract C {
+    function publicFn(bytes calldata data) public pure returns (uint256) {
+        return data.length;
+    }
+
+    function encode(bytes calldata data) external pure returns (bytes memory) {
+        return abi.encodeCall(publicFn, (data));
+    }
+}
+"#,
+    )]);
+    assert!(
+        !unit.diagnostics().is_empty(),
+        "an internal reference is not an `abi.encodeCall` callee"
+    );
+}
+
+/// solc reports a parameter whose type name does not resolve ("Identifier not
+/// found or not unique").
+///
+/// Expected to fail: slang does not report unresolved type names yet. Remove
+/// the `should_panic` once it does.
+#[test]
+#[should_panic(expected = "`Missing` is not declared")]
+fn test_undeclared_parameter_type_is_reported() {
+    let unit = support::compile([(
+        "main.sol".into(),
+        r#"
+// SPDX-License-Identifier: UNLICENSED
+pragma solidity ^0.8.0;
+
+contract C {
+    function f(Missing value) public {}
+}
+"#,
+    )]);
+    assert!(!unit.diagnostics().is_empty(), "`Missing` is not declared");
+}
+
+/// solc reports a range access on something that is not an array or an array
+/// slice ("Index range access is only possible for arrays and array slices").
+///
+/// Expected to fail: slang only leaves it untyped. Remove the `should_panic`
+/// once it is reported; the `OpenEndedSliceOfNonSliceable` fixture, which
+/// asserts no diagnostics, will then need to be compiled directly.
+#[test]
+#[should_panic(expected = "a `bytes32` cannot be sliced")]
+fn test_range_access_on_non_sliceable_is_reported() {
+    let unit = support::compile([(
+        "main.sol".into(),
+        r#"
+// SPDX-License-Identifier: UNLICENSED
+pragma solidity ^0.8.0;
+
+contract C {
+    bytes32 b;
+
+    function f() internal view {
+        b[1:];
+    }
+}
+"#,
+    )]);
+    assert!(
+        !unit.diagnostics().is_empty(),
+        "a `bytes32` cannot be sliced"
+    );
 }
