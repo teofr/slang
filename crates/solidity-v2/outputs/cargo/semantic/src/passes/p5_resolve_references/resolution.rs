@@ -13,12 +13,15 @@ use crate::binder::{
     Definition, DefinitionIds, Reference, Resolution, ResolveOptions, ScopeId, Typing,
     UsingDirective, UsingOperator,
 };
-use crate::built_ins::BuiltInsResolver;
+use crate::built_ins::{BuiltInsResolver, InternalBuiltIn};
 use crate::passes::common::constant_evaluator::{
     ConstantResolver, EvaluationError, evaluate_compile_time_constant,
 };
 use crate::passes::common::find_definition_namespace_scope_id;
-use crate::types::{ContractType, InterfaceType, StructType, Type, TypeId, UserMetaType};
+use crate::types::{
+    ContractType, FunctionType, FunctionTypeVisibility, InterfaceType, StructType, Type, TypeId,
+    UserMetaType,
+};
 
 /// Lexical style resolution of symbols
 impl Pass<'_> {
@@ -164,10 +167,47 @@ impl Pass<'_> {
         self.add_attached_functions_for_type(type_id, symbol, &mut definition_ids);
 
         Resolution::from(definition_ids).or_else(|| {
+            if self.has_internal_reference_selector(type_id, symbol) {
+                return Resolution::BuiltIn(InternalBuiltIn::FunctionSelector);
+            }
             // If still unresolved, try with a built-in
             self.built_ins_resolver()
                 .lookup_member_of_type_id(type_id, symbol)
                 .into()
+        })
+    }
+
+    /// solc gives an internal reference to a function that is part of the
+    /// external interface a `selector`, but only when reached from a contract
+    /// other than the one declaring it (ie. a deriving one).
+    fn has_internal_reference_selector(&self, type_id: TypeId, symbol: &str) -> bool {
+        if symbol != "selector" {
+            return false;
+        }
+        let Type::Function(FunctionType {
+            visibility: FunctionTypeVisibility::Internal,
+            definition_id: Some(definition_id),
+            ..
+        }) = self.types.get_type_by_id(type_id)
+        else {
+            return false;
+        };
+        let Some(Definition::Function(function_definition)) =
+            self.binder.find_definition_by_id(*definition_id)
+        else {
+            return false;
+        };
+        if !function_definition.ir_node.is_externally_visible()
+            || !matches!(function_definition.ir_node.kind, ir::FunctionKind::Regular)
+        {
+            return false;
+        }
+        let Some(declaring_contract_id) = self.binder.enclosing_definition_node_id(*definition_id)
+        else {
+            return false;
+        };
+        self.current_contract_scope_id().is_some_and(|scope_id| {
+            self.binder.get_scope_by_id(scope_id).node_id() != declaring_contract_id
         })
     }
 

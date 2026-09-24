@@ -537,6 +537,24 @@ impl TypeRegistry {
         self.externalized_function_types.get(&type_id).copied()
     }
 
+    // A public function named without an external receiver (bare, through
+    // `super`, or through a base contract's name) denotes the internal
+    // function, as in solc, so its reference is typed `Internal`. Any other
+    // type is returned as is.
+    pub(crate) fn internalize_function_type(&mut self, type_id: TypeId) -> TypeId {
+        let Type::Function(function_type) = self.get_type_by_id(type_id) else {
+            return type_id;
+        };
+        if function_type.visibility != FunctionTypeVisibility::Public {
+            return type_id;
+        }
+        let function_type = function_type.clone();
+        self.register_type(Type::Function(FunctionType {
+            visibility: FunctionTypeVisibility::Internal,
+            ..function_type
+        }))
+    }
+
     // Marks a function type as partially applied:
     // - a function from a `using` directive applied on a value
     // - call options have been pre-applied in an external call

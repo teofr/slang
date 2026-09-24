@@ -1098,7 +1098,8 @@ impl Visitor for ReferenceTypes {
                 self.types.push((Self::label(node), identifier.get_type()));
             }
             ast::Expression::MemberAccessExpression(member_access) => {
-                self.types.push((Self::label(node), member_access.get_type()));
+                self.types
+                    .push((Self::label(node), member_access.get_type()));
             }
             _ => {}
         }

@@ -731,7 +731,10 @@ impl Pass<'_> {
     fn typing_of_definition_as_contract_member(&mut self, definition_id: NodeId) -> Typing {
         // Check if the target is a state variable with a getter or a function
         // with an externalized type; the member is accessed through that type.
-        if let Some(member_type_id) = match self.binder.find_definition_by_id(definition_id).unwrap()
+        if let Some(member_type_id) = match self
+            .binder
+            .find_definition_by_id(definition_id)
+            .unwrap()
         {
             Definition::StateVariable(state_var_definition) => state_var_definition.getter_type_id,
             Definition::Function(function_definition) => function_definition.externalized_type_id,
@@ -757,6 +760,44 @@ impl Pass<'_> {
         }
 
         typing
+    }
+
+    /// Types an internal reference to a function: see
+    /// [`TypeRegistry::internalize_function_type`].
+    pub(super) fn internalize_typing(&mut self, typing: Typing) -> Typing {
+        match typing {
+            Typing::Resolved(type_id) => {
+                Typing::Resolved(self.types.internalize_function_type(type_id))
+            }
+            Typing::Undetermined(type_ids) => Typing::Undetermined(
+                type_ids
+                    .into_iter()
+                    .map(|type_id| self.types.internalize_function_type(type_id))
+                    .collect(),
+            ),
+            Typing::Unresolved
+            | Typing::This(_)
+            | Typing::Super
+            | Typing::BuiltIn(_)
+            | Typing::NewExpression(_) => typing,
+        }
+    }
+
+    /// Whether a member of `operand_typing` is reached internally: through
+    /// `super`, or through the name of a contract (a library member is not,
+    /// nor is a foreign contract's, which types as its declaration instead).
+    pub(super) fn is_internal_member_access(&self, operand_typing: &Typing) -> bool {
+        match operand_typing {
+            Typing::Super => true,
+            Typing::Resolved(type_id) => match self.types.get_type_by_id(*type_id) {
+                Type::UserMetaType(UserMetaType { definition_id }) => matches!(
+                    self.binder.find_definition_by_id(*definition_id),
+                    Some(Definition::Contract(_))
+                ),
+                _ => false,
+            },
+            _ => false,
+        }
     }
 
     /// Whether `contract_id` is accessed from a scope that neither is it nor

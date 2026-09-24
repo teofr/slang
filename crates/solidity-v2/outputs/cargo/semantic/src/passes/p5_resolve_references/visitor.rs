@@ -170,6 +170,8 @@ impl Visitor for Pass<'_> {
                 // follow through in order to get to the actual typing.
                 let followed_resolution = self.binder.follow_symbol_aliases(resolution.clone());
                 let typing = self.typing_of_resolution(&followed_resolution);
+                // A function named bare is an internal reference.
+                let typing = self.internalize_typing(typing);
                 self.binder.set_node_typing(identifier.id(), typing);
 
                 // Finally, create the reference for the identifier.
@@ -448,6 +450,12 @@ impl Visitor for Pass<'_> {
             Typing::Unresolved | Typing::BuiltIn(_) | Typing::NewExpression(_) | Typing::Super => {
                 typing
             }
+        };
+
+        let typing = if self.is_internal_member_access(&operand_typing) {
+            self.internalize_typing(typing)
+        } else {
+            typing
         };
 
         // Store the typing
