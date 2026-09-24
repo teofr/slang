@@ -1188,12 +1188,14 @@ contract C is Base {
         inherited.diagnostics()
     );
 
-    let own = support::compile([(
-        "main.sol".into(),
-        r#"
-// SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.0;
-
+    // Inside the declaring contract, whether named bare or through its own
+    // name, and for an internal library function (not part of the external
+    // interface), there is no `selector`: solc's `484_function_types_selector_1`
+    // and `library_function_selector_internal` syntax tests.
+    for (shape, source) in [
+        (
+            "f.selector",
+            r#"
 contract C {
     function f() public {}
 
@@ -1202,11 +1204,42 @@ contract C {
     }
 }
 "#,
-    )]);
-    assert!(
-        !own.diagnostics().is_empty(),
-        "`f.selector` inside the contract declaring `f` has no `selector` member"
-    );
+        ),
+        (
+            "C.f.selector",
+            r#"
+contract C {
+    function f() public {}
+
+    function selector() external pure returns (bytes4) {
+        return C.f.selector;
+    }
+}
+"#,
+        ),
+        (
+            "L.f.selector",
+            r#"
+library L {
+    function f(uint256) internal {}
+}
+
+contract C {
+    function selector() external pure returns (bytes4) {
+        return L.f.selector;
+    }
+}
+"#,
+        ),
+    ] {
+        let source =
+            format!("// SPDX-License-Identifier: UNLICENSED\npragma solidity ^0.8.0;\n{source}");
+        let unit = support::compile([("main.sol".into(), source.as_str())]);
+        assert!(
+            !unit.diagnostics().is_empty(),
+            "`{shape}` has no `selector` member"
+        );
+    }
 }
 
 /// solc never gives an internal reference an `address`.
