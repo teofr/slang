@@ -24,76 +24,34 @@ fn lex(source: &str) -> Vec<(LexemeKind, &str)> {
 #[test]
 fn natspec_comments() {
     for (source, expected) in [
-        // Consecutive `///` lines are a single comment, whatever their line breaks and indentation,
-        // including the line break after each line
+        // Each `///` line is a comment of its own, without its line break: the parser merges
+        // consecutive ones
         (
             "/// a\n  /// b\nx",
             &[
-                (SingleLineNatSpecComment, "/// a\n  /// b\n"),
+                (SingleLineNatSpecComment, "/// a"),
+                (SingleLineNatSpecComment, "/// b"),
                 (Identifier, "x"),
             ][..],
         ),
         (
-            "/// a\r\n/// b\r\t/// c\nx",
+            "/// a\r\n///\r\t/// c",
             &[
-                (SingleLineNatSpecComment, "/// a\r\n/// b\r\t/// c\n"),
-                (Identifier, "x"),
-            ],
-        ),
-        // Slashes within a line are fine, and the last line of the source needs no line break
-        (
-            "/// a/b ////\n/// /c",
-            &[(SingleLineNatSpecComment, "/// a/b ////\n/// /c")],
-        ),
-        // A regular comment, or a blank line, starts a new one
-        (
-            "/// a\n// b\n/// c",
-            &[
-                (SingleLineNatSpecComment, "/// a\n"),
+                (SingleLineNatSpecComment, "/// a"),
+                (SingleLineNatSpecComment, "///"),
                 (SingleLineNatSpecComment, "/// c"),
             ],
         ),
+        // Slashes within a line are fine
         (
-            "/// a\n\n/// b",
-            &[
-                (SingleLineNatSpecComment, "/// a\n"),
-                (SingleLineNatSpecComment, "/// b"),
-            ],
+            "/// a/b ////",
+            &[(SingleLineNatSpecComment, "/// a/b ////")],
         ),
-        // Indentation is left out when the next line isn't `///`
-        (
-            "/// a\n  x",
-            &[(SingleLineNatSpecComment, "/// a\n"), (Identifier, "x")],
-        ),
-        // `////` is a regular comment, which ends a `///` one
+        ("/// /c", &[(SingleLineNatSpecComment, "/// /c")]),
+        // `////` is a regular comment
+        ("////", &[]),
         ("//// a", &[]),
-        ("/// a\n//// b", &[(SingleLineNatSpecComment, "/// a\n")]),
-        // Empty `///` lines are part of the comment
-        (
-            "/// a\n///\n/// b\nx",
-            &[
-                (SingleLineNatSpecComment, "/// a\n///\n/// b\n"),
-                (Identifier, "x"),
-            ],
-        ),
-        (
-            "///\n  x",
-            &[(SingleLineNatSpecComment, "///\n"), (Identifier, "x")],
-        ),
-        (
-            "/// a\r\n///\r\n//// b",
-            &[(SingleLineNatSpecComment, "/// a\r\n///\r\n")],
-        ),
-        ("///\r//// b", &[(SingleLineNatSpecComment, "///\r")]),
-        // At the end of the source, an empty `///` line is a comment of its own
-        ("///", &[(SingleLineNatSpecComment, "///")]),
-        (
-            "/// a\n///",
-            &[
-                (SingleLineNatSpecComment, "/// a\n"),
-                (SingleLineNatSpecComment, "///"),
-            ],
-        ),
+        ("/// a\n//// b", &[(SingleLineNatSpecComment, "/// a")]),
     ] {
         assert_eq!(lex(source), expected, "{source:?}");
     }
@@ -102,23 +60,14 @@ fn natspec_comments() {
 #[test]
 fn regular_comments() {
     for (source, expected) in [
-        // Consecutive `//` lines are a single comment too, including `////` and empty `//` lines,
-        // but `///` lines aren't part of it
-        ("// a\n  //\n//// b\n// c\nx", &[(Identifier, "x")][..]),
+        // Each `//` line is a comment of its own, including `////` and empty `//` lines
+        ("// a\n  //\n//// b\nx", &[(Identifier, "x")][..]),
         (
             "// a\n/// b\n// c",
-            &[(SingleLineNatSpecComment, "/// b\n")],
+            &[(SingleLineNatSpecComment, "/// b")],
         ),
-        (
-            "// a\n///\nx",
-            &[(SingleLineNatSpecComment, "///\n"), (Identifier, "x")],
-        ),
-        ("// a\n\n// b", &[]),
         // Lines of only slashes are regular comments too
         ("//////", &[]),
-        ("// a\n////\n// b", &[]),
-        // At the end of the source, an empty `//` line is a comment of its own
-        ("// a\n//", &[]),
         // `/**/` and `/***` are regular comments, but `/**` is a `NatSpec` one
         ("/**/", &[]),
         ("/***/", &[]),
@@ -174,10 +123,13 @@ fn pragma_and_yul_contexts_follow_the_same_rules() {
                 .collect::<Vec<_>>()
         };
 
-        let source = format!("{prefix}/// a\n///\n/// b\n//// c /** d */ /*** e */{suffix}");
+        let source = format!("{prefix}/// a\n///\n//// c /** d */ /*** e */{suffix}");
         assert_eq!(
             comments(&source),
-            [(natspec.clone(), "/// a\n///\n/// b\n".to_owned()),],
+            [
+                (natspec.clone(), "/// a".to_owned()),
+                (natspec.clone(), "///".to_owned()),
+            ],
             "{source:?}"
         );
 
