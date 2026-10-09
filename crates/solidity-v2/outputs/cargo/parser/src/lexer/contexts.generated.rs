@@ -52,6 +52,10 @@ impl<'source> ContextWrapper<'source> {
         }
     }
 
+    // Always inlined into the parser's hot loop: it runs once per token, but LLVM considers it too
+    // big to inline on its own, and calling it costs a call frame, and a round trip through memory
+    // for the returned `Option<Lexeme>`, on every token.
+    #[inline(always)]
     pub fn next_lexeme(&mut self) -> Option<Lexeme> {
         let (kind, range) = match self {
             Self::Pragma(lexer) => match lexer.next() {
