@@ -1,0 +1,65 @@
+{
+ "2255-baseline": {
+  "base": "2255-mergebase-baseline",
+  "Instructions": 2.202285609319632,
+  "Estimated Cycles": 2.7400558434923283,
+  "Total bytes": 0.0,
+  "Total blocks": 0.0,
+  "At t-gmax bytes": 0.0,
+  "vs_mergebase_instructions": 2.202285609319632
+ },
+ "2255-opt1": {
+  "base": "2255-baseline",
+  "Instructions": -2.8754334682774108,
+  "Estimated Cycles": -2.701534400761496,
+  "Total bytes": 0.0,
+  "Total blocks": 0.0,
+  "At t-gmax bytes": 0.0,
+  "vs_mergebase_instructions": -0.7364731164352212
+ },
+ "2255-opt1b": {
+  "base": "2255-baseline",
+  "Instructions": -2.9380251540088276,
+  "Estimated Cycles": -2.6640721013119095,
+  "Total bytes": 0.0,
+  "Total blocks": 0.0,
+  "At t-gmax bytes": 0.0,
+  "vs_mergebase_instructions": -0.8004432498541325
+ },
+ "2255-opt2": {
+  "base": "2255-baseline",
+  "Instructions": -0.31595030048603423,
+  "Estimated Cycles": -1.319910099049404,
+  "Total bytes": 0.0,
+  "Total blocks": 0.0,
+  "At t-gmax bytes": 0.0,
+  "vs_mergebase_instructions": 1.8793771808333748
+ },
+ "2255-opt3": {
+  "base": "2255-baseline",
+  "Instructions": -0.0036289220530894006,
+  "Estimated Cycles": -0.06944895340176283,
+  "Total bytes": 0.0,
+  "Total blocks": 0.0,
+  "At t-gmax bytes": 0.0,
+  "vs_mergebase_instructions": 2.198576768038385
+ },
+ "2255-combined": {
+  "base": "2255-baseline",
+  "Instructions": -3.8353648982153543,
+  "Estimated Cycles": -3.817695993849146,
+  "Total bytes": 0.0,
+  "Total blocks": 0.0,
+  "At t-gmax bytes": 0.0,
+  "vs_mergebase_instructions": -1.7175449781140273
+ },
+ "main-opt1": {
+  "base": "main-baseline",
+  "Instructions": -1.8170484781348417,
+  "Estimated Cycles": -1.6760396837101843,
+  "Total bytes": 0.0,
+  "Total blocks": 0.0,
+  "At t-gmax bytes": 0.0,
+  "vs_mergebase_instructions": null
+ }
+}
