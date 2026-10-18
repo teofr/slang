@@ -66,7 +66,8 @@ jobs:
         run: "./scripts/bin/infra perf cargo --smoke slang-v2"
 
       - name: "Benchmark > infra perf cargo slang-v2"
-        run: "./scripts/bin/infra perf cargo ${{ github.event_name == 'pull_request' && '--pr-benchmark=full' || ((inputs.dryRun == true || startsWith(github.ref_name, 'bench/')) && '--dry-run' || '') }} slang-v2"
+        # The fork has no Bencher key, and 'bencher' rejects an empty one even in a dry run:
+        run: "${{ startsWith(github.ref_name, 'bench/') && 'env -u BENCHER_API_KEY ' || '' }}./scripts/bin/infra perf cargo ${{ github.event_name == 'pull_request' && '--pr-benchmark=full' || ((inputs.dryRun == true || startsWith(github.ref_name, 'bench/')) && '--dry-run' || '') }} slang-v2"
         env:
           BENCHER_API_KEY: "${{ secrets.BENCHER_API_KEY__CARGO_SLANG_V2 }}"
           BENCHER_PR_HEAD_HASH: "${{ github.event.pull_request.head.sha }}"
