@@ -164,8 +164,8 @@ impl CommentReader {
     /// Updates the comment with the trivia `lexeme` read after it.
     ///
     /// The lexer reads each `///` line on its own, so consecutive ones, only separated by a line
-    /// break and indentation, are merged into a single comment, which includes the line break
-    /// after its last line. Any other `NatSpec` comment replaces this one, which is dropped
+    /// break and indentation, are merged into a single comment, which ends with its last line,
+    /// without the line break after it. Any other `NatSpec` comment replaces this one, which is dropped
     /// without documenting anything.
     fn read(&mut self, lexeme: &Lexeme) {
         use ReaderState::{AfterLine, AfterLineBreak, Complete};
@@ -193,8 +193,7 @@ impl CommentReader {
                 LexemeKind::EndOfLine | LexemeKind::PragmaEndOfLine | LexemeKind::YulEndOfLine,
                 AfterLine,
             ) => {
-                // An end of line after a single line comment is part of the comment, and expects another line
-                self.range.end = lexeme.range.end;
+                // An end of line after a single line comment expects another line
                 self.state = AfterLineBreak;
             }
             // Whitespaces get ignored
