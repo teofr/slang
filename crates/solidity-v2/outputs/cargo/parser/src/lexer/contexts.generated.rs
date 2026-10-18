@@ -111,9 +111,14 @@ pub enum PragmaContext {
     #[regex(r#"~"#, |_| { LexemeKind::PragmaTilde }, priority = 2000019)]
     #[regex(r#"('((?&PragmaEscapeSequence)|[ -&]|[\(-\[]|[\]-~])*')|("((?&PragmaEscapeSequence)|[ -!]|[#-\[]|[\]-~])*")"#, |_| { LexemeKind::PragmaStringLiteral }, priority = 2000020)]
     #[regex(r#"( |\t)+"#, skip_trivia, priority = 1000021, allow_greedy = true)]
-    #[regex(r#"\n|(\r\n?)"#, |_| { LexemeKind::PragmaEndOfLine }, priority = 1000022, allow_greedy = true)]
+    #[regex(r#"\n|(\r\n?)"#, skip_trivia, priority = 1000022, allow_greedy = true)]
     #[regex(r#"//[^\r\n]*"#, skip_trivia, priority = 1000023, allow_greedy = true)]
-    #[regex(r#"/\*[^\*]*\*+([^/\*][^\*]*\*+)*/"#, |_| { LexemeKind::PragmaMultiLineComment }, priority = 1000024, allow_greedy = true)]
+    #[regex(
+        r#"/\*[^\*]*\*+([^/\*][^\*]*\*+)*/"#,
+        skip_trivia,
+        priority = 1000024,
+        allow_greedy = true
+    )]
     #[regex(r#"///([^/\r\n][^\r\n]*)?"#, |_| { LexemeKind::PragmaSingleLineNatSpecComment }, priority = 1000025, allow_greedy = true)]
     #[regex(r#"/\*\*[^/\*][^\*]*\*+([^/\*][^\*]*\*+)*/"#, |_| { LexemeKind::PragmaMultiLineNatSpecComment }, priority = 1000026, allow_greedy = true)]
     Lexeme(LexemeKind),
@@ -364,9 +369,14 @@ pub enum SolidityContext {
     #[regex(r#"\^="#, |_| { LexemeKind::CaretEqual }, priority = 2000159)]
     #[regex(r#"~"#, |_| { LexemeKind::Tilde }, priority = 2000160)]
     #[regex(r#"( |\t)+"#, skip_trivia, priority = 1000161, allow_greedy = true)]
-    #[regex(r#"\n|(\r\n?)"#, |_| { LexemeKind::EndOfLine }, priority = 1000162, allow_greedy = true)]
+    #[regex(r#"\n|(\r\n?)"#, skip_trivia, priority = 1000162, allow_greedy = true)]
     #[regex(r#"//[^\r\n]*"#, skip_trivia, priority = 1000163, allow_greedy = true)]
-    #[regex(r#"/\*[^\*]*\*+([^/\*][^\*]*\*+)*/"#, |_| { LexemeKind::MultiLineComment }, priority = 1000164, allow_greedy = true)]
+    #[regex(
+        r#"/\*[^\*]*\*+([^/\*][^\*]*\*+)*/"#,
+        skip_trivia,
+        priority = 1000164,
+        allow_greedy = true
+    )]
     #[regex(r#"///([^/\r\n][^\r\n]*)?"#, |_| { LexemeKind::SingleLineNatSpecComment }, priority = 1000165, allow_greedy = true)]
     #[regex(r#"/\*\*[^/\*][^\*]*\*+([^/\*][^\*]*\*+)*/"#, |_| { LexemeKind::MultiLineNatSpecComment }, priority = 1000166, allow_greedy = true)]
     #[regex(
@@ -501,9 +511,14 @@ pub enum YulContext {
     #[regex(r#"\("#, |_| { LexemeKind::YulOpenParen }, priority = 2000027)]
     #[regex(r#"\."#, |_| { LexemeKind::YulPeriod }, priority = 2000028)]
     #[regex(r#"( |\t)+"#, skip_trivia, priority = 1000029, allow_greedy = true)]
-    #[regex(r#"\n|(\r\n?)"#, |_| { LexemeKind::YulEndOfLine }, priority = 1000030, allow_greedy = true)]
+    #[regex(r#"\n|(\r\n?)"#, skip_trivia, priority = 1000030, allow_greedy = true)]
     #[regex(r#"//[^\r\n]*"#, skip_trivia, priority = 1000031, allow_greedy = true)]
-    #[regex(r#"/\*[^\*]*\*+([^/\*][^\*]*\*+)*/"#, |_| { LexemeKind::YulMultiLineComment }, priority = 1000032, allow_greedy = true)]
+    #[regex(
+        r#"/\*[^\*]*\*+([^/\*][^\*]*\*+)*/"#,
+        skip_trivia,
+        priority = 1000032,
+        allow_greedy = true
+    )]
     #[regex(r#"///([^/\r\n][^\r\n]*)?"#, |_| { LexemeKind::YulSingleLineNatSpecComment }, priority = 1000033, allow_greedy = true)]
     #[regex(r#"/\*\*[^/\*][^\*]*\*+([^/\*][^\*]*\*+)*/"#, |_| { LexemeKind::YulMultiLineNatSpecComment }, priority = 1000034, allow_greedy = true)]
     Lexeme(LexemeKind),

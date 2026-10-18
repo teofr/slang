@@ -252,6 +252,7 @@ language_v2_macros::compile!(Language(
                             ),
                             Trivia(
                                 name = PragmaEndOfLine,
+                                skipped = true,
                                 scanner = Choice([
                                     Atom("\n"),
                                     Sequence([Atom("\r"), Optional(Atom("\n"))])
@@ -266,6 +267,7 @@ language_v2_macros::compile!(Language(
                             Trivia(
                                 name = PragmaMultiLineComment,
                                 category = RegularComment,
+                                skipped = true,
                                 // https://stackoverflow.com/a/36328890
                                 scanner = Sequence([
                                     Atom("/*"),
@@ -1523,6 +1525,7 @@ language_v2_macros::compile!(Language(
                                 ),
                                 Trivia(
                                     name = EndOfLine,
+                                    skipped = true,
                                     scanner = Choice([
                                         Atom("\n"),
                                         Sequence([Atom("\r"), Optional(Atom("\n"))])
@@ -1537,6 +1540,7 @@ language_v2_macros::compile!(Language(
                                 Trivia(
                                     name = MultiLineComment,
                                     category = RegularComment,
+                                    skipped = true,
                                     // https://stackoverflow.com/a/36328890
                                     scanner = Sequence([
                                         Atom("/*"),
@@ -4462,6 +4466,7 @@ IdentifierPathTailElement: (Period, IdentifierPathElement) = {
                             ),
                             Trivia(
                                 name = YulEndOfLine,
+                                skipped = true,
                                 scanner = Choice([
                                     Atom("\n"),
                                     Sequence([Atom("\r"), Optional(Atom("\n"))])
@@ -4476,6 +4481,7 @@ IdentifierPathTailElement: (Period, IdentifierPathElement) = {
                             Trivia(
                                 name = YulMultiLineComment,
                                 category = RegularComment,
+                                skipped = true,
                                 // https://stackoverflow.com/a/36328890
                                 scanner = Sequence([
                                     Atom("/*"),
