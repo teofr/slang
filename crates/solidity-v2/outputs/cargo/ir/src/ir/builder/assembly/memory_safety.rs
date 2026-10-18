@@ -70,7 +70,10 @@ impl<S: Source> CstToIrBuilder<'_, S> {
             natspec.range.start..natspec.range.start + text.trim_end_matches(['\r', '\n']).len();
 
         if is_memory_safe_marker(text) {
-            self.report_range(range, DeprecatedAssemblyNatSpec);
+            // solc deprecates the comment, in favor of the `memory-safe` flag, from 0.8.31
+            if self.language_version >= LanguageVersion::V0_8_31 {
+                self.report_range(range, DeprecatedAssemblyNatSpec);
+            }
             true
         } else {
             self.report_range(range, UnrecognizedAssemblyNatSpec);
