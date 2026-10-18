@@ -15,6 +15,8 @@ on:
   push:
     branches:
       - "main"
+      # Dry-run benchmarks of experiment branches in this fork:
+      - "bench/**"
 
   # Run on every pull request (full benchmark, non-blocking):
   pull_request:
@@ -43,7 +45,7 @@ jobs:
     if: >-
       ${{
         (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository)
-        || (github.event_name != 'pull_request' && (github.repository == 'NomicFoundation/slang' || inputs.dryRun == true))
+        || (github.event_name != 'pull_request' && (github.repository == 'NomicFoundation/slang' || inputs.dryRun == true || startsWith(github.ref_name, 'bench/')))
       }}
 
     steps:
@@ -64,7 +66,7 @@ jobs:
         run: "./scripts/bin/infra perf cargo --smoke slang-v2"
 
       - name: "Benchmark > infra perf cargo slang-v2"
-        run: "./scripts/bin/infra perf cargo ${{ github.event_name == 'pull_request' && '--pr-benchmark=full' || (inputs.dryRun == true && '--dry-run' || '') }} slang-v2"
+        run: "./scripts/bin/infra perf cargo ${{ github.event_name == 'pull_request' && '--pr-benchmark=full' || ((inputs.dryRun == true || startsWith(github.ref_name, 'bench/')) && '--dry-run' || '') }} slang-v2"
         env:
           BENCHER_API_KEY: "${{ secrets.BENCHER_API_KEY__CARGO_SLANG_V2 }}"
           BENCHER_PR_HEAD_HASH: "${{ github.event.pull_request.head.sha }}"
