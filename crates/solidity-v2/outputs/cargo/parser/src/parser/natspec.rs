@@ -1,10 +1,12 @@
 //! The `NatSpec` comments of a source file
 //!
-//! The [`NonTriviaTokens`] feeds the parser its tokens, merging each comment's lexemes, and pushes
-//! the comment on the [`NatSpecStack`] with the token after it, which it documents. The parser then pops it from the stack as it reduces the node starting with that
-//! token.
+//! The [`NonTriviaTokens`] feeds the parser its tokens, merging each comment's lexemes into a
+//! [`PendingComment`], and pushes the comment on the [`NatSpecStack`] with the token after it,
+//! which it documents. The parser then pops it from the stack as it reduces the node starting with
+//! that token.
 
 use std::cell::RefCell;
+use std::ops::Range;
 
 use slang_solidity_v2_cst::structured_cst::natspec::NatSpec;
 
@@ -138,13 +140,12 @@ fn is_line_continuation(gap: &str) -> bool {
     indentation.is_some_and(|indentation| indentation.bytes().all(|b| b == b' ' || b == b'\t'))
 }
 
-/// The length of the line break at the start of `rest`, if any.
-fn line_break_len(rest: &str) -> usize {
-    if rest.starts_with("\r\n") {
-        2
-    } else {
-        usize::from(rest.starts_with(['\n', '\r']))
-    }
+/// A `NatSpec` comment read so far, waiting for the token it documents.
+#[derive(Debug)]
+struct PendingComment {
+    range: Range<usize>,
+    /// Whether the comment is made of `///` lines, which the next one can continue.
+    is_line: bool,
 }
 
 /// A `NonTriviaTokens` filters `NatSpec` comments out of a lexer, collecting them into a
@@ -153,6 +154,8 @@ pub(crate) struct NonTriviaTokens<'source, 'natspec> {
     source: &'source str,
     lexer: Lexer<'source>,
     natspec_stack: &'natspec NatSpecStack,
+    /// The `NatSpec` comment read so far, pushed with the next token.
+    pending: Option<PendingComment>,
 }
 
 impl Iterator for NonTriviaTokens<'_, '_> {
@@ -160,16 +163,24 @@ impl Iterator for NonTriviaTokens<'_, '_> {
     type Item = Result<(usize, LexemeKind, usize), ()>;
 
     fn next(&mut self) -> Option<Self::Item> {
-        let lexeme = self.lexer.next_lexeme()?;
-        // NatSpec reading is guarded by a cheap kind check
-        let lexeme = if lexeme.kind.is_natspec_comment() {
-            // Reads the rest of the comment, and returns the token after it
-            self.read_natspec_comment(&lexeme)?
-        } else {
-            lexeme
-        };
-        debug_assert!(!lexeme.kind.is_trivia(), "the lexer skips regular trivia");
-        Some(Ok((lexeme.range.start, lexeme.kind, lexeme.range.end)))
+        while let Some(lexeme) = self.lexer.next_lexeme() {
+            if lexeme.kind.is_natspec_comment() {
+                self.read_natspec_comment(&lexeme);
+                continue;
+            }
+            debug_assert!(!lexeme.kind.is_trivia(), "the lexer skips regular trivia");
+            if let Some(comment) = self.pending.take() {
+                self.natspec_stack.attach_natspec_to(
+                    NatSpec {
+                        range: comment.range,
+                    },
+                    lexeme.range.start,
+                );
+            }
+            return Some(Ok((lexeme.range.start, lexeme.kind, lexeme.range.end)));
+        }
+        // A trailing comment, not documenting anything, is dropped
+        None
     }
 }
 
@@ -183,47 +194,30 @@ impl<'source, 'natspec> NonTriviaTokens<'source, 'natspec> {
             source,
             lexer,
             natspec_stack,
+            pending: None,
         }
     }
 
-    /// Reads the `NatSpec` comment starting with `first`, and the ones after it, up to the token it
-    /// documents, which is returned. A comment followed by no token is dropped.
+    /// Reads the `NatSpec` comment `lexeme` into the pending one.
     ///
     /// The lexer reads each `///` line on its own, so consecutive ones, only separated by a line
-    /// break and indentation, are merged into a single comment, which includes the line break
-    /// after its last line. Any other `NatSpec` comment replaces this one, which is dropped
-    /// without documenting anything.
-    ///
-    /// Never inlined on purpose: it only runs for `NatSpec` comments, and inlining it into
-    /// [`NonTriviaTokens::next`], which is inlined into LALRPOP's parsing loop, slows the whole
-    /// loop down.
-    #[inline(never)]
-    fn read_natspec_comment(&mut self, first: &Lexeme) -> Option<Lexeme> {
-        let mut range = first.range.clone();
-        let mut is_line = is_single_line_natspec(&first.kind);
-
-        while let Some(lexeme) = self.lexer.next_lexeme() {
-            if !lexeme.kind.is_natspec_comment() {
-                if is_line {
-                    range.end += line_break_len(&self.source[range.end..]);
-                }
-                self.natspec_stack
-                    .attach_natspec_to(NatSpec { range }, lexeme.range.start);
-                return Some(lexeme);
-            }
-
-            let next_is_line = is_single_line_natspec(&lexeme.kind);
-            if is_line
-                && next_is_line
-                && is_line_continuation(&self.source[range.end..lexeme.range.start])
-            {
-                range.end = lexeme.range.end;
-            } else {
-                range = lexeme.range.clone();
-                is_line = next_is_line;
-            }
+    /// break and indentation, are merged into a single comment, which ends with its last line,
+    /// without the line break after it. Any other `NatSpec` comment replaces the pending one,
+    /// which is dropped without documenting anything.
+    fn read_natspec_comment(&mut self, lexeme: &Lexeme) {
+        let is_line = is_single_line_natspec(&lexeme.kind);
+        if let Some(pending) = &mut self.pending
+            && pending.is_line
+            && is_line
+            && is_line_continuation(&self.source[pending.range.end..lexeme.range.start])
+        {
+            pending.range.end = lexeme.range.end;
+            return;
         }
-        None
+        self.pending = Some(PendingComment {
+            range: lexeme.range.clone(),
+            is_line,
+        });
     }
 }
 
