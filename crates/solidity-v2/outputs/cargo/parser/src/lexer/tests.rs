@@ -9,8 +9,8 @@ use slang_solidity_v2_common::versions::LanguageVersion;
 use crate::lexer::LexemeKind::{
     self, EndOfLine, Identifier, MultiLineComment, MultiLineNatSpecComment, PragmaMultiLineComment,
     PragmaMultiLineNatSpecComment, PragmaSingleLineComment, PragmaSingleLineNatSpecComment,
-    SingleLineComment, SingleLineNatSpecComment, Whitespace, YulMultiLineComment,
-    YulMultiLineNatSpecComment, YulSingleLineComment, YulSingleLineNatSpecComment,
+    SingleLineNatSpecComment, YulMultiLineComment, YulMultiLineNatSpecComment,
+    YulSingleLineComment, YulSingleLineNatSpecComment,
 };
 use crate::lexer::definition::Lexer;
 
@@ -31,7 +31,6 @@ fn natspec_comments() {
             &[
                 (SingleLineNatSpecComment, "/// a"),
                 (EndOfLine, "\n"),
-                (Whitespace, "  "),
                 (SingleLineNatSpecComment, "/// b"),
                 (EndOfLine, "\n"),
                 (Identifier, "x"),
@@ -44,7 +43,6 @@ fn natspec_comments() {
                 (EndOfLine, "\r\n"),
                 (SingleLineNatSpecComment, "///"),
                 (EndOfLine, "\r"),
-                (Whitespace, "\t"),
                 (SingleLineNatSpecComment, "/// c"),
             ],
         ),
@@ -55,15 +53,11 @@ fn natspec_comments() {
         ),
         ("/// /c", &[(SingleLineNatSpecComment, "/// /c")]),
         // `////` is a regular comment
-        ("////", &[(SingleLineComment, "////")]),
-        ("//// a", &[(SingleLineComment, "//// a")]),
+        ("////", &[]),
+        ("//// a", &[]),
         (
             "/// a\n//// b",
-            &[
-                (SingleLineNatSpecComment, "/// a"),
-                (EndOfLine, "\n"),
-                (SingleLineComment, "//// b"),
-            ],
+            &[(SingleLineNatSpecComment, "/// a"), (EndOfLine, "\n")],
         ),
     ] {
         assert_eq!(lex(source), expected, "{source:?}");
@@ -76,17 +70,10 @@ fn regular_comments() {
         // Each `//` line is a comment of its own, including `////` and empty `//` lines
         (
             "// a\n  //\n//// b",
-            &[
-                (SingleLineComment, "// a"),
-                (EndOfLine, "\n"),
-                (Whitespace, "  "),
-                (SingleLineComment, "//"),
-                (EndOfLine, "\n"),
-                (SingleLineComment, "//// b"),
-            ][..],
+            &[(EndOfLine, "\n"), (EndOfLine, "\n")][..],
         ),
         // Lines of only slashes are regular comments too
-        ("//////", &[(SingleLineComment, "//////")]),
+        ("//////", &[]),
         // `/**/` and `/***` are regular comments, but `/**` is a `NatSpec` one
         ("/**/", &[(MultiLineComment, "/**/")]),
         ("/***/", &[(MultiLineComment, "/***/")]),
@@ -139,7 +126,6 @@ fn pragma_and_yul_contexts_follow_the_same_rules() {
             [
                 (natspec.clone(), "/// a".to_owned()),
                 (natspec.clone(), "///".to_owned()),
-                (comment.clone(), "//// c /** d */ /*** e */".to_owned()),
             ],
             "{source:?}"
         );

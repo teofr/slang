@@ -37,6 +37,8 @@ pub enum Lexeme {
         kind: String,
         regex: String,
         category: TriviaCategory,
+        /// Whether the lexer skips it, never producing a lexeme for it.
+        skipped: bool,
     },
     Token {
         kind: String,

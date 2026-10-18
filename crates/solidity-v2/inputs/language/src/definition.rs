@@ -247,6 +247,7 @@ language_v2_macros::compile!(Language(
                         items = [
                             Trivia(
                                 name = PragmaWhitespace,
+                                skipped = true,
                                 scanner = OneOrMore(Choice([Atom(" "), Atom("\t")]))
                             ),
                             Trivia(
@@ -259,6 +260,7 @@ language_v2_macros::compile!(Language(
                             Trivia(
                                 name = PragmaSingleLineComment,
                                 category = RegularComment,
+                                skipped = true,
                                 scanner = Sequence([Atom("//"), ZeroOrMore(Not(['\r', '\n']))])
                             ),
                             Trivia(
@@ -1516,6 +1518,7 @@ language_v2_macros::compile!(Language(
                             items = [
                                 Trivia(
                                     name = Whitespace,
+                                    skipped = true,
                                     scanner = OneOrMore(Choice([Atom(" "), Atom("\t")]))
                                 ),
                                 Trivia(
@@ -1528,6 +1531,7 @@ language_v2_macros::compile!(Language(
                                 Trivia(
                                     name = SingleLineComment,
                                     category = RegularComment,
+                                    skipped = true,
                                     scanner = Sequence([Atom("//"), ZeroOrMore(Not(['\r', '\n']))])
                                 ),
                                 Trivia(
@@ -4453,6 +4457,7 @@ IdentifierPathTailElement: (Period, IdentifierPathElement) = {
                         items = [
                             Trivia(
                                 name = YulWhitespace,
+                                skipped = true,
                                 scanner = OneOrMore(Choice([Atom(" "), Atom("\t")]))
                             ),
                             Trivia(
@@ -4465,6 +4470,7 @@ IdentifierPathTailElement: (Period, IdentifierPathElement) = {
                             Trivia(
                                 name = YulSingleLineComment,
                                 category = RegularComment,
+                                skipped = true,
                                 scanner = Sequence([Atom("//"), ZeroOrMore(Not(['\r', '\n']))])
                             ),
                             Trivia(

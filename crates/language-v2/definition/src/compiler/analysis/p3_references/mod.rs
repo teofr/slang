@@ -360,6 +360,7 @@ fn check_trivia(
     let SpannedTriviaItem {
         name,
         category: _,
+        skipped: _,
         scanner,
     } = item;
 
