@@ -247,6 +247,7 @@ language_v2_macros::compile!(Language(
                         items = [
                             Trivia(
                                 name = PragmaWhitespace,
+                                skipped = true,
                                 scanner = OneOrMore(Fragment(PragmaSpaceOrTab))
                             ),
                             Fragment(
@@ -269,6 +270,7 @@ language_v2_macros::compile!(Language(
                             Trivia(
                                 name = PragmaSingleLineComment,
                                 category = RegularComment,
+                                skipped = true,
                                 // Match consecutive `//` lines that aren't `///` ones, each line keeps its line break, except for the last line of the file.
                                 scanner = Sequence([
                                     Atom("//"),
@@ -1548,6 +1550,7 @@ language_v2_macros::compile!(Language(
                             items = [
                                 Trivia(
                                     name = Whitespace,
+                                    skipped = true,
                                     scanner = OneOrMore(Fragment(SpaceOrTab))
                                 ),
                                 Fragment(
@@ -1570,6 +1573,7 @@ language_v2_macros::compile!(Language(
                                 Trivia(
                                     name = SingleLineComment,
                                     category = RegularComment,
+                                    skipped = true,
                                     // Match consecutive `//` lines that aren't `///` ones, each line keeps its line break, except for the last line of the file.
                                     scanner = Sequence([
                                         Atom("//"),
@@ -4518,6 +4522,7 @@ IdentifierPathTailElement: (Period, IdentifierPathElement) = {
                         items = [
                             Trivia(
                                 name = YulWhitespace,
+                                skipped = true,
                                 scanner = OneOrMore(Fragment(YulSpaceOrTab))
                             ),
                             Fragment(
@@ -4540,6 +4545,7 @@ IdentifierPathTailElement: (Period, IdentifierPathElement) = {
                             Trivia(
                                 name = YulSingleLineComment,
                                 category = RegularComment,
+                                skipped = true,
                                 // Match consecutive `//` lines that aren't `///` ones, each line keeps its line break, except for the last line of the file.
                                 scanner = Sequence([
                                     Atom("//"),

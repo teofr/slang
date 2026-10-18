@@ -57,6 +57,13 @@ impl<'source> ContextWrapper<'source> {
     }
 }
 
+/// Callback of the trivia the lexer skips, never producing a lexeme for it.
+fn skip_trivia<'source, Context: Logos<'source>>(
+    _: &mut Lexer<'source, Context>,
+) -> FilterResult<LexemeKind, ()> {
+    FilterResult::Skip
+}
+
 {% for context in model.parser.lexer.contexts %}
     {%- for lexeme in context.lexemes %}
     {%- if lexeme.type == "Token" and lexeme.not_followed_by %}
@@ -107,7 +114,11 @@ impl<'source> ContextWrapper<'source> {
         {% for lexeme in context.lexemes -%}
             {%- if lexeme.type == "Trivia" -%}
                 {# use 'allow_greedy' on trivia: https://github.com/maciejhirsz/logos/issues/520 #}
+                {%- if lexeme.skipped -%}
+                #[regex(r#"{{ lexeme.regex }}"#, skip_trivia, priority = {{ 1000000 + loop.index }}, allow_greedy = true)]
+                {%- else -%}
                 #[regex(r#"{{ lexeme.regex }}"#, |_| { LexemeKind::{{ lexeme.kind }} }, priority = {{ 1000000 + loop.index }}, allow_greedy = true)]
+                {%- endif -%}
             {%- elif lexeme.type == "Token" -%}
                 {%- if lexeme.not_followed_by -%}
                 #[regex(r#"{{ lexeme.regex }}"#, not_followed_by__{{ lexeme.kind }}, priority = {{ 2000000 + loop.index }})]
