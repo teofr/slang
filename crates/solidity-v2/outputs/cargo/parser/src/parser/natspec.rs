@@ -1,7 +1,7 @@
 //! The `NatSpec` comments of a source file
 //!
-//! The [`NonTriviaTokens`] feeds the parser its tokens, reading each comment's lexemes with a
-//! [`CommentReader`], and pushes the comment on the [`NatSpecStack`] with the token after it, which
+//! The [`NonTriviaTokens`] feeds the parser its tokens, reading each comment's lexemes into a
+//! [`PendingComment`], and pushes the comment on the [`NatSpecStack`] with the token after it, which
 //! it documents. The parser then pops it from the stack as it reduces the node starting with that
 //! token.
 
@@ -118,14 +118,14 @@ fn pop_documenting(
     natspec
 }
 
-/// Reads a `NatSpec` comment from its lexemes, up to the token it documents.
+/// A `NatSpec` comment read from its lexemes, waiting for the token it documents.
 #[derive(Debug)]
-struct CommentReader {
+struct PendingComment {
     range: Range<usize>,
     state: ReaderState,
 }
 
-/// Where a [`CommentReader`] is in the comment, which decides what the next lexeme does to it.
+/// Where a [`PendingComment`] is in the comment, which decides what the next lexeme does to it.
 #[derive(Clone, Copy, Debug)]
 enum ReaderState {
     /// Right after a `///` line, before its line break.
@@ -142,7 +142,7 @@ enum ReaderState {
     Complete,
 }
 
-impl CommentReader {
+impl PendingComment {
     fn new(lexeme: &Lexeme) -> Self {
         debug_assert!(
             lexeme.kind.is_natspec_comment(),
@@ -213,6 +213,8 @@ impl CommentReader {
 pub(crate) struct NonTriviaTokens<'source, 'natspec> {
     lexer: Lexer<'source>,
     natspec_stack: &'natspec NatSpecStack,
+    /// The `NatSpec` comment read so far, pushed with the next non-trivia token.
+    pending: Option<PendingComment>,
 }
 
 impl Iterator for NonTriviaTokens<'_, '_> {
@@ -221,17 +223,25 @@ impl Iterator for NonTriviaTokens<'_, '_> {
 
     fn next(&mut self) -> Option<Self::Item> {
         while let Some(lexeme) = self.lexer.next_lexeme() {
-            // NatSpec reading is guarded by a cheap kind check
-            if lexeme.kind.is_natspec_comment() {
-                // Reads the rest of the comment, and returns the token after it
-                let lexeme = self.read_natspec_comment(&lexeme)?;
-                return Some(Ok((lexeme.range.start, lexeme.kind, lexeme.range.end)));
-            }
             if lexeme.kind.is_trivia() {
+                if let Some(comment) = &mut self.pending {
+                    comment.read(&lexeme);
+                } else if lexeme.kind.is_natspec_comment() {
+                    self.pending = Some(PendingComment::new(&lexeme));
+                }
                 continue;
+            }
+            if let Some(comment) = self.pending.take() {
+                self.natspec_stack.attach_natspec_to(
+                    NatSpec {
+                        range: comment.range,
+                    },
+                    lexeme.range.start,
+                );
             }
             return Some(Ok((lexeme.range.start, lexeme.kind, lexeme.range.end)));
         }
+        // A trailing comment, not documenting anything, is dropped
         None
     }
 }
@@ -241,31 +251,8 @@ impl<'source, 'natspec> NonTriviaTokens<'source, 'natspec> {
         Self {
             lexer,
             natspec_stack,
+            pending: None,
         }
-    }
-
-    /// Reads the `NatSpec` comment starting with `first`, and the trivia after it, up to the token
-    /// it documents, which is returned. A comment followed by no token is dropped.
-    ///
-    /// Never inlined on purpose: it only runs for `NatSpec` comments, and inlining it into
-    /// [`NonTriviaTokens::next`], which is inlined into LALRPOP's parsing loop, slows the whole
-    /// loop down.
-    #[inline(never)]
-    fn read_natspec_comment(&mut self, first: &Lexeme) -> Option<Lexeme> {
-        let mut comment = CommentReader::new(first);
-        while let Some(lexeme) = self.lexer.next_lexeme() {
-            if !lexeme.kind.is_trivia() {
-                self.natspec_stack.attach_natspec_to(
-                    NatSpec {
-                        range: comment.range,
-                    },
-                    lexeme.range.start,
-                );
-                return Some(lexeme);
-            }
-            comment.read(&lexeme);
-        }
-        None
     }
 }
 
