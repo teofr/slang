@@ -186,6 +186,7 @@ impl LexicalContextBuilder {
             kind: item.name.to_string(),
             regex: self.convert_token_scanner(&item.scanner, false),
             category: item.category(),
+            skipped: item.is_skipped(),
         }
     }
 

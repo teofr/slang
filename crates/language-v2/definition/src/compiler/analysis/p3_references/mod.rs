@@ -11,8 +11,8 @@ use crate::model::{
     Identifier, SpannedEnumItem, SpannedEnumVariant, SpannedField, SpannedFragmentItem,
     SpannedItem, SpannedKeywordItem, SpannedPrecedenceExpression, SpannedPrecedenceItem,
     SpannedPrecedenceOperator, SpannedPrimaryExpression, SpannedRepeatedItem, SpannedSeparatedItem,
-    SpannedStructItem, SpannedTokenItem, SpannedTokenScanner, SpannedTriviaItem,
-    SpannedVersionSpecifier,
+    SpannedStructItem, SpannedTokenItem, SpannedTokenScanner, SpannedTriviaCategory,
+    SpannedTriviaItem, SpannedVersionSpecifier,
 };
 
 pub(crate) fn run(analysis: &mut Analysis) {
@@ -359,9 +359,18 @@ fn check_trivia(
 ) {
     let SpannedTriviaItem {
         name,
-        category: _,
+        category,
+        skipped,
         scanner,
     } = item;
+
+    // The parser reads `NatSpec` comments from the lexer, so it can't skip them
+    if let (Some(category), Some(skipped)) = (category, skipped)
+        && matches!(**category, SpannedTriviaCategory::NatSpecComment)
+        && **skipped
+    {
+        analysis.errors.add(skipped, &Errors::SkippedNatSpecComment);
+    }
 
     check_token_scanner(analysis, Some(name), scanner, enablement, lexical_context);
 }
@@ -552,4 +561,6 @@ enum Errors<'err> {
     UnnecessaryLexicalContextSwitch,
     #[error("First field in a context switch cannot be optional.")]
     OptionalGatewayField,
+    #[error("NatSpec comments cannot be skipped, the parser reads them.")]
+    SkippedNatSpecComment,
 }

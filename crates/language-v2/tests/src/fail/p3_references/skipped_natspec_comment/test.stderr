@@ -1,0 +1,5 @@
+error: NatSpec comments cannot be skipped, the parser reads them.
+  --> src/fail/p3_references/skipped_natspec_comment/test.rs:23:35
+   |
+23 |                         skipped = true,
+   |                                   ^^^^
