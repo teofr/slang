@@ -256,6 +256,7 @@ language_v2_macros::compile!(Language(
                             ),
                             Trivia(
                                 name = PragmaEndOfLine,
+                                skipped = true,
                                 scanner = Fragment(PragmaLineBreak)
                             ),
                             Fragment(
@@ -293,6 +294,7 @@ language_v2_macros::compile!(Language(
                             Trivia(
                                 name = PragmaMultiLineComment,
                                 category = RegularComment,
+                                skipped = true,
                                 // https://stackoverflow.com/a/36328890
                                 scanner = Sequence([
                                     Atom("/*"),
@@ -1559,6 +1561,7 @@ language_v2_macros::compile!(Language(
                                 ),
                                 Trivia(
                                     name = EndOfLine,
+                                    skipped = true,
                                     scanner = Fragment(LineBreak)
                                 ),
                                 Fragment(
@@ -1596,6 +1599,7 @@ language_v2_macros::compile!(Language(
                                 Trivia(
                                     name = MultiLineComment,
                                     category = RegularComment,
+                                    skipped = true,
                                     // https://stackoverflow.com/a/36328890
                                     scanner = Sequence([
                                         Atom("/*"),
@@ -4531,6 +4535,7 @@ IdentifierPathTailElement: (Period, IdentifierPathElement) = {
                             ),
                             Trivia(
                                 name = YulEndOfLine,
+                                skipped = true,
                                 scanner = Fragment(YulLineBreak)
                             ),
                             Fragment(
@@ -4568,6 +4573,7 @@ IdentifierPathTailElement: (Period, IdentifierPathElement) = {
                             Trivia(
                                 name = YulMultiLineComment,
                                 category = RegularComment,
+                                skipped = true,
                                 // https://stackoverflow.com/a/36328890
                                 scanner = Sequence([
                                     Atom("/*"),

@@ -7,7 +7,7 @@
 use slang_solidity_v2_common::versions::LanguageVersion;
 
 use crate::lexer::LexemeKind::{
-    self, EndOfLine, Identifier, MultiLineComment, MultiLineNatSpecComment, PragmaMultiLineComment,
+    self, Identifier, MultiLineNatSpecComment, PragmaMultiLineComment,
     PragmaMultiLineNatSpecComment, PragmaSingleLineComment, PragmaSingleLineNatSpecComment,
     SingleLineNatSpecComment, YulMultiLineComment, YulMultiLineNatSpecComment,
     YulSingleLineComment, YulSingleLineNatSpecComment,
@@ -57,7 +57,6 @@ fn natspec_comments() {
             "/// a\n\n/// b",
             &[
                 (SingleLineNatSpecComment, "/// a\n"),
-                (EndOfLine, "\n"),
                 (SingleLineNatSpecComment, "/// b"),
             ],
         ),
@@ -114,16 +113,16 @@ fn regular_comments() {
             "// a\n///\nx",
             &[(SingleLineNatSpecComment, "///\n"), (Identifier, "x")],
         ),
-        ("// a\n\n// b", &[(EndOfLine, "\n")]),
+        ("// a\n\n// b", &[]),
         // Lines of only slashes are regular comments too
         ("//////", &[]),
         ("// a\n////\n// b", &[]),
         // At the end of the source, an empty `//` line is a comment of its own
         ("// a\n//", &[]),
         // `/**/` and `/***` are regular comments, but `/**` is a `NatSpec` one
-        ("/**/", &[(MultiLineComment, "/**/")]),
-        ("/***/", &[(MultiLineComment, "/***/")]),
-        ("/*** a */", &[(MultiLineComment, "/*** a */")]),
+        ("/**/", &[]),
+        ("/***/", &[]),
+        ("/*** a */", &[]),
         ("/** a **/", &[(MultiLineNatSpecComment, "/** a **/")]),
         (
             "/**\n * a/\n */",
@@ -176,11 +175,7 @@ fn pragma_and_yul_contexts_follow_the_same_rules() {
         let source = format!("{prefix}/** d */ /*** e */ /***/{suffix}");
         assert_eq!(
             comments(&source),
-            [
-                (multi_natspec.clone(), "/** d */".to_owned()),
-                (multi_comment.clone(), "/*** e */".to_owned()),
-                (multi_comment.clone(), "/***/".to_owned()),
-            ],
+            [(multi_natspec.clone(), "/** d */".to_owned()),],
             "{source:?}"
         );
     }
