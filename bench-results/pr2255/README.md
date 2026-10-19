@@ -47,3 +47,15 @@ Combined vs main+opt1: +0.10% parser instructions.
 
 - 1c vs main: −2.12% parser instructions (−1.74% est. cycles); vs main+1: −0.31%.
 - Combined PR vs main+1c: +0.41% instructions (+0.46% cycles), between +0.28% and +0.63% per contract. This is the like-for-like cost of PR 2255.
+
+## Inlining: PR 2254 and the reader's shape
+
+PR 2254 forces `next_lexeme` inline. Each row is a PR 2255 variant with 1b + 3, measured against `main` + 1c + 2254 (2254 alone gives −1.11% on main + 1c). Parser instructions:
+
+| Token-stream reader | without 2254 | with 2254 |
+|---|---|---|
+| 2: pending field (combined) | +1.53% | +1.80% |
+| 2b: pending field, NatSpec handling in `#[cold] #[inline(never)]` methods | +1.44% | +0.36% |
+| outlined `#[inline(never)]` loop (no option 2) | +2.41% | +0.03% |
+
+Branches: `bench/main-opt1c-2254`, `bench/2255-combined-2254`, `bench/2255-combined-no2`, `bench/2255-combined-no2-2254`, `bench/2255-combined-2b`, `bench/2255-combined-2b-2254`.
