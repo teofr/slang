@@ -3,284 +3,275 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Sans+Condensed:wght@600;700&display=swap">
 <style>
-/* Layout: a single reading column for a benchmark report, with wide tables in their own scrollers. */
+/* Layout: one reading column for a benchmark report; wide tables scroll inside their own containers. */
 :root {
   --bg: #f6f7f8; --surface: #ffffff; --fg: #1b2026; --muted: #5b6672; --line: #d9dee3;
-  --accent: #1f6f78; --good: #1d7a3e; --bad: #b3361f; --chip: #e9eef0;
+  --accent: #1f6f78; --good: #1d7a3e; --bad: #b3361f; --chip: #e9eef0; --hl: #e3f1f2;
   --display: "IBM Plex Sans Condensed", "Arial Narrow", system-ui, sans-serif;
   --body: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
   --mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
 }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
   --bg: #12161a; --surface: #1a2026; --fg: #e3e8ec; --muted: #9aa6b1; --line: #2c343c;
-  --accent: #5fb7bf; --good: #5cc282; --bad: #f08a72; --chip: #232b32; color-scheme: dark } }
+  --accent: #5fb7bf; --good: #5cc282; --bad: #f08a72; --chip: #232b32; --hl: #1d2f33; color-scheme: dark } }
 :root[data-theme="dark"] {
   --bg: #12161a; --surface: #1a2026; --fg: #e3e8ec; --muted: #9aa6b1; --line: #2c343c;
-  --accent: #5fb7bf; --good: #5cc282; --bad: #f08a72; --chip: #232b32; color-scheme: dark }
+  --accent: #5fb7bf; --good: #5cc282; --bad: #f08a72; --chip: #232b32; --hl: #1d2f33; color-scheme: dark }
 body { background: var(--bg); color: var(--fg); font-family: var(--body); font-size: 15px; line-height: 1.6; }
-.wrap { max-width: 980px; margin: 0 auto; padding-block: 40px 64px;
+.wrap { max-width: 1000px; margin: 0 auto; padding-block: 40px 64px;
   padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
-  display: grid; gap: 40px; }
+  display: grid; gap: 44px; }
 h1, h2, h3 { font-family: var(--display); text-wrap: balance; line-height: 1.2; margin: 0; }
 h1 { font-size: 2.1rem; font-weight: 700; }
 h2 { font-size: 1.45rem; font-weight: 700; padding-bottom: 6px; border-bottom: 1px solid var(--line); }
 h3 { font-size: 1.1rem; font-weight: 600; }
-p, ul, ol { margin: 0; max-width: 72ch; }
+p, ul, ol { margin: 0; max-width: 74ch; }
+ul, ol { padding-left: 1.2rem; display: grid; gap: 6px; }
 section { display: grid; gap: 14px; min-width: 0; }
 .eyebrow { font-family: var(--mono); font-size: .78rem; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
-.lede { color: var(--muted); max-width: 72ch; }
+.lede { color: var(--muted); max-width: 74ch; }
 code { font-family: var(--mono); font-size: .88em; background: var(--chip); padding: 1px 5px; border-radius: 4px; }
 a { color: var(--accent); }
-a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-.findings { display: grid; gap: 12px; padding: 0; list-style: none; }
-.findings li { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 12px 16px; }
-.findings b { font-weight: 600; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .scroll { overflow-x: auto; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); }
 table { border-collapse: collapse; width: 100%; font-size: .9rem; }
-th, td { padding: 8px 12px; text-align: right; white-space: nowrap; border-bottom: 1px solid var(--line); }
+th, td { padding: 8px 12px; text-align: right; white-space: nowrap; border-bottom: 1px solid var(--line); vertical-align: top; }
 th:first-child, td:first-child { text-align: left; }
 th { font-weight: 600; color: var(--muted); font-size: .8rem; letter-spacing: .02em; }
 td { font-family: var(--mono); font-variant-numeric: tabular-nums; }
-td.name { font-family: var(--body); white-space: normal; min-width: 14rem; }
+td.text { font-family: var(--body); white-space: normal; text-align: left; }
+td.text.wide { min-width: 18rem; }
 tr:last-child td { border-bottom: 0; }
 .g { color: var(--good); } .r { color: var(--bad); } .z { color: var(--muted); }
-.chart { display: grid; gap: 8px; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 16px; }
-.bar-row { display: grid; grid-template-columns: minmax(9rem, 15rem) 1fr 4.5rem; gap: 12px; align-items: center; }
-.bar-row .lbl { font-size: .88rem; min-width: 0; }
-.track { position: relative; height: 18px; }
-.track .zero { position: absolute; left: 50%; top: -4px; bottom: -4px; width: 1px; background: var(--muted); }
-.bar { position: absolute; top: 2px; height: 14px; border-radius: 2px; }
-.bar.neg { background: var(--good); right: 50%; } .bar.pos { background: var(--bad); left: 50%; }
-.val { font-family: var(--mono); font-size: .85rem; text-align: right; font-variant-numeric: tabular-nums; }
-.axis { display: grid; grid-template-columns: minmax(9rem, 15rem) 1fr 4.5rem; gap: 12px; font-family: var(--mono); font-size: .75rem; color: var(--muted); }
-.axis .ticks { display: flex; justify-content: space-between; }
-.verdict td:nth-child(2) { font-family: var(--body); white-space: normal; text-align: left; }
-.pill { display: inline-block; font-family: var(--mono); font-size: .75rem; padding: 2px 8px; border-radius: 999px; background: var(--chip); }
-.pill.yes { color: var(--good); } .pill.no { color: var(--bad); } .pill.mid { color: var(--accent); }
-.note { border-left: 3px solid var(--accent); padding: 4px 0 4px 14px; color: var(--muted); max-width: 72ch; }
-.review { display: grid; gap: 14px; }
-.review ul { padding-left: 1.2rem; display: grid; gap: 6px; }
-@media (max-width: 560px) { .bar-row, .axis { grid-template-columns: 7.5rem 1fr 3.8rem; gap: 8px; } h1 { font-size: 1.7rem; } }
+.id { display: inline-block; min-width: 2.2rem; text-align: center; font-family: var(--mono); font-weight: 500; font-size: .85rem;
+  padding: 1px 6px; border-radius: 5px; background: var(--chip); color: var(--accent); }
+.combo .id { min-width: 0; margin-right: 3px; }
+.pill { display: inline-block; font-family: var(--body); font-size: .75rem; padding: 2px 8px; border-radius: 999px; background: var(--chip); color: var(--muted); }
+.yes { color: var(--good); } .no { color: var(--bad); }
+.sub { display: block; font-size: .75rem; color: var(--muted); }
+.findings { list-style: none; padding: 0; display: grid; gap: 10px; max-width: none; }
+.findings li { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 12px 16px; }
+.findings b { font-weight: 600; }
+.controls { display: flex; flex-wrap: wrap; gap: 8px 20px; align-items: center; }
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; background: var(--surface); }
+.seg button { font: inherit; font-size: .85rem; border: 0; background: transparent; color: var(--fg); padding: 6px 12px; cursor: pointer; }
+.seg button + button { border-left: 1px solid var(--line); }
+.seg button[aria-pressed="true"] { background: var(--accent); color: var(--surface); }
+label.check { display: inline-flex; gap: 6px; align-items: center; font-size: .9rem; cursor: pointer; }
+#combos tr.best td { background: var(--hl); }
+#combos td.num { min-width: 9.5rem; }
+.note { border-left: 3px solid var(--accent); padding: 4px 0 4px 14px; color: var(--muted); max-width: 74ch; }
+.legend { font-size: .85rem; color: var(--muted); }
+@media (max-width: 560px) { h1 { font-size: 1.7rem; } th, td { padding: 7px 9px; } }
 </style>
 
 <div class="wrap">
 <header style="display:grid;gap:10px">
   <div class="eyebrow">NomicFoundation/slang PR 2255 · parser stage · Callgrind instructions</div>
   <h1>NatSpec Lexing Benchmarks</h1>
-  <p class="lede">PR 2255 lexes each <code>///</code> line separately and merges consecutive lines in the token stream. In review, Omar suggested three follow-ups. This page benchmarks each one (plus a variant called 1b, and the combination) on its own branch in <code>teofr/slang</code>. It closes with an independent review of the changes.</p>
+  <p class="lede">Every optimization tried around PR 2255, each with an ID, and every combination of them measured on <code>main</code> and on PR 2255. All numbers are the geometric mean of the parser stage's instruction count over 9 contracts. Negative is faster.</p>
 </header>
 
 <section>
   <h2>Summary</h2>
   <ul class="findings">
-    <li><b>PR 2255 costs +2.20% parser instructions</b> against its merge base. Merge base and current <code>main</code> are identical on the parser stage (±0.00%). No other stage moves, and allocations are unchanged.</li>
-    <li><b>Skipping trivia in the lexer (option 1 / 1b) is where the speed comes from:</b> −2.88% / −2.94% on top of the PR. The pending-field refactor (2) gives −0.32%, and the range change (3) gives nothing.</li>
-    <li><b>All three together give −3.84%</b> against the PR, which matches Omar's "3–4%". Against the merge base that is −1.72%.</li>
-    <li><b>Trivia skipping works on <code>main</code> too.</b> Option 1 gives −1.82%. Option 1c, which skips all regular trivia (<code>main</code> already merges <code>///</code> lines in its lexer, so it needs none of them), gives −2.12%.</li>
-    <li><b>On equal footing, PR 2255 costs about +0.41%</b> of parser instructions: combined against <code>main</code> + 1c, between +0.28% and +0.63% per contract. That is about 0.2% of the whole pipeline.</li>
-    <li><b>With the right reader and PR 2254, the cost drops to +0.03%.</b> PR 2254 forces <code>next_lexeme</code> inline. Combined with an outlined comment reader, the PR matches <code>main</code> + 1c + 2254. On top of the pending-field design, 2254 is unnecessary (+0.27%) unless the NatSpec handling is marked <code>#[cold]</code> (option 2b, +0.36%). See "Inlining" below.</li>
+    <li><b>Best on <code>main</code>: <span class="id">1c</span> + <span class="id">4</span>, −3.20%.</b> Best on PR 2255: <span class="id">1b</span> + <span class="id">2c</span> + <span class="id">3</span> + <span class="id">4</span>, −3.17% against <code>main</code>. The two are level, so PR 2255's design costs nothing once both sides get the same optimizations.</li>
+    <li><b><span class="id">0</span> alone costs +2.20%.</b> Most of that goes away with lexer skipping (<span class="id">1a</span> / <span class="id">1b</span> / <span class="id">1c</span>), which is also the biggest single win on either base.</li>
+    <li><b><span class="id">4</span> depends on the reader.</b> It helps <code>main</code>'s token loop and the PR's own outlined reader <span class="id">2c</span>, is what makes <span class="id">2b</span> pay off, and slightly hurts the pending field <span class="id">2a</span>.</li>
+    <li><b>Lexer skipping has a design cost.</b> The lexer stops returning every character of the source, which works against the plan to put trivia in the CST. Treat it as temporary.</li>
   </ul>
 </section>
 
 <section>
-  <h2>Parser stage, all variants</h2>
-  <p>Geometric mean of the instruction-count change across 9 contracts. Each bar is measured against the base named in the table below. Green is fewer instructions.</p>
-  <div class="chart" role="img" aria-label="Bar chart of parser instruction change per variant">
-    <div class="bar-row"><span class="lbl">PR 2255 vs merge base</span><div class="track"><span class="zero"></span><span class="bar pos" style="width:calc(2.20% / 5 * 50)"></span></div><span class="val r">+2.20%</span></div>
-    <div class="bar-row"><span class="lbl">1 · skip whitespace + <code>//</code></span><div class="track"><span class="zero"></span><span class="bar neg" style="width:calc(2.88% / 5 * 50)"></span></div><span class="val g">−2.88%</span></div>
-    <div class="bar-row"><span class="lbl">1b · skip all regular trivia</span><div class="track"><span class="zero"></span><span class="bar neg" style="width:calc(2.94% / 5 * 50)"></span></div><span class="val g">−2.94%</span></div>
-    <div class="bar-row"><span class="lbl">2 · pending comment field</span><div class="track"><span class="zero"></span><span class="bar neg" style="width:calc(0.32% / 5 * 50)"></span></div><span class="val g">−0.32%</span></div>
-    <div class="bar-row"><span class="lbl">3 · range without line break</span><div class="track"><span class="zero"></span></div><span class="val z">±0.00%</span></div>
-    <div class="bar-row"><span class="lbl">1b + 2 + 3 combined</span><div class="track"><span class="zero"></span><span class="bar neg" style="width:calc(3.84% / 5 * 50)"></span></div><span class="val g">−3.84%</span></div>
-    <div class="bar-row"><span class="lbl">1 on main vs main</span><div class="track"><span class="zero"></span><span class="bar neg" style="width:calc(1.82% / 5 * 50)"></span></div><span class="val g">−1.82%</span></div>
-    <div class="bar-row"><span class="lbl">1c on main vs main</span><div class="track"><span class="zero"></span><span class="bar neg" style="width:calc(2.12% / 5 * 50)"></span></div><span class="val g">−2.12%</span></div>
-    <div class="bar-row"><span class="lbl">combined vs main + 1c</span><div class="track"><span class="zero"></span><span class="bar pos" style="width:calc(0.41% / 5 * 50)"></span></div><span class="val r">+0.41%</span></div>
-    <div class="axis"><span></span><div class="ticks"><span>−5%</span><span>0</span><span>+5%</span></div><span></span></div>
-  </div>
-
+  <h2>Optimizations</h2>
+  <p>Options that share a number are alternatives: pick at most one 1 and one 2.</p>
   <div class="scroll">
   <table>
-    <thead><tr><th>Variant</th><th>Base</th><th>Instructions</th><th>Est. cycles</th><th>Total bytes</th><th>Total blocks</th><th>vs merge base</th></tr></thead>
+    <thead><tr><th>ID</th><th>What it does</th><th>On <code>main</code></th><th>On PR 2255</th></tr></thead>
     <tbody>
-      <tr><td class="name">PR 2255 as is</td><td>merge base</td><td class="r">+2.20%</td><td class="r">+2.74%</td><td class="z">+0.00%</td><td class="z">+0.00%</td><td class="r">+2.20%</td></tr>
-      <tr><td class="name">1 · skip whitespace + <code>//</code></td><td>PR 2255</td><td class="g">−2.88%</td><td class="g">−2.70%</td><td class="z">+0.00%</td><td class="z">+0.00%</td><td class="g">−0.74%</td></tr>
-      <tr><td class="name">1b · skip all regular trivia, merge from source</td><td>PR 2255</td><td class="g">−2.94%</td><td class="g">−2.66%</td><td class="z">+0.00%</td><td class="z">+0.00%</td><td class="g">−0.80%</td></tr>
-      <tr><td class="name">2 · pending comment field</td><td>PR 2255</td><td class="g">−0.32%</td><td class="g">−1.32%</td><td class="z">+0.00%</td><td class="z">+0.00%</td><td class="r">+1.88%</td></tr>
-      <tr><td class="name">3 · range without line break</td><td>PR 2255</td><td class="z">−0.00%</td><td class="z">−0.07%</td><td class="z">+0.00%</td><td class="z">+0.00%</td><td class="r">+2.20%</td></tr>
-      <tr><td class="name">1b + 2 + 3 combined</td><td>PR 2255</td><td class="g">−3.84%</td><td class="g">−3.82%</td><td class="z">+0.00%</td><td class="z">+0.00%</td><td class="g">−1.72%</td></tr>
-      <tr><td class="name">1 on main</td><td>main</td><td class="g">−1.82%</td><td class="g">−1.68%</td><td class="z">+0.00%</td><td class="z">+0.00%</td><td>—</td></tr>
-      <tr><td class="name">1c · skip all regular trivia, on main</td><td>main</td><td class="g">−2.12%</td><td class="g">−1.74%</td><td class="z">+0.00%</td><td class="z">+0.00%</td><td>—</td></tr>
-      <tr><td class="name">combined vs 1 on main</td><td>main + 1</td><td class="r">+0.10%</td><td>—</td><td>—</td><td>—</td><td>—</td></tr>
-      <tr><td class="name"><b>combined vs 1c on main</b> (fair comparison)</td><td>main + 1c</td><td class="r">+0.41%</td><td class="r">+0.46%</td><td>—</td><td>—</td><td>—</td></tr>
-    </tbody>
-  </table>
-  </div>
-  <p class="note">Quote instructions. Estimated cycles come from a synthetic cache model that is sensitive to code layout. That is likely why option 2 shows −1.32% cycles but only −0.32% instructions.</p>
-</section>
-
-<section>
-  <h2>Per contract</h2>
-  <p>Parser instruction change per contract. Columns 1 to combined are measured against PR 2255. Comment-dense sources such as <code>pointer_libraries</code> move the most.</p>
-  <div class="scroll">
-  <table>
-    <thead><tr><th>Contract</th><th>PR 2255 instr.</th><th>PR vs base</th><th>1</th><th>1b</th><th>2</th><th>3</th><th>combined</th><th>main instr.</th><th>1 on main</th></tr></thead>
-    <tbody>
-      <tr><td>cooldogs</td><td>11,406,998</td><td class="r">+1.08%</td><td class="g">−1.69%</td><td class="g">−1.32%</td><td class="g">−0.11%</td><td class="z">+0.00%</td><td class="g">−1.92%</td><td>11,284,958</td><td class="g">−1.11%</td></tr>
-      <tr><td>create_x</td><td>12,521,260</td><td class="r">+1.76%</td><td class="g">−2.42%</td><td class="g">−2.34%</td><td class="g">−0.22%</td><td class="z">+0.00%</td><td class="g">−3.13%</td><td>12,304,415</td><td class="g">−1.50%</td></tr>
-      <tr><td>ens_registrar_controller</td><td>11,517,108</td><td class="r">+1.94%</td><td class="g">−2.79%</td><td class="g">−2.92%</td><td class="g">−0.23%</td><td class="z">−0.00%</td><td class="g">−3.75%</td><td>11,297,865</td><td class="g">−1.78%</td></tr>
-      <tr><td>merkle_proof</td><td>1,007,075</td><td class="r">+1.93%</td><td class="g">−2.76%</td><td class="g">−2.68%</td><td class="g">−0.19%</td><td class="z">−0.00%</td><td class="g">−3.43%</td><td>987,993</td><td class="g">−1.71%</td></tr>
-      <tr><td>multicall3</td><td>1,144,474</td><td class="r">+2.45%</td><td class="g">−2.78%</td><td class="g">−2.73%</td><td class="g">−0.37%</td><td class="z">−0.00%</td><td class="g">−3.64%</td><td>1,117,093</td><td class="g">−1.71%</td></tr>
-      <tr><td>one_step_leverage_f</td><td>11,099,336</td><td class="r">+2.63%</td><td class="g">−2.98%</td><td class="g">−3.20%</td><td class="g">−0.38%</td><td class="z">−0.00%</td><td class="g">−4.13%</td><td>10,814,993</td><td class="g">−1.83%</td></tr>
-      <tr><td>pointer_libraries</td><td>8,691,987</td><td class="r">+3.28%</td><td class="g">−4.40%</td><td class="g">−5.06%</td><td class="g">−0.64%</td><td class="z">−0.00%</td><td class="g">−6.42%</td><td>8,416,631</td><td class="g">−2.91%</td></tr>
-      <tr><td>ui_pool_data_provider_v3</td><td>12,298,507</td><td class="r">+2.20%</td><td class="g">−3.20%</td><td class="g">−3.34%</td><td class="g">−0.30%</td><td class="z">−0.00%</td><td class="g">−4.27%</td><td>12,034,079</td><td class="g">−2.08%</td></tr>
-      <tr><td>uniswap</td><td>82,966,353</td><td class="r">+2.58%</td><td class="g">−2.84%</td><td class="g">−2.82%</td><td class="g">−0.41%</td><td class="z">−0.02%</td><td class="g">−3.78%</td><td>80,886,343</td><td class="g">−1.72%</td></tr>
+      <tr><td><span class="id">0</span></td><td class="text wide"><b>PR 2255.</b> The lexer emits each <code>///</code> line, line break and whitespace on its own; the token stream merges consecutive <code>///</code> lines and attaches the comment to the next token.</td><td class="text">This is the change: <span class="r">+2.20%</span></td><td class="text">—</td></tr>
+      <tr><td><span class="id">1a</span></td><td class="text wide">The lexer skips whitespace and <code>//</code> comments (a <code>skipped</code> flag on trivia in the language definition). Line breaks and <code>/* */</code> are kept.</td><td class="text"><span class="yes">✓</span> <span class="g">−1.82%</span></td><td class="text"><span class="yes">✓</span> <span class="g">−2.88%</span> vs PR</td></tr>
+      <tr><td><span class="id">1b</span></td><td class="text wide">The lexer skips all regular trivia, and consecutive <code>///</code> lines merge when the source between them is one line break plus spaces or tabs.</td><td class="text"><span class="no">✗</span> <code>main</code> merges in the lexer; use 1c</td><td class="text"><span class="yes">✓</span> <span class="g">−2.94%</span> vs PR</td></tr>
+      <tr><td><span class="id">1c</span></td><td class="text wide">The lexer skips all regular trivia. Safe on <code>main</code> because its lexer already merges <code>///</code> lines into one lexeme.</td><td class="text"><span class="yes">✓</span> <span class="g">−2.12%</span></td><td class="text"><span class="no">✗</span> needs line breaks to merge; use 1b</td></tr>
+      <tr><td><span class="id">2a</span></td><td class="text wide">The comment being read lives in a <code>pending</code> field: one loop, one <code>next_lexeme</code> call site.</td><td class="text"><span class="no">✗</span> no reader on <code>main</code></td><td class="text"><span class="yes">✓</span> <span class="g">−0.32%</span> vs PR</td></tr>
+      <tr><td><span class="id">2b</span></td><td class="text wide">2a, with NatSpec reading and attaching moved into <code>#[cold] #[inline(never)]</code> methods.</td><td class="text"><span class="no">✗</span> no reader on <code>main</code></td><td class="text"><span class="yes">✓</span> only measured with 1b + 3</td></tr>
+      <tr><td><span class="id">2c</span></td><td class="text wide">The PR's own reader: an <code>#[inline(never)]</code> loop reads the rest of the comment. This is the default, so "X + 2c" is the same code as "X".</td><td class="text"><span class="no">✗</span> no reader on <code>main</code></td><td class="text">default, ±0.00%</td></tr>
+      <tr><td><span class="id">3</span></td><td class="text wide"><code>///</code> ranges end before the trailing line break; the line-break trimming in <code>memory_safety.rs</code> goes away.</td><td class="text">possible (lexer regex), not built</td><td class="text"><span class="yes">✓</span> <span class="z">±0.00%</span> vs PR</td></tr>
+      <tr><td><span class="id">4</span></td><td class="text wide">PR 2254: <code>#[inline(always)]</code> on both <code>next_lexeme</code> functions.</td><td class="text"><span class="yes">✓</span> <span class="g">−1.11%</span> on top of 1c</td><td class="text"><span class="yes">✓</span> depends on 2</td></tr>
     </tbody>
   </table>
   </div>
 </section>
 
 <section>
-  <h2>PR against the fair baseline</h2>
-  <p>Option 1c on <code>main</code> skips every regular trivia, just as the combined PR branch does. That makes it the like-for-like baseline for the PR.</p>
-  <div class="scroll">
-  <table>
-    <thead><tr><th>Contract</th><th>1c vs main</th><th>combined vs main + 1c</th></tr></thead>
-    <tbody>
-      <tr><td>cooldogs</td><td class="g">−1.14%</td><td class="r">+0.29%</td></tr>
-      <tr><td>create_x</td><td class="g">−1.73%</td><td class="r">+0.31%</td></tr>
-      <tr><td>ens_registrar_controller</td><td class="g">−2.20%</td><td class="r">+0.33%</td></tr>
-      <tr><td>merkle_proof</td><td class="g">−1.90%</td><td class="r">+0.35%</td></tr>
-      <tr><td>multicall3</td><td class="g">−1.86%</td><td class="r">+0.60%</td></tr>
-      <tr><td>one_step_leverage_f</td><td class="g">−2.22%</td><td class="r">+0.63%</td></tr>
-      <tr><td>pointer_libraries</td><td class="g">−3.62%</td><td class="r">+0.28%</td></tr>
-      <tr><td>ui_pool_data_provider_v3</td><td class="g">−2.49%</td><td class="r">+0.32%</td></tr>
-      <tr><td>uniswap</td><td class="g">−1.88%</td><td class="r">+0.59%</td></tr>
-    </tbody>
-  </table>
+  <h2>Combinations</h2>
+  <p>Every combination, applied to each base. Both columns are measured against <code>main</code>, so they compare directly. The PR column also gives the change against PR 2255 in small type. <span class="pill">incompatible</span> means the combination can't be built on that base; <code>-</code> means it hasn't been measured.</p>
+  <div class="controls">
+    <div class="seg" role="group" aria-label="Sort combinations">
+      <button type="button" id="sort-default" aria-pressed="true">Default order</button>
+      <button type="button" id="sort-main" aria-pressed="false">Best on main</button>
+      <button type="button" id="sort-pr" aria-pressed="false">Best on PR 2255</button>
+    </div>
+    <label class="check"><input type="checkbox" id="measured-only"> Measured only</label>
   </div>
+  <div class="scroll">
+    <table id="combos">
+      <thead><tr><th>Combination</th><th>Applied to <code>main</code></th><th>Applied to PR 2255</th></tr></thead>
+      <tbody></tbody>
+    </table>
+  </div>
+  <p class="legend">Highlighted rows hold the best measured result in a column.</p>
 </section>
 
 <section>
-  <h2>Inlining: PR 2254 and the reader's shape</h2>
-  <p>PR 2254 adds <code>#[inline(always)]</code> to both <code>next_lexeme</code> functions. Each row below is a PR 2255 variant with 1b and 3, measured against <code>main</code> + 1c + 2254, which uses the same lexer skipping and the same forced inlining. On its own, 2254 gives −1.11% on <code>main</code> + 1c.</p>
+  <h2>Inlining: <span class="id">4</span> and the reader</h2>
+  <p>Each cell is a PR 2255 build with <span class="id">1b</span> + <span class="id">3</span>, measured against <code>main</code> + <span class="id">1c</span> + <span class="id">4</span>, which has the same lexer skipping and inlining.</p>
   <div class="scroll">
   <table>
-    <thead><tr><th>Token-stream reader</th><th>without 2254</th><th>with 2254</th></tr></thead>
+    <thead><tr><th>Reader</th><th>without 4</th><th>with 4</th></tr></thead>
     <tbody>
-      <tr><td class="name">2 · pending field, one <code>next_lexeme</code> call site (combined)</td><td class="r">+1.53%</td><td class="r">+1.80%</td></tr>
-      <tr><td class="name">2b · pending field, NatSpec reading and attaching in <code>#[cold] #[inline(never)]</code> methods</td><td class="r">+1.44%</td><td class="r">+0.36%</td></tr>
-      <tr><td class="name">outlined · <code>#[inline(never)]</code> loop reads the rest of the comment (PR's shape, without option 2)</td><td class="r">+2.41%</td><td><b>+0.03%</b></td></tr>
+      <tr><td><span class="id">2a</span> pending field</td><td class="r">+1.53%</td><td class="r">+1.80%</td></tr>
+      <tr><td><span class="id">2b</span> cold pending field</td><td class="r">+1.44%</td><td class="r">+0.36%</td></tr>
+      <tr><td><span class="id">2c</span> outlined loop</td><td class="r">+2.41%</td><td class="z"><b>+0.03%</b></td></tr>
     </tbody>
   </table>
   </div>
-  <div class="scroll">
-  <table>
-    <thead><tr><th>Contract</th><th>combined</th><th>combined + 2254</th><th>outlined</th><th>outlined + 2254</th><th>2b</th><th>2b + 2254</th></tr></thead>
-    <tbody>
-      <tr><td>cooldogs</td><td class="r">+1.12%</td><td class="r">+1.67%</td><td class="r">+1.73%</td><td class="g">−0.10%</td><td class="r">+0.98%</td><td class="r">+0.17%</td></tr>
-      <tr><td>create_x</td><td class="r">+1.36%</td><td class="r">+1.68%</td><td class="r">+2.18%</td><td class="g">−0.10%</td><td class="r">+1.24%</td><td class="r">+0.21%</td></tr>
-      <tr><td>ens_registrar_controller</td><td class="r">+1.43%</td><td class="r">+1.70%</td><td class="r">+2.30%</td><td class="g">−0.10%</td><td class="r">+1.30%</td><td class="r">+0.23%</td></tr>
-      <tr><td>merkle_proof</td><td class="r">+1.34%</td><td class="r">+1.73%</td><td class="r">+2.12%</td><td class="g">−0.07%</td><td class="r">+1.21%</td><td class="r">+0.24%</td></tr>
-      <tr><td>multicall3</td><td class="r">+1.72%</td><td class="r">+2.00%</td><td class="r">+2.63%</td><td class="r">+0.27%</td><td class="r">+1.64%</td><td class="r">+0.60%</td></tr>
-      <tr><td>one_step_leverage_f</td><td class="r">+1.70%</td><td class="r">+1.99%</td><td class="r">+2.63%</td><td class="r">+0.32%</td><td class="r">+1.63%</td><td class="r">+0.63%</td></tr>
-      <tr><td>pointer_libraries</td><td class="r">+1.82%</td><td class="r">+1.79%</td><td class="r">+3.18%</td><td class="g">−0.11%</td><td class="r">+1.78%</td><td class="r">+0.31%</td></tr>
-      <tr><td>ui_pool_data_provider_v3</td><td class="r">+1.55%</td><td class="r">+1.71%</td><td class="r">+2.53%</td><td class="g">−0.05%</td><td class="r">+1.44%</td><td class="r">+0.30%</td></tr>
-      <tr><td>uniswap</td><td class="r">+1.79%</td><td class="r">+2.00%</td><td class="r">+2.77%</td><td class="r">+0.25%</td><td class="r">+1.73%</td><td class="r">+0.58%</td></tr>
-    </tbody>
-  </table>
-  </div>
-  <p class="note">Forcing <code>next_lexeme</code> inline only pays off when the NatSpec handling is outside the hot loop. With the pending field inline, 2254 makes things slightly worse. <code>#[cold]</code> alone does nothing (−0.09% against combined) but recovers most of the gain together with 2254. A separate outlined loop for the rest of the comment does about 0.3% better still. All of this depends on the compiler's inlining decisions and could shift with a Rust or LALRPOP update.</p>
+  <p class="note">Forcing <code>next_lexeme</code> inline only pays off when the NatSpec handling is outside the hot loop. <code>#[cold]</code> alone does nothing, but recovers most of the gain together with 4. A separate outlined loop does about 0.3% better still. This depends on the compiler's inlining decisions and could shift with a Rust or LALRPOP update.</p>
 </section>
 
 <section>
-  <h2>What each branch changes</h2>
+  <h2>Measured runs</h2>
+  <p>Each run's parser instructions against <code>main</code>, overall and per contract.</p>
   <div class="scroll">
-  <table>
-    <thead><tr><th>Branch</th><th>Commit</th><th>Change</th><th>Run</th></tr></thead>
-    <tbody>
-      <tr><td><code>bench/2255-mergebase-baseline</code></td><td>dfed2de5</td><td class="name">PR 2255's base (3636a557), unchanged</td><td><a href="https://github.com/teofr/slang/actions/runs/39174857012">run</a></td></tr>
-      <tr><td><code>bench/2255-baseline</code></td><td>c1361d8c</td><td class="name">PR 2255 head (2c90dfcc), unchanged</td><td><a href="https://github.com/teofr/slang/actions/runs/39174850966">run</a></td></tr>
-      <tr><td><code>bench/2255-opt1</code></td><td>3fdf6a5b</td><td class="name">New <code>skipped</code> flag on trivia definitions; whitespace and <code>//</code> skipped in all three lexical contexts. Line breaks and <code>/* */</code> kept so <code>/// a\n/* x */ /// b</code> still splits.</td><td><a href="https://github.com/teofr/slang/actions/runs/39174859517">run</a></td></tr>
-      <tr><td><code>bench/2255-opt1b</code></td><td>387e5108</td><td class="name">On top of 1: line breaks and <code>/* */</code> skipped too. Consecutive <code>///</code> lines merge when the source between them is one line break plus spaces or tabs.</td><td><a href="https://github.com/teofr/slang/actions/runs/39174861645">run</a></td></tr>
-      <tr><td><code>bench/2255-opt2</code></td><td>4ecfe58b</td><td class="name"><code>CommentReader</code> becomes a <code>pending</code> field; one loop and one <code>next_lexeme</code> call site; no <code>#[inline(never)]</code> reader.</td><td><a href="https://github.com/teofr/slang/actions/runs/39174864296">run</a></td></tr>
-      <tr><td><code>bench/2255-opt3</code></td><td>840c7b5c</td><td class="name"><code>///</code> ranges end before the trailing line break; the line-break stripping in <code>memory_safety.rs</code> is removed.</td><td><a href="https://github.com/teofr/slang/actions/runs/39174866083">run</a></td></tr>
-      <tr><td><code>bench/2255-combined</code></td><td>5b7977c1</td><td class="name">1b + 2 + 3: pending field, merge by source gap, ranges without line break.</td><td><a href="https://github.com/teofr/slang/actions/runs/39174868396">run</a></td></tr>
-      <tr><td><code>bench/main-baseline</code></td><td>152c8b07</td><td class="name">main (7331a2ff), unchanged</td><td><a href="https://github.com/teofr/slang/actions/runs/39174853901">run</a></td></tr>
-      <tr><td><code>bench/main-opt1</code></td><td>463e70f8</td><td class="name">Option 1 applied to main</td><td><a href="https://github.com/teofr/slang/actions/runs/39174870857">run</a></td></tr>
-      <tr><td><code>bench/main-opt1c-2254</code></td><td>a211f485</td><td class="name">1c on main + PR 2254 (always inline <code>next_lexeme</code>)</td><td><a href="https://github.com/teofr/slang/actions/runs/39227405589">run</a></td></tr>
-      <tr><td><code>bench/2255-combined-2254</code></td><td>9c4b83ae</td><td class="name">combined + PR 2254</td><td><a href="https://github.com/teofr/slang/actions/runs/39224370171">run</a></td></tr>
-      <tr><td><code>bench/2255-combined-no2</code></td><td>7e7623c7</td><td class="name">combined with option 2 reverted: <code>#[inline(never)]</code> loop reads the rest of the comment</td><td><a href="https://github.com/teofr/slang/actions/runs/39224372893">run</a></td></tr>
-      <tr><td><code>bench/2255-combined-no2-2254</code></td><td>ffbbb9c1</td><td class="name">the above + PR 2254</td><td><a href="https://github.com/teofr/slang/actions/runs/39224376046">run</a></td></tr>
-      <tr><td><code>bench/2255-combined-2b</code></td><td>43dae41f</td><td class="name">2b: pending field, NatSpec reading and attaching in <code>#[cold] #[inline(never)]</code> methods</td><td><a href="https://github.com/teofr/slang/actions/runs/39229465034">run</a></td></tr>
-      <tr><td><code>bench/2255-combined-2b-2254</code></td><td>20499914</td><td class="name">2b + PR 2254</td><td><a href="https://github.com/teofr/slang/actions/runs/39229467307">run</a></td></tr>
-      <tr><td><code>bench/main-opt1c</code></td><td>be5c4cd0</td><td class="name">On top of 1 on main: line breaks and <code>/* */</code> skipped too. Safe there because <code>main</code>'s lexer already merges <code>///</code> lines into one lexeme.</td><td><a href="https://github.com/teofr/slang/actions/runs/39219851677">run</a></td></tr>
-    </tbody>
-  </table>
+    <table id="runs">
+      <thead><tr><th>Combination</th><th>Base</th><th>Branch</th><th>Instr.</th><th>Cycles</th><th>cooldogs</th><th>create_x</th><th>ens_registrar</th><th>merkle_proof</th><th>multicall3</th><th>one_step_lev.</th><th>pointer_libs</th><th>ui_pool_v3</th><th>uniswap</th></tr></thead>
+      <tbody></tbody>
+    </table>
   </div>
-  <p class="note">Every branch carries two CI-only commits so <code>benchmark_cargo_slang_v2</code> runs a dry run on <code>bench/**</code> pushes without a Bencher key. Parser tests and all 812 CST and binder snapshots pass locally on each code branch. The diagnostics snapshots need a <code>solc</code> download that this environment blocks.</p>
+  <p class="note">Plus <code>bench/2255-mergebase-baseline</code> (<a href="https://github.com/teofr/slang/actions/runs/39174857012">run</a>), PR 2255's base, which equals <code>main</code> on the parser stage (±0.00%). Every branch carries two CI-only commits that run a dry-run benchmark on <code>bench/**</code> pushes without a Bencher key.</p>
 </section>
 
 <section>
   <h2>Method</h2>
-  <ul style="padding-left:1.2rem;display:grid;gap:6px">
-    <li><code>slang_v2</code> gungraun suite (Callgrind and DHAT), one dry run per branch on <code>ubuntu-24.04</code> GitHub runners. Numbers are taken from each job's log.</li>
-    <li>54 benchmarks: 6 pipeline stages × 9 contracts. Only the <code>parser</code> stage times parsing; the others parse in setup and moved by at most 0.006%.</li>
-    <li>Instruction counts are deterministic. Merge base and main are equal on the parser stage (±0.005%), which sets the noise floor.</li>
-    <li>Raw logs, parsed metrics and these tables are committed to <code>bench/2255-results</code> in <code>teofr/slang</code>.</li>
+  <ul>
+    <li><code>slang_v2</code> gungraun suite (Callgrind and DHAT), one dry run per branch on GitHub's <code>ubuntu-24.04</code> runners, numbers taken from each job's log.</li>
+    <li>54 benchmarks: 6 pipeline stages × 9 contracts. Only the <code>parser</code> stage times parsing; the others parse in setup and moved by at most 0.006%. No variant changed allocations.</li>
+    <li>Instruction counts are deterministic; PR 2255's base and <code>main</code> match to ±0.005% on the parser stage, which sets the noise floor. Estimated cycles come from a cache model that is sensitive to code layout, so quote instructions.</li>
+    <li>Parser tests and all 812 CST and binder snapshots pass on every code branch. Diagnostics snapshots need a <code>solc</code> download that the test environment blocks.</li>
+    <li>Raw logs, parsed metrics and scripts are on <code>bench/2255-results</code> in <code>teofr/slang</code>.</li>
   </ul>
 </section>
 
-<section class="review">
+<section>
   <h2>Independent review</h2>
-  <p class="lede">Written by a separate Claude agent (Fable) that read every diff and the raw results without editing anything. Its factual claims about the numbers and about <code>main</code> were re-checked before publishing.</p>
-
-  <h3>Verdict</h3>
+  <p class="lede">Written by a separate Claude agent (Fable) that read every diff and the first round of results (<span class="id">0</span>, <span class="id">1a</span>, <span class="id">1b</span>, <span class="id">2a</span>, <span class="id">3</span>) without editing anything. It came before <span class="id">1c</span>, <span class="id">2b</span> and <span class="id">4</span> were measured; notes below mark where later results change its conclusions.</p>
   <div class="scroll">
-  <table class="verdict">
+  <table>
     <thead><tr><th>Option</th><th>Assessment</th><th>Call</th></tr></thead>
     <tbody>
-      <tr><td>PR 2255</td><td>As is, it costs about +2.2% on the parser stage, roughly 1% of the whole pipeline. On equal footing with <code>main</code> the cost is 0.1–0.5%. In exchange it gets a simpler lexer and solc-like merging rules.</td><td><span class="pill yes">recommend, with changes</span></td></tr>
-      <tr><td>1</td><td>Safe, but keeps the state machine; superseded by 1b.</td><td><span class="pill no">don't recommend alone</span></td></tr>
-      <tr><td>1b</td><td>Merging by source gap is the cleanest formulation and survives trivia coming back. Lexer skipping is optional and temporary.</td><td><span class="pill yes">recommend the merge logic</span></td></tr>
-      <tr><td>2</td><td>Faithful refactor, one call site, no measurable cost.</td><td><span class="pill yes">recommend</span></td></tr>
-      <tr><td>3</td><td>Right semantics (symmetric with <code>/** */</code>, no end-of-file special case). After rebasing, also remove the second trim on <code>main</code>'s <code>memory_safety.rs:70</code>.</td><td><span class="pill yes">recommend</span></td></tr>
-      <tr><td>combined</td><td>Present it as "no regression", not "3.8% faster": its gain over <code>main</code> with the same lexer skipping is about 0. Measured after the review, against <code>main</code> + 1c it is a +0.41% cost.</td><td><span class="pill mid">recommend, reframed</span></td></tr>
+      <tr><td><span class="id">0</span></td><td class="text wide">Simpler lexer and merging rules that match solc. The merge belongs in the token stream: the reverted regex needed four fragments per context and couldn't express "only the last comment counts".</td><td class="text"><span class="yes">recommend, with changes</span></td></tr>
+      <tr><td><span class="id">1a</span></td><td class="text wide">Safe, but superseded by 1b.</td><td class="text"><span class="no">don't recommend alone</span></td></tr>
+      <tr><td><span class="id">1b</span></td><td class="text wide">Merging by source gap is equivalent to the PR's state machine (no differing input found) and survives trivia coming back. The skipping is optional and temporary; land it separately. The <code>skipped</code> flag isn't validated, so setting it on a NatSpec item would silently break NatSpec. Skip by category instead, or add a check.</td><td class="text"><span class="yes">recommend the merge logic</span></td></tr>
+      <tr><td><span class="id">2a</span></td><td class="text wide">Faithful refactor with one call site. <i>Later results: with <span class="id">4</span>, <span class="id">2c</span> is faster; <span class="id">2a</span> is only best without 4.</i></td><td class="text"><span class="yes">recommend</span> <span class="sub">superseded</span></td></tr>
+      <tr><td><span class="id">3</span></td><td class="text wide">Right semantics (symmetric with <code>/** */</code>). After rebasing, also remove the second trim on <code>main</code>'s <code>memory_safety.rs:70</code>.</td><td class="text"><span class="yes">recommend</span></td></tr>
     </tbody>
   </table>
   </div>
-
-  <h3>Correctness</h3>
   <ul>
-    <li>The PR's <code>CommentReader</code> matches solc: the last comment wins, a blank line or any other comment splits a <code>///</code> run, <code>////</code> is a regular comment, and regular comments don't drop a pending doc comment. Checked: <code>\r</code>-only and CRLF endings, <code>///</code> at end of file, <code>/** */</code> after <code>///</code>, lexical-context switches, unrecognized lexemes.</li>
-    <li>The 1b gap check is equivalent to the PR's state machine. Every skipped <code>//</code> or <code>/* */</code> contains a <code>/</code>, and a second line break contains <code>\n</code> or <code>\r</code>. So "one line break plus spaces or tabs" holds exactly when the PR would merge. No input was found where they differ.</li>
-    <li>Not introduced here: solc ends a <code>///</code> line at form feed or vertical tab (<code>\x0b</code>, <code>\x0c</code>), while slang's <code>[^\r\n]*</code> runs through them. Worth a test.</li>
+    <li>Correctness: CRLF and <code>\r</code>-only endings, <code>///</code> at end of file, <code>////</code>, <code>/** */</code> after <code>///</code> and lexical-context switches all behave like solc. Not introduced here: solc ends a <code>///</code> line at <code>\x0b</code>/<code>\x0c</code>, slang doesn't.</li>
+    <li>Suggested tests: <code>is_line_continuation</code> on <code>"\n"</code>, <code>"\r\n  "</code>, <code>"\r"</code>, <code>"\n\n"</code>, <code>"\n/* x */ "</code>, <code>""</code>. Write down in the PR body why the merging regex was reverted.</li>
+    <li>Updated path, combining the review with later results: land <span class="id">0</span> + <span class="id">1b</span>'s merge-by-gap + <span class="id">3</span>, keep the PR's reader <span class="id">2c</span>, and add <span class="id">4</span>. Put the lexer skipping in its own small PR labelled temporary.</li>
   </ul>
-
-  <h3>Code improvements</h3>
-  <ul>
-    <li>A per-item <code>skipped = true</code> in the language definition leaks a lexer detail into the language model, and nothing validates it: setting it on a NatSpec item would silently break NatSpec. Either skip every trivia that isn't a NatSpec comment as a code-generation policy, or add a check that rejects <code>skipped</code> on NatSpec items. The <code>FilterResult::Skip</code> callback is fine compared with <code>#[logos(skip)]</code>.</li>
-    <li>Skipped lexeme kinds are still generated but never produced. That's acceptable if the skipping is temporary; otherwise stop generating them.</li>
-    <li>Once the lexer skips trivia itself, rename <code>NonTriviaTokens</code>. Add unit tests for <code>is_line_continuation</code> (<code>"\n"</code>, <code>"\r\n  "</code>, <code>"\r"</code>, <code>"\n\n"</code>, <code>"\n/* x */ "</code>, <code>""</code>).</li>
-    <li>The PR commit has no body. Write down why the merging regex was reverted, since the benchmark doesn't argue for it.</li>
-  </ul>
-
-  <h3>Benchmark validity</h3>
-  <ul>
-    <li>Single deterministic runs are enough for instructions. The 11-commit gap between the PR base and <code>main</code> doesn't bias the parser numbers.</li>
-    <li>The review called combined against <code>main</code> with option 1 (+0.10%) the fair comparison. Option 1c, measured afterwards, is the stricter baseline: +0.41%.</li>
-    <li>Option 2's large cycles gain, and the combination beating the sum of its parts (−3.84% against −3.26%), are likely inlining and layout effects that could flip with a toolchain update.</li>
-  </ul>
-
-  <h3>Architecture</h3>
-  <ul>
-    <li>The token stream is the right place to merge NatSpec. The regex the PR reverted needed four fragments per context and couldn't express "only the last comment counts".</li>
-    <li>A lexer that drops trivia is a step back for a full-fidelity CST tool, and the gain goes away when trivia comes back. It is cheap to undo and harmless meanwhile, but it should be labeled temporary and land separately.</li>
-  </ul>
-
-  <h3>Recommended path</h3>
-  <ol style="padding-left:1.2rem;display:grid;gap:6px">
-    <li>Rebase PR 2255 on <code>main</code>. Fold in 2, 3 and 1b's merge-by-source-gap reader, which only needs the source text, not lexer skipping. Write the motivation in the PR body and add the gap unit tests.</li>
-    <li>Separately, open a small PR "lexer: skip non-NatSpec trivia (temporary, until trivia is in the CST)" with the code-generation change, so it can be reviewed and reverted on its own.</li>
-  </ol>
 </section>
 </div>
+
+<script>
+const DATA = {"main":{"vs_main":0.0,"vs_pr":-2.15,"cyc":0.0,"per":{"cooldogs":0.0,"create_x":0.0,"ens_registrar_controller":0.0,"merkle_proof":0.0,"multicall3":0.0,"one_step_leverage_f":0.0,"pointer_libraries":0.0,"ui_pool_data_provider_v3":0.0,"uniswap":0.0}},"main+1a":{"vs_main":-1.82,"vs_pr":-3.93,"cyc":-1.68,"per":{"cooldogs":-1.11,"create_x":-1.5,"ens_registrar_controller":-1.78,"merkle_proof":-1.71,"multicall3":-1.71,"one_step_leverage_f":-1.83,"pointer_libraries":-2.91,"ui_pool_data_provider_v3":-2.08,"uniswap":-1.72}},"main+1c":{"vs_main":-2.12,"vs_pr":-4.23,"cyc":-1.74,"per":{"cooldogs":-1.14,"create_x":-1.73,"ens_registrar_controller":-2.2,"merkle_proof":-1.9,"multicall3":-1.86,"one_step_leverage_f":-2.22,"pointer_libraries":-3.62,"ui_pool_data_provider_v3":-2.49,"uniswap":-1.88}},"main+1c+4":{"vs_main":-3.2,"vs_pr":-5.29,"cyc":-2.23,"per":{"cooldogs":-1.95,"create_x":-2.74,"ens_registrar_controller":-3.26,"merkle_proof":-2.86,"multicall3":-2.94,"one_step_leverage_f":-3.25,"pointer_libraries":-5.08,"ui_pool_data_provider_v3":-3.67,"uniswap":-3.04}},"2255":{"vs_main":2.2,"vs_pr":0.0,"cyc":2.63,"per":{"cooldogs":1.08,"create_x":1.76,"ens_registrar_controller":1.94,"merkle_proof":1.93,"multicall3":2.45,"one_step_leverage_f":2.63,"pointer_libraries":3.27,"ui_pool_data_provider_v3":2.2,"uniswap":2.57}},"2255+1a":{"vs_main":-0.74,"vs_pr":-2.88,"cyc":-0.14,"per":{"cooldogs":-0.63,"create_x":-0.7,"ens_registrar_controller":-0.91,"merkle_proof":-0.88,"multicall3":-0.4,"one_step_leverage_f":-0.43,"pointer_libraries":-1.27,"ui_pool_data_provider_v3":-1.07,"uniswap":-0.34}},"2255+1b":{"vs_main":-0.8,"vs_pr":-2.94,"cyc":-0.1,"per":{"cooldogs":-0.25,"create_x":-0.62,"ens_registrar_controller":-1.03,"merkle_proof":-0.8,"multicall3":-0.34,"one_step_leverage_f":-0.65,"pointer_libraries":-1.96,"ui_pool_data_provider_v3":-1.22,"uniswap":-0.32}},"2255+2a":{"vs_main":1.88,"vs_pr":-0.32,"cyc":1.28,"per":{"cooldogs":0.97,"create_x":1.54,"ens_registrar_controller":1.7,"merkle_proof":1.74,"multicall3":2.07,"one_step_leverage_f":2.24,"pointer_libraries":2.61,"ui_pool_data_provider_v3":1.89,"uniswap":2.15}},"2255+3":{"vs_main":2.2,"vs_pr":-0.0,"cyc":2.56,"per":{"cooldogs":1.08,"create_x":1.76,"ens_registrar_controller":1.94,"merkle_proof":1.93,"multicall3":2.45,"one_step_leverage_f":2.63,"pointer_libraries":3.27,"ui_pool_data_provider_v3":2.2,"uniswap":2.55}},"2255+1b+2a+3":{"vs_main":-1.72,"vs_pr":-3.84,"cyc":-1.28,"per":{"cooldogs":-0.86,"create_x":-1.43,"ens_registrar_controller":-1.88,"merkle_proof":-1.56,"multicall3":-1.27,"one_step_leverage_f":-1.6,"pointer_libraries":-3.36,"ui_pool_data_provider_v3":-2.17,"uniswap":-1.31}},"2255+1b+2a+3+4":{"vs_main":-1.45,"vs_pr":-3.58,"cyc":-1.09,"per":{"cooldogs":-0.31,"create_x":-1.11,"ens_registrar_controller":-1.62,"merkle_proof":-1.18,"multicall3":-1.0,"one_step_leverage_f":-1.32,"pointer_libraries":-3.38,"ui_pool_data_provider_v3":-2.02,"uniswap":-1.1}},"2255+1b+3":{"vs_main":-0.83,"vs_pr":-2.97,"cyc":-0.18,"per":{"cooldogs":-0.25,"create_x":-0.62,"ens_registrar_controller":-1.04,"merkle_proof":-0.8,"multicall3":-0.38,"one_step_leverage_f":-0.7,"pointer_libraries":-2.06,"ui_pool_data_provider_v3":-1.22,"uniswap":-0.36}},"2255+1b+3+4":{"vs_main":-3.17,"vs_pr":-5.26,"cyc":-2.56,"per":{"cooldogs":-2.05,"create_x":-2.84,"ens_registrar_controller":-3.36,"merkle_proof":-2.92,"multicall3":-2.68,"one_step_leverage_f":-2.94,"pointer_libraries":-5.19,"ui_pool_data_provider_v3":-3.72,"uniswap":-2.8}},"2255+1b+2b+3":{"vs_main":-1.81,"vs_pr":-3.93,"cyc":-1.18,"per":{"cooldogs":-0.99,"create_x":-1.54,"ens_registrar_controller":-2.01,"merkle_proof":-1.68,"multicall3":-1.35,"one_step_leverage_f":-1.67,"pointer_libraries":-3.39,"ui_pool_data_provider_v3":-2.28,"uniswap":-1.36}},"2255+1b+2b+3+4":{"vs_main":-2.85,"vs_pr":-4.94,"cyc":-2.44,"per":{"cooldogs":-1.78,"create_x":-2.54,"ens_registrar_controller":-3.04,"merkle_proof":-2.63,"multicall3":-2.36,"one_step_leverage_f":-2.64,"pointer_libraries":-4.79,"ui_pool_data_provider_v3":-3.38,"uniswap":-2.48}}};
+const RUNS = [
+  ["main", "main", "main-baseline", "152c8b07", 39174853901],
+  ["main+1a", "main", "main-opt1", "463e70f8", 39174870857],
+  ["main+1c", "main", "main-opt1c", "be5c4cd0", 39219851677],
+  ["main+1c+4", "main", "main-opt1c-2254", "a211f485", 39227405589],
+  ["2255", "PR 2255", "2255-baseline", "c1361d8c", 39174850966],
+  ["2255+1a", "PR 2255", "2255-opt1", "3fdf6a5b", 39174859517],
+  ["2255+1b", "PR 2255", "2255-opt1b", "387e5108", 39174861645],
+  ["2255+2a", "PR 2255", "2255-opt2", "4ecfe58b", 39174864296],
+  ["2255+3", "PR 2255", "2255-opt3", "840c7b5c", 39174866083],
+  ["2255+1b+3", "PR 2255", "2255-combined-no2", "7e7623c7", 39224372893],
+  ["2255+1b+3+4", "PR 2255", "2255-combined-no2-2254", "ffbbb9c1", 39224376046],
+  ["2255+1b+2a+3", "PR 2255", "2255-combined", "5b7977c1", 39174868396],
+  ["2255+1b+2a+3+4", "PR 2255", "2255-combined-2254", "9c4b83ae", 39224370171],
+  ["2255+1b+2b+3", "PR 2255", "2255-combined-2b", "43dae41f", 39229465034],
+  ["2255+1b+2b+3+4", "PR 2255", "2255-combined-2b-2254", "20499914", 39229467307],
+];
+const CONTRACTS = ["cooldogs","create_x","ens_registrar_controller","merkle_proof","multicall3","one_step_leverage_f","pointer_libraries","ui_pool_data_provider_v3","uniswap"];
+
+const fmt = v => (v > 0 ? "+" : v < 0 ? "−" : "±") + Math.abs(v).toFixed(2) + "%";
+const cls = v => v < -0.005 ? "g" : v > 0.005 ? "r" : "z";
+const ids = parts => parts.length ? parts.map(p => `<span class="id">${p}</span>`).join("") : '<span class="pill">none</span>';
+
+// Every combination: one of each group, in a fixed order.
+const G1 = ["", "1a", "1b", "1c"], G2 = ["", "2a", "2b", "2c"], G3 = ["", "3"], G4 = ["", "4"];
+const combos = [];
+let order = 0;
+for (const a of G1) for (const b of G2) for (const c of G3) for (const d of G4) {
+  const parts = [a, b, c, d].filter(Boolean);
+  combos.push({ parts, order: order++, main: cellMain(parts), pr: cellPr(parts) });
+}
+function key(base, parts) { return [base, ...parts].join("+"); }
+function cellMain(parts) {
+  if (parts.some(p => p === "1b" || p.startsWith("2"))) return { kind: "incompatible" };
+  const r = DATA[key("main", parts)];
+  return r ? { kind: "value", v: r.vs_main } : { kind: "missing" };
+}
+function cellPr(parts) {
+  if (parts.includes("1c")) return { kind: "incompatible" };
+  // 2c is the PR's own reader, so X + 2c is the same code as X.
+  const same = parts.filter(p => p !== "2c");
+  const r = DATA[key("2255", same)];
+  const note = parts.includes("2c") ? `same code as ${same.length ? same.join(" + ") : "PR 2255"}` : "";
+  return r ? { kind: "value", v: r.vs_main, pr: r.vs_pr, note } : { kind: "missing", note };
+}
+const bestMain = Math.min(...combos.filter(c => c.main.kind === "value").map(c => c.main.v));
+const bestPr = Math.min(...combos.filter(c => c.pr.kind === "value").map(c => c.pr.v));
+
+function renderCell(c, isPr) {
+  if (c.kind === "incompatible") return '<span class="pill">incompatible</span>';
+  let html = c.kind === "value" ? `<span class="${cls(c.v)}">${fmt(c.v)}</span>` : '<span class="z">-</span>';
+  if (isPr && c.kind === "value") html += `<span class="sub">${fmt(c.pr)} vs PR</span>`;
+  if (c.note) html += `<span class="sub">${c.note}</span>`;
+  return html;
+}
+let sortBy = "default";
+try { sortBy = localStorage.getItem("combo-sort") || "default"; } catch (e) {}
+let measuredOnly = false;
+try { measuredOnly = localStorage.getItem("combo-measured") === "1"; } catch (e) {}
+
+function rank(cell) { return cell.kind === "value" ? cell.v : cell.kind === "missing" ? 1e6 : 2e6; }
+function render() {
+  let rows = combos.slice();
+  if (measuredOnly) rows = rows.filter(c => c.main.kind === "value" || c.pr.kind === "value");
+  if (sortBy === "main") rows.sort((x, y) => rank(x.main) - rank(y.main) || rank(x.pr) - rank(y.pr) || x.order - y.order);
+  else if (sortBy === "pr") rows.sort((x, y) => rank(x.pr) - rank(y.pr) || rank(x.main) - rank(y.main) || x.order - y.order);
+  document.querySelector("#combos tbody").innerHTML = rows.map(c => {
+    const best = (c.main.kind === "value" && c.main.v === bestMain) || (c.pr.kind === "value" && c.pr.v === bestPr && !c.parts.includes("2c"));
+    return `<tr class="${best ? "best" : ""}"><td class="combo">${ids(c.parts)}</td><td class="num">${renderCell(c.main, false)}</td><td class="num">${renderCell(c.pr, true)}</td></tr>`;
+  }).join("");
+  for (const [id, v] of [["sort-default", "default"], ["sort-main", "main"], ["sort-pr", "pr"]])
+    document.getElementById(id).setAttribute("aria-pressed", String(sortBy === v));
+  document.getElementById("measured-only").checked = measuredOnly;
+}
+document.getElementById("sort-default").onclick = () => setSort("default");
+document.getElementById("sort-main").onclick = () => setSort("main");
+document.getElementById("sort-pr").onclick = () => setSort("pr");
+document.getElementById("measured-only").onchange = e => { measuredOnly = e.target.checked; try { localStorage.setItem("combo-measured", measuredOnly ? "1" : "0"); } catch (err) {} render(); };
+function setSort(v) { sortBy = v; try { localStorage.setItem("combo-sort", v); } catch (e) {} render(); }
+render();
+
+document.querySelector("#runs tbody").innerHTML = RUNS.map(([k, base, branch, sha, run]) => {
+  const r = DATA[k], parts = k.split("+").slice(1);
+  return `<tr><td class="combo">${ids(parts)}</td><td class="text">${base}</td><td><a href="https://github.com/teofr/slang/actions/runs/${run}"><code>${branch}</code></a> <span class="z">${sha}</span></td>` +
+    `<td class="${cls(r.vs_main)}">${fmt(r.vs_main)}</td><td class="${cls(r.cyc)}">${fmt(r.cyc)}</td>` +
+    CONTRACTS.map(c => `<td class="${cls(r.per[c])}">${fmt(r.per[c])}</td>`).join("") + "</tr>";
+}).join("");
+</script>

@@ -1,0 +1,257 @@
+{
+ "main": {
+  "branch": "bench/main-baseline",
+  "vs_main": 0.0,
+  "vs_pr": -2.15,
+  "cyc_main": 0.0,
+  "per": {
+   "cooldogs": 0.0,
+   "create_x": 0.0,
+   "ens_registrar_controller": 0.0,
+   "merkle_proof": 0.0,
+   "multicall3": 0.0,
+   "one_step_leverage_f": 0.0,
+   "pointer_libraries": 0.0,
+   "ui_pool_data_provider_v3": 0.0,
+   "uniswap": 0.0
+  }
+ },
+ "main+1a": {
+  "branch": "bench/main-opt1",
+  "vs_main": -1.82,
+  "vs_pr": -3.93,
+  "cyc_main": -1.68,
+  "per": {
+   "cooldogs": -1.11,
+   "create_x": -1.5,
+   "ens_registrar_controller": -1.78,
+   "merkle_proof": -1.71,
+   "multicall3": -1.71,
+   "one_step_leverage_f": -1.83,
+   "pointer_libraries": -2.91,
+   "ui_pool_data_provider_v3": -2.08,
+   "uniswap": -1.72
+  }
+ },
+ "main+1c": {
+  "branch": "bench/main-opt1c",
+  "vs_main": -2.12,
+  "vs_pr": -4.23,
+  "cyc_main": -1.74,
+  "per": {
+   "cooldogs": -1.14,
+   "create_x": -1.73,
+   "ens_registrar_controller": -2.2,
+   "merkle_proof": -1.9,
+   "multicall3": -1.86,
+   "one_step_leverage_f": -2.22,
+   "pointer_libraries": -3.62,
+   "ui_pool_data_provider_v3": -2.49,
+   "uniswap": -1.88
+  }
+ },
+ "main+1c+4": {
+  "branch": "bench/main-opt1c-2254",
+  "vs_main": -3.2,
+  "vs_pr": -5.29,
+  "cyc_main": -2.23,
+  "per": {
+   "cooldogs": -1.95,
+   "create_x": -2.74,
+   "ens_registrar_controller": -3.26,
+   "merkle_proof": -2.86,
+   "multicall3": -2.94,
+   "one_step_leverage_f": -3.25,
+   "pointer_libraries": -5.08,
+   "ui_pool_data_provider_v3": -3.67,
+   "uniswap": -3.04
+  }
+ },
+ "2255": {
+  "branch": "bench/2255-baseline",
+  "vs_main": 2.2,
+  "vs_pr": 0.0,
+  "cyc_main": 2.63,
+  "per": {
+   "cooldogs": 1.08,
+   "create_x": 1.76,
+   "ens_registrar_controller": 1.94,
+   "merkle_proof": 1.93,
+   "multicall3": 2.45,
+   "one_step_leverage_f": 2.63,
+   "pointer_libraries": 3.27,
+   "ui_pool_data_provider_v3": 2.2,
+   "uniswap": 2.57
+  }
+ },
+ "2255+1a": {
+  "branch": "bench/2255-opt1",
+  "vs_main": -0.74,
+  "vs_pr": -2.88,
+  "cyc_main": -0.14,
+  "per": {
+   "cooldogs": -0.63,
+   "create_x": -0.7,
+   "ens_registrar_controller": -0.91,
+   "merkle_proof": -0.88,
+   "multicall3": -0.4,
+   "one_step_leverage_f": -0.43,
+   "pointer_libraries": -1.27,
+   "ui_pool_data_provider_v3": -1.07,
+   "uniswap": -0.34
+  }
+ },
+ "2255+1b": {
+  "branch": "bench/2255-opt1b",
+  "vs_main": -0.8,
+  "vs_pr": -2.94,
+  "cyc_main": -0.1,
+  "per": {
+   "cooldogs": -0.25,
+   "create_x": -0.62,
+   "ens_registrar_controller": -1.03,
+   "merkle_proof": -0.8,
+   "multicall3": -0.34,
+   "one_step_leverage_f": -0.65,
+   "pointer_libraries": -1.96,
+   "ui_pool_data_provider_v3": -1.22,
+   "uniswap": -0.32
+  }
+ },
+ "2255+2a": {
+  "branch": "bench/2255-opt2",
+  "vs_main": 1.88,
+  "vs_pr": -0.32,
+  "cyc_main": 1.28,
+  "per": {
+   "cooldogs": 0.97,
+   "create_x": 1.54,
+   "ens_registrar_controller": 1.7,
+   "merkle_proof": 1.74,
+   "multicall3": 2.07,
+   "one_step_leverage_f": 2.24,
+   "pointer_libraries": 2.61,
+   "ui_pool_data_provider_v3": 1.89,
+   "uniswap": 2.15
+  }
+ },
+ "2255+3": {
+  "branch": "bench/2255-opt3",
+  "vs_main": 2.2,
+  "vs_pr": -0.0,
+  "cyc_main": 2.56,
+  "per": {
+   "cooldogs": 1.08,
+   "create_x": 1.76,
+   "ens_registrar_controller": 1.94,
+   "merkle_proof": 1.93,
+   "multicall3": 2.45,
+   "one_step_leverage_f": 2.63,
+   "pointer_libraries": 3.27,
+   "ui_pool_data_provider_v3": 2.2,
+   "uniswap": 2.55
+  }
+ },
+ "2255+1b+2a+3": {
+  "branch": "bench/2255-combined",
+  "vs_main": -1.72,
+  "vs_pr": -3.84,
+  "cyc_main": -1.28,
+  "per": {
+   "cooldogs": -0.86,
+   "create_x": -1.43,
+   "ens_registrar_controller": -1.88,
+   "merkle_proof": -1.56,
+   "multicall3": -1.27,
+   "one_step_leverage_f": -1.6,
+   "pointer_libraries": -3.36,
+   "ui_pool_data_provider_v3": -2.17,
+   "uniswap": -1.31
+  }
+ },
+ "2255+1b+2a+3+4": {
+  "branch": "bench/2255-combined-2254",
+  "vs_main": -1.45,
+  "vs_pr": -3.58,
+  "cyc_main": -1.09,
+  "per": {
+   "cooldogs": -0.31,
+   "create_x": -1.11,
+   "ens_registrar_controller": -1.62,
+   "merkle_proof": -1.18,
+   "multicall3": -1.0,
+   "one_step_leverage_f": -1.32,
+   "pointer_libraries": -3.38,
+   "ui_pool_data_provider_v3": -2.02,
+   "uniswap": -1.1
+  }
+ },
+ "2255+1b+3": {
+  "branch": "bench/2255-combined-no2",
+  "vs_main": -0.83,
+  "vs_pr": -2.97,
+  "cyc_main": -0.18,
+  "per": {
+   "cooldogs": -0.25,
+   "create_x": -0.62,
+   "ens_registrar_controller": -1.04,
+   "merkle_proof": -0.8,
+   "multicall3": -0.38,
+   "one_step_leverage_f": -0.7,
+   "pointer_libraries": -2.06,
+   "ui_pool_data_provider_v3": -1.22,
+   "uniswap": -0.36
+  }
+ },
+ "2255+1b+3+4": {
+  "branch": "bench/2255-combined-no2-2254",
+  "vs_main": -3.17,
+  "vs_pr": -5.26,
+  "cyc_main": -2.56,
+  "per": {
+   "cooldogs": -2.05,
+   "create_x": -2.84,
+   "ens_registrar_controller": -3.36,
+   "merkle_proof": -2.92,
+   "multicall3": -2.68,
+   "one_step_leverage_f": -2.94,
+   "pointer_libraries": -5.19,
+   "ui_pool_data_provider_v3": -3.72,
+   "uniswap": -2.8
+  }
+ },
+ "2255+1b+2b+3": {
+  "branch": "bench/2255-combined-2b",
+  "vs_main": -1.81,
+  "vs_pr": -3.93,
+  "cyc_main": -1.18,
+  "per": {
+   "cooldogs": -0.99,
+   "create_x": -1.54,
+   "ens_registrar_controller": -2.01,
+   "merkle_proof": -1.68,
+   "multicall3": -1.35,
+   "one_step_leverage_f": -1.67,
+   "pointer_libraries": -3.39,
+   "ui_pool_data_provider_v3": -2.28,
+   "uniswap": -1.36
+  }
+ },
+ "2255+1b+2b+3+4": {
+  "branch": "bench/2255-combined-2b-2254",
+  "vs_main": -2.85,
+  "vs_pr": -4.94,
+  "cyc_main": -2.44,
+  "per": {
+   "cooldogs": -1.78,
+   "create_x": -2.54,
+   "ens_registrar_controller": -3.04,
+   "merkle_proof": -2.63,
+   "multicall3": -2.36,
+   "one_step_leverage_f": -2.64,
+   "pointer_libraries": -4.79,
+   "ui_pool_data_provider_v3": -3.38,
+   "uniswap": -2.48
+  }
+ }
+}
