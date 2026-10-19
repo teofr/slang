@@ -76,7 +76,8 @@ tr:last-child td { border-bottom: 0; }
     <li><b>PR 2255 costs +2.20% parser instructions</b> against its merge base. Merge base and current <code>main</code> are identical on the parser stage (±0.00%). No other stage moves, and allocations are unchanged.</li>
     <li><b>Skipping trivia in the lexer (option 1 / 1b) is where the speed comes from:</b> −2.88% / −2.94% on top of the PR. The pending-field refactor (2) gives −0.32%, and the range change (3) gives nothing.</li>
     <li><b>All three together give −3.84%</b> against the PR, which matches Omar's "3–4%". Against the merge base that is −1.72%.</li>
-    <li><b>The same trivia skipping on <code>main</code> gives −1.82%</b>, so on equal footing the combined PR is 0.10% slower than <code>main</code> with option 1. That is within noise for any real use. The decision rests on correctness and code shape, not speed.</li>
+    <li><b>Trivia skipping works on <code>main</code> too.</b> Option 1 gives −1.82%. Option 1c, which skips all regular trivia (<code>main</code> already merges <code>///</code> lines in its lexer, so it needs none of them), gives −2.12%.</li>
+    <li><b>On equal footing, PR 2255 costs about +0.41%</b> of parser instructions: combined against <code>main</code> + 1c, between +0.28% and +0.63% per contract. That is about 0.2% of the whole pipeline. The decision rests on correctness and code shape, not speed.</li>
   </ul>
 </section>
 
@@ -91,6 +92,8 @@ tr:last-child td { border-bottom: 0; }
     <div class="bar-row"><span class="lbl">3 · range without line break</span><div class="track"><span class="zero"></span></div><span class="val z">±0.00%</span></div>
     <div class="bar-row"><span class="lbl">1b + 2 + 3 combined</span><div class="track"><span class="zero"></span><span class="bar neg" style="width:calc(3.84% / 5 * 50)"></span></div><span class="val g">−3.84%</span></div>
     <div class="bar-row"><span class="lbl">1 on main vs main</span><div class="track"><span class="zero"></span><span class="bar neg" style="width:calc(1.82% / 5 * 50)"></span></div><span class="val g">−1.82%</span></div>
+    <div class="bar-row"><span class="lbl">1c on main vs main</span><div class="track"><span class="zero"></span><span class="bar neg" style="width:calc(2.12% / 5 * 50)"></span></div><span class="val g">−2.12%</span></div>
+    <div class="bar-row"><span class="lbl">combined vs main + 1c</span><div class="track"><span class="zero"></span><span class="bar pos" style="width:calc(0.41% / 5 * 50)"></span></div><span class="val r">+0.41%</span></div>
     <div class="axis"><span></span><div class="ticks"><span>−5%</span><span>0</span><span>+5%</span></div><span></span></div>
   </div>
 
@@ -105,7 +108,9 @@ tr:last-child td { border-bottom: 0; }
       <tr><td class="name">3 · range without line break</td><td>PR 2255</td><td class="z">−0.00%</td><td class="z">−0.07%</td><td class="z">+0.00%</td><td class="z">+0.00%</td><td class="r">+2.20%</td></tr>
       <tr><td class="name">1b + 2 + 3 combined</td><td>PR 2255</td><td class="g">−3.84%</td><td class="g">−3.82%</td><td class="z">+0.00%</td><td class="z">+0.00%</td><td class="g">−1.72%</td></tr>
       <tr><td class="name">1 on main</td><td>main</td><td class="g">−1.82%</td><td class="g">−1.68%</td><td class="z">+0.00%</td><td class="z">+0.00%</td><td>—</td></tr>
+      <tr><td class="name">1c · skip all regular trivia, on main</td><td>main</td><td class="g">−2.12%</td><td class="g">−1.74%</td><td class="z">+0.00%</td><td class="z">+0.00%</td><td>—</td></tr>
       <tr><td class="name">combined vs 1 on main</td><td>main + 1</td><td class="r">+0.10%</td><td>—</td><td>—</td><td>—</td><td>—</td></tr>
+      <tr><td class="name"><b>combined vs 1c on main</b> (fair comparison)</td><td>main + 1c</td><td class="r">+0.41%</td><td class="r">+0.46%</td><td>—</td><td>—</td><td>—</td></tr>
     </tbody>
   </table>
   </div>
@@ -134,6 +139,27 @@ tr:last-child td { border-bottom: 0; }
 </section>
 
 <section>
+  <h2>PR against the fair baseline</h2>
+  <p>Option 1c on <code>main</code> skips every regular trivia, just as the combined PR branch does. That makes it the like-for-like baseline for the PR.</p>
+  <div class="scroll">
+  <table>
+    <thead><tr><th>Contract</th><th>1c vs main</th><th>combined vs main + 1c</th></tr></thead>
+    <tbody>
+      <tr><td>cooldogs</td><td class="g">−1.14%</td><td class="r">+0.29%</td></tr>
+      <tr><td>create_x</td><td class="g">−1.73%</td><td class="r">+0.31%</td></tr>
+      <tr><td>ens_registrar_controller</td><td class="g">−2.20%</td><td class="r">+0.33%</td></tr>
+      <tr><td>merkle_proof</td><td class="g">−1.90%</td><td class="r">+0.35%</td></tr>
+      <tr><td>multicall3</td><td class="g">−1.86%</td><td class="r">+0.60%</td></tr>
+      <tr><td>one_step_leverage_f</td><td class="g">−2.22%</td><td class="r">+0.63%</td></tr>
+      <tr><td>pointer_libraries</td><td class="g">−3.62%</td><td class="r">+0.28%</td></tr>
+      <tr><td>ui_pool_data_provider_v3</td><td class="g">−2.49%</td><td class="r">+0.32%</td></tr>
+      <tr><td>uniswap</td><td class="g">−1.88%</td><td class="r">+0.59%</td></tr>
+    </tbody>
+  </table>
+  </div>
+</section>
+
+<section>
   <h2>What each branch changes</h2>
   <div class="scroll">
   <table>
@@ -148,6 +174,7 @@ tr:last-child td { border-bottom: 0; }
       <tr><td><code>bench/2255-combined</code></td><td>5b7977c1</td><td class="name">1b + 2 + 3: pending field, merge by source gap, ranges without line break.</td><td><a href="https://github.com/teofr/slang/actions/runs/39174868396">run</a></td></tr>
       <tr><td><code>bench/main-baseline</code></td><td>152c8b07</td><td class="name">main (7331a2ff), unchanged</td><td><a href="https://github.com/teofr/slang/actions/runs/39174853901">run</a></td></tr>
       <tr><td><code>bench/main-opt1</code></td><td>463e70f8</td><td class="name">Option 1 applied to main</td><td><a href="https://github.com/teofr/slang/actions/runs/39174870857">run</a></td></tr>
+      <tr><td><code>bench/main-opt1c</code></td><td>be5c4cd0</td><td class="name">On top of 1 on main: line breaks and <code>/* */</code> skipped too. Safe there because <code>main</code>'s lexer already merges <code>///</code> lines into one lexeme.</td><td><a href="https://github.com/teofr/slang/actions/runs/39219851677">run</a></td></tr>
     </tbody>
   </table>
   </div>
@@ -178,7 +205,7 @@ tr:last-child td { border-bottom: 0; }
       <tr><td>1b</td><td>Merging by source gap is the cleanest formulation and survives trivia coming back. Lexer skipping is optional and temporary.</td><td><span class="pill yes">recommend the merge logic</span></td></tr>
       <tr><td>2</td><td>Faithful refactor, one call site, no measurable cost.</td><td><span class="pill yes">recommend</span></td></tr>
       <tr><td>3</td><td>Right semantics (symmetric with <code>/** */</code>, no end-of-file special case). After rebasing, also remove the second trim on <code>main</code>'s <code>memory_safety.rs:70</code>.</td><td><span class="pill yes">recommend</span></td></tr>
-      <tr><td>combined</td><td>Present it as "no regression", not "3.8% faster": its gain over <code>main</code> with the same lexer skipping is about 0.</td><td><span class="pill mid">recommend, reframed</span></td></tr>
+      <tr><td>combined</td><td>Present it as "no regression", not "3.8% faster": its gain over <code>main</code> with the same lexer skipping is about 0. Measured after the review, against <code>main</code> + 1c it is a +0.41% cost.</td><td><span class="pill mid">recommend, reframed</span></td></tr>
     </tbody>
   </table>
   </div>
@@ -201,7 +228,7 @@ tr:last-child td { border-bottom: 0; }
   <h3>Benchmark validity</h3>
   <ul>
     <li>Single deterministic runs are enough for instructions. The 11-commit gap between the PR base and <code>main</code> doesn't bias the parser numbers.</li>
-    <li>The fair comparison is combined against <code>main</code> with option 1, which is +0.10%.</li>
+    <li>The review called combined against <code>main</code> with option 1 (+0.10%) the fair comparison. Option 1c, measured afterwards, is the stricter baseline: +0.41%.</li>
     <li>Option 2's large cycles gain, and the combination beating the sum of its parts (−3.84% against −3.26%), are likely inlining and layout effects that could flip with a toolchain update.</li>
   </ul>
 

@@ -40,3 +40,10 @@ Parser-stage results of dry-run `slang_v2` gungraun benchmarks for NomicFoundati
 - 1 on main: largest geometric-mean instructions change in a non-parser stage: 0.00%
 
 Combined vs main+opt1: +0.10% parser instructions.
+
+## Option 1c on main
+
+`bench/main-opt1c`: skip all regular trivia on main (main already merges `///` lines in its lexer).
+
+- 1c vs main: −2.12% parser instructions (−1.74% est. cycles); vs main+1: −0.31%.
+- Combined PR vs main+1c: +0.41% instructions (+0.46% cycles), between +0.28% and +0.63% per contract. This is the like-for-like cost of PR 2255.
