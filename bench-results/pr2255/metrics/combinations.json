@@ -253,5 +253,39 @@
    "ui_pool_data_provider_v3": -3.38,
    "uniswap": -2.48
   }
+ },
+ "main+4": {
+  "branch": "bench/main-opt4",
+  "vs_main": -0.55,
+  "vs_pr": -2.69,
+  "cyc_main": -0.38,
+  "per": {
+   "cooldogs": -0.53,
+   "create_x": -0.47,
+   "ens_registrar_controller": -0.45,
+   "merkle_proof": -0.48,
+   "multicall3": -0.45,
+   "one_step_leverage_f": -0.46,
+   "pointer_libraries": -0.43,
+   "ui_pool_data_provider_v3": -0.42,
+   "uniswap": -1.25
+  }
+ },
+ "2255+3+4": {
+  "branch": "bench/2255-opt3-2254",
+  "vs_main": 1.51,
+  "vs_pr": -0.68,
+  "cyc_main": 1.09,
+  "per": {
+   "cooldogs": 0.87,
+   "create_x": 1.34,
+   "ens_registrar_controller": 1.47,
+   "merkle_proof": 1.5,
+   "multicall3": 1.78,
+   "one_step_leverage_f": 1.89,
+   "pointer_libraries": 2.06,
+   "ui_pool_data_provider_v3": 1.61,
+   "uniswap": 1.07
+  }
  }
 }

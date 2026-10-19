@@ -59,3 +59,8 @@ PR 2254 forces `next_lexeme` inline. Each row is a PR 2255 variant with 1b + 3, 
 | outlined `#[inline(never)]` loop (no option 2) | +2.41% | +0.03% |
 
 Branches: `bench/main-opt1c-2254`, `bench/2255-combined-2254`, `bench/2255-combined-no2`, `bench/2255-combined-no2-2254`, `bench/2255-combined-2b`, `bench/2255-combined-2b-2254`.
+
+## Without lexer skipping
+
+- `bench/main-opt4` (main + 4): −0.55% parser instructions vs main.
+- `bench/2255-opt3-2254` (0 + 3 + 4, i.e. PR 2255 + 2254 as filed): +1.51% vs main, −0.68% vs PR 2255, **+2.07% vs main + 4** (+1.40% to +2.49% per contract). PR 2255 is only cost-free when the lexer skips trivia.
