@@ -169,13 +169,8 @@ impl Iterator for NonTriviaTokens<'_, '_> {
                 continue;
             }
             debug_assert!(!lexeme.kind.is_trivia(), "the lexer skips regular trivia");
-            if let Some(comment) = self.pending.take() {
-                self.natspec_stack.attach_natspec_to(
-                    NatSpec {
-                        range: comment.range,
-                    },
-                    lexeme.range.start,
-                );
+            if self.pending.is_some() {
+                self.attach_pending_comment(lexeme.range.start);
             }
             return Some(Ok((lexeme.range.start, lexeme.kind, lexeme.range.end)));
         }
@@ -204,6 +199,11 @@ impl<'source, 'natspec> NonTriviaTokens<'source, 'natspec> {
     /// break and indentation, are merged into a single comment, which ends with its last line,
     /// without the line break after it. Any other `NatSpec` comment replaces the pending one,
     /// which is dropped without documenting anything.
+    ///
+    /// Cold on purpose: it only runs for `NatSpec` comments, and keeping it out of
+    /// [`NonTriviaTokens::next`], which is inlined into LALRPOP's parsing loop, keeps the loop small.
+    #[cold]
+    #[inline(never)]
     fn read_natspec_comment(&mut self, lexeme: &Lexeme) {
         let is_line = is_single_line_natspec(&lexeme.kind);
         if let Some(pending) = &mut self.pending
@@ -218,6 +218,23 @@ impl<'source, 'natspec> NonTriviaTokens<'source, 'natspec> {
             range: lexeme.range.clone(),
             is_line,
         });
+    }
+
+    /// Pushes the pending comment on the [`NatSpecStack`], documenting the token starting at
+    /// `token_start`.
+    ///
+    /// Cold for the same reason as [`NonTriviaTokens::read_natspec_comment`].
+    #[cold]
+    #[inline(never)]
+    fn attach_pending_comment(&mut self, token_start: usize) {
+        if let Some(comment) = self.pending.take() {
+            self.natspec_stack.attach_natspec_to(
+                NatSpec {
+                    range: comment.range,
+                },
+                token_start,
+            );
+        }
     }
 }
 
