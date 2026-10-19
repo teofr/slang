@@ -4,7 +4,7 @@ Parser-stage results of dry-run `slang_v2` gungraun benchmarks for NomicFoundati
 
 - `metrics/*.json`: per-benchmark Callgrind/DHAT metrics, parsed from each run's log
 - `logs/*.log.txt.gz`: raw job logs
-- `review.md`: independent review of the changes
+- `review.md`: independent review of all cases, with untried alternatives (`review-round1.md`: the first review, superseded)
 - `scripts/`: log parser and comparison scripts
 
 ## Results

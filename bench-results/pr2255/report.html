@@ -78,6 +78,7 @@ label.check { display: inline-flex; gap: 6px; align-items: center; font-size: .9
     <li><b>Best on <code>main</code>: <span class="id">1c</span> + <span class="id">4</span>, −3.20%.</b> Best on PR 2255: <span class="id">1b</span> + <span class="id">2c</span> + <span class="id">3</span> + <span class="id">4</span>, −3.17% against <code>main</code>. The two are level, so PR 2255's design costs nothing once both sides get the same optimizations.</li>
     <li><b><span class="id">0</span> alone costs +2.20%.</b> Most of that goes away with lexer skipping (<span class="id">1a</span> / <span class="id">1b</span> / <span class="id">1c</span>), which is also the biggest single win on either base.</li>
     <li><b><span class="id">4</span> depends on the reader.</b> It helps <code>main</code>'s token loop and the PR's own outlined reader <span class="id">2c</span>, is what makes <span class="id">2b</span> pay off, and slightly hurts the pending field <span class="id">2a</span>.</li>
+    <li><b>Recommended split</b> (see the review): PR A = <span class="id">1c</span> + <span class="id">4</span> on <code>main</code> (−3.20%); PR B = <span class="id">0</span> + <span class="id">1b</span> gap merge + <span class="id">2c</span> + <span class="id">3</span> on top (±0.0%).</li>
     <li><b>Lexer skipping has a design cost.</b> The lexer stops returning every character of the source, which works against the plan to put trivia in the CST. Treat it as temporary.</li>
   </ul>
 </section>
@@ -164,24 +165,63 @@ label.check { display: inline-flex; gap: 6px; align-items: center; font-size: .9
 
 <section>
   <h2>Independent review</h2>
-  <p class="lede">Written by a separate Claude agent (Fable) that read every diff and the first round of results (<span class="id">0</span>, <span class="id">1a</span>, <span class="id">1b</span>, <span class="id">2a</span>, <span class="id">3</span>) without editing anything. It came before <span class="id">1c</span>, <span class="id">2b</span> and <span class="id">4</span> were measured; notes below mark where later results change its conclusions.</p>
+  <p class="lede">Written by a separate Claude agent (Fable) after all results above were in. It read every diff, built the best variants and inspected their generated assembly, without changing the repository or running benchmarks. Its factual claims were re-checked before publishing; one correction is marked below.</p>
+
+  <h3>Verdict</h3>
+  <ul class="findings">
+    <li><b>Adopt <span class="id">0</span> + <span class="id">1b</span>'s gap merge + <span class="id">2c</span> + <span class="id">3</span>, on top of <code>main</code> + <span class="id">1c</span> + <span class="id">4</span>.</b> That is the <code>bench/2255-combined-no2-2254</code> tree, split into two PRs.</li>
+    <li><b>PR A (performance):</b> <span class="id">1c</span> + <span class="id">4</span> on <code>main</code>, −3.20%. Include validation of the <code>skipped</code> flag (or skip by category), the comment fixes below, a deep-recursion stress test, and a <code>TODO(v2)</code> saying the skipping goes away (or becomes <span class="id">5d</span>) when trivia enters the CST. Run it with <code>ci:perf</code>.</li>
+    <li><b>PR B (PR 2255):</b> one lexeme per <code>///</code> line, merge by source gap, ranges without the trailing line break. Add unit tests for <code>is_line_continuation</code> and write down in the PR body why the merging regex was reverted. Expected ±0.0% on top of A; present it that way, not as "−5.3%".</li>
+    <li><b>Drop <span class="id">2a</span> and <span class="id">2b</span>; fold <span class="id">4</span> into PR A.</b> The first review's recommendation of <span class="id">2a</span> was wrong: its gain came from a compiler inlining heuristic that <span class="id">4</span> makes unnecessary.</li>
+  </ul>
+
+  <h3>Correctness</h3>
+  <ul>
+    <li><b><span class="id">1c</span> is safe on <code>main</code>.</b> Skipping only changes what a match returns, not the patterns, so the lexemes the parser sees are exactly those <code>main</code>'s token stream kept. <code>main</code>'s <code>///</code> regex still stops at a blank line, <code>/* */</code>, <code>////</code> or <code>//</code>. All 12 regular trivia items across the three lexical contexts carry the flag.</li>
+    <li><b>Possible deep recursion in debug builds.</b> With skipping, logos jumps straight to the next match instead of returning. Release builds turn that into a loop; debug builds may not. On PR 2255 each <code>//</code> line is its own lexeme, so a long comment header could become a very deep chain in debug tests. Add a stress test (<code>"// x\n".repeat(50_000) + "contract C {}"</code>). If it overflows, switch logos to state-machine code generation or merge <code>//</code> lines in the regex again.</li>
+    <li><b>The <code>skipped</code> flag is unvalidated.</b> Setting it on a NatSpec item would silently drop all documentation. Reject that combination in the definition checks, or skip "every trivia that isn't NatSpec" in code generation. Also remove or document the never-produced lexeme kinds and their 18 <code>unreachable!</code> arms.</li>
+    <li><b><span class="id">2c</span> with <span class="id">1b</span></b> is equivalent to the PR's state machine. Checked: CRLF, a lone <code>\r</code>, <code>\n\r</code>, <code>/**</code> after <code>///</code>, end of file. <span class="id">2b</span> behaves like <span class="id">2a</span>; marking per-line reading <code>#[cold]</code> is a slight misnomer for comment-dense files, but harmless.</li>
+    <li><b>Correction (verified while publishing):</b> the review says the best branch already removed <code>main</code>'s second line-break trim. It didn't. That branch is based on PR 2255's base, which predates the trim (<code>memory_safety.rs:70</code> on <code>main</code>), so the trim still has to be removed when rebasing <span class="id">3</span> onto <code>main</code>.</li>
+  </ul>
+
+  <h3>Why <span class="id">4</span> helps <span class="id">2c</span> and hurts <span class="id">2a</span></h3>
+  <ul>
+    <li>As a rule of thumb, one instruction per token is about 0.08% of the parser stage.</li>
+    <li><b>Without <span class="id">4</span>:</b> <span class="id">2a</span>/<span class="id">2b</span> have one <code>next_lexeme</code> call site, so the compiler inlines it. <span class="id">2c</span> has two and gets neither, paying a call per token. The first review mistook this for a design difference.</li>
+    <li><b>With <span class="id">4</span>:</b> the call layer is gone everywhere. <span class="id">2c</span>'s token loop is then minimal. <span class="id">2b</span> still loads, stores and compares the <code>pending</code> field on every token (about 4 instructions, +0.32%). <span class="id">2a</span> also pulls the gap check and a jump table into LALRPOP's parsing loop, which raises register pressure across the whole state machine.</li>
+    <li><b>Robustness.</b> The shape is sound, but two things rest on compiler choices. One <code>#[inline(never)]</code> keeps the comment reader out of the loop. And the token iterator is only inlined into the parsing loop under the release profile's <code>lto = true</code>. That setting is in this repository's <code>.cargo/config.toml</code>, so crates built without LTO likely pay about 1% that the benchmark never sees.</li>
+    <li><b>The +0.03% parity is a wash, not an identity.</b> The PR is ahead on 6 of 9 contracts, and behind by up to +0.32% on those with more <code>///</code> lines per token (<code>one_step_leverage_f</code>, <code>multicall3</code>, <code>uniswap</code>).</li>
+    <li><b>Comment fixes.</b> Explain why <span class="id">4</span>'s <code>#[inline(always)]</code> is there: a second call site stopped the compiler from inlining <code>next_lexeme</code>. And say that the inlining notes on <code>read_natspec_comment</code> describe the compiler's current choice under LTO, not a guarantee.</li>
+  </ul>
+
+  <h3>Alternatives not yet tried</h3>
   <div class="scroll">
   <table>
-    <thead><tr><th>Option</th><th>Assessment</th><th>Call</th></tr></thead>
+    <thead><tr><th>ID</th><th>Idea</th><th>Base</th><th>Expected gain</th><th>Risk / cost</th></tr></thead>
     <tbody>
-      <tr><td><span class="id">0</span></td><td class="text wide">Simpler lexer and merging rules that match solc. The merge belongs in the token stream: the reverted regex needed four fragments per context and couldn't express "only the last comment counts".</td><td class="text"><span class="yes">recommend, with changes</span></td></tr>
-      <tr><td><span class="id">1a</span></td><td class="text wide">Safe, but superseded by 1b.</td><td class="text"><span class="no">don't recommend alone</span></td></tr>
-      <tr><td><span class="id">1b</span></td><td class="text wide">Merging by source gap is equivalent to the PR's state machine (no differing input found) and survives trivia coming back. The skipping is optional and temporary; land it separately. The <code>skipped</code> flag isn't validated, so setting it on a NatSpec item would silently break NatSpec. Skip by category instead, or add a check.</td><td class="text"><span class="yes">recommend the merge logic</span></td></tr>
-      <tr><td><span class="id">2a</span></td><td class="text wide">Faithful refactor with one call site. <i>Later results: with <span class="id">4</span>, <span class="id">2c</span> is faster; <span class="id">2a</span> is only best without 4.</i></td><td class="text"><span class="yes">recommend</span> <span class="sub">superseded</span></td></tr>
-      <tr><td><span class="id">3</span></td><td class="text wide">Right semantics (symmetric with <code>/** */</code>). After rebasing, also remove the second trim on <code>main</code>'s <code>memory_safety.rs:70</code>.</td><td class="text"><span class="yes">recommend</span></td></tr>
+      <tr><td><span class="id">2d</span></td><td class="text wide"><code>#[inline(always)]</code> on <code>NonTriviaTokens::next</code>, and return the bare <code>(usize, LexemeKind, usize)</code> instead of a <code>Result</code> that is never an error.</td><td class="text">both</td><td class="text">~0 on the LTO benchmark; ~1% for builds without LTO. Makes the inlining a contract instead of a heuristic.</td><td class="text">none</td></tr>
+      <tr><td><span class="id">6</span></td><td class="text wide">Generate <code>LexemeKind</code> with trivia (NatSpec last) as a contiguous tail, so <code>is_trivia</code> and <code>is_natspec_comment</code> become one comparison.</td><td class="text">both</td><td class="text">0.2–0.4%</td><td class="text">low</td></tr>
+      <tr><td><span class="id">8</span></td><td class="text wide">Detect lexical-context switches with a lookup table indexed by kind (or logos callbacks on the five switching tokens), replacing the chain of comparisons in <code>Lexer::next_lexeme</code>.</td><td class="text">both</td><td class="text">0.3–0.5%</td><td class="text">low</td></tr>
+      <tr><td><span class="id">5a</span></td><td class="text wide">Merge <code>///</code> lines in a logos callback that peeks ahead in the source.</td><td class="text">2255</td><td class="text">0–0.3%, only on comment-dense files</td><td class="text">medium: a hand-written sub-lexer in generated code, and line structure back in the lexer, which the PR moved out</td></tr>
+      <tr><td><span class="id">5b</span></td><td class="text wide"><code>#[logos(skip …)]</code> instead of the skip callback.</td><td class="text">both</td><td class="text">0 (same generated code)</td><td class="text">pointless</td></tr>
+      <tr><td><span class="id">5c</span></td><td class="text wide">Drop <code>NatSpecStack</code>; scan the source backwards from each documentable node.</td><td class="text">both</td><td class="text">tiny</td><td class="text">high: strings and comments are ambiguous without lexer state</td></tr>
+      <tr><td><span class="id">5d</span></td><td class="text wide">Keep the lexer trivia-free for good, and re-lex trivia from the gaps between tokens when the full-fidelity CST needs it.</td><td class="text">both</td><td class="text">keeps the ~3% once trivia enters the CST</td><td class="text">medium: design work; the gap lexer should be generated from the same trivia definitions</td></tr>
+      <tr><td><span class="id">7</span></td><td class="text wide">Replace the three-way lexical-context dispatch with a function pointer to the active lexer.</td><td class="text">both</td><td class="text">≤0.25%</td><td class="text">medium for ~3 instructions; skip</td></tr>
+      <tr><td><span class="id">9</span></td><td class="text wide"><code>Cell</code> fast path instead of <code>RefCell::borrow_mut</code> when popping NatSpec.</td><td class="text">both</td><td class="text">≤0.1%</td><td class="text">low; not worth a PR</td></tr>
+      <tr><td><span class="id">10</span></td><td class="text wide"><code>codegen-units = 1</code> (and <code>panic = "abort"</code> where allowed) in the release profile.</td><td class="text">benchmark</td><td class="text">1–3%, and less sensitivity to inlining heuristics</td><td class="text">build time; only affects this repo's binaries</td></tr>
+      <tr><td><span class="id">11</span></td><td class="text wide">Profile-guided optimization for the benchmark.</td><td class="text">benchmark</td><td class="text">5–10%</td><td class="text">doesn't reach users; shows the ceiling only</td></tr>
     </tbody>
   </table>
   </div>
-  <ul>
-    <li>Correctness: CRLF and <code>\r</code>-only endings, <code>///</code> at end of file, <code>////</code>, <code>/** */</code> after <code>///</code> and lexical-context switches all behave like solc. Not introduced here: solc ends a <code>///</code> line at <code>\x0b</code>/<code>\x0c</code>, slang doesn't.</li>
-    <li>Suggested tests: <code>is_line_continuation</code> on <code>"\n"</code>, <code>"\r\n  "</code>, <code>"\r"</code>, <code>"\n\n"</code>, <code>"\n/* x */ "</code>, <code>""</code>. Write down in the PR body why the merging regex was reverted.</li>
-    <li>Updated path, combining the review with later results: land <span class="id">0</span> + <span class="id">1b</span>'s merge-by-gap + <span class="id">3</span>, keep the PR's reader <span class="id">2c</span>, and add <span class="id">4</span>. Put the lexer skipping in its own small PR labelled temporary.</li>
-  </ul>
+  <p class="note">Considered and rejected: lexing NatSpec only where a documentable node can follow (not possible with LALRPOP's pull-based token iterator; the stack already does the lazy equivalent), a smaller or <code>Copy</code> <code>LexemeKind</code> (already one byte), and a runtime switch to return trivia (logos skipping is fixed at compile time; <span class="id">5d</span> is the workable form). <b>Worth measuring next: <span class="id">2d</span>, <span class="id">6</span>, <span class="id">8</span>.</b></p>
+
+  <h3>For the PR reviewer</h3>
+  <ol>
+    <li>PR 2255 as filed costs +2.2% on the parser stage, but the cost comes from the call-layer heuristic and from emitting trivia, not from the design. PR A removes both, and PR B is neutral on top.</li>
+    <li>The inlining comments describe the compiler's current choices under LTO, not guarantees. Add the reasons, and consider <span class="id">2d</span> so builds without LTO get the same loop.</li>
+    <li>Merging by source gap doesn't depend on which trivia lexemes exist, so it survives both the skipping and its eventual removal.</li>
+    <li>The real decision isn't <span class="id">2a</span> vs <span class="id">2c</span>. It's whether to build <span class="id">5d</span>, or give the ~3% back when trivia enters the CST.</li>
+  </ol>
 </section>
 </div>
 
