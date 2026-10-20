@@ -1468,6 +1468,14 @@ mod state_variable_definition {
     }
 
     #[test]
+    fn function_type_second_visibility_with_returns() -> Result<()> {
+        run(
+            "StateVariableDefinition",
+            "function_type_second_visibility_with_returns",
+        )
+    }
+
+    #[test]
     fn transient() -> Result<()> {
         run("StateVariableDefinition", "transient")
     }
