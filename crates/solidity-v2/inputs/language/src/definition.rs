@@ -247,12 +247,10 @@ language_v2_macros::compile!(Language(
                         items = [
                             Trivia(
                                 name = PragmaWhitespace,
-                                skipped = true,
                                 scanner = OneOrMore(Choice([Atom(" "), Atom("\t")]))
                             ),
                             Trivia(
                                 name = PragmaEndOfLine,
-                                skipped = true,
                                 scanner = Choice([
                                     Atom("\n"),
                                     Sequence([Atom("\r"), Optional(Atom("\n"))])
@@ -261,13 +259,11 @@ language_v2_macros::compile!(Language(
                             Trivia(
                                 name = PragmaSingleLineComment,
                                 category = RegularComment,
-                                skipped = true,
                                 scanner = Sequence([Atom("//"), ZeroOrMore(Not(['\r', '\n']))])
                             ),
                             Trivia(
                                 name = PragmaMultiLineComment,
                                 category = RegularComment,
-                                skipped = true,
                                 // https://stackoverflow.com/a/36328890
                                 scanner = Sequence([
                                     Atom("/*"),
@@ -1520,12 +1516,10 @@ language_v2_macros::compile!(Language(
                             items = [
                                 Trivia(
                                     name = Whitespace,
-                                    skipped = true,
                                     scanner = OneOrMore(Choice([Atom(" "), Atom("\t")]))
                                 ),
                                 Trivia(
                                     name = EndOfLine,
-                                    skipped = true,
                                     scanner = Choice([
                                         Atom("\n"),
                                         Sequence([Atom("\r"), Optional(Atom("\n"))])
@@ -1534,13 +1528,11 @@ language_v2_macros::compile!(Language(
                                 Trivia(
                                     name = SingleLineComment,
                                     category = RegularComment,
-                                    skipped = true,
                                     scanner = Sequence([Atom("//"), ZeroOrMore(Not(['\r', '\n']))])
                                 ),
                                 Trivia(
                                     name = MultiLineComment,
                                     category = RegularComment,
-                                    skipped = true,
                                     // https://stackoverflow.com/a/36328890
                                     scanner = Sequence([
                                         Atom("/*"),
@@ -4462,12 +4454,10 @@ IdentifierPathTailElement: (Period, IdentifierPathElement) = {
                         items = [
                             Trivia(
                                 name = YulWhitespace,
-                                skipped = true,
                                 scanner = OneOrMore(Choice([Atom(" "), Atom("\t")]))
                             ),
                             Trivia(
                                 name = YulEndOfLine,
-                                skipped = true,
                                 scanner = Choice([
                                     Atom("\n"),
                                     Sequence([Atom("\r"), Optional(Atom("\n"))])
@@ -4476,13 +4466,11 @@ IdentifierPathTailElement: (Period, IdentifierPathElement) = {
                             Trivia(
                                 name = YulSingleLineComment,
                                 category = RegularComment,
-                                skipped = true,
                                 scanner = Sequence([Atom("//"), ZeroOrMore(Not(['\r', '\n']))])
                             ),
                             Trivia(
                                 name = YulMultiLineComment,
                                 category = RegularComment,
-                                skipped = true,
                                 // https://stackoverflow.com/a/36328890
                                 scanner = Sequence([
                                     Atom("/*"),
