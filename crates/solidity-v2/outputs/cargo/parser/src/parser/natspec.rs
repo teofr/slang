@@ -1,12 +1,10 @@
 //! The `NatSpec` comments of a source file
 //!
-//! The [`NonTriviaTokens`] feeds the parser its tokens, reading each comment's lexemes with a
-//! [`CommentReader`], and pushes the comment on the [`NatSpecStack`] with the token after it, which
-//! it documents. The parser then pops it from the stack as it reduces the node starting with that
-//! token.
+//! The [`NonTriviaTokens`] feeds the parser its tokens, merging each comment's lexemes, and pushes
+//! the comment on the [`NatSpecStack`] with the token after it, which it documents. The parser
+//! then pops it from the stack as it reduces the node starting with that token.
 
 use std::cell::RefCell;
-use std::ops::Range;
 
 use slang_solidity_v2_cst::structured_cst::natspec::NatSpec;
 
@@ -42,8 +40,9 @@ struct DocumentingComment {
 impl NatSpecStack {
     /// Pushes `natspec`, documenting the token starting at `token_start`.
     ///
-    /// Never inlined on purpose: the parser pushes comments from [`NonTriviaTokens`], which is
-    /// inlined into LALRPOP's parsing loop, and inlining this there slows the whole loop down.
+    /// Never inlined on purpose: the parser pushes comments from [`NonTriviaTokens`], which LLVM
+    /// inlines into LALRPOP's parsing loop in LTO builds, and inlining this there slows the whole
+    /// loop down.
     #[inline(never)]
     pub(crate) fn attach_natspec_to(&self, natspec: NatSpec, token_start: usize) {
         let mut comments = self.comments.borrow_mut();
@@ -118,99 +117,41 @@ fn pop_documenting(
     natspec
 }
 
-/// Reads a `NatSpec` comment from its lexemes, up to the token it documents.
-#[derive(Debug)]
-struct CommentReader {
-    range: Range<usize>,
-    state: ReaderState,
-}
-
-/// Where a [`CommentReader`] is in the comment, which decides what the next lexeme does to it.
-#[derive(Clone, Copy, Debug)]
-enum ReaderState {
-    /// Right after a `///` line, before its line break.
-    ///
-    /// Only `///` comments can be in this state.
-    AfterLine,
-    /// After the line break of a `///` line, and maybe some indentation: another `///` line
-    /// continues the comment.
-    ///
-    /// Only `///` comments can be in this state.
-    AfterLineBreak,
-    /// The comment is complete: either a `/** ... */` one, or `///` lines followed by something
-    /// else than another `///` line.
-    Complete,
-}
-
-impl CommentReader {
-    fn new(lexeme: &Lexeme) -> Self {
-        debug_assert!(
-            lexeme.kind.is_natspec_comment(),
-            "a comment starts with a NatSpec lexeme"
-        );
-
-        let state = match lexeme.kind {
-            LexemeKind::SingleLineNatSpecComment
+/// Whether `kind` is a `///` line, which consecutive ones are merged with.
+fn is_single_line_natspec(kind: &LexemeKind) -> bool {
+    matches!(
+        kind,
+        LexemeKind::SingleLineNatSpecComment
             | LexemeKind::PragmaSingleLineNatSpecComment
-            | LexemeKind::YulSingleLineNatSpecComment => ReaderState::AfterLine,
-            _ => ReaderState::Complete,
-        };
-        Self {
-            range: lexeme.range.clone(),
-            state,
-        }
-    }
+            | LexemeKind::YulSingleLineNatSpecComment
+    )
+}
 
-    /// Updates the comment with the trivia `lexeme` read after it.
-    ///
-    /// The lexer reads each `///` line on its own, so consecutive ones, only separated by a line
-    /// break and indentation, are merged into a single comment, which includes the line break
-    /// after its last line. Any other `NatSpec` comment replaces this one, which is dropped
-    /// without documenting anything.
-    fn read(&mut self, lexeme: &Lexeme) {
-        use ReaderState::{AfterLine, AfterLineBreak, Complete};
+/// Whether `gap`, the source between two `///` lines, makes them consecutive: a single line break,
+/// followed by the indentation of the second line.
+///
+/// The lexer skips regular trivia, so it's only seen in the source: a blank line, or a regular
+/// comment, in the gap splits the lines into two comments.
+fn is_line_continuation(gap: &str) -> bool {
+    let indentation = gap
+        .strip_prefix("\r\n")
+        .or_else(|| gap.strip_prefix(['\n', '\r']));
+    indentation.is_some_and(|indentation| indentation.bytes().all(|b| b == b' ' || b == b'\t'))
+}
 
-        debug_assert!(
-            lexeme.kind.is_trivia(),
-            "only trivia is read into a comment"
-        );
-
-        match (&lexeme.kind, self.state) {
-            (
-                LexemeKind::SingleLineNatSpecComment
-                | LexemeKind::PragmaSingleLineNatSpecComment
-                | LexemeKind::YulSingleLineNatSpecComment,
-                AfterLineBreak,
-            ) => {
-                // Line comments separated by a line break get merged
-                self.range.end = lexeme.range.end;
-                self.state = AfterLine;
-            }
-            // Either a multi-line comment, or a single line that is `Complete` start a new comment
-            (kind, _) if kind.is_natspec_comment() => *self = Self::new(lexeme),
-
-            (
-                LexemeKind::EndOfLine | LexemeKind::PragmaEndOfLine | LexemeKind::YulEndOfLine,
-                AfterLine,
-            ) => {
-                // An end of line after a single line comment is part of the comment, and expects another line
-                self.range.end = lexeme.range.end;
-                self.state = AfterLineBreak;
-            }
-            // Whitespaces get ignored
-            (
-                LexemeKind::Whitespace | LexemeKind::PragmaWhitespace | LexemeKind::YulWhitespace,
-                _,
-            ) => {}
-            // A blank line, or a regular comment complete any kind of comment
-            (_, _) => self.state = Complete,
-        }
+/// The length of the line break at the start of `rest`, if any.
+fn line_break_len(rest: &str) -> usize {
+    if rest.starts_with("\r\n") {
+        2
+    } else {
+        usize::from(rest.starts_with(['\n', '\r']))
     }
 }
 
-/// A `NonTriviaTokens` filters trivia tokens out of a lexer, collecting `NatSpec` comments into a
-/// `NatSpecStack` whenever they are followed by a non trivia token.
+/// A `NonTriviaTokens` filters `NatSpec` comments out of a lexer, collecting them into a
+/// `NatSpecStack` whenever they are followed by a token. The lexer skips the rest of the trivia.
 pub(crate) struct NonTriviaTokens<'source, 'natspec> {
+    source: &'source str,
     lexer: Lexer<'source>,
     natspec_stack: &'natspec NatSpecStack,
 }
@@ -220,50 +161,69 @@ impl Iterator for NonTriviaTokens<'_, '_> {
     type Item = Result<(usize, LexemeKind, usize), ()>;
 
     fn next(&mut self) -> Option<Self::Item> {
-        while let Some(lexeme) = self.lexer.next_lexeme() {
-            // NatSpec reading is guarded by a cheap kind check
-            if lexeme.kind.is_natspec_comment() {
-                // Reads the rest of the comment, and returns the token after it
-                let lexeme = self.read_natspec_comment(&lexeme)?;
-                return Some(Ok((lexeme.range.start, lexeme.kind, lexeme.range.end)));
-            }
-            if lexeme.kind.is_trivia() {
-                continue;
-            }
-            return Some(Ok((lexeme.range.start, lexeme.kind, lexeme.range.end)));
-        }
-        None
+        let lexeme = self.lexer.next_lexeme()?;
+        // NatSpec reading is guarded by a cheap kind check
+        let lexeme = if lexeme.kind.is_natspec_comment() {
+            // Reads the rest of the comment, and returns the token after it
+            self.read_natspec_comment(&lexeme)?
+        } else {
+            lexeme
+        };
+        debug_assert!(!lexeme.kind.is_trivia(), "the lexer skips regular trivia");
+        Some(Ok((lexeme.range.start, lexeme.kind, lexeme.range.end)))
     }
 }
 
 impl<'source, 'natspec> NonTriviaTokens<'source, 'natspec> {
-    pub(crate) fn new(lexer: Lexer<'source>, natspec_stack: &'natspec NatSpecStack) -> Self {
+    pub(crate) fn new(
+        source: &'source str,
+        lexer: Lexer<'source>,
+        natspec_stack: &'natspec NatSpecStack,
+    ) -> Self {
         Self {
+            source,
             lexer,
             natspec_stack,
         }
     }
 
-    /// Reads the `NatSpec` comment starting with `first`, and the trivia after it, up to the token
-    /// it documents, which is returned. A comment followed by no token is dropped.
+    /// Reads the `NatSpec` comment starting with `first`, and the ones after it, up to the token it
+    /// documents, which is returned. A comment followed by no token is dropped.
+    ///
+    /// The lexer reads each `///` line on its own, so consecutive ones, only separated by a line
+    /// break and indentation, are merged into a single comment, which includes the line break
+    /// after its last line. Any other `NatSpec` comment replaces this one, which is dropped
+    /// without documenting anything.
     ///
     /// Never inlined on purpose: it only runs for `NatSpec` comments, and inlining it into
-    /// [`NonTriviaTokens::next`], which is inlined into LALRPOP's parsing loop, slows the whole
-    /// loop down.
+    /// [`NonTriviaTokens::next`] slows down the parsing loop that calls it. That's LALRPOP's loop
+    /// itself in LTO builds, where LLVM inlines [`NonTriviaTokens::next`] into it: nothing pins
+    /// that, it's LLVM's choice.
     #[inline(never)]
     fn read_natspec_comment(&mut self, first: &Lexeme) -> Option<Lexeme> {
-        let mut comment = CommentReader::new(first);
+        let mut range = first.range.clone();
+        let mut is_line = is_single_line_natspec(&first.kind);
+
         while let Some(lexeme) = self.lexer.next_lexeme() {
-            if !lexeme.kind.is_trivia() {
-                self.natspec_stack.attach_natspec_to(
-                    NatSpec {
-                        range: comment.range,
-                    },
-                    lexeme.range.start,
-                );
+            if !lexeme.kind.is_natspec_comment() {
+                if is_line {
+                    range.end += line_break_len(&self.source[range.end..]);
+                }
+                self.natspec_stack
+                    .attach_natspec_to(NatSpec { range }, lexeme.range.start);
                 return Some(lexeme);
             }
-            comment.read(&lexeme);
+
+            let next_is_line = is_single_line_natspec(&lexeme.kind);
+            if is_line
+                && next_is_line
+                && is_line_continuation(&self.source[range.end..lexeme.range.start])
+            {
+                range.end = lexeme.range.end;
+            } else {
+                range = lexeme.range.clone();
+                is_line = next_is_line;
+            }
         }
         None
     }
@@ -275,7 +235,7 @@ mod tests {
 
     use slang_solidity_v2_cst::structured_cst::natspec::NatSpec;
 
-    use super::NatSpecStack;
+    use super::{NatSpecStack, is_line_continuation};
 
     fn push(stack: &NatSpecStack, range: Range<usize>, token_start: usize) {
         stack.attach_natspec_to(NatSpec { range }, token_start);
@@ -327,5 +287,23 @@ mod tests {
 
         assert_eq!(pop(&stack, 6, 20), None);
         assert_eq!(pop(&stack, 16, 18), None);
+    }
+
+    #[test]
+    fn line_continuations() {
+        // A single line break, and the indentation of the next line
+        assert!(is_line_continuation("\n"));
+        assert!(is_line_continuation("\r\n  "));
+        assert!(is_line_continuation("\r"));
+        assert!(is_line_continuation("\n \t"));
+
+        // No line break, a blank line, or a regular comment in between
+        assert!(!is_line_continuation(""));
+        assert!(!is_line_continuation(" "));
+        assert!(!is_line_continuation("\n\n"));
+        assert!(!is_line_continuation("\n\t\n"));
+        assert!(!is_line_continuation("\n\r"));
+        assert!(!is_line_continuation("\n/* x */ "));
+        assert!(!is_line_continuation("\n// x\n"));
     }
 }
