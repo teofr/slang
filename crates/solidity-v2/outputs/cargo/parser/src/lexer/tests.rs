@@ -134,6 +134,15 @@ fn regular_comments() {
 }
 
 #[test]
+fn skipped_trivia_runs_dont_overflow_the_stack() {
+    // With its default codegen, logos restarts after skipped trivia with a tail call into its root
+    // state, which only release builds turn into a loop: a long run of skipped lexemes must not
+    // overflow the stack of a debug build
+    let source = "// a\n\n/* b */ ".repeat(50_000) + "x";
+    assert_eq!(lex(&source), [(Identifier, "x")]);
+}
+
+#[test]
 fn pragma_and_yul_contexts_follow_the_same_rules() {
     for (prefix, suffix, natspec, comment, multi_natspec, multi_comment) in [
         (
