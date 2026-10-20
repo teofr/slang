@@ -468,11 +468,17 @@ fn resolve_repeated(item: model::RepeatedItem, ctx: &mut ResolveCtx) -> ParserDe
 
     let repeated = Labeled::with_predefined_label(PredefinedLabel::Item, reference);
 
-    if item.allow_empty.unwrap_or_default() {
-        ParserDefinitionNode::ZeroOrMore(repeated).versioned(item.enabled)
+    let mut node = if item.allow_empty.unwrap_or_default() {
+        ParserDefinitionNode::ZeroOrMore(repeated)
     } else {
-        ParserDefinitionNode::OneOrMore(repeated).versioned(item.enabled)
+        ParserDefinitionNode::OneOrMore(repeated)
+    };
+
+    if let Some(stop_before) = item.stop_before {
+        node = ParserDefinitionNode::StopBefore(Box::new(node), stop_before);
     }
+
+    node.versioned(item.enabled)
 }
 
 fn resolve_separated(item: model::SeparatedItem, ctx: &mut ResolveCtx) -> ParserDefinitionNode {

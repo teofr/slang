@@ -15,6 +15,7 @@ impl Versioned for ParserDefinitionNode {
             ParserDefinitionNode::Versioned(_, version_specifier) => Some(version_specifier),
 
             ParserDefinitionNode::Optional(value)
+            | ParserDefinitionNode::StopBefore(value, _)
             | ParserDefinitionNode::ZeroOrMore(Labeled { value, .. })
             | ParserDefinitionNode::OneOrMore(Labeled { value, .. }) => value.version_specifier(),
 

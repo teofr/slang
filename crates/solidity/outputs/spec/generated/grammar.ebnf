@@ -964,6 +964,7 @@ FunctionType = (* function_keyword: *) FUNCTION_KEYWORD
                (* attributes: *) FunctionTypeAttributes
                (* returns: *) ReturnsDeclaration?;
 
+(* Stops before (INTERNAL_KEYWORD | EXTERNAL_KEYWORD | PRIVATE_KEYWORD | PUBLIC_KEYWORD) once (INTERNAL_KEYWORD | EXTERNAL_KEYWORD) was matched (introduced in 0.4.22) *)
 FunctionTypeAttributes = (* item: *) FunctionTypeAttribute*;
 
 FunctionTypeAttribute = (* variant: *) INTERNAL_KEYWORD

@@ -8,6 +8,7 @@ mod recovery;
 mod repetition_helper;
 mod separated_helper;
 mod sequence_helper;
+mod stop_before_helper;
 
 pub use choice_helper::ChoiceHelper;
 pub use context::ParserContext;
@@ -18,3 +19,4 @@ pub use precedence_helper::PrecedenceHelper;
 pub use repetition_helper::{OneOrMoreHelper, ZeroOrMoreHelper};
 pub use separated_helper::SeparatedHelper;
 pub use sequence_helper::SequenceHelper;
+pub use stop_before_helper::StopBeforeHelper;

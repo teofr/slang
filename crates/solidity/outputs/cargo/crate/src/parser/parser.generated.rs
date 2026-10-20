@@ -20,7 +20,7 @@ use crate::parser::ParseOutput;
 use crate::parser::lexer::{KeywordScan, Lexer, ScannedTerminal};
 use crate::parser::parser_support::{
     ChoiceHelper, OneOrMoreHelper, OptionalHelper, ParserContext, ParserFunction, ParserResult,
-    PrecedenceHelper, SeparatedHelper, SequenceHelper, ZeroOrMoreHelper,
+    PrecedenceHelper, SeparatedHelper, SequenceHelper, StopBeforeHelper, ZeroOrMoreHelper,
 };
 use crate::parser::scanner_macros::{
     scan_char_range, scan_chars, scan_choice, scan_keyword_choice, scan_none_of,
@@ -3254,9 +3254,27 @@ impl Parser {
 
     #[allow(unused_assignments, unused_parens)]
     fn function_type_attributes(&self, input: &mut ParserContext<'_>) -> ParserResult {
-        ZeroOrMoreHelper::run(input, |input| {
-            self.function_type_attribute(input)
-                .with_label(EdgeLabel::Item)
+        ({
+            let stop_before = StopBeforeHelper::default();
+            ZeroOrMoreHelper::run(input, |input| {
+                let result = self
+                    .function_type_attribute(input)
+                    .with_label(EdgeLabel::Item);
+                if self.version_is_at_least_0_4_22 {
+                    stop_before.run(
+                        &[TerminalKind::InternalKeyword, TerminalKind::ExternalKeyword],
+                        &[
+                            TerminalKind::InternalKeyword,
+                            TerminalKind::ExternalKeyword,
+                            TerminalKind::PrivateKeyword,
+                            TerminalKind::PublicKeyword,
+                        ],
+                        result,
+                    )
+                } else {
+                    result
+                }
+            })
         })
         .with_kind(NonterminalKind::FunctionTypeAttributes)
     }

@@ -77,6 +77,9 @@ pub enum ParserDefinitionNode {
     Optional(Box<Self>),
     ZeroOrMore(Labeled<Box<Self>>),
     OneOrMore(Labeled<Box<Self>>),
+    /// Wraps a [`Self::ZeroOrMore`] or [`Self::OneOrMore`] to end it early.
+    /// See [`model::RepeatedStopBefore`].
+    StopBefore(Box<Self>, model::RepeatedStopBefore),
     Sequence(Vec<Labeled<Self>>),
     Choice(Labeled<Vec<Self>>),
     ScannerDefinition(ScannerDefinitionRef),
@@ -125,7 +128,8 @@ impl Visitable for ParserDefinitionNode {
             Self::Versioned(value, _)
             | Self::Optional(value)
             | Self::ZeroOrMore(Labeled { value, .. })
-            | Self::OneOrMore(Labeled { value, .. }) => value.accept_visitor(visitor),
+            | Self::OneOrMore(Labeled { value, .. })
+            | Self::StopBefore(value, _) => value.accept_visitor(visitor),
 
             Self::Sequence(nodes) => {
                 for node in nodes {

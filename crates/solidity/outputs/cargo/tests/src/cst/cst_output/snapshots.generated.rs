@@ -921,6 +921,11 @@ mod function_type {
     }
 
     #[test]
+    fn duplicate_visibility() -> Result<()> {
+        run("FunctionType", "duplicate_visibility")
+    }
+
+    #[test]
     fn pure_state_mutability() -> Result<()> {
         run("FunctionType", "pure_state_mutability")
     }
@@ -1448,6 +1453,19 @@ mod source_unit {
 
 mod state_variable_definition {
     use super::*;
+
+    #[test]
+    fn function_type_second_visibility() -> Result<()> {
+        run("StateVariableDefinition", "function_type_second_visibility")
+    }
+
+    #[test]
+    fn function_type_second_visibility_with_mutability() -> Result<()> {
+        run(
+            "StateVariableDefinition",
+            "function_type_second_visibility_with_mutability",
+        )
+    }
 
     #[test]
     fn transient() -> Result<()> {

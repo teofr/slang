@@ -51,38 +51,51 @@ impl ParserDefinitionNodeCodegen for ParserDefinitionNode {
             }
 
             Self::ZeroOrMore(Labeled { label, value }) => {
-                let parser = value.to_parser_code(context_name, is_trivia);
-
-                let parser = if label.is_empty() {
-                    parser
-                } else {
-                    let name = format_ident!("{}", label.to_pascal_case());
-
-                    quote! {
-                        #parser.with_label(EdgeLabel::#name)
-                    }
-                };
-
+                let parser = labeled_item_code(label, value, context_name, is_trivia);
                 quote! {
                     ZeroOrMoreHelper::run(input, |input| #parser)
                 }
             }
 
             Self::OneOrMore(Labeled { label, value }) => {
-                let parser = value.to_parser_code(context_name, is_trivia);
-
-                let parser = if label.is_empty() {
-                    parser
-                } else {
-                    let name = format_ident!("{}", label.to_pascal_case());
-
-                    quote! {
-                        #parser.with_label(EdgeLabel::#name)
-                    }
-                };
-
+                let parser = labeled_item_code(label, value, context_name, is_trivia);
                 quote! {
                     OneOrMoreHelper::run(input, |input| #parser)
+                }
+            }
+
+            Self::StopBefore(repeated, stop_before) => {
+                let (helper, Labeled { label, value }) = match &**repeated {
+                    Self::ZeroOrMore(item) => (quote! { ZeroOrMoreHelper }, item),
+                    Self::OneOrMore(item) => (quote! { OneOrMoreHelper }, item),
+                    _ => unreachable!("StopBefore can only wrap repetitions: {repeated:?}"),
+                };
+
+                let parser = labeled_item_code(label, value, context_name, is_trivia);
+
+                let to_kinds = |terminals: &[Identifier]| {
+                    let kinds = terminals.iter().map(|terminal| {
+                        let terminal = format_ident!("{terminal}");
+                        quote! { TerminalKind::#terminal }
+                    });
+                    quote! { &[ #(#kinds),* ] }
+                };
+                let after = to_kinds(&stop_before.after);
+                let before = to_kinds(&stop_before.before);
+
+                let checked = stop_before.enabled.as_ref().to_conditional_code(
+                    quote! { stop_before.run(#after, #before, result) },
+                    Some(quote! { result }),
+                );
+
+                quote! {
+                    ({
+                        let stop_before = StopBeforeHelper::default();
+                        #helper::run(input, |input| {
+                            let result = #parser;
+                            #checked
+                        })
+                    })
                 }
             }
 
@@ -310,6 +323,25 @@ impl ParserDefinitionNodeCodegen for ParserDefinitionNode {
                     })
                 }
             }
+        }
+    }
+}
+
+fn labeled_item_code(
+    label: &str,
+    value: &ParserDefinitionNode,
+    context_name: &Identifier,
+    is_trivia: bool,
+) -> TokenStream {
+    let parser = value.to_parser_code(context_name, is_trivia);
+
+    if label.is_empty() {
+        parser
+    } else {
+        let name = format_ident!("{}", label.to_pascal_case());
+
+        quote! {
+            #parser.with_label(EdgeLabel::#name)
         }
     }
 }

@@ -10354,6 +10354,7 @@ export class ModifierAttributes {
  * This node represents a `FunctionTypeAttributes` nonterminal, with the following structure:
  *
  * ```ebnf
+ * (* Stops before (INTERNAL_KEYWORD | EXTERNAL_KEYWORD | PRIVATE_KEYWORD | PUBLIC_KEYWORD) once (INTERNAL_KEYWORD | EXTERNAL_KEYWORD) was matched (introduced in 0.4.22) *)
  * FunctionTypeAttributes = (* item: *) FunctionTypeAttribute*;
  * ```
  */

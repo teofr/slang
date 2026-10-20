@@ -15,9 +15,9 @@ use crate::model::{
     SpannedEnumItem, SpannedEnumVariant, SpannedField, SpannedFragmentItem, SpannedItem,
     SpannedKeywordDefinition, SpannedKeywordItem, SpannedPrecedenceExpression,
     SpannedPrecedenceItem, SpannedPrecedenceOperator, SpannedPrimaryExpression,
-    SpannedRepeatedItem, SpannedScanner, SpannedSeparatedItem, SpannedStructItem,
-    SpannedTokenDefinition, SpannedTokenItem, SpannedTriviaItem, SpannedTriviaParser,
-    SpannedVersionSpecifier,
+    SpannedRepeatedItem, SpannedRepeatedStopBefore, SpannedScanner, SpannedSeparatedItem,
+    SpannedStructItem, SpannedTokenDefinition, SpannedTokenItem, SpannedTriviaItem,
+    SpannedTriviaParser, SpannedVersionSpecifier,
 };
 
 pub(crate) fn analyze_references(analysis: &mut Analysis) {
@@ -124,6 +124,7 @@ fn check_repeated(analysis: &mut Analysis, item: &SpannedRepeatedItem, enablemen
         name,
         reference,
         allow_empty: _,
+        stop_before,
         enabled,
     } = item;
 
@@ -138,6 +139,20 @@ fn check_repeated(analysis: &mut Analysis, item: &SpannedRepeatedItem, enablemen
             Struct, Enum, Repeated, Separated, Precedence, Keyword, Token,
         ],
     );
+
+    if let Some(stop_before) = stop_before {
+        let SpannedRepeatedStopBefore {
+            after,
+            before,
+            enabled,
+        } = stop_before;
+
+        let enablement = update_enablement(analysis, &enablement, enabled.as_ref());
+
+        for terminal in after.iter().chain(before.iter()) {
+            check_reference(analysis, None, terminal, &enablement, &[Keyword, Token]);
+        }
+    }
 }
 
 fn check_separated(analysis: &mut Analysis, item: &SpannedSeparatedItem, enablement: &VersionSet) {
