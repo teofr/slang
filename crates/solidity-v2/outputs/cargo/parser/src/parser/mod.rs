@@ -83,7 +83,8 @@ impl Parser {
     pub fn parse(file_id: &FileId, source: &str, language_version: LanguageVersion) -> ParseOutput {
         let natspec_stack = NatSpecStack::default();
         // TODO(v2): Include the trivia in future versions
-        let tokens = NonTriviaTokens::new(Lexer::new(source, language_version), &natspec_stack);
+        let tokens =
+            NonTriviaTokens::new(source, Lexer::new(source, language_version), &natspec_stack);
         let parser = grammar::SourceUnitParser::new();
 
         let mut ctx = GrammarCtx {
