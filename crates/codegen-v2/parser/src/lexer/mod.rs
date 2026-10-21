@@ -12,6 +12,8 @@ use crate::lexer::builder::LexerModelBuilder;
 pub struct LexerModel {
     pub contexts: Vec<LexicalContext>,
     pub all_lexeme_kinds: BTreeSet<String>,
+    /// The terminal kinds the lexemes map to, i.e. every token and keyword.
+    pub all_terminal_kinds: BTreeSet<String>,
     pub trivia_lexeme_kinds: BTreeSet<String>,
     /// The trivia that are `NatSpec` comments.
     pub natspec_comment_lexeme_kinds: BTreeSet<String>,
@@ -47,6 +49,7 @@ pub enum Lexeme {
         kind: String,
         identifier: Option<String>,
         regex: String,
+        enabled: VersionSpecifier,
         reserved: VersionSpecifier,
     },
 }

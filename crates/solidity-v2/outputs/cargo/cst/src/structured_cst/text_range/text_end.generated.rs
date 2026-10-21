@@ -2125,18 +2125,6 @@ impl TextEnd for AddressKeyword {
     }
 }
 
-impl TextEnd for AfterKeyword {
-    fn calculate_text_end(&self) -> Option<usize> {
-        Some(self.range.end)
-    }
-}
-
-impl TextEnd for AliasKeyword {
-    fn calculate_text_end(&self) -> Option<usize> {
-        Some(self.range.end)
-    }
-}
-
 impl TextEnd for Ampersand {
     fn calculate_text_end(&self) -> Option<usize> {
         Some(self.range.end)
@@ -2156,12 +2144,6 @@ impl TextEnd for AmpersandEqual {
 }
 
 impl TextEnd for AnonymousKeyword {
-    fn calculate_text_end(&self) -> Option<usize> {
-        Some(self.range.end)
-    }
-}
-
-impl TextEnd for ApplyKeyword {
     fn calculate_text_end(&self) -> Option<usize> {
         Some(self.range.end)
     }
@@ -2198,12 +2180,6 @@ impl TextEnd for AsteriskEqual {
 }
 
 impl TextEnd for AtKeyword {
-    fn calculate_text_end(&self) -> Option<usize> {
-        Some(self.range.end)
-    }
-}
-
-impl TextEnd for AutoKeyword {
     fn calculate_text_end(&self) -> Option<usize> {
         Some(self.range.end)
     }
@@ -2251,12 +2227,6 @@ impl TextEnd for BreakKeyword {
     }
 }
 
-impl TextEnd for ByteKeyword {
-    fn calculate_text_end(&self) -> Option<usize> {
-        Some(self.range.end)
-    }
-}
-
 impl TextEnd for BytesKeyword {
     fn calculate_text_end(&self) -> Option<usize> {
         Some(self.range.end)
@@ -2276,12 +2246,6 @@ impl TextEnd for Caret {
 }
 
 impl TextEnd for CaretEqual {
-    fn calculate_text_end(&self) -> Option<usize> {
-        Some(self.range.end)
-    }
-}
-
-impl TextEnd for CaseKeyword {
     fn calculate_text_end(&self) -> Option<usize> {
         Some(self.range.end)
     }
@@ -2347,12 +2311,6 @@ impl TextEnd for ContractKeyword {
     }
 }
 
-impl TextEnd for CopyOfKeyword {
-    fn calculate_text_end(&self) -> Option<usize> {
-        Some(self.range.end)
-    }
-}
-
 impl TextEnd for DaysKeyword {
     fn calculate_text_end(&self) -> Option<usize> {
         Some(self.range.end)
@@ -2360,18 +2318,6 @@ impl TextEnd for DaysKeyword {
 }
 
 impl TextEnd for DecimalLiteral {
-    fn calculate_text_end(&self) -> Option<usize> {
-        Some(self.range.end)
-    }
-}
-
-impl TextEnd for DefaultKeyword {
-    fn calculate_text_end(&self) -> Option<usize> {
-        Some(self.range.end)
-    }
-}
-
-impl TextEnd for DefineKeyword {
     fn calculate_text_end(&self) -> Option<usize> {
         Some(self.range.end)
     }
@@ -2467,12 +2413,6 @@ impl TextEnd for FalseKeyword {
     }
 }
 
-impl TextEnd for FinalKeyword {
-    fn calculate_text_end(&self) -> Option<usize> {
-        Some(self.range.end)
-    }
-}
-
 impl TextEnd for FixedKeyword {
     fn calculate_text_end(&self) -> Option<usize> {
         Some(self.range.end)
@@ -2545,12 +2485,6 @@ impl TextEnd for GweiKeyword {
     }
 }
 
-impl TextEnd for HexKeyword {
-    fn calculate_text_end(&self) -> Option<usize> {
-        Some(self.range.end)
-    }
-}
-
 impl TextEnd for HexLiteral {
     fn calculate_text_end(&self) -> Option<usize> {
         Some(self.range.end)
@@ -2587,31 +2521,13 @@ impl TextEnd for ImmutableKeyword {
     }
 }
 
-impl TextEnd for ImplementsKeyword {
-    fn calculate_text_end(&self) -> Option<usize> {
-        Some(self.range.end)
-    }
-}
-
 impl TextEnd for ImportKeyword {
     fn calculate_text_end(&self) -> Option<usize> {
         Some(self.range.end)
     }
 }
 
-impl TextEnd for InKeyword {
-    fn calculate_text_end(&self) -> Option<usize> {
-        Some(self.range.end)
-    }
-}
-
 impl TextEnd for IndexedKeyword {
-    fn calculate_text_end(&self) -> Option<usize> {
-        Some(self.range.end)
-    }
-}
-
-impl TextEnd for InlineKeyword {
     fn calculate_text_end(&self) -> Option<usize> {
         Some(self.range.end)
     }
@@ -2671,31 +2587,13 @@ impl TextEnd for LessThanLessThanEqual {
     }
 }
 
-impl TextEnd for LetKeyword {
-    fn calculate_text_end(&self) -> Option<usize> {
-        Some(self.range.end)
-    }
-}
-
 impl TextEnd for LibraryKeyword {
     fn calculate_text_end(&self) -> Option<usize> {
         Some(self.range.end)
     }
 }
 
-impl TextEnd for MacroKeyword {
-    fn calculate_text_end(&self) -> Option<usize> {
-        Some(self.range.end)
-    }
-}
-
 impl TextEnd for MappingKeyword {
-    fn calculate_text_end(&self) -> Option<usize> {
-        Some(self.range.end)
-    }
-}
-
-impl TextEnd for MatchKeyword {
     fn calculate_text_end(&self) -> Option<usize> {
         Some(self.range.end)
     }
@@ -2737,25 +2635,7 @@ impl TextEnd for ModifierKeyword {
     }
 }
 
-impl TextEnd for MutableKeyword {
-    fn calculate_text_end(&self) -> Option<usize> {
-        Some(self.range.end)
-    }
-}
-
 impl TextEnd for NewKeyword {
-    fn calculate_text_end(&self) -> Option<usize> {
-        Some(self.range.end)
-    }
-}
-
-impl TextEnd for NullKeyword {
-    fn calculate_text_end(&self) -> Option<usize> {
-        Some(self.range.end)
-    }
-}
-
-impl TextEnd for OfKeyword {
     fn calculate_text_end(&self) -> Option<usize> {
         Some(self.range.end)
     }
@@ -2780,12 +2660,6 @@ impl TextEnd for OpenParen {
 }
 
 impl TextEnd for OverrideKeyword {
-    fn calculate_text_end(&self) -> Option<usize> {
-        Some(self.range.end)
-    }
-}
-
-impl TextEnd for PartialKeyword {
     fn calculate_text_end(&self) -> Option<usize> {
         Some(self.range.end)
     }
@@ -2917,12 +2791,6 @@ impl TextEnd for PrivateKeyword {
     }
 }
 
-impl TextEnd for PromiseKeyword {
-    fn calculate_text_end(&self) -> Option<usize> {
-        Some(self.range.end)
-    }
-}
-
 impl TextEnd for PublicKeyword {
     fn calculate_text_end(&self) -> Option<usize> {
         Some(self.range.end)
@@ -2942,18 +2810,6 @@ impl TextEnd for QuestionMark {
 }
 
 impl TextEnd for ReceiveKeyword {
-    fn calculate_text_end(&self) -> Option<usize> {
-        Some(self.range.end)
-    }
-}
-
-impl TextEnd for ReferenceKeyword {
-    fn calculate_text_end(&self) -> Option<usize> {
-        Some(self.range.end)
-    }
-}
-
-impl TextEnd for RelocatableKeyword {
     fn calculate_text_end(&self) -> Option<usize> {
         Some(self.range.end)
     }
@@ -2983,12 +2839,6 @@ impl TextEnd for SMTCheckerKeyword {
     }
 }
 
-impl TextEnd for SealedKeyword {
-    fn calculate_text_end(&self) -> Option<usize> {
-        Some(self.range.end)
-    }
-}
-
 impl TextEnd for SecondsKeyword {
     fn calculate_text_end(&self) -> Option<usize> {
         Some(self.range.end)
@@ -2996,12 +2846,6 @@ impl TextEnd for SecondsKeyword {
 }
 
 impl TextEnd for Semicolon {
-    fn calculate_text_end(&self) -> Option<usize> {
-        Some(self.range.end)
-    }
-}
-
-impl TextEnd for SizeOfKeyword {
     fn calculate_text_end(&self) -> Option<usize> {
         Some(self.range.end)
     }
@@ -3020,12 +2864,6 @@ impl TextEnd for SlashEqual {
 }
 
 impl TextEnd for SolidityKeyword {
-    fn calculate_text_end(&self) -> Option<usize> {
-        Some(self.range.end)
-    }
-}
-
-impl TextEnd for StaticKeyword {
     fn calculate_text_end(&self) -> Option<usize> {
         Some(self.range.end)
     }
@@ -3061,25 +2899,7 @@ impl TextEnd for SuperKeyword {
     }
 }
 
-impl TextEnd for SupportsKeyword {
-    fn calculate_text_end(&self) -> Option<usize> {
-        Some(self.range.end)
-    }
-}
-
-impl TextEnd for SwitchKeyword {
-    fn calculate_text_end(&self) -> Option<usize> {
-        Some(self.range.end)
-    }
-}
-
 impl TextEnd for ThisKeyword {
-    fn calculate_text_end(&self) -> Option<usize> {
-        Some(self.range.end)
-    }
-}
-
-impl TextEnd for ThrowKeyword {
     fn calculate_text_end(&self) -> Option<usize> {
         Some(self.range.end)
     }
@@ -3109,19 +2929,7 @@ impl TextEnd for TryKeyword {
     }
 }
 
-impl TextEnd for TypeDefKeyword {
-    fn calculate_text_end(&self) -> Option<usize> {
-        Some(self.range.end)
-    }
-}
-
 impl TextEnd for TypeKeyword {
-    fn calculate_text_end(&self) -> Option<usize> {
-        Some(self.range.end)
-    }
-}
-
-impl TextEnd for TypeOfKeyword {
     fn calculate_text_end(&self) -> Option<usize> {
         Some(self.range.end)
     }
@@ -3152,12 +2960,6 @@ impl TextEnd for UnicodeStringLiteral {
 }
 
 impl TextEnd for UsingKeyword {
-    fn calculate_text_end(&self) -> Option<usize> {
-        Some(self.range.end)
-    }
-}
-
-impl TextEnd for VarKeyword {
     fn calculate_text_end(&self) -> Option<usize> {
         Some(self.range.end)
     }
@@ -3194,12 +2996,6 @@ impl TextEnd for WeiKeyword {
 }
 
 impl TextEnd for WhileKeyword {
-    fn calculate_text_end(&self) -> Option<usize> {
-        Some(self.range.end)
-    }
-}
-
-impl TextEnd for YearsKeyword {
     fn calculate_text_end(&self) -> Option<usize> {
         Some(self.range.end)
     }
@@ -3277,12 +3073,6 @@ impl TextEnd for YulFunctionKeyword {
     }
 }
 
-impl TextEnd for YulHexKeyword {
-    fn calculate_text_end(&self) -> Option<usize> {
-        Some(self.range.end)
-    }
-}
-
 impl TextEnd for YulHexLiteral {
     fn calculate_text_end(&self) -> Option<usize> {
         Some(self.range.end)
@@ -3349,19 +3139,7 @@ impl TextEnd for YulStringLiteral {
     }
 }
 
-impl TextEnd for YulSuperKeyword {
-    fn calculate_text_end(&self) -> Option<usize> {
-        Some(self.range.end)
-    }
-}
-
 impl TextEnd for YulSwitchKeyword {
-    fn calculate_text_end(&self) -> Option<usize> {
-        Some(self.range.end)
-    }
-}
-
-impl TextEnd for YulThisKeyword {
     fn calculate_text_end(&self) -> Option<usize> {
         Some(self.range.end)
     }

@@ -1,4 +1,4 @@
-{%- set model = model.structured_cst_model -%}
+{%- set lexer = model.parser.lexer -%}
 
 use serde::Serialize;
 use strum::Display;
@@ -8,7 +8,7 @@ pub enum TerminalKind {
     #[allow(clippy::upper_case_acronyms)]
     UNRECOGNIZED,
 
-    {% for terminal in model.terminals -%}
+    {% for terminal in lexer.all_terminal_kinds -%}
         {{ terminal }},
     {% endfor %}
 }

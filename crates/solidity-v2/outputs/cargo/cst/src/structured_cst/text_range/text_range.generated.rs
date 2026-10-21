@@ -1352,18 +1352,6 @@ impl TextRange for AddressKeyword {
     }
 }
 
-impl TextRange for AfterKeyword {
-    fn calculate_text_range(&self) -> Option<Range<usize>> {
-        Some(self.calculate_text_start()?..self.calculate_text_end()?)
-    }
-}
-
-impl TextRange for AliasKeyword {
-    fn calculate_text_range(&self) -> Option<Range<usize>> {
-        Some(self.calculate_text_start()?..self.calculate_text_end()?)
-    }
-}
-
 impl TextRange for Ampersand {
     fn calculate_text_range(&self) -> Option<Range<usize>> {
         Some(self.calculate_text_start()?..self.calculate_text_end()?)
@@ -1383,12 +1371,6 @@ impl TextRange for AmpersandEqual {
 }
 
 impl TextRange for AnonymousKeyword {
-    fn calculate_text_range(&self) -> Option<Range<usize>> {
-        Some(self.calculate_text_start()?..self.calculate_text_end()?)
-    }
-}
-
-impl TextRange for ApplyKeyword {
     fn calculate_text_range(&self) -> Option<Range<usize>> {
         Some(self.calculate_text_start()?..self.calculate_text_end()?)
     }
@@ -1425,12 +1407,6 @@ impl TextRange for AsteriskEqual {
 }
 
 impl TextRange for AtKeyword {
-    fn calculate_text_range(&self) -> Option<Range<usize>> {
-        Some(self.calculate_text_start()?..self.calculate_text_end()?)
-    }
-}
-
-impl TextRange for AutoKeyword {
     fn calculate_text_range(&self) -> Option<Range<usize>> {
         Some(self.calculate_text_start()?..self.calculate_text_end()?)
     }
@@ -1478,12 +1454,6 @@ impl TextRange for BreakKeyword {
     }
 }
 
-impl TextRange for ByteKeyword {
-    fn calculate_text_range(&self) -> Option<Range<usize>> {
-        Some(self.calculate_text_start()?..self.calculate_text_end()?)
-    }
-}
-
 impl TextRange for BytesKeyword {
     fn calculate_text_range(&self) -> Option<Range<usize>> {
         Some(self.calculate_text_start()?..self.calculate_text_end()?)
@@ -1503,12 +1473,6 @@ impl TextRange for Caret {
 }
 
 impl TextRange for CaretEqual {
-    fn calculate_text_range(&self) -> Option<Range<usize>> {
-        Some(self.calculate_text_start()?..self.calculate_text_end()?)
-    }
-}
-
-impl TextRange for CaseKeyword {
     fn calculate_text_range(&self) -> Option<Range<usize>> {
         Some(self.calculate_text_start()?..self.calculate_text_end()?)
     }
@@ -1574,12 +1538,6 @@ impl TextRange for ContractKeyword {
     }
 }
 
-impl TextRange for CopyOfKeyword {
-    fn calculate_text_range(&self) -> Option<Range<usize>> {
-        Some(self.calculate_text_start()?..self.calculate_text_end()?)
-    }
-}
-
 impl TextRange for DaysKeyword {
     fn calculate_text_range(&self) -> Option<Range<usize>> {
         Some(self.calculate_text_start()?..self.calculate_text_end()?)
@@ -1587,18 +1545,6 @@ impl TextRange for DaysKeyword {
 }
 
 impl TextRange for DecimalLiteral {
-    fn calculate_text_range(&self) -> Option<Range<usize>> {
-        Some(self.calculate_text_start()?..self.calculate_text_end()?)
-    }
-}
-
-impl TextRange for DefaultKeyword {
-    fn calculate_text_range(&self) -> Option<Range<usize>> {
-        Some(self.calculate_text_start()?..self.calculate_text_end()?)
-    }
-}
-
-impl TextRange for DefineKeyword {
     fn calculate_text_range(&self) -> Option<Range<usize>> {
         Some(self.calculate_text_start()?..self.calculate_text_end()?)
     }
@@ -1694,12 +1640,6 @@ impl TextRange for FalseKeyword {
     }
 }
 
-impl TextRange for FinalKeyword {
-    fn calculate_text_range(&self) -> Option<Range<usize>> {
-        Some(self.calculate_text_start()?..self.calculate_text_end()?)
-    }
-}
-
 impl TextRange for FixedKeyword {
     fn calculate_text_range(&self) -> Option<Range<usize>> {
         Some(self.calculate_text_start()?..self.calculate_text_end()?)
@@ -1772,12 +1712,6 @@ impl TextRange for GweiKeyword {
     }
 }
 
-impl TextRange for HexKeyword {
-    fn calculate_text_range(&self) -> Option<Range<usize>> {
-        Some(self.calculate_text_start()?..self.calculate_text_end()?)
-    }
-}
-
 impl TextRange for HexLiteral {
     fn calculate_text_range(&self) -> Option<Range<usize>> {
         Some(self.calculate_text_start()?..self.calculate_text_end()?)
@@ -1814,31 +1748,13 @@ impl TextRange for ImmutableKeyword {
     }
 }
 
-impl TextRange for ImplementsKeyword {
-    fn calculate_text_range(&self) -> Option<Range<usize>> {
-        Some(self.calculate_text_start()?..self.calculate_text_end()?)
-    }
-}
-
 impl TextRange for ImportKeyword {
     fn calculate_text_range(&self) -> Option<Range<usize>> {
         Some(self.calculate_text_start()?..self.calculate_text_end()?)
     }
 }
 
-impl TextRange for InKeyword {
-    fn calculate_text_range(&self) -> Option<Range<usize>> {
-        Some(self.calculate_text_start()?..self.calculate_text_end()?)
-    }
-}
-
 impl TextRange for IndexedKeyword {
-    fn calculate_text_range(&self) -> Option<Range<usize>> {
-        Some(self.calculate_text_start()?..self.calculate_text_end()?)
-    }
-}
-
-impl TextRange for InlineKeyword {
     fn calculate_text_range(&self) -> Option<Range<usize>> {
         Some(self.calculate_text_start()?..self.calculate_text_end()?)
     }
@@ -1898,31 +1814,13 @@ impl TextRange for LessThanLessThanEqual {
     }
 }
 
-impl TextRange for LetKeyword {
-    fn calculate_text_range(&self) -> Option<Range<usize>> {
-        Some(self.calculate_text_start()?..self.calculate_text_end()?)
-    }
-}
-
 impl TextRange for LibraryKeyword {
     fn calculate_text_range(&self) -> Option<Range<usize>> {
         Some(self.calculate_text_start()?..self.calculate_text_end()?)
     }
 }
 
-impl TextRange for MacroKeyword {
-    fn calculate_text_range(&self) -> Option<Range<usize>> {
-        Some(self.calculate_text_start()?..self.calculate_text_end()?)
-    }
-}
-
 impl TextRange for MappingKeyword {
-    fn calculate_text_range(&self) -> Option<Range<usize>> {
-        Some(self.calculate_text_start()?..self.calculate_text_end()?)
-    }
-}
-
-impl TextRange for MatchKeyword {
     fn calculate_text_range(&self) -> Option<Range<usize>> {
         Some(self.calculate_text_start()?..self.calculate_text_end()?)
     }
@@ -1964,25 +1862,7 @@ impl TextRange for ModifierKeyword {
     }
 }
 
-impl TextRange for MutableKeyword {
-    fn calculate_text_range(&self) -> Option<Range<usize>> {
-        Some(self.calculate_text_start()?..self.calculate_text_end()?)
-    }
-}
-
 impl TextRange for NewKeyword {
-    fn calculate_text_range(&self) -> Option<Range<usize>> {
-        Some(self.calculate_text_start()?..self.calculate_text_end()?)
-    }
-}
-
-impl TextRange for NullKeyword {
-    fn calculate_text_range(&self) -> Option<Range<usize>> {
-        Some(self.calculate_text_start()?..self.calculate_text_end()?)
-    }
-}
-
-impl TextRange for OfKeyword {
     fn calculate_text_range(&self) -> Option<Range<usize>> {
         Some(self.calculate_text_start()?..self.calculate_text_end()?)
     }
@@ -2007,12 +1887,6 @@ impl TextRange for OpenParen {
 }
 
 impl TextRange for OverrideKeyword {
-    fn calculate_text_range(&self) -> Option<Range<usize>> {
-        Some(self.calculate_text_start()?..self.calculate_text_end()?)
-    }
-}
-
-impl TextRange for PartialKeyword {
     fn calculate_text_range(&self) -> Option<Range<usize>> {
         Some(self.calculate_text_start()?..self.calculate_text_end()?)
     }
@@ -2144,12 +2018,6 @@ impl TextRange for PrivateKeyword {
     }
 }
 
-impl TextRange for PromiseKeyword {
-    fn calculate_text_range(&self) -> Option<Range<usize>> {
-        Some(self.calculate_text_start()?..self.calculate_text_end()?)
-    }
-}
-
 impl TextRange for PublicKeyword {
     fn calculate_text_range(&self) -> Option<Range<usize>> {
         Some(self.calculate_text_start()?..self.calculate_text_end()?)
@@ -2169,18 +2037,6 @@ impl TextRange for QuestionMark {
 }
 
 impl TextRange for ReceiveKeyword {
-    fn calculate_text_range(&self) -> Option<Range<usize>> {
-        Some(self.calculate_text_start()?..self.calculate_text_end()?)
-    }
-}
-
-impl TextRange for ReferenceKeyword {
-    fn calculate_text_range(&self) -> Option<Range<usize>> {
-        Some(self.calculate_text_start()?..self.calculate_text_end()?)
-    }
-}
-
-impl TextRange for RelocatableKeyword {
     fn calculate_text_range(&self) -> Option<Range<usize>> {
         Some(self.calculate_text_start()?..self.calculate_text_end()?)
     }
@@ -2210,12 +2066,6 @@ impl TextRange for SMTCheckerKeyword {
     }
 }
 
-impl TextRange for SealedKeyword {
-    fn calculate_text_range(&self) -> Option<Range<usize>> {
-        Some(self.calculate_text_start()?..self.calculate_text_end()?)
-    }
-}
-
 impl TextRange for SecondsKeyword {
     fn calculate_text_range(&self) -> Option<Range<usize>> {
         Some(self.calculate_text_start()?..self.calculate_text_end()?)
@@ -2223,12 +2073,6 @@ impl TextRange for SecondsKeyword {
 }
 
 impl TextRange for Semicolon {
-    fn calculate_text_range(&self) -> Option<Range<usize>> {
-        Some(self.calculate_text_start()?..self.calculate_text_end()?)
-    }
-}
-
-impl TextRange for SizeOfKeyword {
     fn calculate_text_range(&self) -> Option<Range<usize>> {
         Some(self.calculate_text_start()?..self.calculate_text_end()?)
     }
@@ -2247,12 +2091,6 @@ impl TextRange for SlashEqual {
 }
 
 impl TextRange for SolidityKeyword {
-    fn calculate_text_range(&self) -> Option<Range<usize>> {
-        Some(self.calculate_text_start()?..self.calculate_text_end()?)
-    }
-}
-
-impl TextRange for StaticKeyword {
     fn calculate_text_range(&self) -> Option<Range<usize>> {
         Some(self.calculate_text_start()?..self.calculate_text_end()?)
     }
@@ -2288,25 +2126,7 @@ impl TextRange for SuperKeyword {
     }
 }
 
-impl TextRange for SupportsKeyword {
-    fn calculate_text_range(&self) -> Option<Range<usize>> {
-        Some(self.calculate_text_start()?..self.calculate_text_end()?)
-    }
-}
-
-impl TextRange for SwitchKeyword {
-    fn calculate_text_range(&self) -> Option<Range<usize>> {
-        Some(self.calculate_text_start()?..self.calculate_text_end()?)
-    }
-}
-
 impl TextRange for ThisKeyword {
-    fn calculate_text_range(&self) -> Option<Range<usize>> {
-        Some(self.calculate_text_start()?..self.calculate_text_end()?)
-    }
-}
-
-impl TextRange for ThrowKeyword {
     fn calculate_text_range(&self) -> Option<Range<usize>> {
         Some(self.calculate_text_start()?..self.calculate_text_end()?)
     }
@@ -2336,19 +2156,7 @@ impl TextRange for TryKeyword {
     }
 }
 
-impl TextRange for TypeDefKeyword {
-    fn calculate_text_range(&self) -> Option<Range<usize>> {
-        Some(self.calculate_text_start()?..self.calculate_text_end()?)
-    }
-}
-
 impl TextRange for TypeKeyword {
-    fn calculate_text_range(&self) -> Option<Range<usize>> {
-        Some(self.calculate_text_start()?..self.calculate_text_end()?)
-    }
-}
-
-impl TextRange for TypeOfKeyword {
     fn calculate_text_range(&self) -> Option<Range<usize>> {
         Some(self.calculate_text_start()?..self.calculate_text_end()?)
     }
@@ -2379,12 +2187,6 @@ impl TextRange for UnicodeStringLiteral {
 }
 
 impl TextRange for UsingKeyword {
-    fn calculate_text_range(&self) -> Option<Range<usize>> {
-        Some(self.calculate_text_start()?..self.calculate_text_end()?)
-    }
-}
-
-impl TextRange for VarKeyword {
     fn calculate_text_range(&self) -> Option<Range<usize>> {
         Some(self.calculate_text_start()?..self.calculate_text_end()?)
     }
@@ -2421,12 +2223,6 @@ impl TextRange for WeiKeyword {
 }
 
 impl TextRange for WhileKeyword {
-    fn calculate_text_range(&self) -> Option<Range<usize>> {
-        Some(self.calculate_text_start()?..self.calculate_text_end()?)
-    }
-}
-
-impl TextRange for YearsKeyword {
     fn calculate_text_range(&self) -> Option<Range<usize>> {
         Some(self.calculate_text_start()?..self.calculate_text_end()?)
     }
@@ -2504,12 +2300,6 @@ impl TextRange for YulFunctionKeyword {
     }
 }
 
-impl TextRange for YulHexKeyword {
-    fn calculate_text_range(&self) -> Option<Range<usize>> {
-        Some(self.calculate_text_start()?..self.calculate_text_end()?)
-    }
-}
-
 impl TextRange for YulHexLiteral {
     fn calculate_text_range(&self) -> Option<Range<usize>> {
         Some(self.calculate_text_start()?..self.calculate_text_end()?)
@@ -2576,19 +2366,7 @@ impl TextRange for YulStringLiteral {
     }
 }
 
-impl TextRange for YulSuperKeyword {
-    fn calculate_text_range(&self) -> Option<Range<usize>> {
-        Some(self.calculate_text_start()?..self.calculate_text_end()?)
-    }
-}
-
 impl TextRange for YulSwitchKeyword {
-    fn calculate_text_range(&self) -> Option<Range<usize>> {
-        Some(self.calculate_text_start()?..self.calculate_text_end()?)
-    }
-}
-
-impl TextRange for YulThisKeyword {
     fn calculate_text_range(&self) -> Option<Range<usize>> {
         Some(self.calculate_text_start()?..self.calculate_text_end()?)
     }

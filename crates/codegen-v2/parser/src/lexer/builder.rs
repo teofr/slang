@@ -20,12 +20,14 @@ impl LexerModelBuilder {
             .collect();
 
         let all_lexeme_kinds = Self::collect_all_lexeme_kinds(&contexts);
+        let all_terminal_kinds = Self::collect_all_terminal_kinds(&contexts);
         let trivia_lexeme_kinds = Self::collect_trivia_lexeme_kinds(&contexts);
         let natspec_comment_lexeme_kinds = Self::collect_natspec_comment_lexeme_kinds(&contexts);
 
         LexerModel {
             contexts,
             all_lexeme_kinds,
+            all_terminal_kinds,
             trivia_lexeme_kinds,
             natspec_comment_lexeme_kinds,
         }
@@ -63,6 +65,23 @@ impl LexerModelBuilder {
                         } {
                             kinds.insert(format!("{kind}_Unreserved"));
                         }
+                    }
+                }
+            }
+        }
+
+        kinds
+    }
+
+    fn collect_all_terminal_kinds(contexts: &[LexicalContext]) -> BTreeSet<String> {
+        let mut kinds = BTreeSet::new();
+
+        for context in contexts {
+            for lexeme in &context.lexemes {
+                match lexeme {
+                    Lexeme::Trivia { .. } => {}
+                    Lexeme::Token { kind, .. } | Lexeme::Keyword { kind, .. } => {
+                        kinds.insert(kind.clone());
                     }
                 }
             }
@@ -194,6 +213,7 @@ impl LexicalContextBuilder {
             kind: item.name.to_string(),
             identifier: identifier.map(|id| id.to_string()),
             regex: Self::convert_keyword_scanner(&item.scanner),
+            enabled: item.enabled.clone().unwrap_or_default(),
             reserved: item.reserved.clone().unwrap_or_default(),
         }
     }

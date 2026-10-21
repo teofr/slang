@@ -4765,24 +4765,6 @@ pub fn new_address_keyword(range: Range<usize>, _source: &str) -> AddressKeyword
 }
 
 #[derive(Debug, PartialEq)]
-pub struct AfterKeyword {
-    pub range: Range<usize>,
-}
-
-pub fn new_after_keyword(range: Range<usize>, _source: &str) -> AfterKeyword {
-    AfterKeyword { range }
-}
-
-#[derive(Debug, PartialEq)]
-pub struct AliasKeyword {
-    pub range: Range<usize>,
-}
-
-pub fn new_alias_keyword(range: Range<usize>, _source: &str) -> AliasKeyword {
-    AliasKeyword { range }
-}
-
-#[derive(Debug, PartialEq)]
 pub struct Ampersand {
     pub range: Range<usize>,
 }
@@ -4816,15 +4798,6 @@ pub struct AnonymousKeyword {
 
 pub fn new_anonymous_keyword(range: Range<usize>, _source: &str) -> AnonymousKeyword {
     AnonymousKeyword { range }
-}
-
-#[derive(Debug, PartialEq)]
-pub struct ApplyKeyword {
-    pub range: Range<usize>,
-}
-
-pub fn new_apply_keyword(range: Range<usize>, _source: &str) -> ApplyKeyword {
-    ApplyKeyword { range }
 }
 
 #[derive(Debug, PartialEq)]
@@ -4879,15 +4852,6 @@ pub struct AtKeyword {
 
 pub fn new_at_keyword(range: Range<usize>, _source: &str) -> AtKeyword {
     AtKeyword { range }
-}
-
-#[derive(Debug, PartialEq)]
-pub struct AutoKeyword {
-    pub range: Range<usize>,
-}
-
-pub fn new_auto_keyword(range: Range<usize>, _source: &str) -> AutoKeyword {
-    AutoKeyword { range }
 }
 
 #[derive(Debug, PartialEq)]
@@ -4954,15 +4918,6 @@ pub fn new_break_keyword(range: Range<usize>, _source: &str) -> BreakKeyword {
 }
 
 #[derive(Debug, PartialEq)]
-pub struct ByteKeyword {
-    pub range: Range<usize>,
-}
-
-pub fn new_byte_keyword(range: Range<usize>, _source: &str) -> ByteKeyword {
-    ByteKeyword { range }
-}
-
-#[derive(Debug, PartialEq)]
 pub struct BytesKeyword {
     pub range: Range<usize>,
 }
@@ -4996,15 +4951,6 @@ pub struct CaretEqual {
 
 pub fn new_caret_equal(range: Range<usize>, _source: &str) -> CaretEqual {
     CaretEqual { range }
-}
-
-#[derive(Debug, PartialEq)]
-pub struct CaseKeyword {
-    pub range: Range<usize>,
-}
-
-pub fn new_case_keyword(range: Range<usize>, _source: &str) -> CaseKeyword {
-    CaseKeyword { range }
 }
 
 #[derive(Debug, PartialEq)]
@@ -5098,15 +5044,6 @@ pub fn new_contract_keyword(range: Range<usize>, _source: &str) -> ContractKeywo
 }
 
 #[derive(Debug, PartialEq)]
-pub struct CopyOfKeyword {
-    pub range: Range<usize>,
-}
-
-pub fn new_copy_of_keyword(range: Range<usize>, _source: &str) -> CopyOfKeyword {
-    CopyOfKeyword { range }
-}
-
-#[derive(Debug, PartialEq)]
 pub struct DaysKeyword {
     pub range: Range<usize>,
 }
@@ -5122,24 +5059,6 @@ pub struct DecimalLiteral {
 
 pub fn new_decimal_literal(range: Range<usize>, _source: &str) -> DecimalLiteral {
     DecimalLiteral { range }
-}
-
-#[derive(Debug, PartialEq)]
-pub struct DefaultKeyword {
-    pub range: Range<usize>,
-}
-
-pub fn new_default_keyword(range: Range<usize>, _source: &str) -> DefaultKeyword {
-    DefaultKeyword { range }
-}
-
-#[derive(Debug, PartialEq)]
-pub struct DefineKeyword {
-    pub range: Range<usize>,
-}
-
-pub fn new_define_keyword(range: Range<usize>, _source: &str) -> DefineKeyword {
-    DefineKeyword { range }
 }
 
 #[derive(Debug, PartialEq)]
@@ -5278,15 +5197,6 @@ pub fn new_false_keyword(range: Range<usize>, _source: &str) -> FalseKeyword {
 }
 
 #[derive(Debug, PartialEq)]
-pub struct FinalKeyword {
-    pub range: Range<usize>,
-}
-
-pub fn new_final_keyword(range: Range<usize>, _source: &str) -> FinalKeyword {
-    FinalKeyword { range }
-}
-
-#[derive(Debug, PartialEq)]
 pub struct FixedKeyword {
     pub range: Range<usize>,
 }
@@ -5404,15 +5314,6 @@ pub fn new_gwei_keyword(range: Range<usize>, _source: &str) -> GweiKeyword {
 }
 
 #[derive(Debug, PartialEq)]
-pub struct HexKeyword {
-    pub range: Range<usize>,
-}
-
-pub fn new_hex_keyword(range: Range<usize>, _source: &str) -> HexKeyword {
-    HexKeyword { range }
-}
-
-#[derive(Debug, PartialEq)]
 pub struct HexLiteral {
     pub range: Range<usize>,
 }
@@ -5467,15 +5368,6 @@ pub fn new_immutable_keyword(range: Range<usize>, _source: &str) -> ImmutableKey
 }
 
 #[derive(Debug, PartialEq)]
-pub struct ImplementsKeyword {
-    pub range: Range<usize>,
-}
-
-pub fn new_implements_keyword(range: Range<usize>, _source: &str) -> ImplementsKeyword {
-    ImplementsKeyword { range }
-}
-
-#[derive(Debug, PartialEq)]
 pub struct ImportKeyword {
     pub range: Range<usize>,
 }
@@ -5485,30 +5377,12 @@ pub fn new_import_keyword(range: Range<usize>, _source: &str) -> ImportKeyword {
 }
 
 #[derive(Debug, PartialEq)]
-pub struct InKeyword {
-    pub range: Range<usize>,
-}
-
-pub fn new_in_keyword(range: Range<usize>, _source: &str) -> InKeyword {
-    InKeyword { range }
-}
-
-#[derive(Debug, PartialEq)]
 pub struct IndexedKeyword {
     pub range: Range<usize>,
 }
 
 pub fn new_indexed_keyword(range: Range<usize>, _source: &str) -> IndexedKeyword {
     IndexedKeyword { range }
-}
-
-#[derive(Debug, PartialEq)]
-pub struct InlineKeyword {
-    pub range: Range<usize>,
-}
-
-pub fn new_inline_keyword(range: Range<usize>, _source: &str) -> InlineKeyword {
-    InlineKeyword { range }
 }
 
 #[derive(Debug, PartialEq)]
@@ -5593,15 +5467,6 @@ pub fn new_less_than_less_than_equal(range: Range<usize>, _source: &str) -> Less
 }
 
 #[derive(Debug, PartialEq)]
-pub struct LetKeyword {
-    pub range: Range<usize>,
-}
-
-pub fn new_let_keyword(range: Range<usize>, _source: &str) -> LetKeyword {
-    LetKeyword { range }
-}
-
-#[derive(Debug, PartialEq)]
 pub struct LibraryKeyword {
     pub range: Range<usize>,
 }
@@ -5611,30 +5476,12 @@ pub fn new_library_keyword(range: Range<usize>, _source: &str) -> LibraryKeyword
 }
 
 #[derive(Debug, PartialEq)]
-pub struct MacroKeyword {
-    pub range: Range<usize>,
-}
-
-pub fn new_macro_keyword(range: Range<usize>, _source: &str) -> MacroKeyword {
-    MacroKeyword { range }
-}
-
-#[derive(Debug, PartialEq)]
 pub struct MappingKeyword {
     pub range: Range<usize>,
 }
 
 pub fn new_mapping_keyword(range: Range<usize>, _source: &str) -> MappingKeyword {
     MappingKeyword { range }
-}
-
-#[derive(Debug, PartialEq)]
-pub struct MatchKeyword {
-    pub range: Range<usize>,
-}
-
-pub fn new_match_keyword(range: Range<usize>, _source: &str) -> MatchKeyword {
-    MatchKeyword { range }
 }
 
 #[derive(Debug, PartialEq)]
@@ -5692,39 +5539,12 @@ pub fn new_modifier_keyword(range: Range<usize>, _source: &str) -> ModifierKeywo
 }
 
 #[derive(Debug, PartialEq)]
-pub struct MutableKeyword {
-    pub range: Range<usize>,
-}
-
-pub fn new_mutable_keyword(range: Range<usize>, _source: &str) -> MutableKeyword {
-    MutableKeyword { range }
-}
-
-#[derive(Debug, PartialEq)]
 pub struct NewKeyword {
     pub range: Range<usize>,
 }
 
 pub fn new_new_keyword(range: Range<usize>, _source: &str) -> NewKeyword {
     NewKeyword { range }
-}
-
-#[derive(Debug, PartialEq)]
-pub struct NullKeyword {
-    pub range: Range<usize>,
-}
-
-pub fn new_null_keyword(range: Range<usize>, _source: &str) -> NullKeyword {
-    NullKeyword { range }
-}
-
-#[derive(Debug, PartialEq)]
-pub struct OfKeyword {
-    pub range: Range<usize>,
-}
-
-pub fn new_of_keyword(range: Range<usize>, _source: &str) -> OfKeyword {
-    OfKeyword { range }
 }
 
 #[derive(Debug, PartialEq)]
@@ -5761,15 +5581,6 @@ pub struct OverrideKeyword {
 
 pub fn new_override_keyword(range: Range<usize>, _source: &str) -> OverrideKeyword {
     OverrideKeyword { range }
-}
-
-#[derive(Debug, PartialEq)]
-pub struct PartialKeyword {
-    pub range: Range<usize>,
-}
-
-pub fn new_partial_keyword(range: Range<usize>, _source: &str) -> PartialKeyword {
-    PartialKeyword { range }
 }
 
 #[derive(Debug, PartialEq)]
@@ -5962,15 +5773,6 @@ pub fn new_private_keyword(range: Range<usize>, _source: &str) -> PrivateKeyword
 }
 
 #[derive(Debug, PartialEq)]
-pub struct PromiseKeyword {
-    pub range: Range<usize>,
-}
-
-pub fn new_promise_keyword(range: Range<usize>, _source: &str) -> PromiseKeyword {
-    PromiseKeyword { range }
-}
-
-#[derive(Debug, PartialEq)]
 pub struct PublicKeyword {
     pub range: Range<usize>,
 }
@@ -6004,24 +5806,6 @@ pub struct ReceiveKeyword {
 
 pub fn new_receive_keyword(range: Range<usize>, _source: &str) -> ReceiveKeyword {
     ReceiveKeyword { range }
-}
-
-#[derive(Debug, PartialEq)]
-pub struct ReferenceKeyword {
-    pub range: Range<usize>,
-}
-
-pub fn new_reference_keyword(range: Range<usize>, _source: &str) -> ReferenceKeyword {
-    ReferenceKeyword { range }
-}
-
-#[derive(Debug, PartialEq)]
-pub struct RelocatableKeyword {
-    pub range: Range<usize>,
-}
-
-pub fn new_relocatable_keyword(range: Range<usize>, _source: &str) -> RelocatableKeyword {
-    RelocatableKeyword { range }
 }
 
 #[derive(Debug, PartialEq)]
@@ -6061,15 +5845,6 @@ pub fn new_smt_checker_keyword(range: Range<usize>, _source: &str) -> SMTChecker
 }
 
 #[derive(Debug, PartialEq)]
-pub struct SealedKeyword {
-    pub range: Range<usize>,
-}
-
-pub fn new_sealed_keyword(range: Range<usize>, _source: &str) -> SealedKeyword {
-    SealedKeyword { range }
-}
-
-#[derive(Debug, PartialEq)]
 pub struct SecondsKeyword {
     pub range: Range<usize>,
 }
@@ -6085,15 +5860,6 @@ pub struct Semicolon {
 
 pub fn new_semicolon(range: Range<usize>, _source: &str) -> Semicolon {
     Semicolon { range }
-}
-
-#[derive(Debug, PartialEq)]
-pub struct SizeOfKeyword {
-    pub range: Range<usize>,
-}
-
-pub fn new_size_of_keyword(range: Range<usize>, _source: &str) -> SizeOfKeyword {
-    SizeOfKeyword { range }
 }
 
 #[derive(Debug, PartialEq)]
@@ -6121,15 +5887,6 @@ pub struct SolidityKeyword {
 
 pub fn new_solidity_keyword(range: Range<usize>, _source: &str) -> SolidityKeyword {
     SolidityKeyword { range }
-}
-
-#[derive(Debug, PartialEq)]
-pub struct StaticKeyword {
-    pub range: Range<usize>,
-}
-
-pub fn new_static_keyword(range: Range<usize>, _source: &str) -> StaticKeyword {
-    StaticKeyword { range }
 }
 
 #[derive(Debug, PartialEq)]
@@ -6178,39 +5935,12 @@ pub fn new_super_keyword(range: Range<usize>, _source: &str) -> SuperKeyword {
 }
 
 #[derive(Debug, PartialEq)]
-pub struct SupportsKeyword {
-    pub range: Range<usize>,
-}
-
-pub fn new_supports_keyword(range: Range<usize>, _source: &str) -> SupportsKeyword {
-    SupportsKeyword { range }
-}
-
-#[derive(Debug, PartialEq)]
-pub struct SwitchKeyword {
-    pub range: Range<usize>,
-}
-
-pub fn new_switch_keyword(range: Range<usize>, _source: &str) -> SwitchKeyword {
-    SwitchKeyword { range }
-}
-
-#[derive(Debug, PartialEq)]
 pub struct ThisKeyword {
     pub range: Range<usize>,
 }
 
 pub fn new_this_keyword(range: Range<usize>, _source: &str) -> ThisKeyword {
     ThisKeyword { range }
-}
-
-#[derive(Debug, PartialEq)]
-pub struct ThrowKeyword {
-    pub range: Range<usize>,
-}
-
-pub fn new_throw_keyword(range: Range<usize>, _source: &str) -> ThrowKeyword {
-    ThrowKeyword { range }
 }
 
 #[derive(Debug, PartialEq)]
@@ -6250,30 +5980,12 @@ pub fn new_try_keyword(range: Range<usize>, _source: &str) -> TryKeyword {
 }
 
 #[derive(Debug, PartialEq)]
-pub struct TypeDefKeyword {
-    pub range: Range<usize>,
-}
-
-pub fn new_type_def_keyword(range: Range<usize>, _source: &str) -> TypeDefKeyword {
-    TypeDefKeyword { range }
-}
-
-#[derive(Debug, PartialEq)]
 pub struct TypeKeyword {
     pub range: Range<usize>,
 }
 
 pub fn new_type_keyword(range: Range<usize>, _source: &str) -> TypeKeyword {
     TypeKeyword { range }
-}
-
-#[derive(Debug, PartialEq)]
-pub struct TypeOfKeyword {
-    pub range: Range<usize>,
-}
-
-pub fn new_type_of_keyword(range: Range<usize>, _source: &str) -> TypeOfKeyword {
-    TypeOfKeyword { range }
 }
 
 #[derive(Debug, PartialEq)]
@@ -6319,15 +6031,6 @@ pub struct UsingKeyword {
 
 pub fn new_using_keyword(range: Range<usize>, _source: &str) -> UsingKeyword {
     UsingKeyword { range }
-}
-
-#[derive(Debug, PartialEq)]
-pub struct VarKeyword {
-    pub range: Range<usize>,
-}
-
-pub fn new_var_keyword(range: Range<usize>, _source: &str) -> VarKeyword {
-    VarKeyword { range }
 }
 
 #[derive(Debug, PartialEq)]
@@ -6382,15 +6085,6 @@ pub struct WhileKeyword {
 
 pub fn new_while_keyword(range: Range<usize>, _source: &str) -> WhileKeyword {
     WhileKeyword { range }
-}
-
-#[derive(Debug, PartialEq)]
-pub struct YearsKeyword {
-    pub range: Range<usize>,
-}
-
-pub fn new_years_keyword(range: Range<usize>, _source: &str) -> YearsKeyword {
-    YearsKeyword { range }
 }
 
 #[derive(Debug, PartialEq)]
@@ -6502,15 +6196,6 @@ pub fn new_yul_function_keyword(range: Range<usize>, _source: &str) -> YulFuncti
 }
 
 #[derive(Debug, PartialEq)]
-pub struct YulHexKeyword {
-    pub range: Range<usize>,
-}
-
-pub fn new_yul_hex_keyword(range: Range<usize>, _source: &str) -> YulHexKeyword {
-    YulHexKeyword { range }
-}
-
-#[derive(Debug, PartialEq)]
 pub struct YulHexLiteral {
     pub range: Range<usize>,
 }
@@ -6610,30 +6295,12 @@ pub fn new_yul_string_literal(range: Range<usize>, _source: &str) -> YulStringLi
 }
 
 #[derive(Debug, PartialEq)]
-pub struct YulSuperKeyword {
-    pub range: Range<usize>,
-}
-
-pub fn new_yul_super_keyword(range: Range<usize>, _source: &str) -> YulSuperKeyword {
-    YulSuperKeyword { range }
-}
-
-#[derive(Debug, PartialEq)]
 pub struct YulSwitchKeyword {
     pub range: Range<usize>,
 }
 
 pub fn new_yul_switch_keyword(range: Range<usize>, _source: &str) -> YulSwitchKeyword {
     YulSwitchKeyword { range }
-}
-
-#[derive(Debug, PartialEq)]
-pub struct YulThisKeyword {
-    pub range: Range<usize>,
-}
-
-pub fn new_yul_this_keyword(range: Range<usize>, _source: &str) -> YulThisKeyword {
-    YulThisKeyword { range }
 }
 
 #[derive(Debug, PartialEq)]

@@ -2093,18 +2093,6 @@ impl TextStart for AddressKeyword {
     }
 }
 
-impl TextStart for AfterKeyword {
-    fn calculate_text_start(&self) -> Option<usize> {
-        Some(self.range.start)
-    }
-}
-
-impl TextStart for AliasKeyword {
-    fn calculate_text_start(&self) -> Option<usize> {
-        Some(self.range.start)
-    }
-}
-
 impl TextStart for Ampersand {
     fn calculate_text_start(&self) -> Option<usize> {
         Some(self.range.start)
@@ -2124,12 +2112,6 @@ impl TextStart for AmpersandEqual {
 }
 
 impl TextStart for AnonymousKeyword {
-    fn calculate_text_start(&self) -> Option<usize> {
-        Some(self.range.start)
-    }
-}
-
-impl TextStart for ApplyKeyword {
     fn calculate_text_start(&self) -> Option<usize> {
         Some(self.range.start)
     }
@@ -2166,12 +2148,6 @@ impl TextStart for AsteriskEqual {
 }
 
 impl TextStart for AtKeyword {
-    fn calculate_text_start(&self) -> Option<usize> {
-        Some(self.range.start)
-    }
-}
-
-impl TextStart for AutoKeyword {
     fn calculate_text_start(&self) -> Option<usize> {
         Some(self.range.start)
     }
@@ -2219,12 +2195,6 @@ impl TextStart for BreakKeyword {
     }
 }
 
-impl TextStart for ByteKeyword {
-    fn calculate_text_start(&self) -> Option<usize> {
-        Some(self.range.start)
-    }
-}
-
 impl TextStart for BytesKeyword {
     fn calculate_text_start(&self) -> Option<usize> {
         Some(self.range.start)
@@ -2244,12 +2214,6 @@ impl TextStart for Caret {
 }
 
 impl TextStart for CaretEqual {
-    fn calculate_text_start(&self) -> Option<usize> {
-        Some(self.range.start)
-    }
-}
-
-impl TextStart for CaseKeyword {
     fn calculate_text_start(&self) -> Option<usize> {
         Some(self.range.start)
     }
@@ -2315,12 +2279,6 @@ impl TextStart for ContractKeyword {
     }
 }
 
-impl TextStart for CopyOfKeyword {
-    fn calculate_text_start(&self) -> Option<usize> {
-        Some(self.range.start)
-    }
-}
-
 impl TextStart for DaysKeyword {
     fn calculate_text_start(&self) -> Option<usize> {
         Some(self.range.start)
@@ -2328,18 +2286,6 @@ impl TextStart for DaysKeyword {
 }
 
 impl TextStart for DecimalLiteral {
-    fn calculate_text_start(&self) -> Option<usize> {
-        Some(self.range.start)
-    }
-}
-
-impl TextStart for DefaultKeyword {
-    fn calculate_text_start(&self) -> Option<usize> {
-        Some(self.range.start)
-    }
-}
-
-impl TextStart for DefineKeyword {
     fn calculate_text_start(&self) -> Option<usize> {
         Some(self.range.start)
     }
@@ -2435,12 +2381,6 @@ impl TextStart for FalseKeyword {
     }
 }
 
-impl TextStart for FinalKeyword {
-    fn calculate_text_start(&self) -> Option<usize> {
-        Some(self.range.start)
-    }
-}
-
 impl TextStart for FixedKeyword {
     fn calculate_text_start(&self) -> Option<usize> {
         Some(self.range.start)
@@ -2513,12 +2453,6 @@ impl TextStart for GweiKeyword {
     }
 }
 
-impl TextStart for HexKeyword {
-    fn calculate_text_start(&self) -> Option<usize> {
-        Some(self.range.start)
-    }
-}
-
 impl TextStart for HexLiteral {
     fn calculate_text_start(&self) -> Option<usize> {
         Some(self.range.start)
@@ -2555,31 +2489,13 @@ impl TextStart for ImmutableKeyword {
     }
 }
 
-impl TextStart for ImplementsKeyword {
-    fn calculate_text_start(&self) -> Option<usize> {
-        Some(self.range.start)
-    }
-}
-
 impl TextStart for ImportKeyword {
     fn calculate_text_start(&self) -> Option<usize> {
         Some(self.range.start)
     }
 }
 
-impl TextStart for InKeyword {
-    fn calculate_text_start(&self) -> Option<usize> {
-        Some(self.range.start)
-    }
-}
-
 impl TextStart for IndexedKeyword {
-    fn calculate_text_start(&self) -> Option<usize> {
-        Some(self.range.start)
-    }
-}
-
-impl TextStart for InlineKeyword {
     fn calculate_text_start(&self) -> Option<usize> {
         Some(self.range.start)
     }
@@ -2639,31 +2555,13 @@ impl TextStart for LessThanLessThanEqual {
     }
 }
 
-impl TextStart for LetKeyword {
-    fn calculate_text_start(&self) -> Option<usize> {
-        Some(self.range.start)
-    }
-}
-
 impl TextStart for LibraryKeyword {
     fn calculate_text_start(&self) -> Option<usize> {
         Some(self.range.start)
     }
 }
 
-impl TextStart for MacroKeyword {
-    fn calculate_text_start(&self) -> Option<usize> {
-        Some(self.range.start)
-    }
-}
-
 impl TextStart for MappingKeyword {
-    fn calculate_text_start(&self) -> Option<usize> {
-        Some(self.range.start)
-    }
-}
-
-impl TextStart for MatchKeyword {
     fn calculate_text_start(&self) -> Option<usize> {
         Some(self.range.start)
     }
@@ -2705,25 +2603,7 @@ impl TextStart for ModifierKeyword {
     }
 }
 
-impl TextStart for MutableKeyword {
-    fn calculate_text_start(&self) -> Option<usize> {
-        Some(self.range.start)
-    }
-}
-
 impl TextStart for NewKeyword {
-    fn calculate_text_start(&self) -> Option<usize> {
-        Some(self.range.start)
-    }
-}
-
-impl TextStart for NullKeyword {
-    fn calculate_text_start(&self) -> Option<usize> {
-        Some(self.range.start)
-    }
-}
-
-impl TextStart for OfKeyword {
     fn calculate_text_start(&self) -> Option<usize> {
         Some(self.range.start)
     }
@@ -2748,12 +2628,6 @@ impl TextStart for OpenParen {
 }
 
 impl TextStart for OverrideKeyword {
-    fn calculate_text_start(&self) -> Option<usize> {
-        Some(self.range.start)
-    }
-}
-
-impl TextStart for PartialKeyword {
     fn calculate_text_start(&self) -> Option<usize> {
         Some(self.range.start)
     }
@@ -2885,12 +2759,6 @@ impl TextStart for PrivateKeyword {
     }
 }
 
-impl TextStart for PromiseKeyword {
-    fn calculate_text_start(&self) -> Option<usize> {
-        Some(self.range.start)
-    }
-}
-
 impl TextStart for PublicKeyword {
     fn calculate_text_start(&self) -> Option<usize> {
         Some(self.range.start)
@@ -2910,18 +2778,6 @@ impl TextStart for QuestionMark {
 }
 
 impl TextStart for ReceiveKeyword {
-    fn calculate_text_start(&self) -> Option<usize> {
-        Some(self.range.start)
-    }
-}
-
-impl TextStart for ReferenceKeyword {
-    fn calculate_text_start(&self) -> Option<usize> {
-        Some(self.range.start)
-    }
-}
-
-impl TextStart for RelocatableKeyword {
     fn calculate_text_start(&self) -> Option<usize> {
         Some(self.range.start)
     }
@@ -2951,12 +2807,6 @@ impl TextStart for SMTCheckerKeyword {
     }
 }
 
-impl TextStart for SealedKeyword {
-    fn calculate_text_start(&self) -> Option<usize> {
-        Some(self.range.start)
-    }
-}
-
 impl TextStart for SecondsKeyword {
     fn calculate_text_start(&self) -> Option<usize> {
         Some(self.range.start)
@@ -2964,12 +2814,6 @@ impl TextStart for SecondsKeyword {
 }
 
 impl TextStart for Semicolon {
-    fn calculate_text_start(&self) -> Option<usize> {
-        Some(self.range.start)
-    }
-}
-
-impl TextStart for SizeOfKeyword {
     fn calculate_text_start(&self) -> Option<usize> {
         Some(self.range.start)
     }
@@ -2988,12 +2832,6 @@ impl TextStart for SlashEqual {
 }
 
 impl TextStart for SolidityKeyword {
-    fn calculate_text_start(&self) -> Option<usize> {
-        Some(self.range.start)
-    }
-}
-
-impl TextStart for StaticKeyword {
     fn calculate_text_start(&self) -> Option<usize> {
         Some(self.range.start)
     }
@@ -3029,25 +2867,7 @@ impl TextStart for SuperKeyword {
     }
 }
 
-impl TextStart for SupportsKeyword {
-    fn calculate_text_start(&self) -> Option<usize> {
-        Some(self.range.start)
-    }
-}
-
-impl TextStart for SwitchKeyword {
-    fn calculate_text_start(&self) -> Option<usize> {
-        Some(self.range.start)
-    }
-}
-
 impl TextStart for ThisKeyword {
-    fn calculate_text_start(&self) -> Option<usize> {
-        Some(self.range.start)
-    }
-}
-
-impl TextStart for ThrowKeyword {
     fn calculate_text_start(&self) -> Option<usize> {
         Some(self.range.start)
     }
@@ -3077,19 +2897,7 @@ impl TextStart for TryKeyword {
     }
 }
 
-impl TextStart for TypeDefKeyword {
-    fn calculate_text_start(&self) -> Option<usize> {
-        Some(self.range.start)
-    }
-}
-
 impl TextStart for TypeKeyword {
-    fn calculate_text_start(&self) -> Option<usize> {
-        Some(self.range.start)
-    }
-}
-
-impl TextStart for TypeOfKeyword {
     fn calculate_text_start(&self) -> Option<usize> {
         Some(self.range.start)
     }
@@ -3120,12 +2928,6 @@ impl TextStart for UnicodeStringLiteral {
 }
 
 impl TextStart for UsingKeyword {
-    fn calculate_text_start(&self) -> Option<usize> {
-        Some(self.range.start)
-    }
-}
-
-impl TextStart for VarKeyword {
     fn calculate_text_start(&self) -> Option<usize> {
         Some(self.range.start)
     }
@@ -3162,12 +2964,6 @@ impl TextStart for WeiKeyword {
 }
 
 impl TextStart for WhileKeyword {
-    fn calculate_text_start(&self) -> Option<usize> {
-        Some(self.range.start)
-    }
-}
-
-impl TextStart for YearsKeyword {
     fn calculate_text_start(&self) -> Option<usize> {
         Some(self.range.start)
     }
@@ -3245,12 +3041,6 @@ impl TextStart for YulFunctionKeyword {
     }
 }
 
-impl TextStart for YulHexKeyword {
-    fn calculate_text_start(&self) -> Option<usize> {
-        Some(self.range.start)
-    }
-}
-
 impl TextStart for YulHexLiteral {
     fn calculate_text_start(&self) -> Option<usize> {
         Some(self.range.start)
@@ -3317,19 +3107,7 @@ impl TextStart for YulStringLiteral {
     }
 }
 
-impl TextStart for YulSuperKeyword {
-    fn calculate_text_start(&self) -> Option<usize> {
-        Some(self.range.start)
-    }
-}
-
 impl TextStart for YulSwitchKeyword {
-    fn calculate_text_start(&self) -> Option<usize> {
-        Some(self.range.start)
-    }
-}
-
-impl TextStart for YulThisKeyword {
     fn calculate_text_start(&self) -> Option<usize> {
         Some(self.range.start)
     }

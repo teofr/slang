@@ -44,7 +44,10 @@ impl StructuredCstModelBuilder {
                     // Trivia items are skipped by the parser.
                 }
                 model::Item::Keyword { item } => {
-                    self.terminals.insert(item.name.clone());
+                    // A keyword that is never enabled can't appear in the tree.
+                    if item.enabled != Some(model::VersionSpecifier::Never) {
+                        self.terminals.insert(item.name.clone());
+                    }
                 }
                 model::Item::Token { item } => {
                     self.terminals.insert(item.name.clone());

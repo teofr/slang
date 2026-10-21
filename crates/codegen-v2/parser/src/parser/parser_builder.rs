@@ -154,9 +154,16 @@ impl<'a> ParserBuilder<'a> {
                     Lexeme::Keyword {
                         kind,
                         identifier,
+                        enabled,
                         reserved,
                         ..
                     } => {
+                        // A keyword that is never enabled can't appear in the grammar, so it
+                        // gets no terminal rule. It is still lexed, to keep it reserved.
+                        if *enabled == VersionSpecifier::Never {
+                            continue;
+                        }
+
                         // For Keywords, we need to consider reserved and unreserved forms.
                         if *reserved != VersionSpecifier::Never {
                             terminals
