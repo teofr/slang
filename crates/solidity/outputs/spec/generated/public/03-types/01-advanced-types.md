@@ -24,7 +24,7 @@
 
 ```
 
-<pre ebnf-snippet="FunctionTypeAttributes" style="display: none;"><a href="#FunctionTypeAttributes"><span class="k">FunctionTypeAttributes</span></a><span class="o"> = </span><span class="cm">(* item: *)</span><span class="o"> </span><a href="#FunctionTypeAttribute"><span class="k">FunctionTypeAttribute</span></a><span class="o">*</span><span class="o">;</span></pre>
+<pre ebnf-snippet="FunctionTypeAttributes" style="display: none;"><span class="cm">(* Stops before (INTERNAL_KEYWORD | EXTERNAL_KEYWORD | PRIVATE_KEYWORD | PUBLIC_KEYWORD) once (INTERNAL_KEYWORD | EXTERNAL_KEYWORD) was matched (introduced in 0.4.22) *)</span><br /><a href="#FunctionTypeAttributes"><span class="k">FunctionTypeAttributes</span></a><span class="o"> = </span><span class="cm">(* item: *)</span><span class="o"> </span><a href="#FunctionTypeAttribute"><span class="k">FunctionTypeAttribute</span></a><span class="o">*</span><span class="o">;</span></pre>
 
 ```{ .ebnf #FunctionTypeAttribute }
 

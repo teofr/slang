@@ -78,7 +78,12 @@ impl Language {
                         add_spec(&variant.enabled);
                     }
                 }
-                Item::Repeated { item } => add_spec(&item.enabled),
+                Item::Repeated { item } => {
+                    add_spec(&item.enabled);
+                    if let Some(stop_before) = &item.stop_before {
+                        add_spec(&stop_before.enabled);
+                    }
+                }
                 Item::Separated { item } => add_spec(&item.enabled),
                 Item::Precedence { item } => {
                     add_spec(&item.enabled);

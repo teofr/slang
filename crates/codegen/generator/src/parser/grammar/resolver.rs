@@ -468,11 +468,85 @@ fn resolve_repeated(item: model::RepeatedItem, ctx: &mut ResolveCtx) -> ParserDe
 
     let repeated = Labeled::with_predefined_label(PredefinedLabel::Item, reference);
 
-    if item.allow_empty.unwrap_or_default() {
-        ParserDefinitionNode::ZeroOrMore(repeated).versioned(item.enabled)
+    let repeated = if item.allow_empty.unwrap_or_default() {
+        ParserDefinitionNode::ZeroOrMore(repeated)
     } else {
-        ParserDefinitionNode::OneOrMore(repeated).versioned(item.enabled)
+        ParserDefinitionNode::OneOrMore(repeated)
+    };
+
+    let Some(stop_before) = item.stop_before else {
+        return repeated.versioned(item.enabled);
+    };
+
+    let stopping = resolve_stop_before(&item.reference, &stop_before, ctx);
+
+    match stop_before.enabled {
+        None => stopping,
+        Some(model::VersionSpecifier::From { from }) => {
+            ParserDefinitionNode::Choice(Labeled::anonymous(vec![
+                repeated.versioned(Some(model::VersionSpecifier::Till { till: from.clone() })),
+                stopping.versioned(Some(model::VersionSpecifier::From { from })),
+            ]))
+        }
+        Some(enabled) => {
+            unreachable!("`stop_before` is only enabled `From` a version: {enabled:?}")
+        }
     }
+    .versioned(item.enabled)
+}
+
+/// Lowers `stop_before` into plain grammar, so that the parser needs no state to stop:
+///
+/// ```ebnf
+/// (Item - after)* (after (Item - before)*)?
+/// ```
+///
+/// Each group is an inline copy of the item's enum, restricted to some of its variants.
+/// It still produces a node of the enum's kind, so the CST is the same flat list of items.
+fn resolve_stop_before(
+    reference: &Identifier,
+    stop_before: &model::RepeatedStopBefore,
+    ctx: &mut ResolveCtx,
+) -> ParserDefinitionNode {
+    let (lex_ctx, Item::Enum { item }) = ctx.items.get(reference).cloned().expect("Missing item")
+    else {
+        unreachable!("{reference}: `stop_before` can only repeat an enum");
+    };
+
+    let mut group = |keep: &dyn Fn(&Identifier) -> bool| {
+        let mut variants = item.deref().clone();
+        variants.variants.retain(|variant| keep(&variant.reference));
+
+        let thunk = Rc::new(NamedParserThunk {
+            name: item.name.clone(),
+            context: lex_ctx.clone(),
+            is_inline: true,
+            def: OnceCell::new(),
+        });
+        thunk.def.set(resolve_choice(variants, ctx)).unwrap();
+
+        ParserDefinitionNode::ParserDefinition(thunk)
+    };
+
+    let leading = group(&|variant| !stop_before.after.contains(variant));
+    let closing = group(&|variant| stop_before.after.contains(variant));
+    let trailing = group(&|variant| !stop_before.before.contains(variant));
+
+    let zero_or_more = |node| {
+        Labeled::anonymous(ParserDefinitionNode::ZeroOrMore(
+            Labeled::with_predefined_label(PredefinedLabel::Item, Box::new(node)),
+        ))
+    };
+
+    ParserDefinitionNode::Sequence(vec![
+        zero_or_more(leading),
+        Labeled::anonymous(ParserDefinitionNode::Optional(Box::new(
+            ParserDefinitionNode::Sequence(vec![
+                Labeled::with_predefined_label(PredefinedLabel::Item, closing),
+                zero_or_more(trailing),
+            ]),
+        ))),
+    ])
 }
 
 fn resolve_separated(item: model::SeparatedItem, ctx: &mut ResolveCtx) -> ParserDefinitionNode {

@@ -146,6 +146,7 @@ impl Builder {
             name,
             reference,
             allow_empty,
+            stop_before,
             enabled,
         } = repeated_item;
 
@@ -158,9 +159,33 @@ impl Builder {
             Expression::new_one_or_more(Self::build_ref(Some(label), reference).into())
         };
 
+        let stop_before_comment = stop_before.as_ref().map(|stop_before| {
+            let to_ebnf_ids = |terminals: &[Identifier]| {
+                terminals
+                    .iter()
+                    .map(|terminal| terminal.to_screaming_snake_case())
+                    .collect::<Vec<_>>()
+                    .join(" | ")
+            };
+
+            let mut comment = format!(
+                "Stops before ({before}) once ({after}) was matched",
+                before = to_ebnf_ids(&stop_before.before),
+                after = to_ebnf_ids(&stop_before.after),
+            );
+
+            if let Some(enabled) = Self::build_enabled_comment(stop_before.enabled.as_ref()) {
+                comment = format!("{comment} ({})", enabled.to_lowercase());
+            }
+
+            comment
+        });
+
         self.add_definition(
             name,
-            Self::build_enabled_comment(enabled.as_ref()),
+            Self::build_enabled_comment(enabled.as_ref())
+                .into_iter()
+                .chain(stop_before_comment),
             Some(Value::new(expression, None)),
             DefinitionKind::Sequence,
         );

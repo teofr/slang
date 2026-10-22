@@ -744,6 +744,7 @@ pub enum NonterminalKind {
     /// Represents a node with kind `FunctionTypeAttributes`, having the following structure:
     ///
     /// ```ebnf
+    /// (* Stops before (INTERNAL_KEYWORD | EXTERNAL_KEYWORD | PRIVATE_KEYWORD | PUBLIC_KEYWORD) once (INTERNAL_KEYWORD | EXTERNAL_KEYWORD) was matched (introduced in 0.4.22) *)
     /// FunctionTypeAttributes = (* item: *) FunctionTypeAttribute*;
     /// ```
     FunctionTypeAttributes,

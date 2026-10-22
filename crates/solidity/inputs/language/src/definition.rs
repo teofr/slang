@@ -2837,7 +2837,19 @@ language_macros::compile!(Language(
                         Repeated(
                             name = FunctionTypeAttributes,
                             reference = FunctionTypeAttribute,
-                            allow_empty = true
+                            allow_empty = true,
+                            // After `internal` or `external`, a second visibility belongs to the enclosing
+                            // declaration, as in `function() external public x;`:
+                            stop_before = RepeatedStopBefore(
+                                after = [InternalKeyword, ExternalKeyword],
+                                before = [
+                                    InternalKeyword,
+                                    ExternalKeyword,
+                                    PrivateKeyword,
+                                    PublicKeyword
+                                ],
+                                enabled = From("0.4.22")
+                            )
                         ),
                         Enum(
                             name = FunctionTypeAttribute,
