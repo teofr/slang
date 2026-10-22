@@ -3966,7 +3966,16 @@
             },
             {
               "Repeated": {
-                "item": { "name": "FunctionTypeAttributes", "reference": "FunctionTypeAttribute", "allow_empty": true }
+                "item": {
+                  "name": "FunctionTypeAttributes",
+                  "reference": "FunctionTypeAttribute",
+                  "allow_empty": true,
+                  "stop_before": {
+                    "after": ["InternalKeyword", "ExternalKeyword"],
+                    "before": ["InternalKeyword", "ExternalKeyword", "PrivateKeyword", "PublicKeyword"],
+                    "enabled": { "From": { "from": "0.4.22" } }
+                  }
+                }
               }
             },
             {

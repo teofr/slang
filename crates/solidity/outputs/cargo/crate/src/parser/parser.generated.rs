@@ -3254,9 +3254,132 @@ impl Parser {
 
     #[allow(unused_assignments, unused_parens)]
     fn function_type_attributes(&self, input: &mut ParserContext<'_>) -> ParserResult {
-        ZeroOrMoreHelper::run(input, |input| {
-            self.function_type_attribute(input)
-                .with_label(EdgeLabel::Item)
+        ChoiceHelper::run(input, |mut choice, input| {
+            if !self.version_is_at_least_0_4_22 {
+                let result = ZeroOrMoreHelper::run(input, |input| {
+                    self.function_type_attribute(input)
+                        .with_label(EdgeLabel::Item)
+                });
+                choice.consider(input, result)?;
+            }
+            if self.version_is_at_least_0_4_22 {
+                let result = SequenceHelper::run(|mut seq| {
+                    seq.elem(ZeroOrMoreHelper::run(input, |input| {
+                        ChoiceHelper::run(input, |mut choice, input| {
+                            let result = self
+                                .parse_terminal_with_trivia::<LexicalContextType::Default>(
+                                    input,
+                                    TerminalKind::PrivateKeyword,
+                                );
+                            choice.consider(input, result)?;
+                            let result = self
+                                .parse_terminal_with_trivia::<LexicalContextType::Default>(
+                                    input,
+                                    TerminalKind::PublicKeyword,
+                                );
+                            choice.consider(input, result)?;
+                            if !self.version_is_at_least_0_5_0 {
+                                let result = self
+                                    .parse_terminal_with_trivia::<LexicalContextType::Default>(
+                                        input,
+                                        TerminalKind::ConstantKeyword,
+                                    );
+                                choice.consider(input, result)?;
+                            }
+                            if self.version_is_at_least_0_4_16 {
+                                let result = self
+                                    .parse_terminal_with_trivia::<LexicalContextType::Default>(
+                                        input,
+                                        TerminalKind::PureKeyword,
+                                    );
+                                choice.consider(input, result)?;
+                            }
+                            if self.version_is_at_least_0_4_16 {
+                                let result = self
+                                    .parse_terminal_with_trivia::<LexicalContextType::Default>(
+                                        input,
+                                        TerminalKind::ViewKeyword,
+                                    );
+                                choice.consider(input, result)?;
+                            }
+                            let result = self
+                                .parse_terminal_with_trivia::<LexicalContextType::Default>(
+                                    input,
+                                    TerminalKind::PayableKeyword,
+                                );
+                            choice.consider(input, result)?;
+                            choice.finish(input)
+                        })
+                        .with_label(EdgeLabel::Variant)
+                        .with_kind(NonterminalKind::FunctionTypeAttribute)
+                        .with_label(EdgeLabel::Item)
+                    }))?;
+                    seq.elem(OptionalHelper::transform(SequenceHelper::run(|mut seq| {
+                        seq.elem_labeled(
+                            EdgeLabel::Item,
+                            ChoiceHelper::run(input, |mut choice, input| {
+                                let result = self
+                                    .parse_terminal_with_trivia::<LexicalContextType::Default>(
+                                        input,
+                                        TerminalKind::InternalKeyword,
+                                    );
+                                choice.consider(input, result)?;
+                                let result = self
+                                    .parse_terminal_with_trivia::<LexicalContextType::Default>(
+                                        input,
+                                        TerminalKind::ExternalKeyword,
+                                    );
+                                choice.consider(input, result)?;
+                                choice.finish(input)
+                            })
+                            .with_label(EdgeLabel::Variant)
+                            .with_kind(NonterminalKind::FunctionTypeAttribute),
+                        )?;
+                        seq.elem(ZeroOrMoreHelper::run(input, |input| {
+                            ChoiceHelper::run(input, |mut choice, input| {
+                                if !self.version_is_at_least_0_5_0 {
+                                    let result = self
+                                        .parse_terminal_with_trivia::<LexicalContextType::Default>(
+                                            input,
+                                            TerminalKind::ConstantKeyword,
+                                        );
+                                    choice.consider(input, result)?;
+                                }
+                                if self.version_is_at_least_0_4_16 {
+                                    let result = self
+                                        .parse_terminal_with_trivia::<LexicalContextType::Default>(
+                                            input,
+                                            TerminalKind::PureKeyword,
+                                        );
+                                    choice.consider(input, result)?;
+                                }
+                                if self.version_is_at_least_0_4_16 {
+                                    let result = self
+                                        .parse_terminal_with_trivia::<LexicalContextType::Default>(
+                                            input,
+                                            TerminalKind::ViewKeyword,
+                                        );
+                                    choice.consider(input, result)?;
+                                }
+                                let result = self
+                                    .parse_terminal_with_trivia::<LexicalContextType::Default>(
+                                        input,
+                                        TerminalKind::PayableKeyword,
+                                    );
+                                choice.consider(input, result)?;
+                                choice.finish(input)
+                            })
+                            .with_label(EdgeLabel::Variant)
+                            .with_kind(NonterminalKind::FunctionTypeAttribute)
+                            .with_label(EdgeLabel::Item)
+                        }))?;
+                        seq.finish()
+                    })))?;
+                    seq.finish()
+                });
+                choice.consider(input, result)?;
+            }
+            choice.finish(input)
         })
         .with_kind(NonterminalKind::FunctionTypeAttributes)
     }

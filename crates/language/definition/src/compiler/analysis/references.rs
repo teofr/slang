@@ -15,9 +15,9 @@ use crate::model::{
     SpannedEnumItem, SpannedEnumVariant, SpannedField, SpannedFragmentItem, SpannedItem,
     SpannedKeywordDefinition, SpannedKeywordItem, SpannedPrecedenceExpression,
     SpannedPrecedenceItem, SpannedPrecedenceOperator, SpannedPrimaryExpression,
-    SpannedRepeatedItem, SpannedScanner, SpannedSeparatedItem, SpannedStructItem,
-    SpannedTokenDefinition, SpannedTokenItem, SpannedTriviaItem, SpannedTriviaParser,
-    SpannedVersionSpecifier,
+    SpannedRepeatedItem, SpannedRepeatedStopBefore, SpannedScanner, SpannedSeparatedItem,
+    SpannedStructItem, SpannedTokenDefinition, SpannedTokenItem, SpannedTriviaItem,
+    SpannedTriviaParser, SpannedVersionSpecifier,
 };
 
 pub(crate) fn analyze_references(analysis: &mut Analysis) {
@@ -123,7 +123,8 @@ fn check_repeated(analysis: &mut Analysis, item: &SpannedRepeatedItem, enablemen
     let SpannedRepeatedItem {
         name,
         reference,
-        allow_empty: _,
+        allow_empty,
+        stop_before,
         enabled,
     } = item;
 
@@ -138,6 +139,63 @@ fn check_repeated(analysis: &mut Analysis, item: &SpannedRepeatedItem, enablemen
             Struct, Enum, Repeated, Separated, Precedence, Keyword, Token,
         ],
     );
+
+    if let Some(stop_before) = stop_before {
+        let SpannedRepeatedStopBefore {
+            after,
+            before,
+            enabled,
+        } = stop_before;
+
+        let enablement = update_enablement(analysis, &enablement, enabled.as_ref());
+
+        if !allow_empty
+            .as_ref()
+            .is_some_and(|allow_empty| **allow_empty)
+        {
+            analysis.errors.add(name, &Errors::StopBeforeNotEmpty);
+        }
+
+        if let Some(enabled) = enabled
+            && !matches!(**enabled, SpannedVersionSpecifier::From { .. })
+        {
+            analysis.errors.add(enabled, &Errors::StopBeforeNotFrom);
+        }
+
+        for terminal in after.iter().chain(before.iter()) {
+            check_reference(analysis, None, terminal, &enablement, &[Keyword, Token]);
+        }
+
+        // Each terminal has to be a variant of the repeated enum, which the parser restricts:
+        match analysis
+            .metadata
+            .get(&**reference)
+            .map(|target| &target.item)
+        {
+            Some(SpannedItem::Enum { item: enum_item }) => {
+                let variants: Vec<Identifier> = enum_item
+                    .variants
+                    .iter()
+                    .map(|variant| (*variant.reference).clone())
+                    .collect();
+
+                for terminal in after.iter().chain(before.iter()) {
+                    if !variants.contains(terminal) {
+                        analysis
+                            .errors
+                            .add(terminal, &Errors::StopBeforeNotVariant(terminal, reference));
+                    }
+                }
+            }
+            Some(_) => {
+                analysis
+                    .errors
+                    .add(reference, &Errors::StopBeforeNotEnum(reference));
+            }
+            // Already reported by `check_reference()`:
+            None => {}
+        }
+    }
 }
 
 fn check_separated(analysis: &mut Analysis, item: &SpannedSeparatedItem, enablement: &VersionSet) {
@@ -565,4 +623,12 @@ enum Errors<'err> {
         &'err SpannedItemDiscriminants,
         &'err [SpannedItemDiscriminants],
     ),
+    #[error("`stop_before` can only be used on a repetition of an enum, but '{0}' is not one.")]
+    StopBeforeNotEnum(&'err Identifier),
+    #[error("`stop_before` terminal '{0}' is not a variant of '{1}'.")]
+    StopBeforeNotVariant(&'err Identifier, &'err Identifier),
+    #[error("`stop_before` requires `allow_empty = true`.")]
+    StopBeforeNotEmpty,
+    #[error("`stop_before` can only be enabled `From` a version.")]
+    StopBeforeNotFrom,
 }

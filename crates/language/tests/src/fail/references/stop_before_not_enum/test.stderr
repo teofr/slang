@@ -1,0 +1,5 @@
+error: `stop_before` can only be used on a repetition of an enum, but 'Baz' is not one.
+  --> src/fail/references/stop_before_not_enum/test.rs:17:33
+   |
+17 |                     reference = Baz,
+   |                                 ^^^

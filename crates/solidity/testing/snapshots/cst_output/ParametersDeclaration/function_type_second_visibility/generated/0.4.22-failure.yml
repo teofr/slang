@@ -1,0 +1,33 @@
+# This file is generated automatically by infrastructure scripts. Please don't edit by hand.
+
+Source: >
+  1  │ (function() external public f)                                                   │ 0..30
+
+Errors: # 1 total
+  - >
+    Error: Expected CloseParen or Comma.
+       ╭─[crates/solidity/testing/snapshots/cst_output/ParametersDeclaration/function_type_second_visibility/input.sol:1:22]
+       │
+     1 │ (function() external public f)
+       │                      ────┬───  
+       │                          ╰───── Error occurred here.
+    ───╯
+
+Tree:
+  - (root꞉ ParametersDeclaration): # "(function() external public f)\n" (0..31)
+      - (open_paren꞉ OpenParen): "(" # (0..1)
+      - (parameters꞉ Parameters): # "function() external" (1..20)
+          - (item꞉ Parameter) ► (type_name꞉ TypeName) ► (variant꞉ FunctionType): # "function() external" (1..20)
+              - (function_keyword꞉ FunctionKeyword): "function" # (1..9)
+              - (parameters꞉ ParametersDeclaration): # "()" (9..11)
+                  - (open_paren꞉ OpenParen): "(" # (9..10)
+                  - (parameters꞉ Parameters): [] # (10..10)
+                  - (close_paren꞉ CloseParen): ")" # (10..11)
+              - (attributes꞉ FunctionTypeAttributes): # " external" (11..20)
+                  - (item꞉ FunctionTypeAttribute): # " external" (11..20)
+                      - (leading_trivia꞉ Whitespace): " " # (11..12)
+                      - (variant꞉ ExternalKeyword): "external" # (12..20)
+      - (leading_trivia꞉ Whitespace): " " # (20..21)
+      - (unrecognized꞉ UNRECOGNIZED): "public f" # (21..29)
+      - (close_paren꞉ CloseParen): ")" # (29..30)
+      - (trailing_trivia꞉ EndOfLine): "\n" # (30..31)

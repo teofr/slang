@@ -132,6 +132,7 @@ fn get_spanned_type(input: Type) -> Type {
         | "PrecedenceOperator"
         | "PrimaryExpression"
         | "RepeatedItem"
+        | "RepeatedStopBefore"
         | "Scanner"
         | "Section"
         | "SeparatedItem"

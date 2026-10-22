@@ -1,0 +1,17 @@
+error: `stop_before` requires `allow_empty = true`.
+  --> src/fail/references/stop_before_invalid/test.rs:16:28
+   |
+16 |                     name = Bar,
+   |                            ^^^
+
+error: `stop_before` can only be enabled `From` a version.
+  --> src/fail/references/stop_before_invalid/test.rs:21:35
+   |
+21 |                         enabled = Till("2.0.0")
+   |                                   ^^^^
+
+error: `stop_before` terminal 'Baz3' is not a variant of 'Baz'.
+  --> src/fail/references/stop_before_invalid/test.rs:20:41
+   |
+20 |                         before = [Baz1, Baz3],
+   |                                         ^^^^
