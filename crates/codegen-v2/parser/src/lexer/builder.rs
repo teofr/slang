@@ -7,7 +7,7 @@ use language_v2_definition::model::{
     TokenItem, TokenScanner, TriviaCategory, TriviaItem, VersionSpecifier,
 };
 
-use crate::lexer::{Lexeme, LexerModel, LexicalContext};
+use crate::lexer::{Lexeme, LexerModel, LexicalContext, TokenDefinition};
 
 pub struct LexerModelBuilder;
 
@@ -146,7 +146,7 @@ impl LexicalContextBuilder {
                 }
                 Item::Keyword { item } => {
                     let lexeme =
-                        Self::convert_keyword(item, language_context.identifier_token.as_ref());
+                        instance.convert_keyword(item, language_context.identifier_token.as_ref());
                     instance.lexemes.push(lexeme);
                 }
                 Item::Token { item } => {
@@ -189,26 +189,38 @@ impl LexicalContextBuilder {
         }
     }
 
-    fn convert_keyword(item: &KeywordItem, identifier: Option<&Identifier>) -> Lexeme {
+    fn convert_keyword(&mut self, item: &KeywordItem, identifier: Option<&Identifier>) -> Lexeme {
+        let reject_suffix = item
+            .reject_suffix
+            .as_ref()
+            .map(|scanner| self.convert_token_scanner(scanner, true));
+
         Lexeme::Keyword {
             kind: item.name.to_string(),
             identifier: identifier.map(|id| id.to_string()),
             regex: Self::convert_keyword_scanner(&item.scanner),
             reserved: item.reserved.clone().unwrap_or_default(),
+            reject_suffix,
         }
     }
 
     fn convert_token(&mut self, item: &TokenItem) -> Lexeme {
-        let not_followed_by = item
-            .not_followed_by
-            .as_ref()
-            .map(|scanner| self.convert_token_scanner(scanner, true));
+        let kind = item.name.to_string();
+        let mut definitions = vec![];
 
-        Lexeme::Token {
-            kind: item.name.to_string(),
-            regex: self.convert_token_scanner(&item.scanner, false),
-            not_followed_by,
+        for definition in &item.definitions {
+            let reject_suffix = definition
+                .reject_suffix
+                .as_ref()
+                .map(|scanner| self.convert_token_scanner(scanner, true));
+
+            definitions.push(TokenDefinition {
+                regex: self.convert_token_scanner(&definition.scanner, false),
+                reject_suffix,
+            });
         }
+
+        Lexeme::Token { kind, definitions }
     }
 
     fn convert_keyword_scanner(parent: &KeywordScanner) -> String {
