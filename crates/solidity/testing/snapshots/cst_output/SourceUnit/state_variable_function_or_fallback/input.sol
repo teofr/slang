@@ -5,11 +5,12 @@ contract A {
     function() internal c;
     function() payable d;
     function() external e = f;
-    function() external onlyOwner;
+    function() external onlyOwner; // a variable named `onlyOwner`, not a modifier
 
-    // Unnamed (fallback) functions: there is no such identifier.
-    function() external;
-    function() external { }
-    function() payable onlyOwner { }
-    function() onlyOwner(1);
+    // Unnamed (fallback) functions: no identifier is followed by `;` or `=`.
+    function() external; // no identifier: a function without a body
+    function() external { } // no identifier: a function with a body
+    function() payable onlyOwner { } // followed by `{`: a modifier
+    function() onlyOwner(1); // followed by `(`: a modifier with arguments, and no body
+    function() x external; // followed by `external`: a modifier, and no body
 }
