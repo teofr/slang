@@ -4,6 +4,7 @@ use crate::cst::{
     Edge, EdgeLabel, Node, NonterminalKind, NonterminalNode, TerminalKind, TerminalKindExtensions,
     TextIndex,
 };
+use crate::parser::fix_ups::FixUp;
 use crate::parser::lexer::Lexer;
 use crate::parser::parser_support::context::ParserContext;
 use crate::parser::parser_support::parser_result::{
@@ -20,7 +21,7 @@ where
 
 impl<P, F> ParserFunction<P> for F
 where
-    P: Lexer,
+    P: Lexer + FixUp,
     F: Fn(&P, &mut ParserContext<'_>) -> ParserResult,
 {
     #[allow(clippy::too_many_lines)]
@@ -56,7 +57,7 @@ where
         let is_incomplete = matches!(result, ParserResult::IncompleteMatch(_));
         let is_recovering = matches!(result, ParserResult::SkippedUntil(_));
 
-        match result {
+        let output = match result {
             ParserResult::PrattOperatorMatch(..) => unreachable!("PrattOperatorMatch is internal"),
 
             ParserResult::NoMatch(no_match) => {
@@ -188,6 +189,8 @@ where
                     ParseOutput { tree, errors }
                 }
             }
-        }
+        };
+
+        parser.fix_up(output)
     }
 }

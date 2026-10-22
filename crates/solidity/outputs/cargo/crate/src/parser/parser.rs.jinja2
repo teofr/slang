@@ -94,13 +94,11 @@ impl Parser {
 
     /// Parse the given `{{ model.language_name }}` source code as a specific [`NonterminalKind`].
     pub fn parse_nonterminal(&self, kind: NonterminalKind, input: &str) -> ParseOutput {
-        let output = match kind {
+        match kind {
             {%- for parser_name, _ in model.parser.parser_functions -%}
                 NonterminalKind::{{ parser_name }} => Self::{{ parser_name | snake_case }}.parse(self, input, kind),
             {%- endfor -%}
-        };
-
-        self.fix_up(output)
+        }
     }
 
     /********************************************

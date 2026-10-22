@@ -9,8 +9,13 @@ use crate::cst::{
 };
 use crate::parser::{ParseOutput, Parser};
 
-impl Parser {
-    pub(crate) fn fix_up(&self, mut output: ParseOutput) -> ParseOutput {
+/// Applied to the output of every parse, after the generated parser functions.
+pub(crate) trait FixUp {
+    fn fix_up(&self, output: ParseOutput) -> ParseOutput;
+}
+
+impl FixUp for Parser {
+    fn fix_up(&self, mut output: ParseOutput) -> ParseOutput {
         if self.version_is_at_least_0_4_22 {
             let root = Node::Nonterminal(Rc::clone(&output.tree));
             if let Some(Node::Nonterminal(tree)) = FunctionTypeVisibility.rewrite_node(&root) {

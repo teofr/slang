@@ -159,7 +159,7 @@ impl Parser {
 
     /// Parse the given `Solidity` source code as a specific [`NonterminalKind`].
     pub fn parse_nonterminal(&self, kind: NonterminalKind, input: &str) -> ParseOutput {
-        let output = match kind {
+        match kind {
             NonterminalKind::AbicoderPragma => Self::abicoder_pragma.parse(self, input, kind),
             NonterminalKind::AbicoderVersion => Self::abicoder_version.parse(self, input, kind),
             NonterminalKind::AdditiveExpression => {
@@ -572,9 +572,7 @@ impl Parser {
                 Self::yul_variable_declaration_value.parse(self, input, kind)
             }
             NonterminalKind::YulVariableNames => Self::yul_variable_names.parse(self, input, kind),
-        };
-
-        self.fix_up(output)
+        }
     }
 
     /********************************************
