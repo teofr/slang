@@ -4725,6 +4725,21 @@ mod syntax {
         use super::*;
 
         #[test]
+        fn glued_abicoder_keyword() -> Result<()> {
+            run("syntax/unexpected_terminal", "glued_abicoder_keyword")
+        }
+
+        #[test]
+        fn glued_experimental_keyword() -> Result<()> {
+            run("syntax/unexpected_terminal", "glued_experimental_keyword")
+        }
+
+        #[test]
+        fn glued_solidity_keyword() -> Result<()> {
+            run("syntax/unexpected_terminal", "glued_solidity_keyword")
+        }
+
+        #[test]
         fn in_expression() -> Result<()> {
             run("syntax/unexpected_terminal", "in_expression")
         }
