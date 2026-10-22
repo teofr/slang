@@ -1,0 +1,197 @@
+# This file is generated automatically by infrastructure scripts. Please don't edit by hand.
+
+Source: >
+  1  │ contract A {                                                                       │ 0..12
+  2  │     // State variables: an identifier followed by `;` or `=` is the variable name. │ 13..95
+  3  │     function() a;                                                                  │ 96..113
+  4  │     function() external b;                                                         │ 114..140
+  5  │     function() internal c;                                                         │ 141..167
+  6  │     function() payable d;                                                          │ 168..193
+  7  │     function() external e = f;                                                     │ 194..224
+  8  │     function() external onlyOwner;                                                 │ 225..259
+  9  │                                                                                    │ 260..260
+  10 │     // Unnamed (fallback) functions: there is no such identifier.                  │ 261..326
+  11 │     function() external;                                                           │ 327..351
+  12 │     function() external { }                                                        │ 352..379
+  13 │     function() payable onlyOwner { }                                               │ 380..416
+  14 │     function() onlyOwner(1);                                                       │ 417..445
+  15 │ }                                                                                  │ 446..447
+
+Errors: # 2 total
+  - >
+    Error: Expected ConstantKeyword or Identifier or ImmutableKeyword or InternalKeyword or OverrideKeyword or PrivateKeyword or PublicKeyword.
+        ╭─[crates/solidity/testing/snapshots/cst_output/SourceUnit/state_variable_function_or_fallback/input.sol:11:24]
+        │
+     11 │     function() external;
+        │                        │ 
+        │                        ╰─ Error occurred here.
+    ────╯
+  - >
+    Error: Expected ConstantKeyword or Identifier or ImmutableKeyword or InternalKeyword or OverrideKeyword or PrivateKeyword or PublicKeyword.
+        ╭─[crates/solidity/testing/snapshots/cst_output/SourceUnit/state_variable_function_or_fallback/input.sol:12:25]
+        │
+     12 │ ╭─▶     function() external { }
+        ┆ ┆   
+     14 │ ├─▶     function() onlyOwner(1);
+        │ │                                  
+        │ ╰────────────────────────────────── Error occurred here.
+    ────╯
+
+Tree:
+  - (root꞉ SourceUnit) ► (members꞉ SourceUnitMembers): # "contract A {\n    // State variables: an identifier..." (0..448)
+      - (item꞉ SourceUnitMember) ► (variant꞉ ContractDefinition): # "contract A {\n    // State variables: an identifier..." (0..448)
+          - (contract_keyword꞉ ContractKeyword): "contract" # (0..8)
+          - (leading_trivia꞉ Whitespace): " " # (8..9)
+          - (name꞉ Identifier): "A" # (9..10)
+          - (specifiers꞉ ContractSpecifiers): [] # (10..10)
+          - (leading_trivia꞉ Whitespace): " " # (10..11)
+          - (open_brace꞉ OpenBrace): "{" # (11..12)
+          - (trailing_trivia꞉ EndOfLine): "\n" # (12..13)
+          - (members꞉ ContractMembers): # "    // State variables: an identifier followed by ..." (13..446)
+              - (item꞉ ContractMember) ► (variant꞉ StateVariableDefinition): # "    // State variables: an identifier followed by ..." (13..114)
+                  - (type_name꞉ TypeName) ► (variant꞉ FunctionType): # "    // State variables: an identifier followed by ..." (13..110)
+                      - (leading_trivia꞉ Whitespace): "    " # (13..17)
+                      - (leading_trivia꞉ SingleLineComment): "// State variables: an identifier followed by `;` ..." # (17..95)
+                      - (leading_trivia꞉ EndOfLine): "\n" # (95..96)
+                      - (leading_trivia꞉ Whitespace): "    " # (96..100)
+                      - (function_keyword꞉ FunctionKeyword): "function" # (100..108)
+                      - (parameters꞉ ParametersDeclaration): # "()" (108..110)
+                          - (open_paren꞉ OpenParen): "(" # (108..109)
+                          - (parameters꞉ Parameters): [] # (109..109)
+                          - (close_paren꞉ CloseParen): ")" # (109..110)
+                      - (attributes꞉ FunctionTypeAttributes): [] # (110..110)
+                  - (attributes꞉ StateVariableAttributes): [] # (110..110)
+                  - (leading_trivia꞉ Whitespace): " " # (110..111)
+                  - (name꞉ Identifier): "a" # (111..112)
+                  - (semicolon꞉ Semicolon): ";" # (112..113)
+                  - (trailing_trivia꞉ EndOfLine): "\n" # (113..114)
+              - (item꞉ ContractMember) ► (variant꞉ StateVariableDefinition): # "    function() external b;\n" (114..141)
+                  - (type_name꞉ TypeName) ► (variant꞉ FunctionType): # "    function() external" (114..137)
+                      - (leading_trivia꞉ Whitespace): "    " # (114..118)
+                      - (function_keyword꞉ FunctionKeyword): "function" # (118..126)
+                      - (parameters꞉ ParametersDeclaration): # "()" (126..128)
+                          - (open_paren꞉ OpenParen): "(" # (126..127)
+                          - (parameters꞉ Parameters): [] # (127..127)
+                          - (close_paren꞉ CloseParen): ")" # (127..128)
+                      - (attributes꞉ FunctionTypeAttributes): # " external" (128..137)
+                          - (item꞉ FunctionTypeAttribute): # " external" (128..137)
+                              - (leading_trivia꞉ Whitespace): " " # (128..129)
+                              - (variant꞉ ExternalKeyword): "external" # (129..137)
+                  - (attributes꞉ StateVariableAttributes): [] # (137..137)
+                  - (leading_trivia꞉ Whitespace): " " # (137..138)
+                  - (name꞉ Identifier): "b" # (138..139)
+                  - (semicolon꞉ Semicolon): ";" # (139..140)
+                  - (trailing_trivia꞉ EndOfLine): "\n" # (140..141)
+              - (item꞉ ContractMember) ► (variant꞉ StateVariableDefinition): # "    function() internal c;\n" (141..168)
+                  - (type_name꞉ TypeName) ► (variant꞉ FunctionType): # "    function() internal" (141..164)
+                      - (leading_trivia꞉ Whitespace): "    " # (141..145)
+                      - (function_keyword꞉ FunctionKeyword): "function" # (145..153)
+                      - (parameters꞉ ParametersDeclaration): # "()" (153..155)
+                          - (open_paren꞉ OpenParen): "(" # (153..154)
+                          - (parameters꞉ Parameters): [] # (154..154)
+                          - (close_paren꞉ CloseParen): ")" # (154..155)
+                      - (attributes꞉ FunctionTypeAttributes): # " internal" (155..164)
+                          - (item꞉ FunctionTypeAttribute): # " internal" (155..164)
+                              - (leading_trivia꞉ Whitespace): " " # (155..156)
+                              - (variant꞉ InternalKeyword): "internal" # (156..164)
+                  - (attributes꞉ StateVariableAttributes): [] # (164..164)
+                  - (leading_trivia꞉ Whitespace): " " # (164..165)
+                  - (name꞉ Identifier): "c" # (165..166)
+                  - (semicolon꞉ Semicolon): ";" # (166..167)
+                  - (trailing_trivia꞉ EndOfLine): "\n" # (167..168)
+              - (item꞉ ContractMember) ► (variant꞉ StateVariableDefinition): # "    function() payable d;\n" (168..194)
+                  - (type_name꞉ TypeName) ► (variant꞉ FunctionType): # "    function() payable" (168..190)
+                      - (leading_trivia꞉ Whitespace): "    " # (168..172)
+                      - (function_keyword꞉ FunctionKeyword): "function" # (172..180)
+                      - (parameters꞉ ParametersDeclaration): # "()" (180..182)
+                          - (open_paren꞉ OpenParen): "(" # (180..181)
+                          - (parameters꞉ Parameters): [] # (181..181)
+                          - (close_paren꞉ CloseParen): ")" # (181..182)
+                      - (attributes꞉ FunctionTypeAttributes): # " payable" (182..190)
+                          - (item꞉ FunctionTypeAttribute): # " payable" (182..190)
+                              - (leading_trivia꞉ Whitespace): " " # (182..183)
+                              - (variant꞉ PayableKeyword): "payable" # (183..190)
+                  - (attributes꞉ StateVariableAttributes): [] # (190..190)
+                  - (leading_trivia꞉ Whitespace): " " # (190..191)
+                  - (name꞉ Identifier): "d" # (191..192)
+                  - (semicolon꞉ Semicolon): ";" # (192..193)
+                  - (trailing_trivia꞉ EndOfLine): "\n" # (193..194)
+              - (item꞉ ContractMember) ► (variant꞉ StateVariableDefinition): # "    function() external e = f;\n" (194..225)
+                  - (type_name꞉ TypeName) ► (variant꞉ FunctionType): # "    function() external" (194..217)
+                      - (leading_trivia꞉ Whitespace): "    " # (194..198)
+                      - (function_keyword꞉ FunctionKeyword): "function" # (198..206)
+                      - (parameters꞉ ParametersDeclaration): # "()" (206..208)
+                          - (open_paren꞉ OpenParen): "(" # (206..207)
+                          - (parameters꞉ Parameters): [] # (207..207)
+                          - (close_paren꞉ CloseParen): ")" # (207..208)
+                      - (attributes꞉ FunctionTypeAttributes): # " external" (208..217)
+                          - (item꞉ FunctionTypeAttribute): # " external" (208..217)
+                              - (leading_trivia꞉ Whitespace): " " # (208..209)
+                              - (variant꞉ ExternalKeyword): "external" # (209..217)
+                  - (attributes꞉ StateVariableAttributes): [] # (217..217)
+                  - (leading_trivia꞉ Whitespace): " " # (217..218)
+                  - (name꞉ Identifier): "e" # (218..219)
+                  - (value꞉ StateVariableDefinitionValue): # " = f" (219..223)
+                      - (leading_trivia꞉ Whitespace): " " # (219..220)
+                      - (equal꞉ Equal): "=" # (220..221)
+                      - (value꞉ Expression): # " f" (221..223)
+                          - (leading_trivia꞉ Whitespace): " " # (221..222)
+                          - (variant꞉ Identifier): "f" # (222..223)
+                  - (semicolon꞉ Semicolon): ";" # (223..224)
+                  - (trailing_trivia꞉ EndOfLine): "\n" # (224..225)
+              - (item꞉ ContractMember) ► (variant꞉ StateVariableDefinition): # "    function() external onlyOwner;\n" (225..260)
+                  - (type_name꞉ TypeName) ► (variant꞉ FunctionType): # "    function() external" (225..248)
+                      - (leading_trivia꞉ Whitespace): "    " # (225..229)
+                      - (function_keyword꞉ FunctionKeyword): "function" # (229..237)
+                      - (parameters꞉ ParametersDeclaration): # "()" (237..239)
+                          - (open_paren꞉ OpenParen): "(" # (237..238)
+                          - (parameters꞉ Parameters): [] # (238..238)
+                          - (close_paren꞉ CloseParen): ")" # (238..239)
+                      - (attributes꞉ FunctionTypeAttributes): # " external" (239..248)
+                          - (item꞉ FunctionTypeAttribute): # " external" (239..248)
+                              - (leading_trivia꞉ Whitespace): " " # (239..240)
+                              - (variant꞉ ExternalKeyword): "external" # (240..248)
+                  - (attributes꞉ StateVariableAttributes): [] # (248..248)
+                  - (leading_trivia꞉ Whitespace): " " # (248..249)
+                  - (name꞉ Identifier): "onlyOwner" # (249..258)
+                  - (semicolon꞉ Semicolon): ";" # (258..259)
+                  - (trailing_trivia꞉ EndOfLine): "\n" # (259..260)
+              - (item꞉ ContractMember) ► (variant꞉ StateVariableDefinition): # "\n    // Unnamed (fallback) functions: there is no ..." (260..352)
+                  - (type_name꞉ TypeName) ► (variant꞉ FunctionType): # "\n    // Unnamed (fallback) functions: there is no ..." (260..350)
+                      - (leading_trivia꞉ EndOfLine): "\n" # (260..261)
+                      - (leading_trivia꞉ Whitespace): "    " # (261..265)
+                      - (leading_trivia꞉ SingleLineComment): "// Unnamed (fallback) functions: there is no such ..." # (265..326)
+                      - (leading_trivia꞉ EndOfLine): "\n" # (326..327)
+                      - (leading_trivia꞉ Whitespace): "    " # (327..331)
+                      - (function_keyword꞉ FunctionKeyword): "function" # (331..339)
+                      - (parameters꞉ ParametersDeclaration): # "()" (339..341)
+                          - (open_paren꞉ OpenParen): "(" # (339..340)
+                          - (parameters꞉ Parameters): [] # (340..340)
+                          - (close_paren꞉ CloseParen): ")" # (340..341)
+                      - (attributes꞉ FunctionTypeAttributes): # " external" (341..350)
+                          - (item꞉ FunctionTypeAttribute): # " external" (341..350)
+                              - (leading_trivia꞉ Whitespace): " " # (341..342)
+                              - (variant꞉ ExternalKeyword): "external" # (342..350)
+                  - (attributes꞉ StateVariableAttributes): [] # (350..350)
+                  - (missing꞉ MISSING): "" # (350..350)
+                  - (semicolon꞉ Semicolon): ";" # (350..351)
+                  - (trailing_trivia꞉ EndOfLine): "\n" # (351..352)
+              - (item꞉ ContractMember) ► (variant꞉ StateVariableDefinition): # "    function() external { }\n    function() payable..." (352..446)
+                  - (type_name꞉ TypeName) ► (variant꞉ FunctionType): # "    function() external" (352..375)
+                      - (leading_trivia꞉ Whitespace): "    " # (352..356)
+                      - (function_keyword꞉ FunctionKeyword): "function" # (356..364)
+                      - (parameters꞉ ParametersDeclaration): # "()" (364..366)
+                          - (open_paren꞉ OpenParen): "(" # (364..365)
+                          - (parameters꞉ Parameters): [] # (365..365)
+                          - (close_paren꞉ CloseParen): ")" # (365..366)
+                      - (attributes꞉ FunctionTypeAttributes): # " external" (366..375)
+                          - (item꞉ FunctionTypeAttribute): # " external" (366..375)
+                              - (leading_trivia꞉ Whitespace): " " # (366..367)
+                              - (variant꞉ ExternalKeyword): "external" # (367..375)
+                  - (attributes꞉ StateVariableAttributes): [] # (375..375)
+                  - (leading_trivia꞉ Whitespace): " " # (375..376)
+                  - (unrecognized꞉ UNRECOGNIZED): "{ }\n    function() payable onlyOwner { }\n    funct..." # (376..444)
+                  - (semicolon꞉ Semicolon): ";" # (444..445)
+                  - (trailing_trivia꞉ EndOfLine): "\n" # (445..446)
+          - (close_brace꞉ CloseBrace): "}" # (446..447)
+          - (trailing_trivia꞉ EndOfLine): "\n" # (447..448)
