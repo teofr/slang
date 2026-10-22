@@ -2258,7 +2258,7 @@ language_macros::compile!(Language(
                                 ),
                                 EnumVariant(reference = StateVariableDefinition),
                                 // Must come after `StateVariableDefinition`, so that `function() x;`
-                                // is a state variable named `x`, not a function with an `x` modifier:
+                                // is parsed as a state variable named `x`, not an unnamed function with an `x` modifier:
                                 EnumVariant(
                                     reference = UnnamedFunctionDefinition,
                                     enabled = Till("0.6.0")
