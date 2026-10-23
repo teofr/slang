@@ -5,7 +5,6 @@ use std::rc::Rc;
 
 use crate::cst::{
     BaseRewriter, Edge, EdgeLabel, Node, NonterminalKind, NonterminalNode, TerminalKind,
-    TerminalKindExtensions,
 };
 use crate::parser::Parser;
 
@@ -59,11 +58,9 @@ impl BaseRewriter for FunctionTypeVisibility {
 /// - the function type has `returns`, so moving the attributes would reorder the source text;
 /// - a moved attribute isn't one a state variable can have, such as `view`.
 fn move_second_visibility(variable: &Rc<NonterminalNode>) -> Option<Rc<NonterminalNode>> {
-    let type_name = child_with_label(variable, EdgeLabel::TypeName)?;
-    let function_type = child_with_label(type_name, EdgeLabel::Variant)?;
-    if function_type.kind != NonterminalKind::FunctionType {
-        return None;
-    }
+    let type_name = child_with_label(variable, EdgeLabel::TypeName)?.as_nonterminal()?;
+    let function_type = child_with_label(type_name, EdgeLabel::Variant)?
+        .as_nonterminal_with_kind(NonterminalKind::FunctionType)?;
 
     // `returns` is parsed after the attributes, so moving them would reorder the source text.
     // `solc` reports an error in that case anyway.
@@ -71,7 +68,8 @@ fn move_second_visibility(variable: &Rc<NonterminalNode>) -> Option<Rc<Nontermin
         return None;
     }
 
-    let function_attributes = child_with_label(function_type, EdgeLabel::Attributes)?;
+    let function_attributes =
+        child_with_label(function_type, EdgeLabel::Attributes)?.as_nonterminal()?;
     let split = split_index(&function_attributes.children)?;
 
     let (kept, moved) = function_attributes.children.split_at(split);
@@ -96,7 +94,8 @@ fn move_second_visibility(variable: &Rc<NonterminalNode>) -> Option<Rc<Nontermin
     let function_type = replace_child(function_type, EdgeLabel::Attributes, function_attributes);
     let type_name = replace_child(type_name, EdgeLabel::Variant, function_type);
 
-    let variable_attributes = child_with_label(variable, EdgeLabel::Attributes)?;
+    let variable_attributes =
+        child_with_label(variable, EdgeLabel::Attributes)?.as_nonterminal()?;
     let variable_attributes = NonterminalNode::create(
         NonterminalKind::StateVariableAttributes,
         moved
@@ -142,12 +141,12 @@ fn split_index(items: &[Edge]) -> Option<usize> {
     None
 }
 
-/// Returns the first nonterminal child of `node` under the edge `label`.
-fn child_with_label(node: &Rc<NonterminalNode>, label: EdgeLabel) -> Option<&Rc<NonterminalNode>> {
+/// Returns the first child of `node` under the edge `label`.
+fn child_with_label(node: &Rc<NonterminalNode>, label: EdgeLabel) -> Option<&Node> {
     node.children
         .iter()
         .find(|edge| edge.label == label)
-        .and_then(|edge| edge.node.as_nonterminal())
+        .map(|edge| &edge.node)
 }
 
 /// Returns a copy of `node`, with the child under the edge `label` replaced by `child`.
@@ -166,20 +165,13 @@ fn replace_child(
 
 /// Returns whether `node` contains a `MISSING` or `UNRECOGNIZED` terminal.
 fn contains_errors(node: &Rc<NonterminalNode>) -> bool {
-    node.children.iter().any(|edge| match &edge.node {
-        Node::Terminal(terminal) => !terminal.kind.is_valid(),
-        Node::Nonterminal(nonterminal) => contains_errors(nonterminal),
-    })
+    Rc::clone(node).descendants().any(|edge| !edge.is_valid())
 }
 
 /// Returns the kind of the first terminal in `node`, skipping trivia.
 fn first_terminal_kind(node: &Node) -> Option<TerminalKind> {
-    match node {
-        Node::Terminal(terminal) => Some(terminal.kind),
-        Node::Nonterminal(nonterminal) => nonterminal
-            .children
-            .iter()
-            .filter(|edge| !matches!(&edge.node, Node::Terminal(t) if t.kind.is_trivia()))
-            .find_map(|edge| first_terminal_kind(&edge.node)),
-    }
+    node.clone()
+        .descendants()
+        .find(|edge| edge.is_terminal() && !edge.is_trivia())
+        .and_then(|edge| edge.as_terminal().map(|terminal| terminal.kind))
 }
