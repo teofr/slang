@@ -40,13 +40,19 @@ pub enum Lexeme {
     },
     Token {
         kind: String,
-        regex: String,
-        not_followed_by: Option<String>,
+        definitions: Vec<TokenDefinition>,
     },
     Keyword {
         kind: String,
         identifier: Option<String>,
         regex: String,
         reserved: VersionSpecifier,
+        reject_suffix: Option<String>,
     },
+}
+
+#[derive(Clone, Debug, Serialize)]
+pub struct TokenDefinition {
+    pub regex: String,
+    pub reject_suffix: Option<String>,
 }
