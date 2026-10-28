@@ -57,33 +57,38 @@ impl<'source> ContextWrapper<'source> {
     // for the returned `Option<Lexeme>`, on every token.
     #[inline(always)]
     pub fn next_lexeme(&mut self) -> Option<Lexeme> {
+        // Skipped trivia is matched like any other lexeme and dropped here, in a loop.
+        // Skipping it inside `logos` restarts the lexer with a tail call, which debug
+        // builds keep as recursion, overflowing the stack on long runs of trivia.
         let (kind, range) = match self {
-            Self::Pragma(lexer) => match lexer.next() {
-                Some(Ok(PragmaContext::Lexeme(kind))) => (kind, lexer.span()),
-                Some(Err(())) => (LexemeKind::UNRECOGNIZED, lexer.span()),
-                None => return None,
+            Self::Pragma(lexer) => loop {
+                match lexer.next() {
+                    Some(Ok(PragmaContext::Lexeme(kind))) => break (kind, lexer.span()),
+                    Some(Ok(PragmaContext::Skipped)) => {}
+                    Some(Err(())) => break (LexemeKind::UNRECOGNIZED, lexer.span()),
+                    None => return None,
+                }
             },
-            Self::Solidity(lexer) => match lexer.next() {
-                Some(Ok(SolidityContext::Lexeme(kind))) => (kind, lexer.span()),
-                Some(Err(())) => (LexemeKind::UNRECOGNIZED, lexer.span()),
-                None => return None,
+            Self::Solidity(lexer) => loop {
+                match lexer.next() {
+                    Some(Ok(SolidityContext::Lexeme(kind))) => break (kind, lexer.span()),
+                    Some(Ok(SolidityContext::Skipped)) => {}
+                    Some(Err(())) => break (LexemeKind::UNRECOGNIZED, lexer.span()),
+                    None => return None,
+                }
             },
-            Self::Yul(lexer) => match lexer.next() {
-                Some(Ok(YulContext::Lexeme(kind))) => (kind, lexer.span()),
-                Some(Err(())) => (LexemeKind::UNRECOGNIZED, lexer.span()),
-                None => return None,
+            Self::Yul(lexer) => loop {
+                match lexer.next() {
+                    Some(Ok(YulContext::Lexeme(kind))) => break (kind, lexer.span()),
+                    Some(Ok(YulContext::Skipped)) => {}
+                    Some(Err(())) => break (LexemeKind::UNRECOGNIZED, lexer.span()),
+                    None => return None,
+                }
             },
         };
 
         Some(Lexeme { kind, range })
     }
-}
-
-/// Callback of the trivia the lexer skips, never producing a lexeme for it.
-fn skip_trivia<'source, Context: Logos<'source>>(
-    _: &mut Lexer<'source, Context>,
-) -> FilterResult<LexemeKind, ()> {
-    FilterResult::Skip
 }
 
 #[derive(Clone, Debug, Logos)]
@@ -118,28 +123,20 @@ pub enum PragmaContext {
     #[regex(r#";"#, |_| { LexemeKind::PragmaSemicolon }, priority = 2000018)]
     #[regex(r#"~"#, |_| { LexemeKind::PragmaTilde }, priority = 2000019)]
     #[regex(r#"('((?&PragmaEscapeSequence)|[ -&]|[\(-\[]|[\]-~])*')|("((?&PragmaEscapeSequence)|[ -!]|[#-\[]|[\]-~])*")"#, |_| { LexemeKind::PragmaStringLiteral }, priority = 2000020)]
-    #[regex(
-        r#"(?&PragmaSpaceOrTab)+"#,
-        skip_trivia,
-        priority = 1000021,
-        allow_greedy = true
-    )]
-    #[regex(
-        r#"(?&PragmaLineBreak)"#,
-        skip_trivia,
-        priority = 1000022,
-        allow_greedy = true
-    )]
-    #[regex(r#"//(?&PragmaSingleLineRegularCommentText)?((?&PragmaLineBreak)((?&PragmaSpaceOrTab)*//(?&PragmaSingleLineRegularCommentText)?(?&PragmaLineBreak))*((?&PragmaSpaceOrTab)*//(?&PragmaSingleLineRegularCommentText))?)?"#, skip_trivia, priority = 1000023, allow_greedy = true)]
-    #[regex(
-        r#"/\*[^\*]*\*+([^/\*][^\*]*\*+)*/"#,
-        skip_trivia,
-        priority = 1000024,
-        allow_greedy = true
-    )]
     #[regex(r#"///(?&PragmaTextAfterSlashes)?((?&PragmaLineBreak)((?&PragmaSpaceOrTab)*///(?&PragmaTextAfterSlashes)?(?&PragmaLineBreak))*((?&PragmaSpaceOrTab)*///(?&PragmaTextAfterSlashes))?)?"#, |_| { LexemeKind::PragmaSingleLineNatSpecComment }, priority = 1000025, allow_greedy = true)]
     #[regex(r#"/\*\*[^/\*][^\*]*\*+([^/\*][^\*]*\*+)*/"#, |_| { LexemeKind::PragmaMultiLineNatSpecComment }, priority = 1000026, allow_greedy = true)]
     Lexeme(LexemeKind),
+
+    /// Trivia the lexer skips, dropped by `ContextWrapper::next_lexeme`.
+    #[regex(r#"(?&PragmaSpaceOrTab)+"#, priority = 1000021, allow_greedy = true)]
+    #[regex(r#"(?&PragmaLineBreak)"#, priority = 1000022, allow_greedy = true)]
+    #[regex(r#"//(?&PragmaSingleLineRegularCommentText)?((?&PragmaLineBreak)((?&PragmaSpaceOrTab)*//(?&PragmaSingleLineRegularCommentText)?(?&PragmaLineBreak))*((?&PragmaSpaceOrTab)*//(?&PragmaSingleLineRegularCommentText))?)?"#, priority = 1000023, allow_greedy = true)]
+    #[regex(
+        r#"/\*[^\*]*\*+([^/\*][^\*]*\*+)*/"#,
+        priority = 1000024,
+        allow_greedy = true
+    )]
+    Skipped,
 }
 
 /// Lookahead pattern guarding `HexLiteral`.
@@ -390,25 +387,6 @@ pub enum SolidityContext {
     #[regex(r#"\^"#, |_| { LexemeKind::Caret }, priority = 2000158)]
     #[regex(r#"\^="#, |_| { LexemeKind::CaretEqual }, priority = 2000159)]
     #[regex(r#"~"#, |_| { LexemeKind::Tilde }, priority = 2000160)]
-    #[regex(
-        r#"(?&SpaceOrTab)+"#,
-        skip_trivia,
-        priority = 1000161,
-        allow_greedy = true
-    )]
-    #[regex(
-        r#"(?&LineBreak)"#,
-        skip_trivia,
-        priority = 1000162,
-        allow_greedy = true
-    )]
-    #[regex(r#"//(?&SingleLineRegularCommentText)?((?&LineBreak)((?&SpaceOrTab)*//(?&SingleLineRegularCommentText)?(?&LineBreak))*((?&SpaceOrTab)*//(?&SingleLineRegularCommentText))?)?"#, skip_trivia, priority = 1000163, allow_greedy = true)]
-    #[regex(
-        r#"/\*[^\*]*\*+([^/\*][^\*]*\*+)*/"#,
-        skip_trivia,
-        priority = 1000164,
-        allow_greedy = true
-    )]
     #[regex(r#"///(?&TextAfterSlashes)?((?&LineBreak)((?&SpaceOrTab)*///(?&TextAfterSlashes)?(?&LineBreak))*((?&SpaceOrTab)*///(?&TextAfterSlashes))?)?"#, |_| { LexemeKind::SingleLineNatSpecComment }, priority = 1000165, allow_greedy = true)]
     #[regex(r#"/\*\*[^/\*][^\*]*\*+([^/\*][^\*]*\*+)*/"#, |_| { LexemeKind::MultiLineNatSpecComment }, priority = 1000166, allow_greedy = true)]
     #[regex(
@@ -422,6 +400,17 @@ pub enum SolidityContext {
     #[regex(r#"(unicode'((?&UnicodeEscapeSequence)|[^'\\\r\n])*')|(unicode"((?&UnicodeEscapeSequence)|[^"\\\r\n])*")"#, |_| { LexemeKind::UnicodeStringLiteral }, priority = 2000171)]
     #[regex(r#"(?&IdentifierScanner)"#, |_| { LexemeKind::Identifier }, priority = 2000172)]
     Lexeme(LexemeKind),
+
+    /// Trivia the lexer skips, dropped by `ContextWrapper::next_lexeme`.
+    #[regex(r#"(?&SpaceOrTab)+"#, priority = 1000161, allow_greedy = true)]
+    #[regex(r#"(?&LineBreak)"#, priority = 1000162, allow_greedy = true)]
+    #[regex(r#"//(?&SingleLineRegularCommentText)?((?&LineBreak)((?&SpaceOrTab)*//(?&SingleLineRegularCommentText)?(?&LineBreak))*((?&SpaceOrTab)*//(?&SingleLineRegularCommentText))?)?"#, priority = 1000163, allow_greedy = true)]
+    #[regex(
+        r#"/\*[^\*]*\*+([^/\*][^\*]*\*+)*/"#,
+        priority = 1000164,
+        allow_greedy = true
+    )]
+    Skipped,
 }
 
 /// Lookahead pattern guarding `YulDecimalLiteral`.
@@ -546,26 +535,18 @@ pub enum YulContext {
     #[regex(r#"\{"#, |_| { LexemeKind::YulOpenBrace }, priority = 2000026)]
     #[regex(r#"\("#, |_| { LexemeKind::YulOpenParen }, priority = 2000027)]
     #[regex(r#"\."#, |_| { LexemeKind::YulPeriod }, priority = 2000028)]
-    #[regex(
-        r#"(?&YulSpaceOrTab)+"#,
-        skip_trivia,
-        priority = 1000029,
-        allow_greedy = true
-    )]
-    #[regex(
-        r#"(?&YulLineBreak)"#,
-        skip_trivia,
-        priority = 1000030,
-        allow_greedy = true
-    )]
-    #[regex(r#"//(?&YulSingleLineRegularCommentText)?((?&YulLineBreak)((?&YulSpaceOrTab)*//(?&YulSingleLineRegularCommentText)?(?&YulLineBreak))*((?&YulSpaceOrTab)*//(?&YulSingleLineRegularCommentText))?)?"#, skip_trivia, priority = 1000031, allow_greedy = true)]
-    #[regex(
-        r#"/\*[^\*]*\*+([^/\*][^\*]*\*+)*/"#,
-        skip_trivia,
-        priority = 1000032,
-        allow_greedy = true
-    )]
     #[regex(r#"///(?&YulTextAfterSlashes)?((?&YulLineBreak)((?&YulSpaceOrTab)*///(?&YulTextAfterSlashes)?(?&YulLineBreak))*((?&YulSpaceOrTab)*///(?&YulTextAfterSlashes))?)?"#, |_| { LexemeKind::YulSingleLineNatSpecComment }, priority = 1000033, allow_greedy = true)]
     #[regex(r#"/\*\*[^/\*][^\*]*\*+([^/\*][^\*]*\*+)*/"#, |_| { LexemeKind::YulMultiLineNatSpecComment }, priority = 1000034, allow_greedy = true)]
     Lexeme(LexemeKind),
+
+    /// Trivia the lexer skips, dropped by `ContextWrapper::next_lexeme`.
+    #[regex(r#"(?&YulSpaceOrTab)+"#, priority = 1000029, allow_greedy = true)]
+    #[regex(r#"(?&YulLineBreak)"#, priority = 1000030, allow_greedy = true)]
+    #[regex(r#"//(?&YulSingleLineRegularCommentText)?((?&YulLineBreak)((?&YulSpaceOrTab)*//(?&YulSingleLineRegularCommentText)?(?&YulLineBreak))*((?&YulSpaceOrTab)*//(?&YulSingleLineRegularCommentText))?)?"#, priority = 1000031, allow_greedy = true)]
+    #[regex(
+        r#"/\*[^\*]*\*+([^/\*][^\*]*\*+)*/"#,
+        priority = 1000032,
+        allow_greedy = true
+    )]
+    Skipped,
 }
