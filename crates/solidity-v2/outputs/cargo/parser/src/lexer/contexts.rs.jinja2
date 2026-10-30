@@ -47,12 +47,22 @@ impl<'source> ContextWrapper<'source> {
     // for the returned `Option<Lexeme>`, on every token.
     #[inline(always)]
     pub fn next_lexeme(&mut self) -> Option<Lexeme> {
+        // The lexer skips all trivia but `NatSpec` comments, which the parser reads. Skipped trivia
+        // is matched like any other lexeme and dropped here, in a loop: skipping it inside `logos`
+        // restarts the lexer with a tail call, which debug builds keep as recursion, overflowing
+        // the stack on long runs of trivia.
+        //
+        // TODO(v2): Skipping is temporary: once trivia is part of the CST, the lexer has to produce
+        // it again, or the CST has to re-lex it from the gaps between tokens.
         let (kind, range) = match self {
             {%- for context in model.parser.lexer.contexts %}
-                Self::{{ context.name }}(lexer) => match lexer.next() {
-                    Some(Ok({{ context.name }}Context::Lexeme(kind))) => (kind, lexer.span()),
-                    Some(Err(())) => (LexemeKind::UNRECOGNIZED, lexer.span()),
-                    None => return None,
+                Self::{{ context.name }}(lexer) => loop {
+                    match lexer.next() {
+                        Some(Ok({{ context.name }}Context::Lexeme(kind))) => break (kind, lexer.span()),
+                        Some(Ok({{ context.name }}Context::Skipped)) => {}
+                        Some(Err(())) => break (LexemeKind::UNRECOGNIZED, lexer.span()),
+                        None => return None,
+                    }
                 },
             {%- endfor -%}
         };
@@ -96,8 +106,10 @@ impl<'source> ContextWrapper<'source> {
         {% for lexeme in context.lexemes -%}
             {%- set lexeme_index = loop.index -%}
             {%- if lexeme.type == "Trivia" -%}
+                {%- if lexeme.category == "NatSpecComment" -%}
                 {# use 'allow_greedy' on trivia: https://github.com/maciejhirsz/logos/issues/520 #}
                 #[regex(r#"{{ lexeme.regex }}"#, |_| { LexemeKind::{{ lexeme.kind }} }, priority = {{ 1000000 + lexeme_index }}, allow_greedy = true)]
+                {%- endif -%}
             {%- elif lexeme.type == "Token" -%}
                 {%- for definition in lexeme.definitions -%}
                     {%- if definition.reject_suffix -%}
@@ -129,6 +141,14 @@ impl<'source> ContextWrapper<'source> {
             {%- endif -%}
         {%- endfor %}
         Lexeme(LexemeKind),
+
+        /// Trivia the lexer skips, dropped by `ContextWrapper::next_lexeme`.
+        {% for lexeme in context.lexemes -%}
+            {%- if lexeme.type == "Trivia" and lexeme.category != "NatSpecComment" -%}
+                #[regex(r#"{{ lexeme.regex }}"#, priority = {{ 1000000 + loop.index }}, allow_greedy = true)]
+            {%- endif -%}
+        {%- endfor %}
+        Skipped,
     }
 {% endfor %}
 
