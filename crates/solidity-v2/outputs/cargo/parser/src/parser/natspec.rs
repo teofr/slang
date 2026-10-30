@@ -224,20 +224,13 @@ impl Iterator for NonTriviaTokens<'_, '_> {
     fn next(&mut self) -> Option<Self::Item> {
         while let Some(lexeme) = self.lexer.next_lexeme() {
             if lexeme.kind.is_trivia() {
-                if let Some(comment) = &mut self.pending {
-                    comment.read(&lexeme);
-                } else if lexeme.kind.is_natspec_comment() {
-                    self.pending = Some(PendingComment::new(&lexeme));
+                if self.pending.is_some() || lexeme.kind.is_natspec_comment() {
+                    self.read_natspec_trivia(&lexeme);
                 }
                 continue;
             }
-            if let Some(comment) = self.pending.take() {
-                self.natspec_stack.attach_natspec_to(
-                    NatSpec {
-                        range: comment.range,
-                    },
-                    lexeme.range.start,
-                );
+            if self.pending.is_some() {
+                self.attach_pending_comment(lexeme.range.start);
             }
             return Some(Ok((lexeme.range.start, lexeme.kind, lexeme.range.end)));
         }
@@ -252,6 +245,38 @@ impl<'source, 'natspec> NonTriviaTokens<'source, 'natspec> {
             lexer,
             natspec_stack,
             pending: None,
+        }
+    }
+
+    /// Reads `lexeme`, a trivia lexeme, into the pending comment, or starts one with it.
+    ///
+    /// Cold on purpose: it only runs for `NatSpec` comments and the trivia after them, and keeping
+    /// it out of [`NonTriviaTokens::next`], which is inlined into LALRPOP's parsing loop, keeps the
+    /// loop small.
+    #[cold]
+    #[inline(never)]
+    fn read_natspec_trivia(&mut self, lexeme: &Lexeme) {
+        if let Some(comment) = &mut self.pending {
+            comment.read(lexeme);
+        } else {
+            self.pending = Some(PendingComment::new(lexeme));
+        }
+    }
+
+    /// Pushes the pending comment on the [`NatSpecStack`], documenting the token starting at
+    /// `token_start`.
+    ///
+    /// Cold for the same reason as [`NonTriviaTokens::read_natspec_trivia`].
+    #[cold]
+    #[inline(never)]
+    fn attach_pending_comment(&mut self, token_start: usize) {
+        if let Some(comment) = self.pending.take() {
+            self.natspec_stack.attach_natspec_to(
+                NatSpec {
+                    range: comment.range,
+                },
+                token_start,
+            );
         }
     }
 }
