@@ -174,30 +174,30 @@ uint constant K = 1;
     assert_eq!(
         documented_nodes(source),
         [
-            ("contract C {", Some("/// @title A contract")),
-            ("uint public count;", Some("/// @notice A state variable")),
+            ("contract C {", Some("/// @title A contract\n")),
+            ("uint public count;", Some("/// @notice A state variable\n")),
             (
                 "event Changed(uint value);",
                 Some("/** @notice An event */")
             ),
-            ("error Failed();", Some("/// @notice An error")),
-            ("struct S { uint x; }", Some("/// @notice A struct")),
-            ("enum E { A }", Some("/// @notice An enum")),
-            ("constructor() {}", Some("/// @notice A constructor")),
+            ("error Failed();", Some("/// @notice An error\n")),
+            ("struct S { uint x; }", Some("/// @notice A struct\n")),
+            ("enum E { A }", Some("/// @notice An enum\n")),
+            ("constructor() {}", Some("/// @notice A constructor\n")),
             (
                 "fallback() external {}",
-                Some("/// @notice A fallback function")
+                Some("/// @notice A fallback function\n")
             ),
             (
                 "receive() external payable {}",
-                Some("/// @notice A receive function")
+                Some("/// @notice A receive function\n")
             ),
-            ("modifier m() { _; }", Some("/// @notice A modifier")),
-            ("function f() public {", Some("/// @notice A function")),
-            ("assembly {}", Some("/// @solidity memory-safe-assembly")),
-            ("interface I {}", Some("/// @title An interface")),
-            ("library L {}", Some("/// @title A library")),
-            ("uint constant K = 1;", Some("/// @dev A constant")),
+            ("modifier m() { _; }", Some("/// @notice A modifier\n")),
+            ("function f() public {", Some("/// @notice A function\n")),
+            ("assembly {}", Some("/// @solidity memory-safe-assembly\n")),
+            ("interface I {}", Some("/// @title An interface\n")),
+            ("library L {}", Some("/// @title A library\n")),
+            ("uint constant K = 1;", Some("/// @dev A constant\n")),
         ]
     );
 }
@@ -211,7 +211,7 @@ function f() {}
 ";
     assert_eq!(
         documented_nodes(source),
-        [("function f() {}", Some("/// @notice a\n    /// @dev b"))]
+        [("function f() {}", Some("/// @notice a\n    /// @dev b\n"))]
     );
 }
 
@@ -225,7 +225,7 @@ function f() {}
 ";
     assert_eq!(
         documented_nodes(source),
-        [("function f() {}", Some("/// @notice a\n///\n/// @dev b"))]
+        [("function f() {}", Some("/// @notice a\n///\n/// @dev b\n"))]
     );
 }
 
@@ -235,7 +235,7 @@ fn regular_comments_split_consecutive_lines() {
         let source = format!("/// @notice a\n{comment}\n/// @notice b\nfunction f() {{}}");
         assert_eq!(
             documented_nodes(&source),
-            [("function f() {}", Some("/// @notice b"))],
+            [("function f() {}", Some("/// @notice b\n"))],
             "{source:?}"
         );
     }
@@ -244,7 +244,7 @@ fn regular_comments_split_consecutive_lines() {
     let source = "/// @notice a\n/* a */ /// @notice b\nfunction f() {}";
     assert_eq!(
         documented_nodes(source),
-        [("function f() {}", Some("/// @notice b"))]
+        [("function f() {}", Some("/// @notice b\n"))]
     );
 }
 
@@ -260,7 +260,7 @@ function f() {}
 ";
     assert_eq!(
         documented_nodes(source),
-        [("function f() {}", Some("/// @notice b"))]
+        [("function f() {}", Some("/// @notice b\n"))]
     );
 
     let source = "
@@ -269,7 +269,7 @@ function f() {}
 ";
     assert_eq!(
         documented_nodes(source),
-        [("function f() {}", Some("/// @notice b"))]
+        [("function f() {}", Some("/// @notice b\n"))]
     );
 
     // Even an empty one
@@ -295,7 +295,7 @@ function f() {}
 ";
     assert_eq!(
         documented_nodes(source),
-        [("function f() {}", Some("/// @notice a"))]
+        [("function f() {}", Some("/// @notice a\n"))]
     );
 }
 
@@ -313,7 +313,7 @@ contract C {
         documented_nodes(source),
         [
             ("contract C {", None),
-            ("uint x;", Some("/// @notice a")),
+            ("uint x;", Some("/// @notice a\n")),
             ("function f() public {}", None),
         ]
     );
@@ -328,7 +328,7 @@ contract C {
     assert_eq!(
         documented_nodes(source),
         [
-            ("contract C {", Some("/// @notice a")),
+            ("contract C {", Some("/// @notice a\n")),
             ("function f() public {}", None),
         ]
     );
@@ -373,7 +373,7 @@ function f() {
         documented_nodes(source),
         [
             ("function f() {", None),
-            ("assembly {}", Some("/// @notice a"))
+            ("assembly {}", Some("/// @notice a\n"))
         ]
     );
 }
@@ -468,8 +468,8 @@ function f() {}
 }
 
 #[test]
-fn trailing_empty_line_excludes_its_line_break() {
-    // Like any other last line, an empty one ends before its line break
+fn trailing_empty_line_includes_its_line_break() {
+    // Like any other last line, an empty one includes its line break
     let source = "
 /// @notice a
 ///
@@ -477,13 +477,13 @@ function f() {}
 ";
     assert_eq!(
         documented_nodes(source),
-        [("function f() {}", Some("/// @notice a\n///"))]
+        [("function f() {}", Some("/// @notice a\n///\n"))]
     );
 
     let source = "/// @notice a\r\n///\r\nfunction f() {}\n";
     assert_eq!(
         documented_nodes(source),
-        [("function f() {}", Some("/// @notice a\r\n///"))]
+        [("function f() {}", Some("/// @notice a\r\n///\r\n"))]
     );
 }
 
@@ -492,7 +492,7 @@ fn line_endings() {
     // Line endings can't be tested with snapshots, since the repository normalizes them to `\n`
     for line_break in ["\n", "\r\n", "\r"] {
         let source = format!("/// @notice a{line_break}/// @dev b{line_break}function f() {{}}");
-        let comment = format!("/// @notice a{line_break}/// @dev b");
+        let comment = format!("/// @notice a{line_break}/// @dev b{line_break}");
         assert_eq!(
             documented_nodes(&source),
             [("function f() {}", Some(&comment[..]))],

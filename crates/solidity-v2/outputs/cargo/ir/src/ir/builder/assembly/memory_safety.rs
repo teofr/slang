@@ -64,14 +64,19 @@ impl<S: Source> CstToIrBuilder<'_, S> {
 
         let text = self.source.text(natspec.range.clone());
 
+        // A `///` comment includes the line break after its last line: leave it out of the
+        // reported range
+        let range =
+            natspec.range.start..natspec.range.start + text.trim_end_matches(['\r', '\n']).len();
+
         if is_memory_safe_marker(text) {
             // We only warn about deprecation from 0.8.31, following solc
             if self.language_version >= LanguageVersion::V0_8_31 {
-                self.report_range(natspec.range.clone(), DeprecatedAssemblyNatSpec);
+                self.report_range(range, DeprecatedAssemblyNatSpec);
             }
             true
         } else {
-            self.report_range(natspec.range.clone(), UnrecognizedAssemblyNatSpec);
+            self.report_range(range, UnrecognizedAssemblyNatSpec);
             false
         }
     }
@@ -80,6 +85,12 @@ impl<S: Source> CstToIrBuilder<'_, S> {
 /// Whether the text of a `NatSpec` comment marks the assembly statement it documents as memory
 /// safe: only a single `/// @solidity memory-safe-assembly` line does.
 fn is_memory_safe_marker(comment: &str) -> bool {
+    // A `///` comment includes the line break after its last line
+    let comment = comment
+        .strip_suffix("\r\n")
+        .or_else(|| comment.strip_suffix(['\n', '\r']))
+        .unwrap_or(comment);
+
     comment.strip_prefix("///").is_some_and(|text| {
         // Strict on purpose: only spaces and tabs may surround the marker. The line
         // break check is redundant with the comparison, but spells out the single line rule
@@ -94,10 +105,11 @@ mod tests {
 
     #[test]
     fn marker() {
-        // Spaces and tabs around the marker don't matter
+        // Spaces and tabs around the marker don't matter, nor does the line break after it
         for comment in [
             "/// @solidity memory-safe-assembly",
-            "///\t @solidity memory-safe-assembly \t",
+            "///\t @solidity memory-safe-assembly \t\n",
+            "/// @solidity memory-safe-assembly\r\n",
         ] {
             assert!(is_memory_safe_marker(comment), "{comment:?}");
         }
@@ -106,9 +118,9 @@ mod tests {
     #[test]
     fn anything_else() {
         for comment in [
-            "///",
+            "///\n",
             "/** @solidity memory-safe-assembly */",
-            "/// @notice Writes to scratch space\n/// @solidity memory-safe-assembly",
+            "/// @notice Writes to scratch space\n/// @solidity memory-safe-assembly\n",
             "/// @solidity  memory-safe-assembly",
             // Other whitespace looks the same, but it isn't the expected whitespace
             "/// @solidity\u{a0}memory-safe-assembly",

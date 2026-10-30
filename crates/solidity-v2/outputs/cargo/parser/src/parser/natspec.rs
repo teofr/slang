@@ -139,6 +139,15 @@ fn is_line_continuation(gap: &str) -> bool {
     indentation.is_some_and(|indentation| indentation.bytes().all(|b| b == b' ' || b == b'\t'))
 }
 
+/// The length of the line break at the start of `rest`, if any.
+fn line_break_len(rest: &str) -> usize {
+    if rest.starts_with("\r\n") {
+        2
+    } else {
+        usize::from(rest.starts_with(['\n', '\r']))
+    }
+}
+
 /// A `NonTriviaTokens` filters `NatSpec` comments out of a lexer, collecting them into a
 /// `NatSpecStack` whenever they are followed by a token. The lexer skips the rest of the trivia.
 pub(crate) struct NonTriviaTokens<'source, 'natspec> {
@@ -185,9 +194,9 @@ impl<'source, 'natspec> NonTriviaTokens<'source, 'natspec> {
     /// documents, which is returned. A comment followed by no token is dropped.
     ///
     /// The lexer reads each `///` line on its own, so consecutive ones, only separated by a line
-    /// break and indentation, are merged into a single comment, which ends with its last line,
-    /// without the line break after it. Any other `NatSpec` comment replaces this one, which is
-    /// dropped without documenting anything.
+    /// break and indentation, are merged into a single comment, which includes the line break
+    /// after its last line. Any other `NatSpec` comment replaces this one, which is dropped
+    /// without documenting anything.
     ///
     /// Never inlined on purpose: it only runs for `NatSpec` comments, and inlining it into
     /// [`NonTriviaTokens::next`] slows down the parsing loop that calls it. That's LALRPOP's loop
@@ -203,6 +212,9 @@ impl<'source, 'natspec> NonTriviaTokens<'source, 'natspec> {
                 continue;
             }
             if !lexeme.kind.is_natspec_comment() {
+                if is_line {
+                    range.end += line_break_len(&self.source[range.end..]);
+                }
                 self.natspec_stack
                     .attach_natspec_to(NatSpec { range }, lexeme.range.start);
                 return Some(lexeme);
