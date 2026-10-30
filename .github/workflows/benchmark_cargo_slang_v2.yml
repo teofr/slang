@@ -72,6 +72,15 @@ jobs:
           BENCHER_API_KEY: "${{ secrets.BENCHER_API_KEY__CARGO_SLANG_V2 }}"
           BENCHER_PR_HEAD_HASH: "${{ github.event.pull_request.head.sha }}"
           GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+          # Profiling only: run the version inference benchmarks alone
+          GUNGRAUN_FILTER: "*::infer_language_versions::*"
+
+      - name: "Profile > callgrind_annotate infer_language_versions"
+        run: |
+          for f in $(find target/gungraun -name 'callgrind.*.out' | sort); do
+            echo "=== PROFILE $f"
+            callgrind_annotate --inclusive=no --threshold=99 "$f" | sed -n '1,70p'
+          done
 
       - name: "Benchmark > Upload Benchmarking Data"
         uses: "actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9" # v7.0.2
