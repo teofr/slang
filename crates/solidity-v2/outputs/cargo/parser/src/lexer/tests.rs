@@ -7,10 +7,10 @@
 use slang_solidity_v2_common::versions::LanguageVersion;
 
 use crate::lexer::LexemeKind::{
-    self, Identifier, MultiLineNatSpecComment, PragmaMultiLineComment,
+    self, EndOfLine, Identifier, MultiLineComment, MultiLineNatSpecComment, PragmaMultiLineComment,
     PragmaMultiLineNatSpecComment, PragmaSingleLineComment, PragmaSingleLineNatSpecComment,
-    SingleLineNatSpecComment, YulMultiLineComment, YulMultiLineNatSpecComment,
-    YulSingleLineComment, YulSingleLineNatSpecComment,
+    SingleLineComment, SingleLineNatSpecComment, Whitespace, YulMultiLineComment,
+    YulMultiLineNatSpecComment, YulSingleLineComment, YulSingleLineNatSpecComment,
 };
 use crate::lexer::definition::Lexer;
 
@@ -30,7 +30,10 @@ fn natspec_comments() {
             "/// a\n  /// b\nx",
             &[
                 (SingleLineNatSpecComment, "/// a"),
+                (EndOfLine, "\n"),
+                (Whitespace, "  "),
                 (SingleLineNatSpecComment, "/// b"),
+                (EndOfLine, "\n"),
                 (Identifier, "x"),
             ][..],
         ),
@@ -38,7 +41,10 @@ fn natspec_comments() {
             "/// a\r\n///\r\t/// c",
             &[
                 (SingleLineNatSpecComment, "/// a"),
+                (EndOfLine, "\r\n"),
                 (SingleLineNatSpecComment, "///"),
+                (EndOfLine, "\r"),
+                (Whitespace, "\t"),
                 (SingleLineNatSpecComment, "/// c"),
             ],
         ),
@@ -49,9 +55,16 @@ fn natspec_comments() {
         ),
         ("/// /c", &[(SingleLineNatSpecComment, "/// /c")]),
         // `////` is a regular comment
-        ("////", &[]),
-        ("//// a", &[]),
-        ("/// a\n//// b", &[(SingleLineNatSpecComment, "/// a")]),
+        ("////", &[(SingleLineComment, "////")]),
+        ("//// a", &[(SingleLineComment, "//// a")]),
+        (
+            "/// a\n//// b",
+            &[
+                (SingleLineNatSpecComment, "/// a"),
+                (EndOfLine, "\n"),
+                (SingleLineComment, "//// b"),
+            ],
+        ),
     ] {
         assert_eq!(lex(source), expected, "{source:?}");
     }
@@ -61,17 +74,23 @@ fn natspec_comments() {
 fn regular_comments() {
     for (source, expected) in [
         // Each `//` line is a comment of its own, including `////` and empty `//` lines
-        ("// a\n  //\n//// b\nx", &[(Identifier, "x")][..]),
         (
-            "// a\n/// b\n// c",
-            &[(SingleLineNatSpecComment, "/// b")],
+            "// a\n  //\n//// b",
+            &[
+                (SingleLineComment, "// a"),
+                (EndOfLine, "\n"),
+                (Whitespace, "  "),
+                (SingleLineComment, "//"),
+                (EndOfLine, "\n"),
+                (SingleLineComment, "//// b"),
+            ][..],
         ),
         // Lines of only slashes are regular comments too
-        ("//////", &[]),
+        ("//////", &[(SingleLineComment, "//////")]),
         // `/**/` and `/***` are regular comments, but `/**` is a `NatSpec` one
-        ("/**/", &[]),
-        ("/***/", &[]),
-        ("/*** a */", &[]),
+        ("/**/", &[(MultiLineComment, "/**/")]),
+        ("/***/", &[(MultiLineComment, "/***/")]),
+        ("/*** a */", &[(MultiLineComment, "/*** a */")]),
         ("/** a **/", &[(MultiLineNatSpecComment, "/** a **/")]),
         (
             "/**\n * a/\n */",
@@ -80,15 +99,6 @@ fn regular_comments() {
     ] {
         assert_eq!(lex(source), expected, "{source:?}");
     }
-}
-
-#[test]
-fn skipped_trivia_runs_dont_overflow_the_stack() {
-    // With its default codegen, logos restarts after skipped trivia with a tail call into its root
-    // state, which only release builds turn into a loop: a long run of skipped lexemes must not
-    // overflow the stack of a debug build
-    let source = "// a\n\n/* b */ ".repeat(50_000) + "x";
-    assert_eq!(lex(&source), [(Identifier, "x")]);
 }
 
 #[test]
@@ -129,6 +139,7 @@ fn pragma_and_yul_contexts_follow_the_same_rules() {
             [
                 (natspec.clone(), "/// a".to_owned()),
                 (natspec.clone(), "///".to_owned()),
+                (comment.clone(), "//// c /** d */ /*** e */".to_owned()),
             ],
             "{source:?}"
         );
@@ -136,7 +147,11 @@ fn pragma_and_yul_contexts_follow_the_same_rules() {
         let source = format!("{prefix}/** d */ /*** e */ /***/{suffix}");
         assert_eq!(
             comments(&source),
-            [(multi_natspec.clone(), "/** d */".to_owned()),],
+            [
+                (multi_natspec.clone(), "/** d */".to_owned()),
+                (multi_comment.clone(), "/*** e */".to_owned()),
+                (multi_comment.clone(), "/***/".to_owned()),
+            ],
             "{source:?}"
         );
     }
