@@ -47,15 +47,19 @@ impl<'source> ContextWrapper<'source> {
     // for the returned `Option<Lexeme>`, on every token.
     #[inline(always)]
     pub fn next_lexeme(&mut self) -> Option<Lexeme> {
-        // Skipped trivia is matched like any other lexeme and dropped here, in a loop.
+        // Skipped trivia is lexed like any other lexeme, and dropped here by its kind, in a loop.
         // Skipping it inside `logos` restarts the lexer with a tail call, which debug
         // builds keep as recursion, overflowing the stack on long runs of trivia.
         let (kind, range) = match self {
             {%- for context in model.parser.lexer.contexts %}
                 Self::{{ context.name }}(lexer) => loop {
                     match lexer.next() {
+                        Some(Ok({{ context.name }}Context::Lexeme(
+                            {%- for lexeme in context.lexemes -%}
+                                {%- if lexeme.type == "Trivia" and lexeme.skipped %} | LexemeKind::{{ lexeme.kind }}{% endif -%}
+                            {%- endfor -%}
+                        ))) => {}
                         Some(Ok({{ context.name }}Context::Lexeme(kind))) => break (kind, lexer.span()),
-                        Some(Ok({{ context.name }}Context::Skipped)) => {}
                         Some(Err(())) => break (LexemeKind::UNRECOGNIZED, lexer.span()),
                         None => return None,
                     }
@@ -117,9 +121,7 @@ impl<'source> ContextWrapper<'source> {
         {% for lexeme in context.lexemes -%}
             {%- if lexeme.type == "Trivia" -%}
                 {# use 'allow_greedy' on trivia: https://github.com/maciejhirsz/logos/issues/520 #}
-                {%- if not lexeme.skipped -%}
                 #[regex(r#"{{ lexeme.regex }}"#, |_| { LexemeKind::{{ lexeme.kind }} }, priority = {{ 1000000 + loop.index }}, allow_greedy = true)]
-                {%- endif -%}
             {%- elif lexeme.type == "Token" -%}
                 {%- if lexeme.not_followed_by -%}
                 #[regex(r#"{{ lexeme.regex }}"#, not_followed_by__{{ lexeme.kind }}, priority = {{ 2000000 + loop.index }})]
@@ -149,13 +151,5 @@ impl<'source> ContextWrapper<'source> {
             {%- endif -%}
         {%- endfor %}
         Lexeme(LexemeKind),
-
-        /// Trivia the lexer skips, dropped by `ContextWrapper::next_lexeme`.
-        {% for lexeme in context.lexemes -%}
-            {%- if lexeme.type == "Trivia" and lexeme.skipped -%}
-                #[regex(r#"{{ lexeme.regex }}"#, priority = {{ 1000000 + loop.index }}, allow_greedy = true)]
-            {%- endif -%}
-        {%- endfor %}
-        Skipped,
     }
 {% endfor %}
