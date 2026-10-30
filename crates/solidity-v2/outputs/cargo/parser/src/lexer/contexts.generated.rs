@@ -52,42 +52,22 @@ impl<'source> ContextWrapper<'source> {
         }
     }
 
-    // Always inlined into the parser's hot loop: it runs once per token, but LLVM considers it too
-    // big to inline on its own, and calling it costs a call frame, and a round trip through memory
-    // for the returned `Option<Lexeme>`, on every token.
-    #[inline(always)]
     pub fn next_lexeme(&mut self) -> Option<Lexeme> {
-        // The lexer skips all trivia but `NatSpec` comments, which the parser reads. Skipped trivia
-        // is matched like any other lexeme and dropped here, in a loop: skipping it inside `logos`
-        // restarts the lexer with a tail call, which debug builds keep as recursion, overflowing
-        // the stack on long runs of trivia.
-        //
-        // TODO(v2): Skipping is temporary: once trivia is part of the CST, the lexer has to produce
-        // it again, or the CST has to re-lex it from the gaps between tokens.
         let (kind, range) = match self {
-            Self::Pragma(lexer) => loop {
-                match lexer.next() {
-                    Some(Ok(PragmaContext::Lexeme(kind))) => break (kind, lexer.span()),
-                    Some(Ok(PragmaContext::Skipped)) => {}
-                    Some(Err(())) => break (LexemeKind::UNRECOGNIZED, lexer.span()),
-                    None => return None,
-                }
+            Self::Pragma(lexer) => match lexer.next() {
+                Some(Ok(PragmaContext::Lexeme(kind))) => (kind, lexer.span()),
+                Some(Err(())) => (LexemeKind::UNRECOGNIZED, lexer.span()),
+                None => return None,
             },
-            Self::Solidity(lexer) => loop {
-                match lexer.next() {
-                    Some(Ok(SolidityContext::Lexeme(kind))) => break (kind, lexer.span()),
-                    Some(Ok(SolidityContext::Skipped)) => {}
-                    Some(Err(())) => break (LexemeKind::UNRECOGNIZED, lexer.span()),
-                    None => return None,
-                }
+            Self::Solidity(lexer) => match lexer.next() {
+                Some(Ok(SolidityContext::Lexeme(kind))) => (kind, lexer.span()),
+                Some(Err(())) => (LexemeKind::UNRECOGNIZED, lexer.span()),
+                None => return None,
             },
-            Self::Yul(lexer) => loop {
-                match lexer.next() {
-                    Some(Ok(YulContext::Lexeme(kind))) => break (kind, lexer.span()),
-                    Some(Ok(YulContext::Skipped)) => {}
-                    Some(Err(())) => break (LexemeKind::UNRECOGNIZED, lexer.span()),
-                    None => return None,
-                }
+            Self::Yul(lexer) => match lexer.next() {
+                Some(Ok(YulContext::Lexeme(kind))) => (kind, lexer.span()),
+                Some(Err(())) => (LexemeKind::UNRECOGNIZED, lexer.span()),
+                None => return None,
             },
         };
 
@@ -123,20 +103,13 @@ pub enum PragmaContext {
     #[regex(r#";"#, |_| { LexemeKind::PragmaSemicolon }, priority = 2000018)]
     #[regex(r#"~"#, |_| { LexemeKind::PragmaTilde }, priority = 2000019)]
     #[regex(r#"('((?&PragmaEscapeSequence)|[ -&]|[\(-\[]|[\]-~])*')|("((?&PragmaEscapeSequence)|[ -!]|[#-\[]|[\]-~])*")"#, |_| { LexemeKind::PragmaStringLiteral }, priority = 2000020)]
+    #[regex(r#"( |\t)+"#, |_| { LexemeKind::PragmaWhitespace }, priority = 1000021, allow_greedy = true)]
+    #[regex(r#"\n|(\r\n?)"#, |_| { LexemeKind::PragmaEndOfLine }, priority = 1000022, allow_greedy = true)]
+    #[regex(r#"//[^\r\n]*"#, |_| { LexemeKind::PragmaSingleLineComment }, priority = 1000023, allow_greedy = true)]
+    #[regex(r#"/\*[^\*]*\*+([^/\*][^\*]*\*+)*/"#, |_| { LexemeKind::PragmaMultiLineComment }, priority = 1000024, allow_greedy = true)]
     #[regex(r#"///([^/\r\n][^\r\n]*)?"#, |_| { LexemeKind::PragmaSingleLineNatSpecComment }, priority = 1000025, allow_greedy = true)]
     #[regex(r#"/\*\*[^/\*][^\*]*\*+([^/\*][^\*]*\*+)*/"#, |_| { LexemeKind::PragmaMultiLineNatSpecComment }, priority = 1000026, allow_greedy = true)]
     Lexeme(LexemeKind),
-
-    /// Trivia the lexer skips, dropped by `ContextWrapper::next_lexeme`.
-    #[regex(r#"( |\t)+"#, priority = 1000021, allow_greedy = true)]
-    #[regex(r#"\n|(\r\n?)"#, priority = 1000022, allow_greedy = true)]
-    #[regex(r#"//[^\r\n]*"#, priority = 1000023, allow_greedy = true)]
-    #[regex(
-        r#"/\*[^\*]*\*+([^/\*][^\*]*\*+)*/"#,
-        priority = 1000024,
-        allow_greedy = true
-    )]
-    Skipped,
 }
 
 /// Rejects a `HexLiteral` match that ends with this suffix.
@@ -336,6 +309,10 @@ pub enum SolidityContext {
     #[regex(r#"\^"#, |_| { LexemeKind::Caret }, priority = 2000158)]
     #[regex(r#"\^="#, |_| { LexemeKind::CaretEqual }, priority = 2000159)]
     #[regex(r#"~"#, |_| { LexemeKind::Tilde }, priority = 2000160)]
+    #[regex(r#"( |\t)+"#, |_| { LexemeKind::Whitespace }, priority = 1000161, allow_greedy = true)]
+    #[regex(r#"\n|(\r\n?)"#, |_| { LexemeKind::EndOfLine }, priority = 1000162, allow_greedy = true)]
+    #[regex(r#"//[^\r\n]*"#, |_| { LexemeKind::SingleLineComment }, priority = 1000163, allow_greedy = true)]
+    #[regex(r#"/\*[^\*]*\*+([^/\*][^\*]*\*+)*/"#, |_| { LexemeKind::MultiLineComment }, priority = 1000164, allow_greedy = true)]
     #[regex(r#"///([^/\r\n][^\r\n]*)?"#, |_| { LexemeKind::SingleLineNatSpecComment }, priority = 1000165, allow_greedy = true)]
     #[regex(r#"/\*\*[^/\*][^\*]*\*+([^/\*][^\*]*\*+)*/"#, |_| { LexemeKind::MultiLineNatSpecComment }, priority = 1000166, allow_greedy = true)]
     #[regex(r#"0x(?&HexCharacter)+(_(?&HexCharacter)+)*"#, |lexer| { reject_suffix::<RejectSuffixHexLiteral1, _>(lexer, LexemeKind::HexLiteral) }, priority = 2000167)]
@@ -346,17 +323,6 @@ pub enum SolidityContext {
     #[regex(r#"(unicode'((?&UnicodeEscapeSequence)|[^'\\\r\n])*')|(unicode"((?&UnicodeEscapeSequence)|[^"\\\r\n])*")"#, |_| { LexemeKind::UnicodeStringLiteral }, priority = 2000171)]
     #[regex(r#"(?&IdentifierScanner)"#, |_| { LexemeKind::Identifier }, priority = 2000172)]
     Lexeme(LexemeKind),
-
-    /// Trivia the lexer skips, dropped by `ContextWrapper::next_lexeme`.
-    #[regex(r#"( |\t)+"#, priority = 1000161, allow_greedy = true)]
-    #[regex(r#"\n|(\r\n?)"#, priority = 1000162, allow_greedy = true)]
-    #[regex(r#"//[^\r\n]*"#, priority = 1000163, allow_greedy = true)]
-    #[regex(
-        r#"/\*[^\*]*\*+([^/\*][^\*]*\*+)*/"#,
-        priority = 1000164,
-        allow_greedy = true
-    )]
-    Skipped,
 }
 
 /// Rejects a `YulDecimalLiteral` match that ends with this suffix.
@@ -413,20 +379,13 @@ pub enum YulContext {
     #[regex(r#"\{"#, |_| { LexemeKind::YulOpenBrace }, priority = 2000026)]
     #[regex(r#"\("#, |_| { LexemeKind::YulOpenParen }, priority = 2000027)]
     #[regex(r#"\."#, |_| { LexemeKind::YulPeriod }, priority = 2000028)]
+    #[regex(r#"( |\t)+"#, |_| { LexemeKind::YulWhitespace }, priority = 1000029, allow_greedy = true)]
+    #[regex(r#"\n|(\r\n?)"#, |_| { LexemeKind::YulEndOfLine }, priority = 1000030, allow_greedy = true)]
+    #[regex(r#"//[^\r\n]*"#, |_| { LexemeKind::YulSingleLineComment }, priority = 1000031, allow_greedy = true)]
+    #[regex(r#"/\*[^\*]*\*+([^/\*][^\*]*\*+)*/"#, |_| { LexemeKind::YulMultiLineComment }, priority = 1000032, allow_greedy = true)]
     #[regex(r#"///([^/\r\n][^\r\n]*)?"#, |_| { LexemeKind::YulSingleLineNatSpecComment }, priority = 1000033, allow_greedy = true)]
     #[regex(r#"/\*\*[^/\*][^\*]*\*+([^/\*][^\*]*\*+)*/"#, |_| { LexemeKind::YulMultiLineNatSpecComment }, priority = 1000034, allow_greedy = true)]
     Lexeme(LexemeKind),
-
-    /// Trivia the lexer skips, dropped by `ContextWrapper::next_lexeme`.
-    #[regex(r#"( |\t)+"#, priority = 1000029, allow_greedy = true)]
-    #[regex(r#"\n|(\r\n?)"#, priority = 1000030, allow_greedy = true)]
-    #[regex(r#"//[^\r\n]*"#, priority = 1000031, allow_greedy = true)]
-    #[regex(
-        r#"/\*[^\*]*\*+([^/\*][^\*]*\*+)*/"#,
-        priority = 1000032,
-        allow_greedy = true
-    )]
-    Skipped,
 }
 
 /// Rejects the current match if it ends with a `Suffix` match, or emits it as `kind` otherwise.
