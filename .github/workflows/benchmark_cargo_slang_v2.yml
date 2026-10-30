@@ -1,34 +1,18 @@
 name: "benchmark_cargo_slang_v2"
 
+# EXPERIMENT (temporary): measures how sensitive the gungraun numbers are to
+# unrelated codegen changes, across code variants and build configurations.
+
 on:
-  # Run using manual triggers from GitHub UI:
-  # https://docs.github.com/en/actions/managing-workflow-runs/manually-running-a-workflow
   workflow_dispatch:
     inputs:
       dryRun:
-        description: "Attempt a local run and report results here, without updating the bencher dashboard."
+        description: "Unused by the experiment, kept for compatibility with the dispatch API."
         type: "boolean"
         required: true
         default: true
 
-  # Run on pushes to 'main' branch:
-  push:
-    branches:
-      - "main"
-
-  # Run on every pull request (full benchmark, non-blocking):
-  pull_request:
-    types:
-      - "opened"
-      - "synchronize"
-      - "reopened"
-
 permissions: {}
-
-# Queue benchmark workflows for the same branch (main pushes queue for ordered results; PR runs cancel stale ones):
-concurrency:
-  group: "${{ github.workflow }}-${{ github.ref_name }}"
-  cancel-in-progress: "${{ github.event_name == 'pull_request' }}"
 
 jobs:
   benchmark:
@@ -36,20 +20,20 @@ jobs:
 
     permissions:
       contents: "read"
-      pull-requests: "write"
-      checks: "write"
 
-    # Skip fork PRs (can't access GitHub Actions secrets). For non-PR events, only run on the main repo.
-    if: >-
-      ${{
-        (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository)
-        || (github.event_name != 'pull_request' && (github.repository == 'NomicFoundation/slang' || inputs.dryRun == true))
-      }}
+    strategy:
+      fail-fast: false
+      matrix:
+        code: ["bench/r-main", "bench/r-main-opt4", "bench/r-a", "bench/r-ak"]
+        config: ["current", "cgu1", "nolto", "noinline"]
+
+    name: "${{ matrix.config }} @ ${{ matrix.code }}"
 
     steps:
       - name: "Checkout Repository"
         uses: "actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1" # v7.0.1
         with:
+          ref: "${{ matrix.code }}"
           persist-credentials: false
           fetch-depth: 0 # Full history is needed by 'git/restore-mtime' to find each file's last commit time.
 
@@ -59,20 +43,25 @@ jobs:
           task-setup-args: "setup:cargo setup:pipenv"
           sfw-optional: "true"
 
-      - name: "Smoke Test > infra perf cargo --smoke slang-v2"
-        if: "${{ github.event_name == 'pull_request' && !contains(github.event.pull_request.labels.*.name, 'ci:perf') }}"
-        run: "./scripts/bin/infra perf cargo --smoke slang-v2"
+      - name: "Select build configuration"
+        run: |
+          case "${{ matrix.config }}" in
+            current) ;;
+            cgu1) echo "CARGO_PROFILE_BENCH_CODEGEN_UNITS=1" >> "$GITHUB_ENV" ;;
+            nolto) echo "CARGO_PROFILE_BENCH_LTO=false" >> "$GITHUB_ENV" ;;
+            noinline) echo "RUSTFLAGS=-C llvm-args=-inline-threshold=0" >> "$GITHUB_ENV" ;;
+            *) echo "unknown config"; exit 1 ;;
+          esac
 
       - name: "Benchmark > infra perf cargo slang-v2"
-        run: "./scripts/bin/infra perf cargo ${{ github.event_name == 'pull_request' && '--pr-benchmark=full' || (inputs.dryRun == true && '--dry-run' || '') }} slang-v2"
+        run: "env -u BENCHER_API_KEY ./scripts/bin/infra perf cargo --dry-run slang-v2 2>&1 | tee bench.log"
         env:
-          BENCHER_API_KEY: "${{ secrets.BENCHER_API_KEY__CARGO_SLANG_V2 }}"
-          BENCHER_PR_HEAD_HASH: "${{ github.event.pull_request.head.sha }}"
-          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+          SLANG_PERF_SKIP_DHAT: "1"
 
-      - name: "Benchmark > Upload Benchmarking Data"
-        uses: "actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9" # v7.0.2
-        with:
-          name: "benchmarking-data"
-          path: "target/gungraun"
-          if-no-files-found: "error"
+      - name: "Results"
+        run: |
+          awk '/^slang_v2::pipeline::/ { id = $1 " " $2 } /Instructions:/ && id { split($2, a, "|"); ir = a[1] } /Estimated Cycles:/ && id { split($3, a, "|"); if (!(id in seen)) print "RESULT\t" id "\t" ir "\t" a[1]; seen[id] = 1; id = "" }' bench.log
+          for f in $(find target/gungraun -name 'callgrind.*.out' | grep -E 'callgrind\.(infer_language_versions\.(uniswap|pointer_libraries)|parser\.uniswap)\.out' | sort); do
+            echo "=== PROFILE $f"
+            callgrind_annotate --inclusive=no --threshold=95 "$f" | sed -n '1,60p'
+          done
