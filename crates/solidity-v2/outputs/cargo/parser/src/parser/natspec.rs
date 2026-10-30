@@ -152,16 +152,19 @@ impl Iterator for NonTriviaTokens<'_, '_> {
     type Item = Result<(usize, LexemeKind, usize), ()>;
 
     fn next(&mut self) -> Option<Self::Item> {
-        let lexeme = self.lexer.next_lexeme()?;
-        // NatSpec reading is guarded by a cheap kind check
-        let lexeme = if lexeme.kind.is_natspec_comment() {
-            // Reads the rest of the comment, and returns the token after it
-            self.read_natspec_comment(&lexeme)?
-        } else {
-            lexeme
-        };
-        debug_assert!(!lexeme.kind.is_trivia(), "the lexer skips regular trivia");
-        Some(Ok((lexeme.range.start, lexeme.kind, lexeme.range.end)))
+        while let Some(lexeme) = self.lexer.next_lexeme() {
+            // NatSpec reading is guarded by a cheap kind check
+            if lexeme.kind.is_natspec_comment() {
+                // Reads the rest of the comment, and returns the token after it
+                let lexeme = self.read_natspec_comment(&lexeme)?;
+                return Some(Ok((lexeme.range.start, lexeme.kind, lexeme.range.end)));
+            }
+            if lexeme.kind.is_trivia() {
+                continue;
+            }
+            return Some(Ok((lexeme.range.start, lexeme.kind, lexeme.range.end)));
+        }
+        None
     }
 }
 
@@ -196,6 +199,9 @@ impl<'source, 'natspec> NonTriviaTokens<'source, 'natspec> {
         let mut is_line = is_single_line_natspec(&first.kind);
 
         while let Some(lexeme) = self.lexer.next_lexeme() {
+            if lexeme.kind.is_trivia() && !lexeme.kind.is_natspec_comment() {
+                continue;
+            }
             if !lexeme.kind.is_natspec_comment() {
                 self.natspec_stack
                     .attach_natspec_to(NatSpec { range }, lexeme.range.start);
