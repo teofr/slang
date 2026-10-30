@@ -5,9 +5,7 @@ name: "experiment_env_sensitivity"
 # addresses) changes?
 
 on:
-  push:
-    branches:
-      - "claude/gungraun-benchmark-fragility-*"
+  workflow_dispatch:
 
 permissions: {}
 

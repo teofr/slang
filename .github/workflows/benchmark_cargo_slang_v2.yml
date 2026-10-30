@@ -4,6 +4,9 @@ name: "benchmark_cargo_slang_v2"
 # unrelated codegen changes, across code variants and build configurations.
 
 on:
+  push:
+    branches:
+      - "claude/gungraun-benchmark-fragility-*"
   workflow_dispatch:
     inputs:
       dryRun:
@@ -25,7 +28,7 @@ jobs:
       fail-fast: false
       matrix:
         code: ["bench/r-main", "bench/r-main-opt4", "bench/r-a", "bench/r-ak"]
-        config: ["current", "cgu1", "nolto", "noinline"]
+        config: ["current-outlined", "cgu1-outlined"]
 
     name: "${{ matrix.config }} @ ${{ matrix.code }}"
 
@@ -45,7 +48,14 @@ jobs:
 
       - name: "Select build configuration"
         run: |
+          # Keep the 'rfind' pre-scan in its own function, out of the lexer loop's function:
+          f=crates/solidity-v2/outputs/cargo/slang_solidity/src/utils/version_inference.rs
+          sed -i 's/let Some(last_keyword_start) = source.rfind("pragma") else {/let Some(last_keyword_start) = find_last_pragma_keyword(source) else {/' "$f"
+          printf '\n#[inline(never)]\nfn find_last_pragma_keyword(source: \x26str) -> Option<usize> {\n    source.rfind("pragma")\n}\n' >> "$f"
+          git diff
           case "${{ matrix.config }}" in
+            current-outlined) ;;
+            cgu1-outlined) echo "CARGO_PROFILE_BENCH_CODEGEN_UNITS=1" >> "$GITHUB_ENV" ;;
             current) ;;
             cgu1) echo "CARGO_PROFILE_BENCH_CODEGEN_UNITS=1" >> "$GITHUB_ENV" ;;
             nolto) echo "CARGO_PROFILE_BENCH_LTO=false" >> "$GITHUB_ENV" ;;
