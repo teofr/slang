@@ -4,9 +4,6 @@ name: "benchmark_cargo_slang_v2"
 # unrelated codegen changes, across code variants and build configurations.
 
 on:
-  push:
-    branches:
-      - "claude/gungraun-benchmark-fragility-*"
   workflow_dispatch:
     inputs:
       dryRun:
