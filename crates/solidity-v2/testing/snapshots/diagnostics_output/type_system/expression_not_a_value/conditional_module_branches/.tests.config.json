@@ -1,0 +1,11 @@
+{
+  "expected_solc_divergence": [
+    {
+      "specifier": {
+        "type": "From",
+        "from": "0.8.0"
+      },
+      "reason": "solc gives a module itself as its mobile type and never asks a conditional for a nameable type, so it accepts the conditional on every version. Slang gives no module a mobile type."
+    }
+  ]
+}

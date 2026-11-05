@@ -1,0 +1,11 @@
+{
+  "expected_solc_divergence": [
+    {
+      "specifier": {
+        "type": "From",
+        "from": "0.8.0"
+      },
+      "reason": "solc rejects slicing a calldata array with a dynamically encoded base type, and keeps such a slice as a non-nameable mobile type, so the array literal has no element type. Slang decays every calldata slice to the array it slices, and reports neither."
+    }
+  ]
+}
