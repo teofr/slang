@@ -11,6 +11,7 @@ use slang_solidity_v2_ir::ir::NodeIdentity;
 use slang_solidity_v2_ir::ir::visitor::Visitor;
 
 use super::Pass;
+use super::typing::Position;
 use crate::binder::{Definition, Reference, Resolution, Typing, UsingOperator};
 use crate::built_ins::InternalBuiltIn;
 use crate::passes::common::{
@@ -131,13 +132,13 @@ impl Visitor for Pass<'_> {
         // The initialiser's value is bound to the declared variable, as in
         // `leave_variable_declaration_statement`.
         if let Some(value) = &node.value {
-            self.check_type_of_value_expression(value);
+            self.check_expression(value, Position::Value);
         }
     }
 
     fn leave_constant_definition(&mut self, node: &ir::ConstantDefinition) {
         if let Some(value) = &node.value {
-            self.check_type_of_value_expression(value);
+            self.check_expression(value, Position::Value);
         }
     }
 
@@ -163,13 +164,13 @@ impl Visitor for Pass<'_> {
         // __SLANG_EXPRESSION_STATEMENT_TYPE__
         //
         // TODO(validation): the condition does require a value, of a type
-        // convertible to boolean. Caveat: using
-        // `check_type_of_value_expression` here would report an ambiguous
-        // reference a second time, since the expression statement it is written
-        // as has already checked (and reported) the same node.
+        // convertible to boolean. Caveat: checking it as a `Position::Value`
+        // here would report an ambiguous reference a second time, since the
+        // expression statement it is written as has already checked (and
+        // reported) the same node.
         if let Some(iterator) = &node.iterator {
-            // Check that the iterator expression type resolves unambiguously
-            self.check_typing_of_expression(iterator);
+            // The iterator is a statement of its own, as the initialisation is.
+            self.check_expression(iterator, Position::Statement);
         }
         self.leave_scope_for_node_id(node.id());
     }
@@ -268,40 +269,45 @@ impl Visitor for Pass<'_> {
     }
 
     fn leave_assignment_expression(&mut self, node: &ir::AssignmentExpression) {
-        let type_id = self.check_type_of_value_expression(&node.left_operand);
-        self.check_lvalues_under(&node.left_operand);
-        self.check_type_of_value_expression(&node.right_operand);
+        let type_id = self
+            .check_expression(&node.left_operand, Position::Written)
+            .as_type_id();
+        self.check_expression(&node.right_operand, Position::Value);
         // TODO(validation) SDR[59]: check that the type of right_operand can be applied
         // to the left by means of the operator
         self.binder.set_node_type(node.id(), type_id);
     }
 
     fn leave_conditional_expression(&mut self, node: &ir::ConditionalExpression) {
-        self.check_type_of_value_expression(&node.operand);
+        self.check_expression(&node.operand, Position::Value);
         let type_id = self.type_of_conditional_expression(node);
         self.binder.set_node_type(node.id(), type_id);
     }
 
     fn leave_or_expression(&mut self, node: &ir::OrExpression) {
         // TODO(validation) SDR[57]: check that both operands are boolean
-        self.check_type_of_value_expression(&node.left_operand);
-        self.check_type_of_value_expression(&node.right_operand);
+        self.check_expression(&node.left_operand, Position::Value);
+        self.check_expression(&node.right_operand, Position::Value);
         self.binder
             .set_node_type(node.id(), Some(self.types.boolean()));
     }
 
     fn leave_and_expression(&mut self, node: &ir::AndExpression) {
         // TODO(validation) SDR[57]: check that both operands are boolean
-        self.check_type_of_value_expression(&node.left_operand);
-        self.check_type_of_value_expression(&node.right_operand);
+        self.check_expression(&node.left_operand, Position::Value);
+        self.check_expression(&node.right_operand, Position::Value);
         self.binder
             .set_node_type(node.id(), Some(self.types.boolean()));
     }
 
     fn leave_equality_expression(&mut self, node: &ir::EqualityExpression) {
         // TODO(validation) SDR[55]: check that both operands have a compatible type
-        let left = self.check_type_of_value_expression(&node.left_operand);
-        let right = self.check_type_of_value_expression(&node.right_operand);
+        let left = self
+            .check_expression(&node.left_operand, Position::Value)
+            .as_type_id();
+        let right = self
+            .check_expression(&node.right_operand, Position::Value)
+            .as_type_id();
         self.record_comparison_common_operand_type(node.id(), left, right);
         self.binder
             .set_node_type(node.id(), Some(self.types.boolean()));
@@ -310,8 +316,12 @@ impl Visitor for Pass<'_> {
 
     fn leave_inequality_expression(&mut self, node: &ir::InequalityExpression) {
         // TODO(validation) SDR[55]: check that both operands have a compatible type
-        let left = self.check_type_of_value_expression(&node.left_operand);
-        let right = self.check_type_of_value_expression(&node.right_operand);
+        let left = self
+            .check_expression(&node.left_operand, Position::Value)
+            .as_type_id();
+        let right = self
+            .check_expression(&node.right_operand, Position::Value)
+            .as_type_id();
         self.record_comparison_common_operand_type(node.id(), left, right);
         self.binder
             .set_node_type(node.id(), Some(self.types.boolean()));
@@ -319,24 +329,36 @@ impl Visitor for Pass<'_> {
     }
 
     fn leave_bitwise_or_expression(&mut self, node: &ir::BitwiseOrExpression) {
-        let left = self.check_type_of_value_expression(&node.left_operand);
-        let right = self.check_type_of_value_expression(&node.right_operand);
+        let left = self
+            .check_expression(&node.left_operand, Position::Value)
+            .as_type_id();
+        let right = self
+            .check_expression(&node.right_operand, Position::Value)
+            .as_type_id();
         let type_id = self.type_of_binary_operator_expression(left, right, |l, r| l.bit_or(r));
         self.binder.set_node_type(node.id(), type_id);
         self.resolve_operator_function(node.id(), UsingOperator::Bar, left, 2);
     }
 
     fn leave_bitwise_xor_expression(&mut self, node: &ir::BitwiseXorExpression) {
-        let left = self.check_type_of_value_expression(&node.left_operand);
-        let right = self.check_type_of_value_expression(&node.right_operand);
+        let left = self
+            .check_expression(&node.left_operand, Position::Value)
+            .as_type_id();
+        let right = self
+            .check_expression(&node.right_operand, Position::Value)
+            .as_type_id();
         let type_id = self.type_of_binary_operator_expression(left, right, |l, r| l.bit_xor(r));
         self.binder.set_node_type(node.id(), type_id);
         self.resolve_operator_function(node.id(), UsingOperator::Caret, left, 2);
     }
 
     fn leave_bitwise_and_expression(&mut self, node: &ir::BitwiseAndExpression) {
-        let left = self.check_type_of_value_expression(&node.left_operand);
-        let right = self.check_type_of_value_expression(&node.right_operand);
+        let left = self
+            .check_expression(&node.left_operand, Position::Value)
+            .as_type_id();
+        let right = self
+            .check_expression(&node.right_operand, Position::Value)
+            .as_type_id();
         let type_id = self.type_of_binary_operator_expression(left, right, |l, r| l.bit_and(r));
         self.binder.set_node_type(node.id(), type_id);
         self.resolve_operator_function(node.id(), UsingOperator::Ampersand, left, 2);
@@ -345,8 +367,12 @@ impl Visitor for Pass<'_> {
     fn leave_shift_expression(&mut self, node: &ir::ShiftExpression) {
         // TODO(validation) SDR[54]: check that the left operand is an integer and the
         // right operand is an _unsigned_ integer
-        let left = self.check_type_of_value_expression(&node.left_operand);
-        let right = self.check_type_of_value_expression(&node.right_operand);
+        let left = self
+            .check_expression(&node.left_operand, Position::Value)
+            .as_type_id();
+        let right = self
+            .check_expression(&node.right_operand, Position::Value)
+            .as_type_id();
         let type_id = self.type_of_left_typed_binary_operator_expression(left, right, |l, r| {
             match &node.operator {
                 ir::ShiftExpressionOperator::LessThanLessThan(_) => l.shl(r),
@@ -358,8 +384,12 @@ impl Visitor for Pass<'_> {
     }
 
     fn leave_additive_expression(&mut self, node: &ir::AdditiveExpression) {
-        let left = self.check_type_of_value_expression(&node.left_operand);
-        let right = self.check_type_of_value_expression(&node.right_operand);
+        let left = self
+            .check_expression(&node.left_operand, Position::Value)
+            .as_type_id();
+        let right = self
+            .check_expression(&node.right_operand, Position::Value)
+            .as_type_id();
         let type_id =
             self.type_of_binary_operator_expression(left, right, |l, r| match &node.operator {
                 ir::AdditiveExpressionOperator::Plus(_) => Some(l.add(r)),
@@ -370,8 +400,12 @@ impl Visitor for Pass<'_> {
     }
 
     fn leave_multiplicative_expression(&mut self, node: &ir::MultiplicativeExpression) {
-        let left = self.check_type_of_value_expression(&node.left_operand);
-        let right = self.check_type_of_value_expression(&node.right_operand);
+        let left = self
+            .check_expression(&node.left_operand, Position::Value)
+            .as_type_id();
+        let right = self
+            .check_expression(&node.right_operand, Position::Value)
+            .as_type_id();
         let type_id =
             self.type_of_binary_operator_expression(left, right, |l, r| match &node.operator {
                 ir::MultiplicativeExpressionOperator::Asterisk(_) => Some(l.mul(r)),
@@ -383,8 +417,12 @@ impl Visitor for Pass<'_> {
     }
 
     fn leave_exponentiation_expression(&mut self, node: &ir::ExponentiationExpression) {
-        let left = self.check_type_of_value_expression(&node.left_operand);
-        let right = self.check_type_of_value_expression(&node.right_operand);
+        let left = self
+            .check_expression(&node.left_operand, Position::Value)
+            .as_type_id();
+        let right = self
+            .check_expression(&node.right_operand, Position::Value)
+            .as_type_id();
         let type_id =
             self.type_of_left_typed_binary_operator_expression(left, right, |l, r| l.pow(r));
         self.binder.set_node_type(node.id(), type_id);
@@ -394,23 +432,27 @@ impl Visitor for Pass<'_> {
         // `++` and `--` write back to their operand, which therefore has to be
         // a location.
         // TODO(validation) SDR[52]: check that the operand is an integer
-        let type_id = self.check_type_of_value_expression(&node.operand);
-        self.check_lvalues_under(&node.operand);
+        let type_id = self
+            .check_expression(&node.operand, Position::Written)
+            .as_type_id();
         self.binder.set_node_type(node.id(), type_id);
     }
 
     fn leave_prefix_expression(&mut self, node: &ir::PrefixExpression) {
-        let operand = self.check_type_of_value_expression(&node.operand);
         // `delete`, `++` and `--` write to their operand, which therefore has
         // to be a location; the other prefix operators only read it.
-        if matches!(
+        let writes = matches!(
             node.operator,
             ir::PrefixExpressionOperator::DeleteKeyword(_)
                 | ir::PrefixExpressionOperator::PlusPlus(_)
                 | ir::PrefixExpressionOperator::MinusMinus(_)
-        ) {
-            self.check_lvalues_under(&node.operand);
-        }
+        );
+        let position = if writes {
+            Position::Written
+        } else {
+            Position::Value
+        };
+        let operand = self.check_expression(&node.operand, position).as_type_id();
         let type_id = self.type_of_prefix_expression(node, operand);
         self.binder.set_node_type(node.id(), type_id);
         if let Ok(operator) = UsingOperator::try_from(&node.operator) {
@@ -419,42 +461,48 @@ impl Visitor for Pass<'_> {
     }
 
     fn leave_tuple_expression(&mut self, node: &ir::TupleExpression) {
+        // Building a tuple only records the typing its components make up; it
+        // reports nothing about them. What a component may be depends on how
+        // the tuple is used (a type name is fine in the second argument of
+        // `abi.decode` but not in a value, and a literal is fine read but not
+        // written to), and only the tuple's consumer knows that, so it checks
+        // the components, in the tuple's position, through
+        // `Pass::check_expression`.
+        //
+        // That is a change from checking each component here, as a value or a
+        // type name, which reported an overload set, a built-in, `super` or an
+        // uncalled `new` when the tuple was built, before its consumer checked
+        // the same components again for what its own position rejects. Those
+        // reports are now made by the consumer, at the same ranges.
         let typing = if node.items.len() == 1 {
-            // Parentheses are transparent: the typing passes through untouched,
-            // except for overload sets which are not allowed, so `(super).f()`
-            // and `(abi).encode()` resolve as the unwrapped form does. Whether
-            // a value is required is for the enclosing context to decide, and
-            // it sees this same typing.
+            // Parentheses are transparent: the typing passes through, so
+            // `(super).f()` and `(abi).encode()` resolve as the unwrapped form
+            // does. An overload set cannot be selected through them, so it is
+            // left unresolved here; the consumer, which checks the expression
+            // inside, reports it.
             match &node.items.first().unwrap().expression {
-                Some(expression) => self.check_typing_of_expression(expression).clone(),
+                Some(expression) => match self.raw_typing_of_expression(expression) {
+                    Typing::Undetermined(_) => Typing::Unresolved,
+                    typing => typing.clone(),
+                },
                 None => unreachable!("the parser never produces a single omitted component"),
             }
         } else {
-            let mut types = Vec::with_capacity(node.items.len());
-            let mut all_typed = true;
-            for item in node.items.iter() {
-                // A component may name a type, as every component of the
-                // second argument of `abi.decode` does. The tuple then denotes
-                // a type rather than a value, which the enclosing context
-                // rejects where it requires one.
-                match &item.expression {
-                    Some(expression) => {
-                        match self.check_type_of_value_or_type_name_expression(expression) {
-                            Some(type_id) => types.push(type_id),
-                            None => all_typed = false,
-                        }
-                    }
-                    // An omitted component, as in `(x, ) = f()`, holds nothing.
-                    None => types.push(self.types.void()),
+            // The tuple has a type only if every component does. An omitted
+            // component, as in `(x, ) = f()`, holds nothing.
+            let types = node
+                .items
+                .iter()
+                .map(|item| match &item.expression {
+                    Some(expression) => self.raw_typing_of_expression(expression).as_type_id(),
+                    None => Some(self.types.void()),
+                })
+                .collect::<Option<Vec<_>>>();
+            match types {
+                Some(types) => {
+                    Typing::Resolved(self.types.register_type(Type::Tuple(TupleType { types })))
                 }
-            }
-            // A component that has no type is already reported, so the tuple
-            // is left unresolved rather than judged again where it is used.
-            if all_typed {
-                let type_id = self.types.register_type(Type::Tuple(TupleType { types }));
-                Typing::Resolved(type_id)
-            } else {
-                Typing::Unresolved
+                None => Typing::Unresolved,
             }
         };
         self.binder.set_node_typing(node.id(), typing);
@@ -463,7 +511,7 @@ impl Visitor for Pass<'_> {
     fn leave_member_access_expression(&mut self, node: &ir::MemberAccessExpression) {
         // we need to resolve the identifier at this point that we already have
         // typing information of the operand expression
-        let operand_typing = self.check_typing_of_expression(&node.operand).clone();
+        let operand_typing = self.check_expression(&node.operand, Position::MemberOperand);
         let member_resolution =
             self.resolve_symbol_in_typing(&operand_typing, node.member.unparse());
         // `super.f` sees the bases' functions as declared. Any other member,
@@ -530,12 +578,15 @@ impl Visitor for Pass<'_> {
             .into_iter()
             .flatten()
         {
-            self.check_type_of_value_expression(index);
+            self.check_expression(index, Position::Value);
         }
 
         // The operand may name a type, in which case indexing it names the
         // array type of it (eg. the `uint[]` in `abi.decode(data, (uint[]))`).
-        let typing = match self.check_type_of_value_or_type_name_expression(&node.operand) {
+        let typing = match self
+            .check_expression(&node.operand, Position::TypeNameOrValue)
+            .as_type_id()
+        {
             Some(operand_type_id) => {
                 match self.types.get_type_by_id(operand_type_id) {
                     Type::Array(ArrayType {
@@ -676,12 +727,12 @@ impl Visitor for Pass<'_> {
         // Each option is passed to the call (eg. the ether `foo{value: 3}`
         // sends), so it is a value.
         for option in node.options.iter() {
-            self.check_type_of_value_expression(&option.value);
+            self.check_expression(&option.value, Position::Value);
         }
 
         // `foo{value: 3}` partially applies but is still a callee, so an
         // overload set has to survive to the enclosing call.
-        let operand_typing = self.raw_typing_of_expression(&node.operand).clone();
+        let operand_typing = self.check_expression(&node.operand, Position::Callee);
 
         // Pre-applying call options (eg. `foo{value: 3}`) partially applies the
         // function.
@@ -754,7 +805,8 @@ impl Visitor for Pass<'_> {
                 // an argument value is checked either way. An argument without a
                 // type cannot select an overload, so disambiguation is skipped
                 // rather than reported on top of the argument's own failure.
-                let argument_types = self.collect_positional_argument_types(positional_arguments);
+                let argument_types =
+                    self.collect_argument_types(positional_arguments, Position::Value);
                 if let (Some(Resolution::Ambiguous(definition_ids)), Some(argument_types)) =
                     (&event_resolution, &argument_types)
                 {
@@ -802,7 +854,7 @@ impl Visitor for Pass<'_> {
             ir::ArgumentsDeclaration::PositionalArguments(positional_arguments) => {
                 // Collect the argument types to ensure all of them type to a value
                 // TODO(validation): check that the types match the error definition
-                self.collect_positional_argument_types(positional_arguments);
+                self.collect_argument_types(positional_arguments, Position::Value);
             }
             ir::ArgumentsDeclaration::NamedArguments(named_arguments) => {
                 // Collect the argument types to ensure all of them type to a value
@@ -821,11 +873,11 @@ impl Visitor for Pass<'_> {
         match &node.target {
             ir::VariableDeclarationTarget::SingleTypedDeclaration(declaration) => {
                 if let Some(value) = &declaration.value {
-                    self.check_type_of_value_expression(value);
+                    self.check_expression(value, Position::Value);
                 }
             }
             ir::VariableDeclarationTarget::MultiTypedDeclaration(declaration) => {
-                self.check_type_of_value_expression(&declaration.value);
+                self.check_expression(&declaration.value, Position::Value);
             }
         }
 
@@ -836,7 +888,7 @@ impl Visitor for Pass<'_> {
 
     fn leave_return_statement(&mut self, node: &ir::ReturnStatement) {
         if let Some(expression) = &node.expression {
-            self.check_type_of_value_expression(expression);
+            self.check_expression(expression, Position::Value);
         }
     }
 
@@ -849,19 +901,19 @@ impl Visitor for Pass<'_> {
         // NOTE: initializer and condition of a for statement are expression
         // statements, so keep the behaviour in sync with
         // [`Self::leave_for_statement`]. __SLANG_EXPRESSION_STATEMENT_TYPE__
-        self.check_typing_of_expression(&node.expression);
+        self.check_expression(&node.expression, Position::Statement);
     }
 
     fn leave_if_statement(&mut self, node: &ir::IfStatement) {
-        self.check_type_of_value_expression(&node.condition);
+        self.check_expression(&node.condition, Position::Value);
     }
 
     fn leave_while_statement(&mut self, node: &ir::WhileStatement) {
-        self.check_type_of_value_expression(&node.condition);
+        self.check_expression(&node.condition, Position::Value);
     }
 
     fn leave_do_while_statement(&mut self, node: &ir::DoWhileStatement) {
-        self.check_type_of_value_expression(&node.condition);
+        self.check_expression(&node.condition, Position::Value);
     }
 
     fn enter_yul_block(&mut self, _node: &ir::YulBlock) -> bool {
