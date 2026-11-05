@@ -1,0 +1,19 @@
+# This file is generated automatically by infrastructure scripts. Please don't edit by hand.
+
+Diagnostics: 2
+
+[TypeError 2148] Error: Index range access is not supported for arrays with dynamically encoded base types.
+    ╭─[input.sol:12:6]
+    │
+ 12 │     [s[0:1]];
+    │      ───┬──  
+    │         ╰──── Error occurred here.
+────╯
+
+[TypeError 9656] Error: Unable to deduce nameable type for array elements. Try adding explicit type conversion for the first element.
+    ╭─[input.sol:12:5]
+    │
+ 12 │     [s[0:1]];
+    │     ────┬───  
+    │         ╰───── Error occurred here.
+────╯
