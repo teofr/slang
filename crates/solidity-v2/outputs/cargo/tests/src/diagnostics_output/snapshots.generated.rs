@@ -6866,6 +6866,61 @@ mod type_system {
         fn conditional_branch() -> Result<()> {
             run("type_system/literal_too_large", "conditional_branch")
         }
+
+        #[test]
+        fn for_iterator() -> Result<()> {
+            run("type_system/literal_too_large", "for_iterator")
+        }
+
+        #[test]
+        fn statement() -> Result<()> {
+            run("type_system/literal_too_large", "statement")
+        }
+
+        #[test]
+        fn tuple_assignment_target() -> Result<()> {
+            run("type_system/literal_too_large", "tuple_assignment_target")
+        }
+
+        #[test]
+        fn tuple_call_argument() -> Result<()> {
+            run("type_system/literal_too_large", "tuple_call_argument")
+        }
+
+        #[test]
+        fn tuple_conditional_branch() -> Result<()> {
+            run("type_system/literal_too_large", "tuple_conditional_branch")
+        }
+
+        #[test]
+        fn tuple_first_component() -> Result<()> {
+            run("type_system/literal_too_large", "tuple_first_component")
+        }
+
+        #[test]
+        fn tuple_in_array_item() -> Result<()> {
+            run("type_system/literal_too_large", "tuple_in_array_item")
+        }
+
+        #[test]
+        fn tuple_nested() -> Result<()> {
+            run("type_system/literal_too_large", "tuple_nested")
+        }
+
+        #[test]
+        fn tuple_return() -> Result<()> {
+            run("type_system/literal_too_large", "tuple_return")
+        }
+
+        #[test]
+        fn tuple_second_component() -> Result<()> {
+            run("type_system/literal_too_large", "tuple_second_component")
+        }
+
+        #[test]
+        fn tuple_statement() -> Result<()> {
+            run("type_system/literal_too_large", "tuple_statement")
+        }
     }
 
     mod partially_applied_function_used_as_value {

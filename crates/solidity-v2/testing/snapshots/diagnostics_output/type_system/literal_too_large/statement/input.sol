@@ -1,0 +1,12 @@
+// SPDX-License-Identifier: MIT
+pragma solidity *;
+
+// A number literal used as a statement is evaluated, so it needs a type, as an
+// item of an array literal does.
+
+contract C {
+    function f() public {
+        78901234567890123456789012345678901234567890123456789345678901234567890012345678012345678901234567;
+        [1, 78901234567890123456789012345678901234567890123456789345678901234567890012345678012345678901234567];
+    }
+}

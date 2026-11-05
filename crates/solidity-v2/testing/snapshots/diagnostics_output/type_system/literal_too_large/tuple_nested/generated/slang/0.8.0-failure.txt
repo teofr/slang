@@ -1,0 +1,11 @@
+# This file is generated automatically by infrastructure scripts. Please don't edit by hand.
+
+Diagnostics: 1
+
+[type-system/literal-too-large] Error: This literal value is too large to fit into EVM slots (32 bytes).
+    ╭─[input.sol:11:28]
+    │
+ 11 │         (a, (b, c)) = (1, (2**270, 1));
+    │                            ───┬──  
+    │                               ╰──── Error occurred here.
+────╯
