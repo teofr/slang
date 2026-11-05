@@ -86,6 +86,14 @@ impl Pass<'_> {
     /// nested. A pair of parentheses is transparent: the expression inside is
     /// used where the parentheses are.
     pub(super) fn check_expression(&mut self, node: &ir::Expression, position: Position) -> Typing {
+        // A statement is evaluated, so a number literal there still needs a
+        // type, even though nothing consumes it (`2**256;`). It is judged
+        // before any parentheses are looked through, as solc reports the whole
+        // expression of the statement.
+        if position == Position::Statement && self.is_too_large_literal(node) {
+            self.push_diagnostic(node, LiteralTooLarge);
+            return Typing::Unresolved;
+        }
         if let ir::Expression::TupleExpression(tuple) = node {
             return self.check_tuple_expression(node, tuple, position);
         }
@@ -144,10 +152,21 @@ impl Pass<'_> {
             .iter()
             .filter_map(|item| item.expression.as_ref())
         {
-            all_accepted &= self
-                .check_expression(expression, component_position)
-                .as_type_id()
-                .is_some();
+            // A tuple that is read is built, so each component needs a type,
+            // and a number literal that no type can hold has none. It is judged
+            // at the component, as solc does, parentheses and all. One that is
+            // written to is rejected as not being a location instead.
+            let accepted = if component_position != Position::Written
+                && self.is_too_large_literal(expression)
+            {
+                self.push_diagnostic(expression, LiteralTooLarge);
+                false
+            } else {
+                self.check_expression(expression, component_position)
+                    .as_type_id()
+                    .is_some()
+            };
+            all_accepted &= accepted;
         }
         if all_accepted {
             self.raw_typing_of_expression(node).clone()
@@ -177,6 +196,17 @@ impl Pass<'_> {
             self.report_expression_not_a_value(node, kind);
             Typing::Unresolved
         })
+    }
+
+    /// Whether `node` typed as a number literal that no type can hold, eg.
+    /// `2**256`.
+    fn is_too_large_literal(&self, node: &ir::Expression) -> bool {
+        self.raw_typing_of_expression(node)
+            .as_type_id()
+            .is_some_and(|type_id| match self.types.get_type_by_id(type_id) {
+                Type::Literal(kind) => kind.mobile_type().is_none(),
+                _ => false,
+            })
     }
 
     /// Reports `node`, a value that is written to, if it does not denote a
@@ -1520,7 +1550,8 @@ pub(super) enum Position {
     /// bool))`). A built-in, `super` or an uncalled `new` is still rejected.
     TypeNameOrValue,
     /// The expression of a statement, which consumes nothing: anything that
-    /// resolves is accepted (`super;`, `data.pop;`, a modifier's `_`).
+    /// resolves is accepted (`super;`, `data.pop;`, a modifier's `_`), except a
+    /// number literal that no type can hold, which cannot be evaluated.
     Statement,
     /// The operand of a member access, which may name anything with members:
     /// a value, a type, a built-in namespace such as `abi`, or `super`.
