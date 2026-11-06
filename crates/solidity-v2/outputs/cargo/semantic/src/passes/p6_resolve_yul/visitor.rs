@@ -152,6 +152,11 @@ impl Visitor for Pass<'_> {
         true
     }
 
+    fn enter_yul_literal(&mut self, node: &ir::YulLiteral) -> bool {
+        self.check_number_literal_size(node);
+        true
+    }
+
     fn enter_yul_variable_assignment_statement(
         &mut self,
         node: &ir::YulVariableAssignmentStatement,
