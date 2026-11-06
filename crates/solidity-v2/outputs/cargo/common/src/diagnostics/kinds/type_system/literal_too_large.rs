@@ -3,9 +3,11 @@ use serde::Serialize;
 use crate::diagnostics::extensions::DiagnosticExtensions;
 use crate::diagnostics::severity::DiagnosticSeverity;
 
-/// Diagnostic emitted when a number literal used as a value (eg. as a branch
-/// of a conditional) is too large for any EVM type: an integer needing more
-/// than 256 bits, such as `2**9999`.
+/// Diagnostic emitted when a number literal is too large for any EVM type: an
+/// integer needing more than 256 bits. In Solidity, it is reported when such a
+/// literal is used as a value (eg. `2**9999` as a branch of a conditional). In
+/// Yul, where every literal is a 256-bit word, it is reported for any decimal
+/// or hex literal that doesn't fit.
 #[derive(Clone, Debug, Eq, PartialEq, Serialize)]
 pub struct LiteralTooLarge;
 
