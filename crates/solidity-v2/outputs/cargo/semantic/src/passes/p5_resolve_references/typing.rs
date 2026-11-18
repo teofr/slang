@@ -25,6 +25,47 @@ use crate::types::{
     MetaType, NoMobileType, Number, StringType, Type, TypeId, UserMetaType, literals,
 };
 
+/// How an expression is used by its consumer, which decides what it may be.
+/// Each consumer checks its operands through [`Pass::check_expression`] in
+/// the position it uses them in.
+#[derive(Clone, Copy, PartialEq, Eq)]
+pub(super) enum Position {
+    /// A value is required, so a type or module name is rejected too.
+    Value,
+    /// A value that is written to: the left hand side of an assignment, or
+    /// the operand of `++`, `--` or `delete`. On top of [`Position::Value`],
+    /// it has to denote a writable location.
+    Written,
+    /// A value or a type name: the operand of an index access (`uint[]`), and
+    /// the arguments of a built-in or a conversion (`abi.decode(data, (uint,
+    /// bool))`). A built-in, `super` or an uncalled `new` is still rejected.
+    TypeNameOrValue,
+    /// The expression of a statement, which consumes nothing: anything that
+    /// resolves is accepted (`super;`, `data.pop;`, a modifier's `_`).
+    Statement,
+    /// The operand of a member access, which may name anything with members:
+    /// a value, a type, a built-in namespace such as `abi`, or `super`.
+    MemberOperand,
+    /// The operand of a call. Even an overload set is accepted, for the call
+    /// to select from by its arguments.
+    Callee,
+}
+
+impl Position {
+    /// The position of each component of a tuple used in `self`. A tuple of
+    /// two or more is built, so each component needs a type, as a value or a
+    /// type name. A position that asks more of the tuple asks it of each
+    /// component.
+    fn of_tuple_component(self) -> Self {
+        match self {
+            Self::Value | Self::Written => self,
+            Self::TypeNameOrValue | Self::Statement | Self::MemberOperand | Self::Callee => {
+                Self::TypeNameOrValue
+            }
+        }
+    }
+}
+
 impl Pass<'_> {
     /// Registers `inner` and the [`Type::MetaType`] wrapping it, returning the
     /// meta-type as a `Typing::Resolved`.
@@ -1544,45 +1585,4 @@ enum WriteTarget {
     /// operator application, an external access that reads through a getter,
     /// or a name that denotes no value in the first place.
     NotALocation,
-}
-
-/// How an expression is used by its consumer, which decides what it may be.
-/// Each consumer checks its operands through [`Pass::check_expression`] in
-/// the position it uses them in.
-#[derive(Clone, Copy, PartialEq, Eq)]
-pub(super) enum Position {
-    /// A value is required, so a type or module name is rejected too.
-    Value,
-    /// A value that is written to: the left hand side of an assignment, or
-    /// the operand of `++`, `--` or `delete`. On top of [`Position::Value`],
-    /// it has to denote a writable location.
-    Written,
-    /// A value or a type name: the operand of an index access (`uint[]`), and
-    /// the arguments of a built-in or a conversion (`abi.decode(data, (uint,
-    /// bool))`). A built-in, `super` or an uncalled `new` is still rejected.
-    TypeNameOrValue,
-    /// The expression of a statement, which consumes nothing: anything that
-    /// resolves is accepted (`super;`, `data.pop;`, a modifier's `_`).
-    Statement,
-    /// The operand of a member access, which may name anything with members:
-    /// a value, a type, a built-in namespace such as `abi`, or `super`.
-    MemberOperand,
-    /// The operand of a call. Even an overload set is accepted, for the call
-    /// to select from by its arguments.
-    Callee,
-}
-
-impl Position {
-    /// The position of each component of a tuple used in `self`. A tuple of
-    /// two or more is built, so each component needs a type, as a value or a
-    /// type name. A position that asks more of the tuple asks it of each
-    /// component.
-    fn of_tuple_component(self) -> Self {
-        match self {
-            Self::Value | Self::Written => self,
-            Self::TypeNameOrValue | Self::Statement | Self::MemberOperand | Self::Callee => {
-                Self::TypeNameOrValue
-            }
-        }
-    }
 }
