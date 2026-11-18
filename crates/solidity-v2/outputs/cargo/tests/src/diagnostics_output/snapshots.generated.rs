@@ -7525,6 +7525,11 @@ mod type_system {
         }
 
         #[test]
+        fn parenthesised() -> Result<()> {
+            run("type_system/literal_too_large", "parenthesised")
+        }
+
+        #[test]
         fn statement() -> Result<()> {
             run("type_system/literal_too_large", "statement")
         }
