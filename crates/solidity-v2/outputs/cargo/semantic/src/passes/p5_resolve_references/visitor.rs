@@ -440,6 +440,14 @@ impl Visitor for Pass<'_> {
             // does. An overload set cannot be selected through them, so it is
             // left unresolved here; the consumer, which checks the expression
             // inside, reports it.
+            //
+            // Leaving it unresolved is defensive: every consumer of the
+            // parentheses looks through them and rejects the overload set on
+            // the expression inside (a callee checks it as a member operand),
+            // so none uses this typing as an overload set today. It keeps the
+            // typing recorded for the parentheses honest, so that a later raw
+            // read of them, or of the binder, cannot select an overload
+            // through parentheses either.
             match &node.items.first().unwrap().expression {
                 Some(expression) => match self.raw_typing_of_expression(expression) {
                     Typing::Undetermined(_) => Typing::Unresolved,
