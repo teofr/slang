@@ -105,7 +105,7 @@ impl Pass<'_> {
     /// [`Self::check_expression`] calls it, for the positions that reject
     /// nothing but an overload set.
     #[inline]
-    fn check_typing_of_expression(&mut self, node: &ir::Expression) -> &Typing {
+    fn check_unambiguous_typing(&mut self, node: &ir::Expression) -> &Typing {
         // The returned typing is borrowed out of `binder` while reporting takes
         // `diagnostics`, so both are reached as separate fields to keep the
         // borrows disjoint. Going through `Self::raw_typing_of_expression`
@@ -143,7 +143,7 @@ impl Pass<'_> {
             // Anything that resolves to one thing: only an overload set is
             // rejected, as nothing selects from it here.
             Position::Statement | Position::MemberOperand => {
-                self.check_typing_of_expression(node).clone()
+                self.check_unambiguous_typing(node).clone()
             }
             // On top of that, a built-in, `super` and an uncalled `new` are
             // rejected, as they are neither a value nor a type.
@@ -238,7 +238,7 @@ impl Pass<'_> {
     }
 
     /// The typing of `node` where it may be a value or name a type. On top of
-    /// the overload set [`Self::check_typing_of_expression`] reports, it
+    /// the overload set [`Self::check_unambiguous_typing`] reports, it
     /// reports a typing that names something which is neither a value nor a
     /// type (a built-in such as `abi` or `keccak256`, `super`, or an uncalled
     /// `new`), and leaves it unresolved.
@@ -246,7 +246,7 @@ impl Pass<'_> {
         // The typing is matched down to an owned outcome first, which releases
         // the borrow of `binder` it came from and lets the reporting below take
         // the pass mutably.
-        let outcome = match self.check_typing_of_expression(node) {
+        let outcome = match self.check_unambiguous_typing(node) {
             typing @ (Typing::Resolved(_) | Typing::This(_)) => Ok(typing.clone()),
             // An overload set has already been reported and sunk above.
             Typing::Unresolved | Typing::Undetermined(_) => Ok(Typing::Unresolved),
@@ -489,8 +489,7 @@ impl Pass<'_> {
 
     /// Reports `node` as a reference that matched more than one declaration.
     /// Kept out of line so that reporting, which is rare, does not stop
-    /// [`Self::check_typing_of_expression`] from inlining into its many
-    /// callers.
+    /// [`Self::check_unambiguous_typing`] from inlining into its callers.
     ///
     /// Takes the two fields it needs rather than the pass, so that a caller
     /// holding a typing borrowed out of `binder` can still report.
