@@ -112,6 +112,31 @@ impl Pass<'_> {
         }
     }
 
+    /// The type of `node` used as a value: [`Self::check_expression`] in
+    /// [`Position::Value`].
+    #[inline]
+    pub(super) fn check_value_expression(&mut self, node: &ir::Expression) -> Option<TypeId> {
+        self.check_expression(node, Position::Value).as_type_id()
+    }
+
+    /// The type of `node` written to: [`Self::check_expression`] in
+    /// [`Position::Written`].
+    #[inline]
+    pub(super) fn check_written_expression(&mut self, node: &ir::Expression) -> Option<TypeId> {
+        self.check_expression(node, Position::Written).as_type_id()
+    }
+
+    /// The type of `node` used as a value or a type name:
+    /// [`Self::check_expression`] in [`Position::TypeNameOrValue`].
+    #[inline]
+    pub(super) fn check_type_name_or_value_expression(
+        &mut self,
+        node: &ir::Expression,
+    ) -> Option<TypeId> {
+        self.check_expression(node, Position::TypeNameOrValue)
+            .as_type_id()
+    }
+
     /// [`Self::check_expression`] for a tuple, which checks its components
     /// rather than itself: their typings are all a tuple has.
     fn check_tuple_expression(
@@ -317,7 +342,7 @@ impl Pass<'_> {
     // the appropriate type.
     pub(super) fn check_positional_argument_values(&mut self, arguments: &ir::PositionalArguments) {
         for argument in arguments.iter() {
-            self.check_expression(argument, Position::Value);
+            self.check_value_expression(argument);
         }
     }
 
@@ -494,7 +519,7 @@ impl Pass<'_> {
     /// The mobile type of a value expression that has no target type to check
     /// against (eg. a conditional branch), reporting why it has none.
     fn check_mobile_type_of_value_expression(&mut self, node: &ir::Expression) -> Option<TypeId> {
-        let type_id = self.check_expression(node, Position::Value).as_type_id()?;
+        let type_id = self.check_value_expression(node)?;
         self.check_mobile_type(node, type_id)
     }
 
@@ -672,7 +697,7 @@ impl Pass<'_> {
             // reported here. The mobile type itself is discarded:
             // `type_of_array_literal` unifies the raw item types, so that eg.
             // the literal `0` in `[bytes2(0), 0]` still converts to `bytes2`.
-            if let Some(item_type_id) = self.check_expression(item, Position::Value).as_type_id()
+            if let Some(item_type_id) = self.check_value_expression(item)
                 && self.check_mobile_type(item, item_type_id).is_some()
             {
                 item_type_ids.push(item_type_id);
@@ -1223,10 +1248,7 @@ impl Pass<'_> {
         let mut types = Vec::with_capacity(arguments.len());
         let mut all_typed = true;
         for argument in arguments {
-            match self
-                .check_expression(&argument.value, Position::Value)
-                .as_type_id()
-            {
+            match self.check_value_expression(&argument.value) {
                 Some(type_id) => types.push((argument.name.unparse(), type_id)),
                 None => all_typed = false,
             }

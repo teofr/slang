@@ -133,13 +133,13 @@ impl Visitor for Pass<'_> {
         // The initialiser's value is bound to the declared variable, as in
         // `leave_variable_declaration_statement`.
         if let Some(value) = &node.value {
-            self.check_expression(value, Position::Value);
+            self.check_value_expression(value);
         }
     }
 
     fn leave_constant_definition(&mut self, node: &ir::ConstantDefinition) {
         if let Some(value) = &node.value {
-            self.check_expression(value, Position::Value);
+            self.check_value_expression(value);
         }
     }
 
@@ -270,45 +270,39 @@ impl Visitor for Pass<'_> {
     }
 
     fn leave_assignment_expression(&mut self, node: &ir::AssignmentExpression) {
-        let type_id = self
-            .check_expression(&node.left_operand, Position::Written)
-            .as_type_id();
-        self.check_expression(&node.right_operand, Position::Value);
+        let type_id = self.check_written_expression(&node.left_operand);
+        self.check_value_expression(&node.right_operand);
         // TODO(validation) SDR[59]: check that the type of right_operand can be applied
         // to the left by means of the operator
         self.binder.set_node_type(node.id(), type_id);
     }
 
     fn leave_conditional_expression(&mut self, node: &ir::ConditionalExpression) {
-        self.check_expression(&node.operand, Position::Value);
+        self.check_value_expression(&node.operand);
         let type_id = self.type_of_conditional_expression(node);
         self.binder.set_node_type(node.id(), type_id);
     }
 
     fn leave_or_expression(&mut self, node: &ir::OrExpression) {
         // TODO(validation) SDR[57]: check that both operands are boolean
-        self.check_expression(&node.left_operand, Position::Value);
-        self.check_expression(&node.right_operand, Position::Value);
+        self.check_value_expression(&node.left_operand);
+        self.check_value_expression(&node.right_operand);
         self.binder
             .set_node_type(node.id(), Some(self.types.boolean()));
     }
 
     fn leave_and_expression(&mut self, node: &ir::AndExpression) {
         // TODO(validation) SDR[57]: check that both operands are boolean
-        self.check_expression(&node.left_operand, Position::Value);
-        self.check_expression(&node.right_operand, Position::Value);
+        self.check_value_expression(&node.left_operand);
+        self.check_value_expression(&node.right_operand);
         self.binder
             .set_node_type(node.id(), Some(self.types.boolean()));
     }
 
     fn leave_equality_expression(&mut self, node: &ir::EqualityExpression) {
         // TODO(validation) SDR[55]: check that both operands have a compatible type
-        let left = self
-            .check_expression(&node.left_operand, Position::Value)
-            .as_type_id();
-        let right = self
-            .check_expression(&node.right_operand, Position::Value)
-            .as_type_id();
+        let left = self.check_value_expression(&node.left_operand);
+        let right = self.check_value_expression(&node.right_operand);
         self.record_comparison_common_operand_type(node.id(), left, right);
         self.binder
             .set_node_type(node.id(), Some(self.types.boolean()));
@@ -317,12 +311,8 @@ impl Visitor for Pass<'_> {
 
     fn leave_inequality_expression(&mut self, node: &ir::InequalityExpression) {
         // TODO(validation) SDR[55]: check that both operands have a compatible type
-        let left = self
-            .check_expression(&node.left_operand, Position::Value)
-            .as_type_id();
-        let right = self
-            .check_expression(&node.right_operand, Position::Value)
-            .as_type_id();
+        let left = self.check_value_expression(&node.left_operand);
+        let right = self.check_value_expression(&node.right_operand);
         self.record_comparison_common_operand_type(node.id(), left, right);
         self.binder
             .set_node_type(node.id(), Some(self.types.boolean()));
@@ -330,36 +320,24 @@ impl Visitor for Pass<'_> {
     }
 
     fn leave_bitwise_or_expression(&mut self, node: &ir::BitwiseOrExpression) {
-        let left = self
-            .check_expression(&node.left_operand, Position::Value)
-            .as_type_id();
-        let right = self
-            .check_expression(&node.right_operand, Position::Value)
-            .as_type_id();
+        let left = self.check_value_expression(&node.left_operand);
+        let right = self.check_value_expression(&node.right_operand);
         let type_id = self.type_of_binary_operator_expression(left, right, |l, r| l.bit_or(r));
         self.binder.set_node_type(node.id(), type_id);
         self.resolve_operator_function(node.id(), UsingOperator::Bar, left, 2);
     }
 
     fn leave_bitwise_xor_expression(&mut self, node: &ir::BitwiseXorExpression) {
-        let left = self
-            .check_expression(&node.left_operand, Position::Value)
-            .as_type_id();
-        let right = self
-            .check_expression(&node.right_operand, Position::Value)
-            .as_type_id();
+        let left = self.check_value_expression(&node.left_operand);
+        let right = self.check_value_expression(&node.right_operand);
         let type_id = self.type_of_binary_operator_expression(left, right, |l, r| l.bit_xor(r));
         self.binder.set_node_type(node.id(), type_id);
         self.resolve_operator_function(node.id(), UsingOperator::Caret, left, 2);
     }
 
     fn leave_bitwise_and_expression(&mut self, node: &ir::BitwiseAndExpression) {
-        let left = self
-            .check_expression(&node.left_operand, Position::Value)
-            .as_type_id();
-        let right = self
-            .check_expression(&node.right_operand, Position::Value)
-            .as_type_id();
+        let left = self.check_value_expression(&node.left_operand);
+        let right = self.check_value_expression(&node.right_operand);
         let type_id = self.type_of_binary_operator_expression(left, right, |l, r| l.bit_and(r));
         self.binder.set_node_type(node.id(), type_id);
         self.resolve_operator_function(node.id(), UsingOperator::Ampersand, left, 2);
@@ -368,12 +346,8 @@ impl Visitor for Pass<'_> {
     fn leave_shift_expression(&mut self, node: &ir::ShiftExpression) {
         // TODO(validation) SDR[54]: check that the left operand is an integer and the
         // right operand is an _unsigned_ integer
-        let left = self
-            .check_expression(&node.left_operand, Position::Value)
-            .as_type_id();
-        let right = self
-            .check_expression(&node.right_operand, Position::Value)
-            .as_type_id();
+        let left = self.check_value_expression(&node.left_operand);
+        let right = self.check_value_expression(&node.right_operand);
         let type_id = self.type_of_left_typed_binary_operator_expression(left, right, |l, r| {
             match &node.operator {
                 ir::ShiftExpressionOperator::LessThanLessThan(_) => l.shl(r),
@@ -385,12 +359,8 @@ impl Visitor for Pass<'_> {
     }
 
     fn leave_additive_expression(&mut self, node: &ir::AdditiveExpression) {
-        let left = self
-            .check_expression(&node.left_operand, Position::Value)
-            .as_type_id();
-        let right = self
-            .check_expression(&node.right_operand, Position::Value)
-            .as_type_id();
+        let left = self.check_value_expression(&node.left_operand);
+        let right = self.check_value_expression(&node.right_operand);
         let type_id =
             self.type_of_binary_operator_expression(left, right, |l, r| match &node.operator {
                 ir::AdditiveExpressionOperator::Plus(_) => Some(l.add(r)),
@@ -401,12 +371,8 @@ impl Visitor for Pass<'_> {
     }
 
     fn leave_multiplicative_expression(&mut self, node: &ir::MultiplicativeExpression) {
-        let left = self
-            .check_expression(&node.left_operand, Position::Value)
-            .as_type_id();
-        let right = self
-            .check_expression(&node.right_operand, Position::Value)
-            .as_type_id();
+        let left = self.check_value_expression(&node.left_operand);
+        let right = self.check_value_expression(&node.right_operand);
         let type_id =
             self.type_of_binary_operator_expression(left, right, |l, r| match &node.operator {
                 ir::MultiplicativeExpressionOperator::Asterisk(_) => Some(l.mul(r)),
@@ -418,12 +384,8 @@ impl Visitor for Pass<'_> {
     }
 
     fn leave_exponentiation_expression(&mut self, node: &ir::ExponentiationExpression) {
-        let left = self
-            .check_expression(&node.left_operand, Position::Value)
-            .as_type_id();
-        let right = self
-            .check_expression(&node.right_operand, Position::Value)
-            .as_type_id();
+        let left = self.check_value_expression(&node.left_operand);
+        let right = self.check_value_expression(&node.right_operand);
         let type_id =
             self.type_of_left_typed_binary_operator_expression(left, right, |l, r| l.pow(r));
         self.binder.set_node_type(node.id(), type_id);
@@ -433,9 +395,7 @@ impl Visitor for Pass<'_> {
         // `++` and `--` write back to their operand, which therefore has to be
         // a location.
         // TODO(validation) SDR[52]: check that the operand is an integer
-        let type_id = self
-            .check_expression(&node.operand, Position::Written)
-            .as_type_id();
+        let type_id = self.check_written_expression(&node.operand);
         self.binder.set_node_type(node.id(), type_id);
     }
 
@@ -579,15 +539,12 @@ impl Visitor for Pass<'_> {
             .into_iter()
             .flatten()
         {
-            self.check_expression(index, Position::Value);
+            self.check_value_expression(index);
         }
 
         // The operand may name a type, in which case indexing it names the
         // array type of it (eg. the `uint[]` in `abi.decode(data, (uint[]))`).
-        let typing = match self
-            .check_expression(&node.operand, Position::TypeNameOrValue)
-            .as_type_id()
-        {
+        let typing = match self.check_type_name_or_value_expression(&node.operand) {
             Some(operand_type_id) => {
                 match self.types.get_type_by_id(operand_type_id) {
                     Type::Array(ArrayType {
@@ -728,7 +685,7 @@ impl Visitor for Pass<'_> {
         // Each option is passed to the call (eg. the ether `foo{value: 3}`
         // sends), so it is a value.
         for option in node.options.iter() {
-            self.check_expression(&option.value, Position::Value);
+            self.check_value_expression(&option.value);
         }
 
         // `foo{value: 3}` partially applies but is still a callee, so an
@@ -884,11 +841,11 @@ impl Visitor for Pass<'_> {
         match &node.target {
             ir::VariableDeclarationTarget::SingleTypedDeclaration(declaration) => {
                 if let Some(value) = &declaration.value {
-                    self.check_expression(value, Position::Value);
+                    self.check_value_expression(value);
                 }
             }
             ir::VariableDeclarationTarget::MultiTypedDeclaration(declaration) => {
-                self.check_expression(&declaration.value, Position::Value);
+                self.check_value_expression(&declaration.value);
             }
         }
 
@@ -899,7 +856,7 @@ impl Visitor for Pass<'_> {
 
     fn leave_return_statement(&mut self, node: &ir::ReturnStatement) {
         if let Some(expression) = &node.expression {
-            self.check_expression(expression, Position::Value);
+            self.check_value_expression(expression);
         }
     }
 
@@ -916,15 +873,15 @@ impl Visitor for Pass<'_> {
     }
 
     fn leave_if_statement(&mut self, node: &ir::IfStatement) {
-        self.check_expression(&node.condition, Position::Value);
+        self.check_value_expression(&node.condition);
     }
 
     fn leave_while_statement(&mut self, node: &ir::WhileStatement) {
-        self.check_expression(&node.condition, Position::Value);
+        self.check_value_expression(&node.condition);
     }
 
     fn leave_do_while_statement(&mut self, node: &ir::DoWhileStatement) {
-        self.check_expression(&node.condition, Position::Value);
+        self.check_value_expression(&node.condition);
     }
 
     fn enter_yul_block(&mut self, _node: &ir::YulBlock) -> bool {
