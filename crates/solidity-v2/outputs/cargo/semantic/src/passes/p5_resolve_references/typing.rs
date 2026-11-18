@@ -25,6 +25,89 @@ use crate::types::{
     MetaType, NoMobileType, Number, StringType, Type, TypeId, UserMetaType, literals,
 };
 
+/// What a consumer accepts of an expression it uses, which
+/// [`Pass::check_expression`] checks. Each accepts less than the one before
+/// it, so a stricter requirement is the greater one.
+///
+/// Other requirements of a use are checked by the consumers that have them,
+/// after this one: [`Pass::check_written_expression`] for a location that is
+/// written to, and [`Pass::check_mobile_value_expression`] for a value taken at
+/// its mobile type.
+///
+/// A tuple has no rules of its own: what is asked of it is asked of its
+/// components. It is either read or written, so two functions know what a
+/// tuple is made of, one for each: [`Pass::check_expression`] and
+/// [`Pass::check_written_expression`]. Every other check judges a single
+/// expression.
+#[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+pub(super) enum Accepts {
+    /// Anything, even an overload set, for a call to select from by its
+    /// arguments: the operand of a call.
+    Anything,
+    /// Anything that resolves to one thing: a value, a type, a built-in
+    /// namespace such as `abi`, `super`. Only an overload set is rejected, as
+    /// nothing selects from it. The expression of a statement, which consumes
+    /// nothing (`super;`, `data.pop;`, a modifier's `_`), and the operand of a
+    /// member access, which may name anything with members.
+    Resolved,
+    /// A value or a type name. A built-in, `super` and an uncalled `new` are
+    /// rejected too, as they are neither. The operand of an index access
+    /// (`uint[]`), and the arguments of a built-in or a conversion
+    /// (`abi.decode(data, (uint, bool))`).
+    TypeNameOrValue,
+    /// A value. A type or module name is rejected too. Operands, conditions,
+    /// values, the arguments of a call.
+    Value,
+}
+
+impl Accepts {
+    /// What each component of a tuple used where `self` is accepted must be. A
+    /// tuple of two or more is built, so each component needs a type, as a
+    /// value or a type name at least; what is asked of the tuple is asked of
+    /// each component.
+    fn of_tuple_component(self) -> Self {
+        self.max(Self::TypeNameOrValue)
+    }
+
+    /// What the expression inside a pair of parentheses used where `self` is
+    /// accepted must be: the same, except that an overload set cannot be
+    /// selected through parentheses.
+    fn through_parentheses(self) -> Self {
+        self.max(Self::Resolved)
+    }
+}
+
+/// A value taken at its mobile type, as
+/// [`Pass::check_mobile_value_expression`] checks it.
+#[derive(Clone, Copy)]
+pub(super) struct MobileValue {
+    /// The type of the value itself.
+    pub(super) own: TypeId,
+    /// Its mobile type.
+    pub(super) mobile: TypeId,
+}
+
+/// The components of `tuple` that hold an expression. An omitted one, as in
+/// `(x, ) = f()`, has nothing to check.
+fn tuple_components(tuple: &ir::TupleExpression) -> impl Iterator<Item = &ir::Expression> {
+    tuple
+        .items
+        .iter()
+        .filter_map(|item| item.expression.as_ref())
+}
+
+/// The expression inside any pairs of parentheses around `node`. A check
+/// reports the expression it judges, never the parentheses around it.
+fn peel_parentheses(mut node: &ir::Expression) -> &ir::Expression {
+    while let ir::Expression::TupleExpression(tuple) = node
+        && let [item] = &tuple.items[..]
+        && let Some(inner) = &item.expression
+    {
+        node = inner;
+    }
+    node
+}
+
 impl Pass<'_> {
     /// Registers `inner` and the [`Type::MetaType`] wrapping it, returning the
     /// meta-type as a `Typing::Resolved`.
@@ -60,9 +143,11 @@ impl Pass<'_> {
     /// one that reaches this point is reported as ambiguous and sunk to
     /// `Unresolved` rather than handed on undetermined. The typing may still
     /// name something other than a value, so a position that requires one
-    /// should use [`Self::check_type_of_value_expression`] instead.
+    /// should use [`Self::check_value_expression`] instead. Only
+    /// [`Self::check_expression`] calls it, for the positions that reject
+    /// nothing but an overload set.
     #[inline]
-    pub(super) fn check_typing_of_expression(&mut self, node: &ir::Expression) -> &Typing {
+    fn check_unambiguous_typing(&mut self, node: &ir::Expression) -> &Typing {
         // The returned typing is borrowed out of `binder` while reporting takes
         // `diagnostics`, so both are reached as separate fields to keep the
         // borrows disjoint. Going through `Self::raw_typing_of_expression`
@@ -75,130 +160,178 @@ impl Pass<'_> {
         typing
     }
 
-    /// The type of `node` in a position that requires a value. On top of
-    /// [`Self::check_type_of_value_or_type_name_expression`], an expression
-    /// that denotes a type or a module is not a value either, and neither is a
-    /// tuple with a component that does.
-    // __SLANG_VALUE_TYPING__ keep the typings that denote a value in sync with
-    // the guard in `Self::check_lvalues_under`
+    /// The typing of `node` where its consumer reads it and `accepts` it, after
+    /// reporting what is not accepted. Every expression is checked once, by the
+    /// expression or statement that consumes it: only the consumer knows how it
+    /// is used, so only it knows what to reject. See [`Accepts`].
+    ///
+    /// A tuple is checked component by component, so each is reported at its
+    /// own range however deeply it is nested. A pair of parentheses is
+    /// transparent: the expression inside is used where the parentheses are.
+    ///
+    /// Checking only ever rejects: the typing returned is the one registered
+    /// for `node`, or `Unresolved` when it is not accepted (or a component of
+    /// it is not), which has then been reported.
+    pub(super) fn check_expression(&mut self, node: &ir::Expression, accepts: Accepts) -> Typing {
+        if let ir::Expression::TupleExpression(tuple) = node {
+            return self.check_tuple_expression(node, tuple, accepts);
+        }
+        // Each level rejects what the one before it does, and more; see
+        // `Accepts`.
+        match accepts {
+            Accepts::Anything => self.raw_typing_of_expression(node).clone(),
+            Accepts::Resolved => self.check_unambiguous_typing(node).clone(),
+            Accepts::TypeNameOrValue => self.check_value_or_type_name(node),
+            Accepts::Value => {
+                let typing = self.check_value_or_type_name(node);
+                if let Some(type_id) = typing.as_type_id()
+                    && self.types.get_type_by_id(type_id).is_meta_type()
+                {
+                    self.report_expression_not_a_value(node, NotAValueKind::TypeOrModule);
+                    return Typing::Unresolved;
+                }
+                typing
+            }
+        }
+    }
+
+    /// The type of `node` used as a value: [`Self::check_expression`] for
+    /// [`Accepts::Value`].
     #[inline]
-    pub(super) fn check_type_of_value_expression(
+    pub(super) fn check_value_expression(&mut self, node: &ir::Expression) -> Option<TypeId> {
+        self.check_expression(node, Accepts::Value).as_type_id()
+    }
+
+    /// The type of `node` used as a value or a type name:
+    /// [`Self::check_expression`] for [`Accepts::TypeNameOrValue`].
+    #[inline]
+    pub(super) fn check_type_name_or_value_expression(
         &mut self,
         node: &ir::Expression,
     ) -> Option<TypeId> {
-        // A tuple is typed even when its components name types, as the second
-        // argument of `abi.decode` needs, so those are only rejected here. They
-        // are looked for first, since a tuple with another component that
-        // failed has no type at all.
-        if let ir::Expression::TupleExpression(tuple) = node
-            && self.report_type_names_in_tuple(tuple)
-        {
-            return None;
+        self.check_expression(node, Accepts::TypeNameOrValue)
+            .as_type_id()
+    }
+
+    /// The type of `node` written to: a value, which then has to denote a
+    /// writable location. Only a value is checked for one, so an expression
+    /// already reported as not a value is not reported again as not a
+    /// location.
+    ///
+    /// A tuple that is written to writes to each of its components, so each is
+    /// checked on its own, and one that is rejected does not stop the rest from
+    /// being checked (and reported). A pair of parentheses is transparent.
+    ///
+    /// Not denoting a location is reported but does not take the type away:
+    /// the expression is still a value of that type.
+    pub(super) fn check_written_expression(&mut self, node: &ir::Expression) -> Option<TypeId> {
+        if let ir::Expression::TupleExpression(tuple) = node {
+            let mut all_typed = true;
+            for component in tuple_components(tuple) {
+                all_typed &= self.check_written_expression(component).is_some();
+            }
+            return if all_typed {
+                self.raw_typing_of_expression(node).as_type_id()
+            } else {
+                None
+            };
         }
-        let type_id = self.check_type_of_value_or_type_name_expression(node)?;
-        if self.types.get_type_by_id(type_id).is_meta_type() {
-            self.report_expression_not_a_value(node, NotAValueKind::TypeOrModule);
-            return None;
-        }
+        let type_id = self.check_value_expression(node)?;
+        self.check_written_location(node);
         Some(type_id)
     }
 
-    /// Reports every component of `tuple`, however deeply nested, that names
-    /// a type or a module rather than a value, and returns whether there was
-    /// any. Kept out of line, as only tuples reach it.
-    #[inline(never)]
-    fn report_type_names_in_tuple(&mut self, tuple: &ir::TupleExpression) -> bool {
-        let mut found = false;
-        for expression in tuple
-            .items
-            .iter()
-            .filter_map(|item| item.expression.as_ref())
-        {
-            if let ir::Expression::TupleExpression(inner) = expression {
-                found |= self.report_type_names_in_tuple(inner);
-            } else if self.is_meta_typed(expression) {
-                self.report_expression_not_a_value(expression, NotAValueKind::TypeOrModule);
-                found = true;
-            }
-        }
-        found
-    }
-
-    /// Whether `node` typed as a meta-type, ie. names a type or a module.
-    fn is_meta_typed(&self, node: &ir::Expression) -> bool {
-        self.raw_typing_of_expression(node)
-            .as_type_id()
-            .is_some_and(|type_id| self.types.get_type_by_id(type_id).is_meta_type())
-    }
-
-    /// The type of `node` in a position that takes either a value or a type
-    /// name, so a meta-type is left alone: the operand of an index access
-    /// (`uint[]`), a component of a tuple and an argument of a built-in call
-    /// (`abi.decode(data, (uint, bool))`). Reports the overload set
-    /// [`Self::check_typing_of_expression`] does, and on top of it the typings
-    /// that name something which is neither a value nor a type: a built-in (a
-    /// namespace such as `abi`, or a built-in function), `super`, and an
-    /// uncalled `new`.
-    #[inline]
-    pub(super) fn check_type_of_value_or_type_name_expression(
+    /// The type of `node` and its mobile type, where it is used as a value
+    /// that has no target type to convert to, so it is taken at its mobile type
+    /// instead: an item of an array literal, and a branch of a conditional,
+    /// whose types decide the type of the whole (`[1, 2]`, `c ? 1 : 2`).
+    ///
+    /// The type registry decides whether a type has a mobile type, and why
+    /// not; each reason is reported here. A tuple has one if every component
+    /// does, and is reported as a whole.
+    pub(super) fn check_mobile_value_expression(
         &mut self,
         node: &ir::Expression,
-    ) -> Option<TypeId> {
-        // The typing is matched down to a `Copy` outcome first, which releases
+    ) -> Option<MobileValue> {
+        let own = self.check_value_expression(node)?;
+        let reported = peel_parentheses(node);
+        match self.types.compute_mobile_type(own) {
+            Ok(mobile) => return Some(MobileValue { own, mobile }),
+            // A value can still hold a type name, eg. call options applied to
+            // a tuple of them: `(uint, bool){value: 1}`.
+            Err(NoMobileType::NotAValue) => {
+                self.report_expression_not_a_value(reported, NotAValueKind::TypeOrModule);
+            }
+            Err(NoMobileType::PartiallyAppliedFunction) => {
+                self.push_diagnostic(reported, PartiallyAppliedFunctionUsedAsValue);
+            }
+            Err(NoMobileType::LiteralTooLarge) => self.push_diagnostic(reported, LiteralTooLarge),
+        }
+        None
+    }
+
+    /// [`Self::check_expression`] for a tuple, which checks its components
+    /// rather than itself: their typings are all a tuple has. Only a tuple
+    /// that is read gets here; [`Self::check_written_expression`] checks the
+    /// components of one that is written to.
+    fn check_tuple_expression(
+        &mut self,
+        node: &ir::Expression,
+        tuple: &ir::TupleExpression,
+        accepts: Accepts,
+    ) -> Typing {
+        if tuple.items.len() == 1 {
+            let inner = tuple
+                .items
+                .first()
+                .and_then(|item| item.expression.as_ref())
+                .expect("the parser never produces a single omitted component");
+            return self.check_expression(inner, accepts.through_parentheses());
+        }
+        // Every component is checked before the tuple is judged, so one that
+        // is rejected does not stop the rest from being checked (and
+        // reported).
+        let component_accepts = accepts.of_tuple_component();
+        let mut all_accepted = true;
+        for component in tuple_components(tuple) {
+            all_accepted &= self
+                .check_expression(component, component_accepts)
+                .as_type_id()
+                .is_some();
+        }
+        if all_accepted {
+            self.raw_typing_of_expression(node).clone()
+        } else {
+            Typing::Unresolved
+        }
+    }
+
+    /// The typing of `node` where it may be a value or name a type. On top of
+    /// the overload set [`Self::check_unambiguous_typing`] reports, it
+    /// reports a typing that names something which is neither a value nor a
+    /// type (a built-in such as `abi` or `keccak256`, `super`, or an uncalled
+    /// `new`), and leaves it unresolved.
+    fn check_value_or_type_name(&mut self, node: &ir::Expression) -> Typing {
+        // The typing is matched down to an owned outcome first, which releases
         // the borrow of `binder` it came from and lets the reporting below take
         // the pass mutably.
-        let outcome = match self.check_typing_of_expression(node) {
-            Typing::Resolved(type_id) | Typing::This(type_id) => Ok(Some(*type_id)),
+        let outcome = match self.check_unambiguous_typing(node) {
+            typing @ (Typing::Resolved(_) | Typing::This(_)) => Ok(typing.clone()),
             // An overload set has already been reported and sunk above.
-            Typing::Unresolved | Typing::Undetermined(_) => Ok(None),
+            Typing::Unresolved | Typing::Undetermined(_) => Ok(Typing::Unresolved),
             Typing::BuiltIn(_) => Err(NotAValueKind::BuiltIn),
             Typing::Super(_) => Err(NotAValueKind::Super),
             Typing::NewExpression(_) => Err(NotAValueKind::UncalledNew),
         };
-        match outcome {
-            Ok(type_id) => type_id,
-            Err(kind) => {
-                self.report_expression_not_a_value(node, kind);
-                None
-            }
-        }
+        outcome.unwrap_or_else(|kind| {
+            self.report_expression_not_a_value(node, kind);
+            Typing::Unresolved
+        })
     }
 
-    /// Reports every expression written to under `node` that does not denote a
-    /// writable location: the left operand of an assignment, or the operand of
-    /// `delete`, `++` or `--`. Descends through a tuple on its own, so a
-    /// component of one is judged at its own range however deeply it is
-    /// nested, as [`Self::check_type_of_value_expression`] does for the
-    /// components that name a type. A write position is also a value
-    /// position, so that check runs alongside this one, and what it rejects
-    /// is not judged again here.
-    pub(super) fn check_lvalues_under(&mut self, node: &ir::Expression) {
-        // A tuple on the left hand side is written component-wise, so each
-        // component is a write position of its own, and an omitted one writes
-        // nothing. A single component is parenthesisation of the same write.
-        if let ir::Expression::TupleExpression(tuple) = node {
-            for item in tuple.items.iter() {
-                if let Some(expression) = &item.expression {
-                    self.check_lvalues_under(expression);
-                }
-            }
-            return;
-        }
-        // Only an expression that typed as a value is judged: one that did not
-        // is either unresolved or already reported as not a value.
-        // __SLANG_VALUE_TYPING__ keep in sync with the typings
-        // `Self::check_type_of_value_expression` accepts. The two cannot share
-        // an accessor on `Typing`: this one only asks whether there is a value,
-        // while that one also tells an unresolved typing, which reports
-        // nothing, from one naming something that is not a value, which does.
-        let is_value = match self.raw_typing_of_expression(node) {
-            Typing::Resolved(type_id) => !self.types.get_type_by_id(*type_id).is_meta_type(),
-            Typing::This(_) => true,
-            _ => false,
-        };
-        if !is_value {
-            return;
-        }
+    /// Reports `node`, a value that is written to and not a tuple, if it does
+    /// not denote a writable location.
+    fn check_written_location(&mut self, node: &ir::Expression) {
         match self.write_target_of(node) {
             WriteTarget::WritableLocation => {}
             WriteTarget::Constant => self.report_write_to_constant(node),
@@ -334,7 +467,7 @@ impl Pass<'_> {
     // the appropriate type.
     pub(super) fn check_positional_argument_values(&mut self, arguments: &ir::PositionalArguments) {
         for argument in arguments.iter() {
-            self.check_type_of_value_expression(argument);
+            self.check_value_expression(argument);
         }
     }
 
@@ -425,8 +558,7 @@ impl Pass<'_> {
 
     /// Reports `node` as a reference that matched more than one declaration.
     /// Kept out of line so that reporting, which is rare, does not stop
-    /// [`Self::check_typing_of_expression`] from inlining into its many
-    /// callers.
+    /// [`Self::check_unambiguous_typing`] from inlining into its callers.
     ///
     /// Takes the two fields it needs rather than the pass, so that a caller
     /// holding a typing borrowed out of `binder` can still report.
@@ -499,45 +631,15 @@ impl Pass<'_> {
         &mut self,
         node: &ir::ConditionalExpression,
     ) -> Option<TypeId> {
-        let true_mobile = self.check_mobile_type_of_value_expression(&node.true_expression);
-        let false_mobile = self.check_mobile_type_of_value_expression(&node.false_expression);
-        let common = self.types.common_type(true_mobile?, false_mobile?);
+        let true_value = self.check_mobile_value_expression(&node.true_expression);
+        let false_value = self.check_mobile_value_expression(&node.false_expression);
+        let common = self
+            .types
+            .common_type(true_value?.mobile, false_value?.mobile);
         if common.is_none() {
             self.push_diagnostic(node, IncompatibleConditionalBranches);
         }
         common
-    }
-
-    /// The mobile type of a value expression that has no target type to check
-    /// against (eg. a conditional branch), reporting why it has none.
-    fn check_mobile_type_of_value_expression(&mut self, node: &ir::Expression) -> Option<TypeId> {
-        let type_id = self.check_type_of_value_expression(node)?;
-        self.check_mobile_type(node, type_id)
-    }
-
-    /// The mobile type of `type_id`, the type of `node`, reporting why it has
-    /// none.
-    fn check_mobile_type(&mut self, node: &ir::Expression, type_id: TypeId) -> Option<TypeId> {
-        match self.types.compute_mobile_type(type_id) {
-            Ok(mobile) => Some(mobile),
-            Err(NoMobileType::NotAValue) => {
-                self.push_diagnostic(
-                    node,
-                    ExpressionNotAValue {
-                        kind: NotAValueKind::TypeOrModule,
-                    },
-                );
-                None
-            }
-            Err(NoMobileType::PartiallyAppliedFunction) => {
-                self.push_diagnostic(node, PartiallyAppliedFunctionUsedAsValue);
-                None
-            }
-            Err(NoMobileType::LiteralTooLarge) => {
-                self.push_diagnostic(node, LiteralTooLarge);
-                None
-            }
-        }
     }
 
     /// Records the common type both operands of a comparison reconcile to
@@ -684,26 +786,21 @@ impl Pass<'_> {
         // and stays so. Every later item is still checked, so its problems are
         // reported too, but it's not unified.
         let (first, rest) = array.items.split_first()?;
-        let mut element_type = self
-            .check_array_literal_item(first)
-            .map(|(_, mobile_type_id)| mobile_type_id);
+        let mut element_type = self.check_array_literal_item(first).map(|item| item.mobile);
 
         for item in rest {
-            let item_types = self.check_array_literal_item(item);
-            element_type = match (element_type, item_types) {
-                (Some(element_type), Some((item_type_id, item_mobile_type_id))) => {
-                    if self
-                        .types
-                        .implicitly_convertible_to(item_type_id, element_type)
-                    {
+            let item = self.check_array_literal_item(item);
+            element_type = match (element_type, item) {
+                (Some(element_type), Some(item)) => {
+                    if self.types.implicitly_convertible_to(item.own, element_type) {
                         // If the item type can be converted to the element type, the element type is unchanged.
                         Some(element_type)
                     } else if self
                         .types
-                        .implicitly_convertible_to(element_type, item_mobile_type_id)
+                        .implicitly_convertible_to(element_type, item.mobile)
                     {
                         // If the element type can be converted to the item mobile type, the element type is lifted.
-                        Some(item_mobile_type_id)
+                        Some(item.mobile)
                     } else {
                         // If neither type can be converted to the other, the array literal is ill-typed, and later
                         // items are not unified.
@@ -728,14 +825,13 @@ impl Pass<'_> {
 
     /// The type and the mobile type of one item of an array literal, reporting
     /// why it has none.
-    fn check_array_literal_item(&mut self, item: &ir::Expression) -> Option<(TypeId, TypeId)> {
-        let type_id = self.check_type_of_value_expression(item)?;
-        let mobile_type_id = self.check_mobile_type(item, type_id)?;
-        if !self.types.get_type_by_id(type_id).can_be_array_element() {
+    fn check_array_literal_item(&mut self, item: &ir::Expression) -> Option<MobileValue> {
+        let item = self.check_mobile_value_expression(item)?;
+        if !self.types.get_type_by_id(item.own).can_be_array_element() {
             // TODO(validation) SDR[750]: Error if the element type can't be an array element
             return None;
         }
-        Some((type_id, mobile_type_id))
+        Some(item)
     }
 
     pub(super) fn type_of_left_typed_binary_operator_expression<F>(
@@ -862,8 +958,11 @@ impl Pass<'_> {
     /// Returns `None` when the call target is not a member access.
     fn type_id_of_value_receiver(&mut self, operand: &ir::Expression) -> Option<TypeId> {
         if let ir::Expression::MemberAccessExpression(member_access_expression) = operand {
+            // Only the receiver's type is needed, to bind it as the implicit
+            // first argument; its value is not consumed here. The member access
+            // is its consumer, and has already checked it as its operand.
             let type_id = self
-                .check_typing_of_expression(&member_access_expression.operand)
+                .raw_typing_of_expression(&member_access_expression.operand)
                 .as_type_id()?;
             // A meta-type operand is a namespace qualifier, not
             // a runtime value, so there is no receiver to bind as an implicit
@@ -1002,39 +1101,22 @@ impl Pass<'_> {
         Typing::Resolved(type_id)
     }
 
-    /// Collects the types of `arguments`, each of which is a value position.
+    /// Collects the types of `arguments`, each checked for `accepts`: a value,
+    /// except for a callee that accepts a type name in one of them (the second
+    /// argument of `abi.decode`, the function `abi.encodeCall` encodes a call
+    /// to, and the argument of a conversion, which only allows the library
+    /// name in `address(L)`), which is up to the callee to judge.
     pub(super) fn collect_positional_argument_types(
         &mut self,
         arguments: &[ir::Expression],
-    ) -> Option<Vec<TypeId>> {
-        self.collect_argument_types(arguments, Self::check_type_of_value_expression)
-    }
-
-    /// Collects the types of `arguments` for a callee that accepts a type name
-    /// in one of them: the second argument of `abi.decode`, the function
-    /// `abi.encodeCall` encodes a call to, and the argument of a conversion,
-    /// which only allows the library name in `address(L)`. Which of them is
-    /// valid is up to the callee.
-    pub(super) fn collect_argument_types_allowing_type_names(
-        &mut self,
-        arguments: &[ir::Expression],
-    ) -> Option<Vec<TypeId>> {
-        self.collect_argument_types(arguments, Self::check_type_of_value_or_type_name_expression)
-    }
-
-    // Generic over the check, rather than taking a function pointer, so that
-    // each use can inline it.
-    fn collect_argument_types(
-        &mut self,
-        arguments: &[ir::Expression],
-        check: impl Fn(&mut Self, &ir::Expression) -> Option<TypeId>,
+        accepts: Accepts,
     ) -> Option<Vec<TypeId>> {
         // Every argument is checked before the result is folded, so one that has
         // no type does not stop the rest from being checked (and reported).
         let mut types = Vec::with_capacity(arguments.len());
         let mut all_typed = true;
         for argument in arguments {
-            match check(self, argument) {
+            match self.check_expression(argument, accepts).as_type_id() {
                 Some(type_id) => types.push(type_id),
                 None => all_typed = false,
             }
@@ -1047,20 +1129,21 @@ impl Pass<'_> {
         node: &ir::FunctionCallExpression,
         arguments: &[ir::Expression],
     ) -> Typing {
-        let operand_typing = self.raw_typing_of_expression(&node.operand).clone();
+        let operand_typing = self.check_expression(&node.operand, Accepts::Anything);
         // A built-in and a conversion each accept a type name in an argument,
         // so theirs are not all value positions; see
-        // [`Self::collect_argument_types_allowing_type_names`].
+        // [`Self::collect_positional_argument_types`].
         let accepts_type_names = match &operand_typing {
             Typing::BuiltIn(_) => true,
             Typing::Resolved(type_id) => self.is_conversion_callee(*type_id),
             _ => false,
         };
-        let argument_types = if accepts_type_names {
-            self.collect_argument_types_allowing_type_names(arguments)
+        let argument_accepts = if accepts_type_names {
+            Accepts::TypeNameOrValue
         } else {
-            self.collect_positional_argument_types(arguments)
+            Accepts::Value
         };
+        let argument_types = self.collect_positional_argument_types(arguments, argument_accepts);
 
         match operand_typing {
             Typing::Unresolved => {
@@ -1280,7 +1363,7 @@ impl Pass<'_> {
         let mut types = Vec::with_capacity(arguments.len());
         let mut all_typed = true;
         for argument in arguments {
-            match self.check_type_of_value_expression(&argument.value) {
+            match self.check_value_expression(&argument.value) {
                 Some(type_id) => types.push((argument.name.unparse(), type_id)),
                 None => all_typed = false,
             }
@@ -1293,7 +1376,7 @@ impl Pass<'_> {
         node: &ir::FunctionCallExpression,
         arguments: &[ir::NamedArgument],
     ) -> Typing {
-        let operand_typing = self.raw_typing_of_expression(&node.operand).clone();
+        let operand_typing = self.check_expression(&node.operand, Accepts::Anything);
         let argument_types = self.collect_named_argument_types(arguments);
 
         let (typing, definition_id) = match operand_typing {
