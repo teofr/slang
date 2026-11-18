@@ -5,7 +5,7 @@
 use num_bigint::{BigInt, BigUint};
 use num_rational::BigRational;
 
-use super::expression;
+use super::{Analyse, Analysis, expression};
 use crate::types::{AddressType, LiteralKind, Type};
 
 #[test]
@@ -336,4 +336,26 @@ fn test_hex_string_literal_value() {
     // Concatenated hex string literals: the pieces are joined.
     let (type_, _) = expression(r#"hex"4142" hex"43""#).into_resolved_type();
     assert_eq!(type_, hex_string_literal(b"ABC"));
+}
+
+// A number literal that some type can hold is fine where it needs a type of its
+// own, however large or fractional it is.
+#[test]
+fn test_literals_that_fit_a_type_are_accepted_as_components_and_statements() {
+    let source = r#"
+        pragma solidity *;
+        contract Test {
+            function __test() internal pure {
+                (1.5, 1);
+                (2**255, -2**255);
+                (1, (2**256 - 1, 1));
+                2**256 - 1;
+                1.5;
+                (2**256 - 1);
+            }
+        }
+        "#;
+    Analysis::of_source(source)
+        .run(Analyse::References)
+        .expect_no_diagnostics();
 }
