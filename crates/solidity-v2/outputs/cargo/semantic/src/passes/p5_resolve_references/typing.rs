@@ -4,10 +4,11 @@ use slang_solidity_v2_common::diagnostics::kinds::resolution::{
     AmbiguousReference, MemberNotFound, NoMatchingCallableDeclaration,
 };
 use slang_solidity_v2_common::diagnostics::kinds::type_system::{
-    CannotCallViaContractTypeName, ExplicitConversionNotAllowed, ExpressionNotAValue,
-    ExpressionNotAnLValue, ExpressionNotCallable, IncompatibleConditionalBranches,
-    InvalidUtf8StringLiteral, LiteralTooLarge, NotAValueKind, PartiallyAppliedFunctionUsedAsValue,
-    WriteToConstant,
+    CalldataWriteKind, CannotCallViaContractTypeName, ExplicitConversionNotAllowed,
+    ExpressionNotAValue, ExpressionNotAnLValue, ExpressionNotCallable,
+    IncompatibleConditionalBranches, InvalidUtf8StringLiteral, LiteralTooLarge, NotAValueKind,
+    PartiallyAppliedFunctionUsedAsValue, WriteToArrayLength, WriteToCalldata, WriteToConstant,
+    WriteToFixedBytesElement,
 };
 use slang_solidity_v2_common::nodes::NodeId;
 use slang_solidity_v2_ir::ir;
@@ -202,16 +203,14 @@ impl Pass<'_> {
         match self.write_target_of(node) {
             WriteTarget::WritableLocation => {}
             WriteTarget::Constant => self.report_write_to_constant(node),
+            WriteTarget::Calldata(kind) => self.push_diagnostic(node, WriteToCalldata { kind }),
+            WriteTarget::FixedBytesElement => self.push_diagnostic(node, WriteToFixedBytesElement),
+            WriteTarget::ArrayLength => self.push_diagnostic(node, WriteToArrayLength),
             WriteTarget::NotALocation => self.report_expression_not_an_lvalue(node),
         }
     }
 
     /// What `node`, in a position that is written to, denotes.
-    ///
-    /// A location that comes back [`WriteTarget::WritableLocation`] may still
-    /// be read-only for a reason of its own, which is not judged here.
-    // TODO(validation) SDR[1325,1071]: report writes to an element of a
-    // calldata array, and to a member of a calldata struct.
     fn write_target_of(&self, node: &ir::Expression) -> WriteTarget {
         match node {
             ir::Expression::Identifier(identifier) => {
@@ -227,35 +226,62 @@ impl Pass<'_> {
                 if self.typing_is_contract_reference(operand_typing) {
                     return WriteTarget::NotALocation;
                 }
+                match operand_typing
+                    .as_type_id()
+                    .map(|type_id| self.types.get_type_by_id(type_id))
+                {
+                    // A calldata struct is the read-only input of a call.
+                    Some(Type::Struct(struct_type))
+                        if struct_type.location == DataLocation::Calldata =>
+                    {
+                        return WriteTarget::Calldata(CalldataWriteKind::StructMember);
+                    }
+                    // The length of an array is read-only, wherever it lives.
+                    Some(Type::Array(_) | Type::FixedSizeArray(_) | Type::Bytes(_))
+                        if matches!(
+                            self.resolution_of_identifier(member_access.member.id()),
+                            Some(Resolution::BuiltIn(InternalBuiltIn::Length))
+                        ) =>
+                    {
+                        return WriteTarget::ArrayLength;
+                    }
+                    _ => {}
+                }
                 // Reaching a member through a type name rather than a value
                 // (`S.field`) is already a resolution failure, so there is
                 // nothing left to judge here.
                 self.write_target_of_reference(member_access.member.id())
             }
             ir::Expression::IndexAccessExpression(index_access) => {
-                // An element of an array or a mapping is a location in its
-                // own right. A single byte of a fixed-size byte array
-                // (`Type::ByteArray`) is deliberately left out: it is copied
-                // out of the word holding it, so it cannot be modified in
-                // place. So is a range index, which yields a slice: a
-                // read-only view of the array it comes from.
-                let indexes_a_location = !index_access.is_slice
-                    && self
-                        .raw_typing_of_expression(&index_access.operand)
-                        .as_type_id()
-                        .is_some_and(|type_id| {
-                            matches!(
-                                self.types.get_type_by_id(type_id),
-                                Type::Array(_)
-                                    | Type::FixedSizeArray(_)
-                                    | Type::Bytes(_)
-                                    | Type::Mapping(_)
-                            )
-                        });
-                if indexes_a_location {
-                    WriteTarget::WritableLocation
-                } else {
-                    WriteTarget::NotALocation
+                // A range index yields a slice: a read-only view of the array
+                // it comes from.
+                if index_access.is_slice {
+                    return WriteTarget::NotALocation;
+                }
+                let operand_type = self
+                    .raw_typing_of_expression(&index_access.operand)
+                    .as_type_id()
+                    .map(|type_id| self.types.get_type_by_id(type_id));
+                match operand_type {
+                    // A single byte of a fixed-size byte array is copied out
+                    // of the word holding it, so it cannot be modified in
+                    // place.
+                    Some(Type::ByteArray(_)) => WriteTarget::FixedBytesElement,
+                    // An element of an array is a location in its own right,
+                    // unless the array is the read-only input of a call.
+                    Some(
+                        operand_type @ (Type::Array(_) | Type::FixedSizeArray(_) | Type::Bytes(_)),
+                    ) => {
+                        if operand_type.data_location() == Some(DataLocation::Calldata) {
+                            WriteTarget::Calldata(CalldataWriteKind::ArrayElement)
+                        } else {
+                            WriteTarget::WritableLocation
+                        }
+                    }
+                    // So is an element of a mapping, which only lives in
+                    // storage.
+                    Some(Type::Mapping(_)) => WriteTarget::WritableLocation,
+                    _ => WriteTarget::NotALocation,
                 }
             }
             // `push()` appends an element and yields a reference to it, which
@@ -1555,6 +1581,14 @@ enum WriteTarget {
     /// A `constant` declaration: it holds a value, but one fixed at compile
     /// time, so there is no location behind it to write to.
     Constant,
+    /// An element of a calldata array or a member of a calldata struct: a
+    /// location, but in the read-only input of a call.
+    Calldata(CalldataWriteKind),
+    /// A single byte of a fixed-size byte array, which is copied out of the
+    /// word holding it.
+    FixedBytesElement,
+    /// The `length` member of an array, which is read-only.
+    ArrayLength,
     /// No location at all: a computed value such as a call result or an
     /// operator application, an external access that reads through a getter,
     /// or a name that denotes no value in the first place.

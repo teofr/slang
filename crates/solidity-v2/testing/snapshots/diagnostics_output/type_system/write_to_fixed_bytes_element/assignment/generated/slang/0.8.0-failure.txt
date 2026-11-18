@@ -2,7 +2,7 @@
 
 Diagnostics: 1
 
-[type-system/expression-not-an-lvalue] Error: Expression has to be an lvalue.
+[type-system/write-to-fixed-bytes-element] Error: Single bytes in fixed bytes arrays cannot be modified.
     ╭─[input.sol:10:5]
     │
  10 │     word[0] = 0x01;

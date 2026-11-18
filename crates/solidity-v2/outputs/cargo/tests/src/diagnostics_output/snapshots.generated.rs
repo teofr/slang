@@ -7196,11 +7196,6 @@ mod type_system {
         }
 
         #[test]
-        fn array_length() -> Result<()> {
-            run("type_system/expression_not_an_lvalue", "array_length")
-        }
-
-        #[test]
         fn array_push_with_argument() -> Result<()> {
             run(
                 "type_system/expression_not_an_lvalue",
@@ -7254,14 +7249,6 @@ mod type_system {
             run(
                 "type_system/expression_not_an_lvalue",
                 "external_state_variable",
-            )
-        }
-
-        #[test]
-        fn fixed_bytes_element() -> Result<()> {
-            run(
-                "type_system/expression_not_an_lvalue",
-                "fixed_bytes_element",
             )
         }
 
@@ -7832,6 +7819,39 @@ mod type_system {
         }
     }
 
+    mod write_to_array_length {
+        use super::*;
+
+        #[test]
+        fn assignment() -> Result<()> {
+            run("type_system/write_to_array_length", "assignment")
+        }
+    }
+
+    mod write_to_calldata {
+        use super::*;
+
+        #[test]
+        fn accepted_copies() -> Result<()> {
+            run("type_system/write_to_calldata", "accepted_copies")
+        }
+
+        #[test]
+        fn array_element() -> Result<()> {
+            run("type_system/write_to_calldata", "array_element")
+        }
+
+        #[test]
+        fn struct_member() -> Result<()> {
+            run("type_system/write_to_calldata", "struct_member")
+        }
+
+        #[test]
+        fn tuple_component() -> Result<()> {
+            run("type_system/write_to_calldata", "tuple_component")
+        }
+    }
+
     mod write_to_constant {
         use super::*;
 
@@ -7868,6 +7888,15 @@ mod type_system {
         #[test]
         fn qualified_constant() -> Result<()> {
             run("type_system/write_to_constant", "qualified_constant")
+        }
+    }
+
+    mod write_to_fixed_bytes_element {
+        use super::*;
+
+        #[test]
+        fn assignment() -> Result<()> {
+            run("type_system/write_to_fixed_bytes_element", "assignment")
         }
     }
 }

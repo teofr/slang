@@ -2,7 +2,7 @@
 
 Diagnostics: 1
 
-[type-system/expression-not-an-lvalue] Error: Expression has to be an lvalue.
+[type-system/write-to-array-length] Error: Member "length" is read-only and cannot be used to resize arrays.
     ╭─[input.sol:10:5]
     │
  10 │     items.length = 5;
