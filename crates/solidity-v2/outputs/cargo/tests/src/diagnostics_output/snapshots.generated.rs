@@ -6862,6 +6862,14 @@ mod type_system {
         }
 
         #[test]
+        fn call_options_on_type_names() -> Result<()> {
+            run(
+                "type_system/expression_not_a_value",
+                "call_options_on_type_names",
+            )
+        }
+
+        #[test]
         fn condition() -> Result<()> {
             run("type_system/expression_not_a_value", "condition")
         }
@@ -7311,6 +7319,14 @@ mod type_system {
         fn tuple_component() -> Result<()> {
             run("type_system/expression_not_an_lvalue", "tuple_component")
         }
+
+        #[test]
+        fn tuple_component_beside_type_name() -> Result<()> {
+            run(
+                "type_system/expression_not_an_lvalue",
+                "tuple_component_beside_type_name",
+            )
+        }
     }
 
     mod expression_not_callable {
@@ -7506,6 +7522,14 @@ mod type_system {
             run(
                 "type_system/literal_too_large",
                 "array_literal_in_tuple_assignment",
+            )
+        }
+
+        #[test]
+        fn array_literal_parenthesised_item() -> Result<()> {
+            run(
+                "type_system/literal_too_large",
+                "array_literal_parenthesised_item",
             )
         }
 
@@ -7843,6 +7867,11 @@ mod type_system {
         #[test]
         fn assignment() -> Result<()> {
             run("type_system/write_to_constant", "assignment")
+        }
+
+        #[test]
+        fn conditional_branch() -> Result<()> {
+            run("type_system/write_to_constant", "conditional_branch")
         }
 
         #[test]
