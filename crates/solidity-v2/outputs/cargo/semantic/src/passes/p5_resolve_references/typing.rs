@@ -27,41 +27,90 @@ use crate::types::{
 
 /// How an expression is used by its consumer, which decides what it may be.
 /// Each consumer checks its operands through [`Pass::check_expression`] in
-/// the position it uses them in.
+/// the position it uses them in. A position is made of independent parts, each
+/// answering one question about that use; the constants below name the ones
+/// the consumers use.
 #[derive(Clone, Copy, PartialEq, Eq)]
-pub(super) enum Position {
-    /// A value is required, so a type or module name is rejected too.
-    Value,
-    /// A value that is written to: the left hand side of an assignment, or
-    /// the operand of `++`, `--` or `delete`. On top of [`Position::Value`],
-    /// it has to denote a writable location.
-    Written,
-    /// A value or a type name: the operand of an index access (`uint[]`), and
-    /// the arguments of a built-in or a conversion (`abi.decode(data, (uint,
-    /// bool))`). A built-in, `super` or an uncalled `new` is still rejected.
+pub(super) struct Position {
+    /// What the consumer accepts.
+    accepts: Accepts,
+    /// Whether the consumer writes to the expression, which then has to
+    /// denote a writable location. Only a value is written to.
+    written: bool,
+}
+
+/// What a position accepts. Each accepts less than the one before it, so a
+/// stricter requirement is the greater one.
+#[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+enum Accepts {
+    /// Anything, even an overload set, for a call to select from by its
+    /// arguments.
+    Anything,
+    /// Anything that resolves to one thing: a value, a type, a built-in
+    /// namespace such as `abi`, `super`. Only an overload set is rejected, as
+    /// nothing selects from it.
+    Resolved,
+    /// A value or a type name. A built-in, `super` and an uncalled `new` are
+    /// rejected too, as they are neither.
     TypeNameOrValue,
-    /// The expression of a statement, which consumes nothing: anything that
-    /// resolves is accepted (`super;`, `data.pop;`, a modifier's `_`).
-    Statement,
-    /// The operand of a member access, which may name anything with members:
-    /// a value, a type, a built-in namespace such as `abi`, or `super`.
-    MemberOperand,
-    /// The operand of a call. Even an overload set is accepted, for the call
-    /// to select from by its arguments.
-    Callee,
+    /// A value. A type or module name is rejected too.
+    Value,
 }
 
 impl Position {
+    /// Operands, conditions, values, the arguments of a call.
+    pub(super) const VALUE: Self = Self {
+        accepts: Accepts::Value,
+        written: false,
+    };
+    /// The left hand side of an assignment, and the operand of `++`, `--` and
+    /// `delete`.
+    pub(super) const WRITTEN: Self = Self {
+        accepts: Accepts::Value,
+        written: true,
+    };
+    /// The operand of an index access (`uint[]`), and the arguments of a
+    /// built-in or a conversion (`abi.decode(data, (uint, bool))`).
+    pub(super) const TYPE_NAME_OR_VALUE: Self = Self {
+        accepts: Accepts::TypeNameOrValue,
+        written: false,
+    };
+    /// The expression of a statement, which consumes nothing (`super;`,
+    /// `data.pop;`, a modifier's `_`).
+    pub(super) const STATEMENT: Self = Self {
+        accepts: Accepts::Resolved,
+        written: false,
+    };
+    /// The operand of a member access, which may name anything with members:
+    /// a value, a type, a built-in namespace such as `abi`, or `super`.
+    pub(super) const MEMBER_OPERAND: Self = Self {
+        accepts: Accepts::Resolved,
+        written: false,
+    };
+    /// The operand of a call.
+    pub(super) const CALLEE: Self = Self {
+        accepts: Accepts::Anything,
+        written: false,
+    };
+
     /// The position of each component of a tuple used in `self`. A tuple of
     /// two or more is built, so each component needs a type, as a value or a
-    /// type name. A position that asks more of the tuple asks it of each
-    /// component.
+    /// type name at least; a position that asks more of the tuple asks it of
+    /// each component.
     fn of_tuple_component(self) -> Self {
-        match self {
-            Self::Value | Self::Written => self,
-            Self::TypeNameOrValue | Self::Statement | Self::MemberOperand | Self::Callee => {
-                Self::TypeNameOrValue
-            }
+        Self {
+            accepts: self.accepts.max(Accepts::TypeNameOrValue),
+            ..self
+        }
+    }
+
+    /// The position of the expression inside a pair of parentheses used in
+    /// `self`, which is the same, except that an overload set cannot be
+    /// selected through parentheses.
+    fn through_parentheses(self) -> Self {
+        Self {
+            accepts: self.accepts.max(Accepts::Resolved),
+            ..self
         }
     }
 }
@@ -136,21 +185,13 @@ impl Pass<'_> {
         if let ir::Expression::TupleExpression(tuple) = node {
             return self.check_tuple_expression(node, tuple, position);
         }
-        match position {
-            // No restriction: even an overload set, for the call to select
-            // from by its arguments.
-            Position::Callee => self.raw_typing_of_expression(node).clone(),
-            // Anything that resolves to one thing: only an overload set is
-            // rejected, as nothing selects from it here.
-            Position::Statement | Position::MemberOperand => {
-                self.check_unambiguous_typing(node).clone()
-            }
-            // On top of that, a built-in, `super` and an uncalled `new` are
-            // rejected, as they are neither a value nor a type.
-            Position::TypeNameOrValue => self.check_value_or_type_name(node),
-            // On top of that, a type or module name is rejected, as a value is
-            // required. One that is written to also has to be a location.
-            Position::Value | Position::Written => {
+        // Each level rejects what the one before it does, and more; see
+        // `Accepts`.
+        match position.accepts {
+            Accepts::Anything => self.raw_typing_of_expression(node).clone(),
+            Accepts::Resolved => self.check_unambiguous_typing(node).clone(),
+            Accepts::TypeNameOrValue => self.check_value_or_type_name(node),
+            Accepts::Value => {
                 let typing = self.check_value_or_type_name(node);
                 let Some(type_id) = typing.as_type_id() else {
                     return typing;
@@ -159,7 +200,7 @@ impl Pass<'_> {
                     self.report_expression_not_a_value(node, NotAValueKind::TypeOrModule);
                     return Typing::Unresolved;
                 }
-                if position == Position::Written {
+                if position.written {
                     self.check_written_location(node);
                 }
                 typing
@@ -168,27 +209,27 @@ impl Pass<'_> {
     }
 
     /// The type of `node` used as a value: [`Self::check_expression`] in
-    /// [`Position::Value`].
+    /// [`Position::VALUE`].
     #[inline]
     pub(super) fn check_value_expression(&mut self, node: &ir::Expression) -> Option<TypeId> {
-        self.check_expression(node, Position::Value).as_type_id()
+        self.check_expression(node, Position::VALUE).as_type_id()
     }
 
     /// The type of `node` written to: [`Self::check_expression`] in
-    /// [`Position::Written`].
+    /// [`Position::WRITTEN`].
     #[inline]
     pub(super) fn check_written_expression(&mut self, node: &ir::Expression) -> Option<TypeId> {
-        self.check_expression(node, Position::Written).as_type_id()
+        self.check_expression(node, Position::WRITTEN).as_type_id()
     }
 
     /// The type of `node` used as a value or a type name:
-    /// [`Self::check_expression`] in [`Position::TypeNameOrValue`].
+    /// [`Self::check_expression`] in [`Position::TYPE_NAME_OR_VALUE`].
     #[inline]
     pub(super) fn check_type_name_or_value_expression(
         &mut self,
         node: &ir::Expression,
     ) -> Option<TypeId> {
-        self.check_expression(node, Position::TypeNameOrValue)
+        self.check_expression(node, Position::TYPE_NAME_OR_VALUE)
             .as_type_id()
     }
 
@@ -206,13 +247,7 @@ impl Pass<'_> {
                 .first()
                 .and_then(|item| item.expression.as_ref())
                 .expect("the parser never produces a single omitted component");
-            // An overload set cannot be selected through parentheses, so a
-            // parenthesised callee has to resolve on its own, as an operand.
-            let inner_position = match position {
-                Position::Callee => Position::MemberOperand,
-                _ => position,
-            };
-            return self.check_expression(inner, inner_position);
+            return self.check_expression(inner, position.through_parentheses());
         }
         // Every component is checked before the tuple is judged, so one that
         // is rejected does not stop the rest from being checked (and
@@ -1071,7 +1106,7 @@ impl Pass<'_> {
         node: &ir::FunctionCallExpression,
         arguments: &[ir::Expression],
     ) -> Typing {
-        let operand_typing = self.check_expression(&node.operand, Position::Callee);
+        let operand_typing = self.check_expression(&node.operand, Position::CALLEE);
         // A built-in and a conversion each accept a type name in an argument,
         // so theirs are not all value positions; see
         // [`Self::collect_positional_argument_types`].
@@ -1081,9 +1116,9 @@ impl Pass<'_> {
             _ => false,
         };
         let argument_position = if accepts_type_names {
-            Position::TypeNameOrValue
+            Position::TYPE_NAME_OR_VALUE
         } else {
-            Position::Value
+            Position::VALUE
         };
         let argument_types = self.collect_positional_argument_types(arguments, argument_position);
 
@@ -1318,7 +1353,7 @@ impl Pass<'_> {
         node: &ir::FunctionCallExpression,
         arguments: &[ir::NamedArgument],
     ) -> Typing {
-        let operand_typing = self.check_expression(&node.operand, Position::Callee);
+        let operand_typing = self.check_expression(&node.operand, Position::CALLEE);
         let argument_types = self.collect_named_argument_types(arguments);
 
         let (typing, definition_id) = match operand_typing {

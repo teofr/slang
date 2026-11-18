@@ -165,13 +165,13 @@ impl Visitor for Pass<'_> {
         // __SLANG_EXPRESSION_STATEMENT_TYPE__
         //
         // TODO(validation): the condition does require a value, of a type
-        // convertible to boolean. Caveat: checking it as a `Position::Value`
+        // convertible to boolean. Caveat: checking it as a `Position::VALUE`
         // here would report an ambiguous reference a second time, since the
         // expression statement it is written as has already checked (and
         // reported) the same node.
         if let Some(iterator) = &node.iterator {
             // The iterator is a statement of its own, as the initialisation is.
-            self.check_expression(iterator, Position::Statement);
+            self.check_expression(iterator, Position::STATEMENT);
         }
         self.leave_scope_for_node_id(node.id());
     }
@@ -408,9 +408,9 @@ impl Visitor for Pass<'_> {
                 | ir::PrefixExpressionOperator::PlusPlus(_)
                 | ir::PrefixExpressionOperator::MinusMinus(_)
         ) {
-            Position::Written
+            Position::WRITTEN
         } else {
-            Position::Value
+            Position::VALUE
         };
         let operand = self.check_expression(&node.operand, position).as_type_id();
         let type_id = self.type_of_prefix_expression(node, operand);
@@ -481,7 +481,7 @@ impl Visitor for Pass<'_> {
     fn leave_member_access_expression(&mut self, node: &ir::MemberAccessExpression) {
         // we need to resolve the identifier at this point that we already have
         // typing information of the operand expression
-        let operand_typing = self.check_expression(&node.operand, Position::MemberOperand);
+        let operand_typing = self.check_expression(&node.operand, Position::MEMBER_OPERAND);
         let member_resolution =
             self.resolve_symbol_in_typing(&operand_typing, node.member.unparse());
         // `super.f` sees the bases' functions as declared. Any other member,
@@ -699,7 +699,7 @@ impl Visitor for Pass<'_> {
 
         // `foo{value: 3}` partially applies but is still a callee, so an
         // overload set has to survive to the enclosing call.
-        let operand_typing = self.check_expression(&node.operand, Position::Callee);
+        let operand_typing = self.check_expression(&node.operand, Position::CALLEE);
 
         // Pre-applying call options (eg. `foo{value: 3}`) partially applies the
         // function.
@@ -778,7 +778,7 @@ impl Visitor for Pass<'_> {
                 // type cannot select an overload, so disambiguation is skipped
                 // rather than reported on top of the argument's own failure.
                 let argument_types =
-                    self.collect_positional_argument_types(positional_arguments, Position::Value);
+                    self.collect_positional_argument_types(positional_arguments, Position::VALUE);
                 if let (Some(Resolution::Ambiguous(definition_ids)), Some(argument_types)) =
                     (&event_resolution, &argument_types)
                 {
@@ -831,7 +831,7 @@ impl Visitor for Pass<'_> {
             ir::ArgumentsDeclaration::PositionalArguments(positional_arguments) => {
                 // Collect the argument types to ensure all of them type to a value
                 // TODO(validation): check that the types match the error definition
-                self.collect_positional_argument_types(positional_arguments, Position::Value);
+                self.collect_positional_argument_types(positional_arguments, Position::VALUE);
             }
             ir::ArgumentsDeclaration::NamedArguments(named_arguments) => {
                 // Collect the argument types to ensure all of them type to a value
@@ -878,7 +878,7 @@ impl Visitor for Pass<'_> {
         // NOTE: initializer and condition of a for statement are expression
         // statements, so keep the behaviour in sync with
         // [`Self::leave_for_statement`]. __SLANG_EXPRESSION_STATEMENT_TYPE__
-        self.check_expression(&node.expression, Position::Statement);
+        self.check_expression(&node.expression, Position::STATEMENT);
     }
 
     fn leave_if_statement(&mut self, node: &ir::IfStatement) {
