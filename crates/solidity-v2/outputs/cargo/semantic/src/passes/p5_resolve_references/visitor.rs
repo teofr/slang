@@ -402,13 +402,12 @@ impl Visitor for Pass<'_> {
     fn leave_prefix_expression(&mut self, node: &ir::PrefixExpression) {
         // `delete`, `++` and `--` write to their operand, which therefore has
         // to be a location; the other prefix operators only read it.
-        let writes = matches!(
+        let position = if matches!(
             node.operator,
             ir::PrefixExpressionOperator::DeleteKeyword(_)
                 | ir::PrefixExpressionOperator::PlusPlus(_)
                 | ir::PrefixExpressionOperator::MinusMinus(_)
-        );
-        let position = if writes {
+        ) {
             Position::Written
         } else {
             Position::Value
@@ -450,7 +449,9 @@ impl Visitor for Pass<'_> {
             }
         } else {
             // The tuple has a type only if every component does. An omitted
-            // component, as in `(x, ) = f()`, holds nothing.
+            // component, as in `(x, ) = f()`, has no expression; its slot is
+            // typed as void (not left untyped), so the tuple keeps its arity
+            // and still lines up with the `(uint, uint)` that `f()` returns.
             let types = node
                 .items
                 .iter()
@@ -769,7 +770,7 @@ impl Visitor for Pass<'_> {
                 // type cannot select an overload, so disambiguation is skipped
                 // rather than reported on top of the argument's own failure.
                 let argument_types =
-                    self.collect_argument_types(positional_arguments, Position::Value);
+                    self.collect_positional_argument_types(positional_arguments, Position::Value);
                 if let (Some(Resolution::Ambiguous(definition_ids)), Some(argument_types)) =
                     (&event_resolution, &argument_types)
                 {
@@ -822,7 +823,7 @@ impl Visitor for Pass<'_> {
             ir::ArgumentsDeclaration::PositionalArguments(positional_arguments) => {
                 // Collect the argument types to ensure all of them type to a value
                 // TODO(validation): check that the types match the error definition
-                self.collect_argument_types(positional_arguments, Position::Value);
+                self.collect_positional_argument_types(positional_arguments, Position::Value);
             }
             ir::ArgumentsDeclaration::NamedArguments(named_arguments) => {
                 // Collect the argument types to ensure all of them type to a value

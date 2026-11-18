@@ -60,9 +60,11 @@ impl Pass<'_> {
     /// one that reaches this point is reported as ambiguous and sunk to
     /// `Unresolved` rather than handed on undetermined. The typing may still
     /// name something other than a value, so a position that requires one
-    /// should use [`Self::check_expression`] instead.
+    /// should use [`Self::check_value_expression`] instead. Only
+    /// [`Self::check_expression`] calls it, for the positions that reject
+    /// nothing but an overload set.
     #[inline]
-    pub(super) fn check_typing_of_expression(&mut self, node: &ir::Expression) -> &Typing {
+    fn check_typing_of_expression(&mut self, node: &ir::Expression) -> &Typing {
         // The returned typing is borrowed out of `binder` while reporting takes
         // `diagnostics`, so both are reached as separate fields to keep the
         // borrows disjoint. Going through `Self::raw_typing_of_expression`
@@ -85,16 +87,28 @@ impl Pass<'_> {
     /// component, so each is reported at its own range however deeply it is
     /// nested. A pair of parentheses is transparent: the expression inside is
     /// used where the parentheses are.
+    ///
+    /// Checking only ever rejects: the typing returned is the one registered
+    /// for `node`, or `Unresolved` when the position does not accept it (or a
+    /// component of it), which has then been reported.
     pub(super) fn check_expression(&mut self, node: &ir::Expression, position: Position) -> Typing {
         if let ir::Expression::TupleExpression(tuple) = node {
             return self.check_tuple_expression(node, tuple, position);
         }
         match position {
+            // No restriction: even an overload set, for the call to select
+            // from by its arguments.
             Position::Callee => self.raw_typing_of_expression(node).clone(),
+            // Anything that resolves to one thing: only an overload set is
+            // rejected, as nothing selects from it here.
             Position::Statement | Position::MemberOperand => {
                 self.check_typing_of_expression(node).clone()
             }
+            // On top of that, a built-in, `super` and an uncalled `new` are
+            // rejected, as they are neither a value nor a type.
             Position::TypeNameOrValue => self.check_value_or_type_name(node),
+            // On top of that, a type or module name is rejected, as a value is
+            // required. One that is written to also has to be a location.
             Position::Value | Position::Written => {
                 let typing = self.check_value_or_type_name(node);
                 let Some(type_id) = typing.as_type_id() else {
@@ -161,7 +175,8 @@ impl Pass<'_> {
         }
         // Every component is checked before the tuple is judged, so one that
         // is rejected does not stop the rest from being checked (and
-        // reported). An omitted component, as in `(x, ) = f()`, holds nothing.
+        // reported). An omitted component, as in `(x, ) = f()`, has no
+        // expression, so there is nothing to check.
         let component_position = position.of_tuple_component();
         let mut all_accepted = true;
         for expression in tuple
@@ -181,11 +196,11 @@ impl Pass<'_> {
         }
     }
 
-    /// The typing of `node` where it may be a value or name a type: on top of
-    /// the overload set [`Self::check_typing_of_expression`] reports, reports a
-    /// typing that names something which is neither (a built-in such as `abi`
-    /// or `keccak256`, `super`, or an uncalled `new`) and leaves it
-    /// unresolved.
+    /// The typing of `node` where it may be a value or name a type. On top of
+    /// the overload set [`Self::check_typing_of_expression`] reports, it
+    /// reports a typing that names something which is neither a value nor a
+    /// type (a built-in such as `abi` or `keccak256`, `super`, or an uncalled
+    /// `new`), and leaves it unresolved.
     fn check_value_or_type_name(&mut self, node: &ir::Expression) -> Typing {
         // The typing is matched down to an owned outcome first, which releases
         // the borrow of `binder` it came from and lets the reporting below take
@@ -845,7 +860,9 @@ impl Pass<'_> {
     /// Returns `None` when the call target is not a member access.
     fn type_id_of_value_receiver(&mut self, operand: &ir::Expression) -> Option<TypeId> {
         if let ir::Expression::MemberAccessExpression(member_access_expression) = operand {
-            // The operand was checked by the member access itself.
+            // Only the receiver's type is needed, to bind it as the implicit
+            // first argument; its value is not consumed here. The member access
+            // is its consumer, and has already checked it as its operand.
             let type_id = self
                 .raw_typing_of_expression(&member_access_expression.operand)
                 .as_type_id()?;
@@ -991,7 +1008,7 @@ impl Pass<'_> {
     /// argument of `abi.decode`, the function `abi.encodeCall` encodes a call
     /// to, and the argument of a conversion, which only allows the library
     /// name in `address(L)`), which is up to the callee to judge.
-    pub(super) fn collect_argument_types(
+    pub(super) fn collect_positional_argument_types(
         &mut self,
         arguments: &[ir::Expression],
         position: Position,
@@ -1017,7 +1034,7 @@ impl Pass<'_> {
         let operand_typing = self.check_expression(&node.operand, Position::Callee);
         // A built-in and a conversion each accept a type name in an argument,
         // so theirs are not all value positions; see
-        // [`Self::collect_argument_types`].
+        // [`Self::collect_positional_argument_types`].
         let accepts_type_names = match &operand_typing {
             Typing::BuiltIn(_) => true,
             Typing::Resolved(type_id) => self.is_conversion_callee(*type_id),
@@ -1028,7 +1045,7 @@ impl Pass<'_> {
         } else {
             Position::Value
         };
-        let argument_types = self.collect_argument_types(arguments, argument_position);
+        let argument_types = self.collect_positional_argument_types(arguments, argument_position);
 
         match operand_typing {
             Typing::Unresolved => {
@@ -1243,7 +1260,7 @@ impl Pass<'_> {
         &mut self,
         arguments: &'a [ir::NamedArgument],
     ) -> Option<Vec<(&'a str, TypeId)>> {
-        // As in `collect_argument_types`, every argument is checked
+        // As in `collect_positional_argument_types`, every argument is checked
         // before the result is folded.
         let mut types = Vec::with_capacity(arguments.len());
         let mut all_typed = true;
