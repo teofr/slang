@@ -171,7 +171,7 @@ impl Visitor for Pass<'_> {
         // reported) the same node.
         if let Some(iterator) = &node.iterator {
             // The iterator is a statement of its own, as the initialisation is.
-            self.check_expression(iterator, Accepts::Resolved);
+            self.check_statement_expression(iterator);
         }
         self.leave_scope_for_node_id(node.id());
     }
@@ -877,7 +877,7 @@ impl Visitor for Pass<'_> {
         // NOTE: initializer and condition of a for statement are expression
         // statements, so keep the behaviour in sync with
         // [`Self::leave_for_statement`]. __SLANG_EXPRESSION_STATEMENT_TYPE__
-        self.check_expression(&node.expression, Accepts::Resolved);
+        self.check_statement_expression(&node.expression);
     }
 
     fn leave_if_statement(&mut self, node: &ir::IfStatement) {

@@ -31,8 +31,9 @@ use crate::types::{
 ///
 /// Other requirements of a use are checked by the consumers that have them,
 /// after this one: [`Pass::check_written_expression`] for a location that is
-/// written to, and [`Pass::check_mobile_value_expression`] for a value taken at
-/// its mobile type.
+/// written to, [`Pass::check_statement_expression`] for an expression that
+/// keeps its own type, and [`Pass::check_mobile_value_expression`] for a value
+/// taken at its mobile type.
 #[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 pub(super) enum Accepts {
     /// Anything, even an overload set, for a call to select from by its
@@ -123,8 +124,8 @@ impl Pass<'_> {
         typing
     }
 
-    /// The typing of `node` where its consumer `accepts` it, after reporting
-    /// what is not accepted. Every expression is checked once, by the
+    /// The typing of `node` where its consumer reads it and `accepts` it, after
+    /// reporting what is not accepted. Every expression is checked once, by the
     /// expression or statement that consumes it: only the consumer knows how it
     /// is used, so only it knows what to reject. See [`Accepts`].
     ///
@@ -136,6 +137,74 @@ impl Pass<'_> {
     /// for `node`, or `Unresolved` when it is not accepted (or a component of
     /// it is not), which has then been reported.
     pub(super) fn check_expression(&mut self, node: &ir::Expression, accepts: Accepts) -> Typing {
+        self.check_read_expression(node, accepts, false)
+    }
+
+    /// The typing of `node`, the expression of a statement: it consumes nothing
+    /// (`super;`, `data.pop;`, a modifier's `_`), so it accepts anything
+    /// resolved, but the expression is still evaluated at its own type.
+    pub(super) fn check_statement_expression(&mut self, node: &ir::Expression) -> Typing {
+        self.check_read_expression(node, Accepts::Resolved, true)
+    }
+
+    /// [`Self::check_accepts`] for an expression that is read, and
+    /// [`Self::check_own_type`] for whether it keeps its own type
+    /// (`self_typed`). Both are checked even when one fails, so that every
+    /// component of a tuple is reported.
+    fn check_read_expression(
+        &mut self,
+        node: &ir::Expression,
+        accepts: Accepts,
+        self_typed: bool,
+    ) -> Typing {
+        let own_type_ok = self.check_own_type(node, self_typed);
+        let typing = self.check_accepts(node, accepts);
+        if own_type_ok {
+            typing
+        } else {
+            Typing::Unresolved
+        }
+    }
+
+    /// Reports `node` if it is a number literal that no type can hold where it
+    /// keeps its own type, having no target type to convert to, returning
+    /// whether it is not one: `node` itself when `self_typed`, and each
+    /// component of a tuple of two or more, which is built from its components'
+    /// own types (solc 3757 and 3390). A pair of parentheses is transparent.
+    fn check_own_type(&mut self, node: &ir::Expression, self_typed: bool) -> bool {
+        if let ir::Expression::TupleExpression(tuple) = node {
+            let components_self_typed = self_typed || tuple.items.len() > 1;
+            let mut all_ok = true;
+            for expression in tuple
+                .items
+                .iter()
+                .filter_map(|item| item.expression.as_ref())
+            {
+                all_ok &= self.check_own_type(expression, components_self_typed);
+            }
+            return all_ok;
+        }
+        if self_typed && self.is_too_large_literal(node) {
+            self.push_diagnostic(node, LiteralTooLarge);
+            return false;
+        }
+        true
+    }
+
+    /// Whether `node` typed as a number literal that no type can hold, eg.
+    /// `2**256`.
+    fn is_too_large_literal(&self, node: &ir::Expression) -> bool {
+        self.raw_typing_of_expression(node)
+            .as_type_id()
+            .is_some_and(|type_id| match self.types.get_type_by_id(type_id) {
+                Type::Literal(kind) => kind.mobile_type().is_none(),
+                _ => false,
+            })
+    }
+
+    /// The typing of `node` where it is `accepts`ed, after reporting what is
+    /// not; see [`Self::check_expression`].
+    fn check_accepts(&mut self, node: &ir::Expression, accepts: Accepts) -> Typing {
         if let ir::Expression::TupleExpression(tuple) = node {
             return self.check_tuple_expression(node, tuple, accepts);
         }
@@ -179,9 +248,10 @@ impl Pass<'_> {
     /// The type of `node` written to: a value, which then has to denote a
     /// writable location. Only a value is checked for one, so an expression
     /// already reported as not a value is not reported again as not a
-    /// location.
+    /// location. Nothing written to keeps a type of its own, not even the
+    /// components of a tuple, which are locations instead.
     pub(super) fn check_written_expression(&mut self, node: &ir::Expression) -> Option<TypeId> {
-        let type_id = self.check_value_expression(node)?;
+        let type_id = self.check_accepts(node, Accepts::Value).as_type_id()?;
         self.check_written_location(node);
         Some(type_id)
     }
@@ -199,7 +269,7 @@ impl Pass<'_> {
         self.check_mobile_type(node, type_id).then_some(type_id)
     }
 
-    /// [`Self::check_expression`] for a tuple, which checks its components
+    /// [`Self::check_accepts`] for a tuple, which checks its components
     /// rather than itself: their typings are all a tuple has.
     fn check_tuple_expression(
         &mut self,
@@ -213,7 +283,7 @@ impl Pass<'_> {
                 .first()
                 .and_then(|item| item.expression.as_ref())
                 .expect("the parser never produces a single omitted component");
-            return self.check_expression(inner, accepts.through_parentheses());
+            return self.check_accepts(inner, accepts.through_parentheses());
         }
         // Every component is checked before the tuple is judged, so one that
         // is rejected does not stop the rest from being checked (and
@@ -227,7 +297,7 @@ impl Pass<'_> {
             .filter_map(|item| item.expression.as_ref())
         {
             all_accepted &= self
-                .check_expression(expression, component_accepts)
+                .check_accepts(expression, component_accepts)
                 .as_type_id()
                 .is_some();
         }
