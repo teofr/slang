@@ -37,6 +37,10 @@ pub(super) struct Position {
     /// Whether the consumer writes to the expression, which then has to
     /// denote a writable location. Only a value is written to.
     written: bool,
+    /// Whether the consumer takes the expression at a type of its own, its
+    /// mobile type, having no target type to convert it to. Only a value has
+    /// one.
+    needs_mobile_type: bool,
 }
 
 /// What a position accepts. Each accepts less than the one before it, so a
@@ -62,35 +66,48 @@ impl Position {
     pub(super) const VALUE: Self = Self {
         accepts: Accepts::Value,
         written: false,
+        needs_mobile_type: false,
     };
     /// The left hand side of an assignment, and the operand of `++`, `--` and
     /// `delete`.
     pub(super) const WRITTEN: Self = Self {
         accepts: Accepts::Value,
         written: true,
+        needs_mobile_type: false,
     };
     /// The operand of an index access (`uint[]`), and the arguments of a
     /// built-in or a conversion (`abi.decode(data, (uint, bool))`).
     pub(super) const TYPE_NAME_OR_VALUE: Self = Self {
         accepts: Accepts::TypeNameOrValue,
         written: false,
+        needs_mobile_type: false,
     };
     /// The expression of a statement, which consumes nothing (`super;`,
     /// `data.pop;`, a modifier's `_`).
     pub(super) const STATEMENT: Self = Self {
         accepts: Accepts::Resolved,
         written: false,
+        needs_mobile_type: false,
     };
     /// The operand of a member access, which may name anything with members:
     /// a value, a type, a built-in namespace such as `abi`, or `super`.
     pub(super) const MEMBER_OPERAND: Self = Self {
         accepts: Accepts::Resolved,
         written: false,
+        needs_mobile_type: false,
     };
     /// The operand of a call.
     pub(super) const CALLEE: Self = Self {
         accepts: Accepts::Anything,
         written: false,
+        needs_mobile_type: false,
+    };
+    /// An item of an array literal, and a branch of a conditional, whose
+    /// types decide the type of the whole (`[1, 2]`, `c ? 1 : 2`).
+    pub(super) const MOBILE_VALUE: Self = Self {
+        accepts: Accepts::Value,
+        written: false,
+        needs_mobile_type: true,
     };
 
     /// The position of each component of a tuple used in `self`. A tuple of
@@ -202,6 +219,9 @@ impl Pass<'_> {
                 }
                 if position.written {
                     self.check_written_location(node);
+                }
+                if position.needs_mobile_type && !self.check_mobile_type(node, type_id) {
+                    return Typing::Unresolved;
                 }
                 typing
             }
@@ -597,43 +617,44 @@ impl Pass<'_> {
         &mut self,
         node: &ir::ConditionalExpression,
     ) -> Option<TypeId> {
-        let true_mobile = self.check_mobile_type_of_value_expression(&node.true_expression);
-        let false_mobile = self.check_mobile_type_of_value_expression(&node.false_expression);
-        let common = self.types.common_type(true_mobile?, false_mobile?);
+        let true_type_id = self
+            .check_expression(&node.true_expression, Position::MOBILE_VALUE)
+            .as_type_id();
+        let false_type_id = self
+            .check_expression(&node.false_expression, Position::MOBILE_VALUE)
+            .as_type_id();
+        let true_mobile = self.mobile_type_of_checked(true_type_id?);
+        let false_mobile = self.mobile_type_of_checked(false_type_id?);
+        let common = self.types.common_type(true_mobile, false_mobile);
         if common.is_none() {
             self.push_diagnostic(node, IncompatibleConditionalBranches);
         }
         common
     }
 
-    /// The mobile type of a value expression that has no target type to check
-    /// against (eg. a conditional branch), reporting why it has none.
-    fn check_mobile_type_of_value_expression(&mut self, node: &ir::Expression) -> Option<TypeId> {
-        let type_id = self.check_value_expression(node)?;
-        self.check_mobile_type(node, type_id)
+    /// The mobile type of `type_id`, the type of an expression already checked
+    /// in [`Position::MOBILE_VALUE`], which has one.
+    fn mobile_type_of_checked(&mut self, type_id: TypeId) -> TypeId {
+        self.types
+            .compute_mobile_type(type_id)
+            .expect("a value checked in `Position::MOBILE_VALUE` has a mobile type")
     }
 
-    /// The mobile type of `type_id`, the type of `node`, reporting why it has
-    /// none.
-    fn check_mobile_type(&mut self, node: &ir::Expression, type_id: TypeId) -> Option<TypeId> {
+    /// Reports `node`, a value of type `type_id` taken at its mobile type, if
+    /// it has none, returning whether it has one.
+    fn check_mobile_type(&mut self, node: &ir::Expression, type_id: TypeId) -> bool {
         match self.types.compute_mobile_type(type_id) {
-            Ok(mobile) => Some(mobile),
+            Ok(_) => true,
             Err(NoMobileType::NotAValue) => {
-                self.push_diagnostic(
-                    node,
-                    ExpressionNotAValue {
-                        kind: NotAValueKind::TypeOrModule,
-                    },
-                );
-                None
+                unreachable!("a type or module name is rejected as a value before this")
             }
             Err(NoMobileType::PartiallyAppliedFunction) => {
                 self.push_diagnostic(node, PartiallyAppliedFunctionUsedAsValue);
-                None
+                false
             }
             Err(NoMobileType::LiteralTooLarge) => {
                 self.push_diagnostic(node, LiteralTooLarge);
-                None
+                false
             }
         }
     }
@@ -783,12 +804,12 @@ impl Pass<'_> {
         // one that has no type does not stop the rest from being checked (and
         // reported).
         for item in array.items.iter() {
-            // Every item needs a mobile type, so the reason one has none is
-            // reported here. The mobile type itself is discarded:
-            // `type_of_array_literal` unifies the raw item types, so that eg.
-            // the literal `0` in `[bytes2(0), 0]` still converts to `bytes2`.
-            if let Some(item_type_id) = self.check_value_expression(item)
-                && self.check_mobile_type(item, item_type_id).is_some()
+            // Every item needs a mobile type, but it is the raw item types
+            // that `type_of_array_literal` unifies, so that eg. the literal `0`
+            // in `[bytes2(0), 0]` still converts to `bytes2`.
+            if let Some(item_type_id) = self
+                .check_expression(item, Position::MOBILE_VALUE)
+                .as_type_id()
             {
                 item_type_ids.push(item_type_id);
             } else {

@@ -1,8 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity *;
 
-// A tuple has a mobile type only if every component does. This is reported
-// before the tuple is rejected for not being a valid array element.
+// A tuple has a mobile type only if every component does, so the component
+// that has none is reported, at its own range. This is reported before the
+// tuple is rejected for not being a valid array element.
 
 library L {
     function lf(uint256) internal pure {}
