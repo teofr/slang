@@ -6271,6 +6271,31 @@ mod type_system {
         }
     }
 
+    mod call_options_on_non_callable {
+        use super::*;
+
+        #[test]
+        fn tuple_of_type_names() -> Result<()> {
+            run(
+                "type_system/call_options_on_non_callable",
+                "tuple_of_type_names",
+            )
+        }
+
+        #[test]
+        fn type_name_called() -> Result<()> {
+            run(
+                "type_system/call_options_on_non_callable",
+                "type_name_called",
+            )
+        }
+
+        #[test]
+        fn value() -> Result<()> {
+            run("type_system/call_options_on_non_callable", "value")
+        }
+    }
+
     mod cannot_call_via_contract_type_name {
         use super::*;
 

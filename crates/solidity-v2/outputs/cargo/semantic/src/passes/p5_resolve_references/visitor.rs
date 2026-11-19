@@ -5,7 +5,9 @@ use slang_solidity_v2_common::diagnostics::kinds::resolution::{
     IdentifierNotFound, MemberNotFound,
 };
 use slang_solidity_v2_common::diagnostics::kinds::structure::DuplicateNamedArgument;
-use slang_solidity_v2_common::diagnostics::kinds::type_system::EmptyArrayLiteral;
+use slang_solidity_v2_common::diagnostics::kinds::type_system::{
+    CallOptionsOnNonCallable, EmptyArrayLiteral,
+};
 use slang_solidity_v2_ir::ir;
 use slang_solidity_v2_ir::ir::NodeIdentity;
 use slang_solidity_v2_ir::ir::visitor::Visitor;
@@ -687,13 +689,20 @@ impl Visitor for Pass<'_> {
         // Pre-applying call options (eg. `foo{value: 3}`) partially applies the
         // function.
         let typing = match operand_typing.as_type_id() {
-            Some(type_id) => match self.types.get_type_by_id(type_id) {
-                Type::Function(function_type) => {
+            Some(type_id) => {
+                if let Type::Function(function_type) = self.types.get_type_by_id(type_id) {
                     let function_type = function_type.clone();
                     Typing::Resolved(self.types.partially_apply_function_type(function_type))
+                } else {
+                    // Call options apply to a function only: not to a value
+                    // of another type, nor to a type name.
+                    self.push_diagnostic(node, CallOptionsOnNonCallable);
+                    Typing::Unresolved
                 }
-                _ => operand_typing,
-            },
+            }
+            // What has no type may still be called with options: an overload
+            // set, a built-in such as the `call` member of an address, or a
+            // `new` expression. An unresolved operand has been reported.
             None => operand_typing,
         };
         self.binder.set_node_typing(node.id(), typing);

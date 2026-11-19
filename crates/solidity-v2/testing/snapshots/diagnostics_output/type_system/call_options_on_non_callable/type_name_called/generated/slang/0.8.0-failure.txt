@@ -1,0 +1,11 @@
+# This file is generated automatically by infrastructure scripts. Please don't edit by hand.
+
+Diagnostics: 1
+
+[type-system/call-options-on-non-callable] Error: Expected callable expression before call options.
+   ╭─[input.sol:9:5]
+   │
+ 9 │     uint{value: 1}(5);
+   │     ───────┬──────  
+   │            ╰──────── Error occurred here.
+───╯
