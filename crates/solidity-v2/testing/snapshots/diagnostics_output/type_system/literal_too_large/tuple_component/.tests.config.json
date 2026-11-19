@@ -1,0 +1,11 @@
+{
+  "expected_solc_divergence": [
+    {
+      "specifier": {
+        "type": "From",
+        "from": "0.8.0"
+      },
+      "reason": "solc rejects a number literal too large for any integer type as a component of a tuple with more than one component (`TypeError 3390`). Slang does not check tuple components yet."
+    }
+  ]
+}

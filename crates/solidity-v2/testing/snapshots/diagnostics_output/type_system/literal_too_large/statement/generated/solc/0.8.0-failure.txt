@@ -1,0 +1,11 @@
+# This file is generated automatically by infrastructure scripts. Please don't edit by hand.
+
+Diagnostics: 1
+
+[TypeError 3757] Error: Invalid rational number.
+   ╭─[input.sol:8:5]
+   │
+ 8 │     2**256;
+   │     ───┬──  
+   │        ╰──── Error occurred here.
+───╯
