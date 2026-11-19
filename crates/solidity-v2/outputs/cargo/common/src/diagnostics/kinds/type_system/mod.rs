@@ -25,10 +25,8 @@ mod storage_layout_base_not_constant;
 mod storage_layout_base_out_of_range;
 mod storage_layout_base_past_end;
 mod type_too_large_for_storage;
-mod write_to_array_length;
 mod write_to_calldata;
 mod write_to_constant;
-mod write_to_fixed_bytes_element;
 
 pub use array_length_fractional::ArrayLengthFractional;
 pub use array_length_negative::ArrayLengthNegative;
@@ -58,10 +56,8 @@ pub use storage_layout_base_not_constant::StorageLayoutBaseNotConstant;
 pub use storage_layout_base_out_of_range::StorageLayoutBaseOutOfRange;
 pub use storage_layout_base_past_end::StorageLayoutBasePastEnd;
 pub use type_too_large_for_storage::TypeTooLargeForStorage;
-pub use write_to_array_length::WriteToArrayLength;
 pub use write_to_calldata::{CalldataWriteKind, WriteToCalldata};
 pub use write_to_constant::WriteToConstant;
-pub use write_to_fixed_bytes_element::WriteToFixedBytesElement;
 
 use crate::diagnostics::kinds::DiagnosticKind;
 use crate::diagnostics::kinds::utils::define_diagnostic_kind;
@@ -139,10 +135,6 @@ define_diagnostic_kind! {
         /// An element of a calldata array or a member of a calldata struct is
         /// written to.
         WriteToCalldata(WriteToCalldata),
-        /// A single byte of a fixed-size byte array is written to.
-        WriteToFixedBytesElement(WriteToFixedBytesElement),
-        /// The `length` member of an array is written to.
-        WriteToArrayLength(WriteToArrayLength),
         /// An explicit type conversion is not allowed from the type of its
         /// argument to the target type.
         ExplicitConversionNotAllowed(ExplicitConversionNotAllowed),

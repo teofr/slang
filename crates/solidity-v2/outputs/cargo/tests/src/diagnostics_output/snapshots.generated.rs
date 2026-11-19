@@ -7196,6 +7196,11 @@ mod type_system {
         }
 
         #[test]
+        fn array_length() -> Result<()> {
+            run("type_system/expression_not_an_lvalue", "array_length")
+        }
+
+        #[test]
         fn array_push_with_argument() -> Result<()> {
             run(
                 "type_system/expression_not_an_lvalue",
@@ -7249,6 +7254,22 @@ mod type_system {
             run(
                 "type_system/expression_not_an_lvalue",
                 "external_state_variable",
+            )
+        }
+
+        #[test]
+        fn fixed_bytes_element() -> Result<()> {
+            run(
+                "type_system/expression_not_an_lvalue",
+                "fixed_bytes_element",
+            )
+        }
+
+        #[test]
+        fn fixed_bytes_element_delete() -> Result<()> {
+            run(
+                "type_system/expression_not_an_lvalue",
+                "fixed_bytes_element_delete",
             )
         }
 
@@ -7819,15 +7840,6 @@ mod type_system {
         }
     }
 
-    mod write_to_array_length {
-        use super::*;
-
-        #[test]
-        fn assignment() -> Result<()> {
-            run("type_system/write_to_array_length", "assignment")
-        }
-    }
-
     mod write_to_calldata {
         use super::*;
 
@@ -7888,15 +7900,6 @@ mod type_system {
         #[test]
         fn qualified_constant() -> Result<()> {
             run("type_system/write_to_constant", "qualified_constant")
-        }
-    }
-
-    mod write_to_fixed_bytes_element {
-        use super::*;
-
-        #[test]
-        fn assignment() -> Result<()> {
-            run("type_system/write_to_fixed_bytes_element", "assignment")
         }
     }
 }
