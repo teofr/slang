@@ -7,8 +7,7 @@ use slang_solidity_v2_common::diagnostics::kinds::type_system::{
     CalldataWriteKind, CannotCallViaContractTypeName, ExplicitConversionNotAllowed,
     ExpressionNotAValue, ExpressionNotAnLValue, ExpressionNotCallable,
     IncompatibleConditionalBranches, InvalidUtf8StringLiteral, LiteralTooLarge, NotAValueKind,
-    PartiallyAppliedFunctionUsedAsValue, WriteToArrayLength, WriteToCalldata, WriteToConstant,
-    WriteToFixedBytesElement,
+    PartiallyAppliedFunctionUsedAsValue, WriteToCalldata, WriteToConstant,
 };
 use slang_solidity_v2_common::nodes::NodeId;
 use slang_solidity_v2_ir::ir;
@@ -204,8 +203,6 @@ impl Pass<'_> {
             WriteTarget::WritableLocation => {}
             WriteTarget::Constant => self.report_write_to_constant(node),
             WriteTarget::Calldata(kind) => self.push_diagnostic(node, WriteToCalldata { kind }),
-            WriteTarget::FixedBytesElement => self.push_diagnostic(node, WriteToFixedBytesElement),
-            WriteTarget::ArrayLength => self.push_diagnostic(node, WriteToArrayLength),
             WriteTarget::NotALocation => self.report_expression_not_an_lvalue(node),
         }
     }
@@ -226,26 +223,13 @@ impl Pass<'_> {
                 if self.typing_is_contract_reference(operand_typing) {
                     return WriteTarget::NotALocation;
                 }
-                match operand_typing
+                // A calldata struct is the read-only input of a call.
+                if let Some(Type::Struct(struct_type)) = operand_typing
                     .as_type_id()
                     .map(|type_id| self.types.get_type_by_id(type_id))
+                    && struct_type.location == DataLocation::Calldata
                 {
-                    // A calldata struct is the read-only input of a call.
-                    Some(Type::Struct(struct_type))
-                        if struct_type.location == DataLocation::Calldata =>
-                    {
-                        return WriteTarget::Calldata(CalldataWriteKind::StructMember);
-                    }
-                    // The length of an array is read-only, wherever it lives.
-                    Some(Type::Array(_) | Type::FixedSizeArray(_) | Type::Bytes(_))
-                        if matches!(
-                            self.resolution_of_identifier(member_access.member.id()),
-                            Some(Resolution::BuiltIn(InternalBuiltIn::Length))
-                        ) =>
-                    {
-                        return WriteTarget::ArrayLength;
-                    }
-                    _ => {}
+                    return WriteTarget::Calldata(CalldataWriteKind::StructMember);
                 }
                 // Reaching a member through a type name rather than a value
                 // (`S.field`) is already a resolution failure, so there is
@@ -263,10 +247,6 @@ impl Pass<'_> {
                     .as_type_id()
                     .map(|type_id| self.types.get_type_by_id(type_id));
                 match operand_type {
-                    // A single byte of a fixed-size byte array is copied out
-                    // of the word holding it, so it cannot be modified in
-                    // place.
-                    Some(Type::ByteArray(_)) => WriteTarget::FixedBytesElement,
                     // An element of an array is a location in its own right,
                     // unless the array is the read-only input of a call.
                     Some(
@@ -281,6 +261,10 @@ impl Pass<'_> {
                     // So is an element of a mapping, which only lives in
                     // storage.
                     Some(Type::Mapping(_)) => WriteTarget::WritableLocation,
+                    // A single byte of a fixed-size byte array
+                    // (`Type::ByteArray`) is deliberately left out: it is
+                    // copied out of the word holding it, so it cannot be
+                    // modified in place.
                     _ => WriteTarget::NotALocation,
                 }
             }
@@ -1584,11 +1568,6 @@ enum WriteTarget {
     /// An element of a calldata array or a member of a calldata struct: a
     /// location, but in the read-only input of a call.
     Calldata(CalldataWriteKind),
-    /// A single byte of a fixed-size byte array, which is copied out of the
-    /// word holding it.
-    FixedBytesElement,
-    /// The `length` member of an array, which is read-only.
-    ArrayLength,
     /// No location at all: a computed value such as a call result or an
     /// operator application, an external access that reads through a getter,
     /// or a name that denotes no value in the first place.
