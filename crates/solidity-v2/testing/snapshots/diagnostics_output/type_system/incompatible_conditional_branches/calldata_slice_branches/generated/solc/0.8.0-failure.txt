@@ -1,0 +1,27 @@
+# This file is generated automatically by infrastructure scripts. Please don't edit by hand.
+
+Diagnostics: 3
+
+[TypeError 2148] Error: Index range access is not supported for arrays with dynamically encoded base types.
+    ╭─[input.sol:11:12]
+    │
+ 11 │     true ? s[0:1] : s[1:2];
+    │            ───┬──  
+    │               ╰──── Error occurred here.
+────╯
+
+[TypeError 2148] Error: Index range access is not supported for arrays with dynamically encoded base types.
+    ╭─[input.sol:11:21]
+    │
+ 11 │     true ? s[0:1] : s[1:2];
+    │                     ───┬──  
+    │                        ╰──── Error occurred here.
+────╯
+
+[TypeError 2148] Error: Index range access is not supported for arrays with dynamically encoded base types.
+    ╭─[input.sol:12:27]
+    │
+ 12 │     string[] calldata x = s[0:1];
+    │                           ───┬──  
+    │                              ╰──── Error occurred here.
+────╯

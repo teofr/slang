@@ -6792,6 +6792,38 @@ mod type_system {
         }
 
         #[test]
+        fn array_literal_built_in_function() -> Result<()> {
+            run(
+                "type_system/expression_not_a_value",
+                "array_literal_built_in_function",
+            )
+        }
+
+        #[test]
+        fn array_literal_calldata_bytes_slice() -> Result<()> {
+            run(
+                "type_system/expression_not_a_value",
+                "array_literal_calldata_bytes_slice",
+            )
+        }
+
+        #[test]
+        fn array_literal_calldata_slice() -> Result<()> {
+            run(
+                "type_system/expression_not_a_value",
+                "array_literal_calldata_slice",
+            )
+        }
+
+        #[test]
+        fn array_literal_dynamically_encoded_calldata_slice() -> Result<()> {
+            run(
+                "type_system/expression_not_a_value",
+                "array_literal_dynamically_encoded_calldata_slice",
+            )
+        }
+
+        #[test]
         fn array_literal_item() -> Result<()> {
             run("type_system/expression_not_a_value", "array_literal_item")
         }
@@ -6802,6 +6834,11 @@ mod type_system {
                 "type_system/expression_not_a_value",
                 "array_literal_magic_variable",
             )
+        }
+
+        #[test]
+        fn array_literal_module() -> Result<()> {
+            run("type_system/expression_not_a_value", "array_literal_module")
         }
 
         #[test]
@@ -6871,6 +6908,14 @@ mod type_system {
             run(
                 "type_system/expression_not_a_value",
                 "conditional_elementary_type_name_branches",
+            )
+        }
+
+        #[test]
+        fn conditional_module_branches() -> Result<()> {
+            run(
+                "type_system/expression_not_a_value",
+                "conditional_module_branches",
             )
         }
 
@@ -7068,6 +7113,11 @@ mod type_system {
                 "type_system/expression_not_a_value",
                 "statement_for_iterator",
             )
+        }
+
+        #[test]
+        fn statement_module() -> Result<()> {
+            run("type_system/expression_not_a_value", "statement_module")
         }
 
         #[test]
@@ -7403,6 +7453,14 @@ mod type_system {
         }
 
         #[test]
+        fn calldata_slice_branches() -> Result<()> {
+            run(
+                "type_system/incompatible_conditional_branches",
+                "calldata_slice_branches",
+            )
+        }
+
+        #[test]
         fn integer_and_narrower_fixed_point() -> Result<()> {
             run(
                 "type_system/incompatible_conditional_branches",
@@ -7517,6 +7575,16 @@ mod type_system {
         #[test]
         fn conditional_branch() -> Result<()> {
             run("type_system/literal_too_large", "conditional_branch")
+        }
+
+        #[test]
+        fn statement() -> Result<()> {
+            run("type_system/literal_too_large", "statement")
+        }
+
+        #[test]
+        fn tuple_component() -> Result<()> {
+            run("type_system/literal_too_large", "tuple_component")
         }
 
         #[test]
