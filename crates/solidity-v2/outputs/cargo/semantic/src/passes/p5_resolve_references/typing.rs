@@ -1200,34 +1200,39 @@ impl Pass<'_> {
         &mut self,
         arguments: &[ir::Expression],
     ) -> Option<Vec<TypeId>> {
-        self.collect_argument_types(arguments, Self::check_type_of_value_expression)
+        self.collect_argument_types(arguments, |pass, _, argument| {
+            pass.check_type_of_value_expression(argument)
+        })
     }
 
-    /// Collects the types of `arguments` for a callee that accepts a type name
-    /// in one of them: the second argument of `abi.decode`, the function
+    /// Whether the argument at `index` of a call to the callee typed as
+    /// `callee` may name a type, which is then up to the callee to judge. Only
+    /// a few do: the types `abi.decode` decodes into, the function
     /// `abi.encodeCall` encodes a call to, and the argument of a conversion,
-    /// which only allows the library name in `address(L)`. Which of them is
-    /// valid is up to the callee.
-    pub(super) fn collect_argument_types_allowing_type_names(
-        &mut self,
-        arguments: &[ir::Expression],
-    ) -> Option<Vec<TypeId>> {
-        self.collect_argument_types(arguments, Self::check_type_of_value_or_type_name_expression)
+    /// which only allows the library name in `address(L)`. Every other
+    /// argument is a value.
+    fn argument_may_name_a_type(&self, callee: &Typing, index: usize) -> bool {
+        match callee {
+            Typing::BuiltIn(InternalBuiltIn::AbiDecode) => index == 1,
+            Typing::BuiltIn(InternalBuiltIn::AbiEncodeCall) => index == 0,
+            Typing::Resolved(type_id) => self.is_conversion_callee(*type_id),
+            _ => false,
+        }
     }
 
     // Generic over the check, rather than taking a function pointer, so that
-    // each use can inline it.
+    // each use can inline it. The check is given each argument's index.
     fn collect_argument_types(
         &mut self,
         arguments: &[ir::Expression],
-        check: impl Fn(&mut Self, &ir::Expression) -> Option<TypeId>,
+        check: impl Fn(&mut Self, usize, &ir::Expression) -> Option<TypeId>,
     ) -> Option<Vec<TypeId>> {
         // Every argument is checked before the result is folded, so one that has
         // no type does not stop the rest from being checked (and reported).
         let mut types = Vec::with_capacity(arguments.len());
         let mut all_typed = true;
-        for argument in arguments {
-            match check(self, argument) {
+        for (index, argument) in arguments.iter().enumerate() {
+            match check(self, index, argument) {
                 Some(type_id) => types.push(type_id),
                 None => all_typed = false,
             }
@@ -1241,19 +1246,15 @@ impl Pass<'_> {
         arguments: &[ir::Expression],
     ) -> Typing {
         let operand_typing = self.raw_typing_of_expression(&node.operand).clone();
-        // A built-in and a conversion each accept a type name in an argument,
-        // so theirs are not all value positions; see
-        // [`Self::collect_argument_types_allowing_type_names`].
-        let accepts_type_names = match &operand_typing {
-            Typing::BuiltIn(_) => true,
-            Typing::Resolved(type_id) => self.is_conversion_callee(*type_id),
-            _ => false,
-        };
-        let argument_types = if accepts_type_names {
-            self.collect_argument_types_allowing_type_names(arguments)
-        } else {
-            self.collect_positional_argument_types(arguments)
-        };
+        // What an argument may be depends on the callee, and on which
+        // argument it is; see [`Self::argument_may_name_a_type`].
+        let argument_types = self.collect_argument_types(arguments, |pass, index, argument| {
+            if pass.argument_may_name_a_type(&operand_typing, index) {
+                pass.check_type_of_value_or_type_name_expression(argument)
+            } else {
+                pass.check_type_of_value_expression(argument)
+            }
+        });
 
         match operand_typing {
             Typing::Unresolved => {
