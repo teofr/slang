@@ -6837,6 +6837,22 @@ mod type_system {
         }
 
         #[test]
+        fn abi_decode_data_type_name() -> Result<()> {
+            run(
+                "type_system/expression_not_a_value",
+                "abi_decode_data_type_name",
+            )
+        }
+
+        #[test]
+        fn abi_encode_type_name_argument() -> Result<()> {
+            run(
+                "type_system/expression_not_a_value",
+                "abi_encode_type_name_argument",
+            )
+        }
+
+        #[test]
         fn array_literal_item() -> Result<()> {
             run("type_system/expression_not_a_value", "array_literal_item")
         }
