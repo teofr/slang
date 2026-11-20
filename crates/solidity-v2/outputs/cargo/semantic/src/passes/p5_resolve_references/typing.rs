@@ -4,11 +4,12 @@ use slang_solidity_v2_common::diagnostics::kinds::resolution::{
     AmbiguousReference, MemberNotFound, NoMatchingCallableDeclaration,
 };
 use slang_solidity_v2_common::diagnostics::kinds::type_system::{
-    CalldataWriteKind, CannotCallViaContractTypeName, ExplicitConversionNotAllowed,
-    ExpressionNotAValue, ExpressionNotAnLValue, ExpressionNotCallable, ExpressionNotIndexable,
-    ExpressionNotSliceable, IncompatibleConditionalBranches, InvalidUtf8StringLiteral,
-    LiteralTooLarge, MissingIndex, NotAValueKind, PartiallyAppliedFunctionUsedAsValue,
-    StringIndexAccess, WriteToCalldata, WriteToConstant,
+    AssignmentToTypeWithMapping, CalldataWriteKind, CannotCallViaContractTypeName,
+    ExplicitConversionNotAllowed, ExpressionNotAValue, ExpressionNotAnLValue,
+    ExpressionNotCallable, ExpressionNotIndexable, ExpressionNotSliceable,
+    IncompatibleConditionalBranches, InvalidUtf8StringLiteral, LiteralTooLarge, MissingIndex,
+    NotAValueKind, PartiallyAppliedFunctionUsedAsValue, StringIndexAccess, WriteToCalldata,
+    WriteToConstant,
 };
 use slang_solidity_v2_common::nodes::NodeId;
 use slang_solidity_v2_ir::ir;
@@ -206,6 +207,82 @@ impl Pass<'_> {
             WriteTarget::Constant => self.report_write_to_constant(node),
             WriteTarget::Calldata(kind) => self.push_diagnostic(node, WriteToCalldata { kind }),
             WriteTarget::NotALocation => self.report_expression_not_an_lvalue(node),
+        }
+    }
+
+    /// Reports what an assignment asks of its target `node` on top of being
+    /// written to, which [`Self::check_lvalues_under`] has checked: a mapping
+    /// cannot be copied, so a target whose type is or contains one is
+    /// rejected, unless it is a local storage pointer, which the assignment
+    /// only points elsewhere. A tuple is assigned to component by component.
+    ///
+    /// Only an assignment asks this, so it walks the target on its own rather
+    /// than as part of the location check, which `delete`, `++` and `--`
+    /// share.
+    // TODO(validation): a parameter of a function is not a local storage
+    // pointer for this purpose, only its return variables are. Both are
+    // accepted until the two are told apart.
+    pub(super) fn check_assignment_target(&mut self, node: &ir::Expression) {
+        if let ir::Expression::TupleExpression(tuple) = node {
+            for component in tuple
+                .items
+                .iter()
+                .filter_map(|item| item.expression.as_ref())
+            {
+                self.check_assignment_target(component);
+            }
+            return;
+        }
+        let Some(type_id) = self.raw_typing_of_expression(node).as_type_id() else {
+            return;
+        };
+        if !self.type_contains_mapping(type_id, &mut Vec::new()) {
+            return;
+        }
+        let is_local_pointer = match node {
+            ir::Expression::Identifier(identifier) => matches!(
+                self.resolution_of_identifier(identifier.id())
+                    .and_then(Resolution::as_definition_id)
+                    .and_then(|definition_id| self.binder.find_definition_by_id(definition_id)),
+                Some(Definition::Variable(_) | Definition::Parameter(_))
+            ),
+            _ => false,
+        };
+        if !is_local_pointer {
+            self.push_diagnostic(node, AssignmentToTypeWithMapping);
+        }
+    }
+
+    /// Whether `type_id` is a mapping or holds one: as the element of an array,
+    /// or as a member of a struct. `visited_structs` holds the structs already
+    /// looked into, which stops at recursive ones.
+    fn type_contains_mapping(&self, type_id: TypeId, visited_structs: &mut Vec<NodeId>) -> bool {
+        match self.types.get_type_by_id(type_id) {
+            Type::Mapping(_) => true,
+            Type::Array(ArrayType { element_type, .. })
+            | Type::FixedSizeArray(FixedSizeArrayType { element_type, .. }) => {
+                self.type_contains_mapping(*element_type, visited_structs)
+            }
+            Type::Struct(struct_type) => {
+                if visited_structs.contains(&struct_type.definition_id) {
+                    return false;
+                }
+                visited_structs.push(struct_type.definition_id);
+                let Some(Definition::Struct(struct_definition)) =
+                    self.binder.find_definition_by_id(struct_type.definition_id)
+                else {
+                    return false;
+                };
+                struct_definition.ir_node.members.iter().any(|member| {
+                    self.binder
+                        .node_typing(member.id())
+                        .as_type_id()
+                        .is_some_and(|member_type_id| {
+                            self.type_contains_mapping(member_type_id, visited_structs)
+                        })
+                })
+            }
+            _ => false,
         }
     }
 
