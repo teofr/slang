@@ -34,6 +34,7 @@ mod storage_layout_base_out_of_range;
 mod storage_layout_base_past_end;
 mod string_index_access;
 mod type_too_large_for_storage;
+mod void_component;
 mod write_to_calldata;
 mod write_to_constant;
 
@@ -74,6 +75,7 @@ pub use storage_layout_base_out_of_range::StorageLayoutBaseOutOfRange;
 pub use storage_layout_base_past_end::StorageLayoutBasePastEnd;
 pub use string_index_access::StringIndexAccess;
 pub use type_too_large_for_storage::TypeTooLargeForStorage;
+pub use void_component::{VoidComponent, VoidComponentKind};
 pub use write_to_calldata::{CalldataWriteKind, WriteToCalldata};
 pub use write_to_constant::WriteToConstant;
 
@@ -162,6 +164,9 @@ define_diagnostic_kind! {
         /// The operand of a slice is not a dynamically-sized calldata array with
         /// fixed-size elements (or a slice of one).
         ExpressionNotSliceable(ExpressionNotSliceable),
+        /// A component of a tuple that is read, or an item of an array literal,
+        /// has no value.
+        VoidComponent(VoidComponent),
         /// An expression in a position that is written to does not denote a
         /// writable storage location.
         ExpressionNotAnLValue(ExpressionNotAnLValue),

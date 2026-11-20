@@ -1,0 +1,11 @@
+# This file is generated automatically by infrastructure scripts. Please don't edit by hand.
+
+Diagnostics: 1
+
+[type-system/void-component] Error: Array component cannot be empty.
+    ╭─[input.sol:11:6]
+    │
+ 11 │     [nothing()];
+    │      ────┬────  
+    │          ╰────── Error occurred here.
+────╯
