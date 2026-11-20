@@ -1,0 +1,11 @@
+# This file is generated automatically by infrastructure scripts. Please don't edit by hand.
+
+Diagnostics: 1
+
+[TypeError 6444] Error: The second argument to "abi.decode" has to be a tuple of types.
+   ╭─[input.sol:9:22]
+   │
+ 9 │     abi.decode(data, uint);
+   │                      ──┬─  
+   │                        ╰─── Error occurred here.
+───╯

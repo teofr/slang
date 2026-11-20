@@ -2,7 +2,9 @@
 //! and array types built from them, and the members reached through them.
 
 use ruint::aliases::U256;
-use slang_solidity_v2_common::diagnostics::kinds::type_system::ExplicitConversionNotAllowed;
+use slang_solidity_v2_common::diagnostics::kinds::type_system::{
+    AbiDecodeTypesNotATuple, ExpectedTypeName, ExplicitConversionNotAllowed,
+};
 use slang_solidity_v2_common::evm_targets::EvmTarget;
 use slang_solidity_v2_ir::ir::{self, NodeIdentity};
 
@@ -271,24 +273,30 @@ fn test_abi_decode_tuple_of_types() {
         "expected the second element to decode to the struct",
     );
 
-    // A tuple element that is not a type name doesn't decode.
-    let (decoded, _) = expression("abi.decode(b, (uint, 5))")
-        .with_members("bytes b;")
-        .into_type();
-    assert_eq!(decoded, None);
+    // A tuple element that is not a type name doesn't decode, and is reported.
+    assert_eq!(
+        (None, Some(ExpectedTypeName.into())),
+        expression("abi.decode(b, (uint, 5))")
+            .with_members("bytes b;")
+            .into_type_and_diagnostic(),
+    );
 
     // A nested tuple element is not a type name, so it doesn't decode either
     // (matching solc, which rejects `abi.decode(b, (uint, (bool, bool)))`).
-    let (decoded, _) = expression("abi.decode(b, (uint, (bool, bool)))")
-        .with_members("bytes b;")
-        .into_type();
-    assert_eq!(decoded, None);
+    assert_eq!(
+        (None, Some(ExpectedTypeName.into())),
+        expression("abi.decode(b, (uint, (bool, bool)))")
+            .with_members("bytes b;")
+            .into_type_and_diagnostic(),
+    );
 
-    // Neither does a second argument that is not a type or tuple of types.
-    let (decoded, _) = expression("abi.decode(b, x)")
-        .with_members("bytes b; uint x;")
-        .into_type();
-    assert_eq!(decoded, None);
+    // Neither does a second argument that is not written as a tuple.
+    assert_eq!(
+        (None, Some(AbiDecodeTypesNotATuple.into())),
+        expression("abi.decode(b, x)")
+            .with_members("bytes b; uint x;")
+            .into_type_and_diagnostic(),
+    );
 }
 
 #[test]
