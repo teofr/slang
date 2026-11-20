@@ -7653,6 +7653,11 @@ mod type_system {
         use super::*;
 
         #[test]
+        fn abi_decode_types() -> Result<()> {
+            run("type_system/literal_too_large", "abi_decode_types")
+        }
+
+        #[test]
         fn array_literal_among_items() -> Result<()> {
             run("type_system/literal_too_large", "array_literal_among_items")
         }
@@ -7673,6 +7678,66 @@ mod type_system {
         #[test]
         fn conditional_branch() -> Result<()> {
             run("type_system/literal_too_large", "conditional_branch")
+        }
+
+        #[test]
+        fn for_iterator() -> Result<()> {
+            run("type_system/literal_too_large", "for_iterator")
+        }
+
+        #[test]
+        fn parenthesised() -> Result<()> {
+            run("type_system/literal_too_large", "parenthesised")
+        }
+
+        #[test]
+        fn statement() -> Result<()> {
+            run("type_system/literal_too_large", "statement")
+        }
+
+        #[test]
+        fn tuple_assignment_target() -> Result<()> {
+            run("type_system/literal_too_large", "tuple_assignment_target")
+        }
+
+        #[test]
+        fn tuple_call_argument() -> Result<()> {
+            run("type_system/literal_too_large", "tuple_call_argument")
+        }
+
+        #[test]
+        fn tuple_conditional_branch() -> Result<()> {
+            run("type_system/literal_too_large", "tuple_conditional_branch")
+        }
+
+        #[test]
+        fn tuple_first_component() -> Result<()> {
+            run("type_system/literal_too_large", "tuple_first_component")
+        }
+
+        #[test]
+        fn tuple_in_array_item() -> Result<()> {
+            run("type_system/literal_too_large", "tuple_in_array_item")
+        }
+
+        #[test]
+        fn tuple_nested() -> Result<()> {
+            run("type_system/literal_too_large", "tuple_nested")
+        }
+
+        #[test]
+        fn tuple_return() -> Result<()> {
+            run("type_system/literal_too_large", "tuple_return")
+        }
+
+        #[test]
+        fn tuple_second_component() -> Result<()> {
+            run("type_system/literal_too_large", "tuple_second_component")
+        }
+
+        #[test]
+        fn tuple_statement() -> Result<()> {
+            run("type_system/literal_too_large", "tuple_statement")
         }
 
         #[test]

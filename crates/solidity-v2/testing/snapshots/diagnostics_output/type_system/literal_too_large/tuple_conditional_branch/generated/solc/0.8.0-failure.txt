@@ -1,0 +1,11 @@
+# This file is generated automatically by infrastructure scripts. Please don't edit by hand.
+
+Diagnostics: 1
+
+[TypeError 3390] Error: Invalid rational number.
+   ╭─[input.sol:9:17]
+   │
+ 9 │         c ? (1, 2**270) : (1, 2);
+   │                 ───┬──  
+   │                    ╰──── Error occurred here.
+───╯
