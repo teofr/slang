@@ -6144,6 +6144,15 @@ mod syntax {
 mod type_system {
     use super::*;
 
+    mod abi_decode_types_not_a_tuple {
+        use super::*;
+
+        #[test]
+        fn type_name() -> Result<()> {
+            run("type_system/abi_decode_types_not_a_tuple", "type_name")
+        }
+    }
+
     mod array_length {
         use super::*;
 
@@ -6734,6 +6743,18 @@ mod type_system {
             run(
                 "type_system/empty_array_literal",
                 "local_variable_initializer_nested",
+            )
+        }
+    }
+
+    mod expected_type_name {
+        use super::*;
+
+        #[test]
+        fn abi_decode_value_component() -> Result<()> {
+            run(
+                "type_system/expected_type_name",
+                "abi_decode_value_component",
             )
         }
     }

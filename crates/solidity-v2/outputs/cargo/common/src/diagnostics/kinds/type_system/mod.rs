@@ -1,3 +1,4 @@
+mod abi_decode_types_not_a_tuple;
 mod array_length_fractional;
 mod array_length_negative;
 mod array_length_not_constant;
@@ -11,6 +12,7 @@ mod compound_assignment_to_tuple;
 mod constant_arithmetic_error;
 mod contract_too_large_for_storage;
 mod empty_array_literal;
+mod expected_type_name;
 mod explicit_conversion_not_allowed;
 mod expression_not_a_value;
 mod expression_not_an_lvalue;
@@ -43,6 +45,7 @@ mod write_to_constant;
 mod wrong_argument_count;
 mod wrong_argument_count_in_conversion;
 
+pub use abi_decode_types_not_a_tuple::AbiDecodeTypesNotATuple;
 pub use array_length_fractional::ArrayLengthFractional;
 pub use array_length_negative::ArrayLengthNegative;
 pub use array_length_not_constant::ArrayLengthNotConstant;
@@ -56,6 +59,7 @@ pub use compound_assignment_to_tuple::CompoundAssignmentToTuple;
 pub use constant_arithmetic_error::ConstantArithmeticError;
 pub use contract_too_large_for_storage::ContractTooLargeForStorage;
 pub use empty_array_literal::EmptyArrayLiteral;
+pub use expected_type_name::ExpectedTypeName;
 pub use explicit_conversion_not_allowed::ExplicitConversionNotAllowed;
 pub use expression_not_a_value::{ExpressionNotAValue, NotAValueKind};
 pub use expression_not_an_lvalue::ExpressionNotAnLValue;
@@ -174,6 +178,11 @@ define_diagnostic_kind! {
         /// An expression in a position that requires a value names a built-in,
         /// `super`, or an uncalled `new` instead. Its `kind` says which.
         ExpressionNotAValue(ExpressionNotAValue),
+        /// An expression in a position that requires a type name is a value
+        /// instead.
+        ExpectedTypeName(ExpectedTypeName),
+        /// The second argument of `abi.decode` is not written as a tuple.
+        AbiDecodeTypesNotATuple(AbiDecodeTypesNotATuple),
         /// A partially applied function is used as a value rather than called.
         PartiallyAppliedFunctionUsedAsValue(PartiallyAppliedFunctionUsedAsValue),
         /// A number literal too large for any EVM type.

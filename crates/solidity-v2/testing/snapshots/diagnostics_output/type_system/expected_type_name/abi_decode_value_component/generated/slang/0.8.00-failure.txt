@@ -1,0 +1,11 @@
+# This file is generated automatically by infrastructure scripts. Please don't edit by hand.
+
+Diagnostics: 1
+
+[type-system/expected-type-name] Error: Argument has to be a type name.
+   ╭─[input.sol:9:29]
+   │
+ 9 │     abi.decode(data, (uint, 5));
+   │                             ┬  
+   │                             ╰── Error occurred here.
+───╯

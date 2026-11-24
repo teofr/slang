@@ -4,12 +4,13 @@ use slang_solidity_v2_common::diagnostics::kinds::resolution::{
     AmbiguousReference, MemberNotFound, NoMatchingCallableDeclaration,
 };
 use slang_solidity_v2_common::diagnostics::kinds::type_system::{
-    AssignmentToTypeWithMapping, CalldataWriteKind, CannotCallViaContractTypeName,
-    ExplicitConversionNotAllowed, ExpressionNotAValue, ExpressionNotAnLValue,
-    ExpressionNotCallable, ExpressionNotIndexable, ExpressionNotSliceable,
-    IncompatibleConditionalBranches, InvalidUtf8StringLiteral, LiteralTooLarge, MissingIndex,
-    NamedArgumentsInConversion, NotAValueKind, PartiallyAppliedFunctionUsedAsValue,
-    StringIndexAccess, WriteToCalldata, WriteToConstant, WrongArgumentCountInConversion,
+    AbiDecodeTypesNotATuple, AssignmentToTypeWithMapping, CalldataWriteKind,
+    CannotCallViaContractTypeName, ExpectedTypeName, ExplicitConversionNotAllowed,
+    ExpressionNotAValue, ExpressionNotAnLValue, ExpressionNotCallable, ExpressionNotIndexable,
+    ExpressionNotSliceable, IncompatibleConditionalBranches, InvalidUtf8StringLiteral,
+    LiteralTooLarge, MissingIndex, NamedArgumentsInConversion, NotAValueKind,
+    PartiallyAppliedFunctionUsedAsValue, StringIndexAccess, WriteToCalldata, WriteToConstant,
+    WrongArgumentCountInConversion,
 };
 use slang_solidity_v2_common::nodes::NodeId;
 use slang_solidity_v2_ir::ir;
@@ -1315,6 +1316,37 @@ impl Pass<'_> {
         })
     }
 
+    /// Reports what `node`, the argument of `abi.decode` giving the types to
+    /// decode into, holds other than type names. It has been checked as "a
+    /// value or a type name", like every tuple of type names; this is what
+    /// `abi.decode` asks on top: a tuple, with a type name in each component.
+    /// A tuple nested in it is not a type name either.
+    fn check_abi_decode_types(&mut self, node: &ir::Expression) {
+        let ir::Expression::TupleExpression(tuple) = node else {
+            self.push_diagnostic(node, AbiDecodeTypesNotATuple);
+            return;
+        };
+        for component in tuple
+            .items
+            .iter()
+            .filter_map(|item| item.expression.as_ref())
+        {
+            // A component with no type has been reported already.
+            let names_a_type = self
+                .raw_typing_of_expression(component)
+                .as_type_id()
+                .is_none_or(|type_id| {
+                    matches!(
+                        self.types.get_type_by_id(type_id),
+                        Type::MetaType(_) | Type::UserMetaType(_)
+                    )
+                });
+            if !names_a_type {
+                self.push_diagnostic(component, ExpectedTypeName);
+            }
+        }
+    }
+
     /// Whether the argument at `index` of a call to the callee typed as
     /// `callee` may name a type, which is then up to the callee to judge. Only
     /// a few do: the types `abi.decode` decodes into, the function
@@ -1365,6 +1397,11 @@ impl Pass<'_> {
                 pass.check_type_of_value_expression(argument)
             }
         });
+        if matches!(&operand_typing, Typing::BuiltIn(InternalBuiltIn::AbiDecode))
+            && let [_, types] = arguments
+        {
+            self.check_abi_decode_types(types);
+        }
 
         match operand_typing {
             Typing::Unresolved => {

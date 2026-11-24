@@ -667,9 +667,10 @@ impl<'a> BuiltInsResolver<'a> {
             let mut decoded = Vec::with_capacity(element_ids.len());
             for element_id in element_ids {
                 let Some(element) = self.type_denoted_by_meta_type(element_id) else {
-                    // TODO(validation) SDR[42]: report an error when a tuple
-                    // element is not a type name (eg. `abi.decode(b, (uint, 5))`).
-                    return Err(BuiltInCallError::NotReportedYet);
+                    // A tuple element that is not a type name (eg.
+                    // `abi.decode(b, (uint, 5))`) is reported where the call
+                    // is typed, which has the expressions to point at.
+                    return Err(BuiltInCallError::UnresolvedDependency);
                 };
                 decoded.push(element);
             }
@@ -678,9 +679,9 @@ impl<'a> BuiltInsResolver<'a> {
                 .register_type(Type::Tuple(TupleType { types: decoded })));
         }
 
-        // TODO(validation) SDR[42]: report an error when the second argument
-        // is not a type or a tuple of types.
-        Err(BuiltInCallError::NotReportedYet)
+        // A second argument that is not a type or a tuple of types is reported
+        // where the call is typed, which has the expressions to point at.
+        Err(BuiltInCallError::UnresolvedDependency)
     }
 
     /// Returns the value type a meta-type denotes: `type(T)` unwraps to `T`,
