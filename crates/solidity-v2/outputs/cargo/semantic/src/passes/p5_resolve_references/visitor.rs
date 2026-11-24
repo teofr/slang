@@ -481,7 +481,12 @@ impl Visitor for Pass<'_> {
             // and `(abi).encode()` resolve as the unwrapped form does. Whether
             // a value is required is for the enclosing context to decide, and
             // it sees this same typing.
+            // Parentheses that are read still need something to read, though.
+            let is_read = !self.written_tuples.contains(&node.id());
             match &node.items.first().unwrap().expression {
+                Some(expression) if is_read && !self.check_has_value_to_read(expression) => {
+                    Typing::Unresolved
+                }
                 Some(expression) => self.check_typing_of_expression(expression).clone(),
                 None => unreachable!("the parser never produces a single omitted component"),
             }

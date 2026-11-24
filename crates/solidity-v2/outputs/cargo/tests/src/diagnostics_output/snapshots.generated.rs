@@ -8868,6 +8868,25 @@ mod type_system {
         }
     }
 
+    mod void_component {
+        use super::*;
+
+        #[test]
+        fn array_item() -> Result<()> {
+            run("type_system/void_component", "array_item")
+        }
+
+        #[test]
+        fn parenthesised() -> Result<()> {
+            run("type_system/void_component", "parenthesised")
+        }
+
+        #[test]
+        fn tuple_component() -> Result<()> {
+            run("type_system/void_component", "tuple_component")
+        }
+    }
+
     mod write_to_calldata {
         use super::*;
 

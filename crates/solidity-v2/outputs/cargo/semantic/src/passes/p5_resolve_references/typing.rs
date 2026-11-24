@@ -9,8 +9,8 @@ use slang_solidity_v2_common::diagnostics::kinds::type_system::{
     ExpressionNotAValue, ExpressionNotAnLValue, ExpressionNotCallable, ExpressionNotIndexable,
     ExpressionNotSliceable, IncompatibleConditionalBranches, InvalidUtf8StringLiteral,
     LiteralTooLarge, MissingIndex, NamedArgumentsInConversion, NotAValueKind,
-    PartiallyAppliedFunctionUsedAsValue, StringIndexAccess, WriteToCalldata, WriteToConstant,
-    WrongArgumentCountInConversion,
+    PartiallyAppliedFunctionUsedAsValue, StringIndexAccess, VoidComponent, VoidComponentKind,
+    WriteToCalldata, WriteToConstant, WrongArgumentCountInConversion,
 };
 use slang_solidity_v2_common::nodes::NodeId;
 use slang_solidity_v2_ir::ir;
@@ -341,13 +341,31 @@ impl Pass<'_> {
     }
 
     /// What a tuple of two or more that is read requires of `component`, on
-    /// top of being a value or a type name: a type of its own, as the tuple
-    /// builds its value from its components' own types. Reports it, returning
-    /// whether it has one. A tuple that is written to asks none of this: each
-    /// component is a location instead, which `Self::check_lvalues_under`
-    /// judges.
+    /// top of being a value or a type name: a value to read (see
+    /// [`Self::check_has_value_to_read`]), and a type of its own, as the tuple
+    /// builds its value from its components' own types. Reports what it lacks,
+    /// returning whether it has both. A tuple that is written to asks none of
+    /// this: each component is a location instead, which
+    /// `Self::check_lvalues_under` judges.
     pub(super) fn check_read_tuple_component(&mut self, component: &ir::Expression) -> bool {
-        self.check_not_too_large_literal(component)
+        self.check_has_value_to_read(component) && self.check_not_too_large_literal(component)
+    }
+
+    /// Reports `node`, the expression inside a pair of parentheses that is
+    /// read or a component of a tuple that is, if it has no value to read: a
+    /// call to a function that returns nothing (eg. `(f(), 1)`), or an empty
+    /// tuple. Returns whether it has one.
+    pub(super) fn check_has_value_to_read(&mut self, node: &ir::Expression) -> bool {
+        let is_void = self.raw_typing_of_expression(node).as_type_id() == Some(self.types.void());
+        if is_void {
+            self.push_diagnostic(
+                peel_parentheses(node),
+                VoidComponent {
+                    kind: VoidComponentKind::Tuple,
+                },
+            );
+        }
+        !is_void
     }
 
     /// Reports `node` if it is typed as a number literal that no type can
@@ -996,6 +1014,15 @@ impl Pass<'_> {
     fn check_array_literal_item(&mut self, item: &ir::Expression) -> Option<(TypeId, TypeId)> {
         let type_id = self.check_type_of_value_expression(item)?;
         let mobile_type_id = self.check_mobile_type(item, type_id)?;
+        if type_id == self.types.void() {
+            self.push_diagnostic(
+                peel_parentheses(item),
+                VoidComponent {
+                    kind: VoidComponentKind::Array,
+                },
+            );
+            return None;
+        }
         if !self.types.get_type_by_id(type_id).can_be_array_element() {
             // TODO(validation) SDR[750]: Error if the element type can't be an array element
             return None;
