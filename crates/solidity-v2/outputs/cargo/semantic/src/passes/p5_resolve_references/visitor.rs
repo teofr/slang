@@ -389,8 +389,8 @@ impl Visitor for Pass<'_> {
         let right = self.check_type_of_value_expression(&node.right_operand);
         let type_id =
             self.type_of_binary_operator_expression(left, right, |l, r| match &node.operator {
-                ir::AdditiveExpressionOperator::Plus(_) => Some(l.add(r)),
-                ir::AdditiveExpressionOperator::Minus(_) => Some(l.sub(r)),
+                ir::AdditiveExpressionOperator::Plus(_) => l.add(r),
+                ir::AdditiveExpressionOperator::Minus(_) => l.sub(r),
             });
         self.binder.set_node_type(node.id(), type_id);
         self.resolve_operator_function(node.id(), (&node.operator).into(), left, 2);
@@ -401,7 +401,7 @@ impl Visitor for Pass<'_> {
         let right = self.check_type_of_value_expression(&node.right_operand);
         let type_id =
             self.type_of_binary_operator_expression(left, right, |l, r| match &node.operator {
-                ir::MultiplicativeExpressionOperator::Asterisk(_) => Some(l.mul(r)),
+                ir::MultiplicativeExpressionOperator::Asterisk(_) => l.mul(r),
                 ir::MultiplicativeExpressionOperator::Slash(_) => l.div(r),
                 ir::MultiplicativeExpressionOperator::Percent(_) => l.rem(r),
             });

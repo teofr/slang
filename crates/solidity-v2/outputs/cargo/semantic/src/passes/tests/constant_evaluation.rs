@@ -232,3 +232,61 @@ fn test_storage_base_slot_evaluation() {
         (None, Some(StorageLayoutBaseNotConstant.into())),
     );
 }
+
+/// solc's 4096-bit limit on constants applies to array lengths too, and
+/// rejects an operation before computing a result that large.
+#[test]
+fn test_array_length_folding_is_limited_to_4096_bits() {
+    // `2^4096`, the largest power of two within the limit, cancels out.
+    assert_eq!(
+        folded_array_length(
+            "",
+            "uint256[2 ** 2048 * 2 ** 2048 - 2 ** 2048 * 2 ** 2048 + 1]"
+        ),
+        (U256::from(1), None),
+    );
+    // `2 ** 4294967295` would take 512 MB to compute.
+    assert_eq!(
+        folded_array_length("", "uint256[2 ** 4294967295 - 2 ** 4294967295 + 1]"),
+        (
+            U256::ZERO,
+            Some(
+                IncompatibleConstantOperator {
+                    operator: "**".to_owned(),
+                    left_type: "int_const 2".to_owned(),
+                    right_type: "int_const 4294967295".to_owned(),
+                }
+                .into()
+            ),
+        ),
+    );
+    assert_eq!(
+        folded_array_length("", "uint256[(1 << 4096) - (1 << 4096) + 1]"),
+        (
+            U256::ZERO,
+            Some(
+                IncompatibleConstantOperator {
+                    operator: "<<".to_owned(),
+                    left_type: "int_const 1".to_owned(),
+                    right_type: "int_const 4096".to_owned(),
+                }
+                .into()
+            ),
+        ),
+    );
+    // A chain of multiplications stops at the first step past the limit.
+    assert_eq!(
+        folded_array_length("", "uint256[1e-1233 * 1e-1233 * 1e1233 * 1e1233]"),
+        (
+            U256::ZERO,
+            Some(
+                IncompatibleConstantOperator {
+                    operator: "*".to_owned(),
+                    left_type: "rational_const 1 / 1000...(1226 digits omitted)...0000".to_owned(),
+                    right_type: "rational_const 1 / 1000...(1226 digits omitted)...0000".to_owned(),
+                }
+                .into()
+            ),
+        ),
+    );
+}

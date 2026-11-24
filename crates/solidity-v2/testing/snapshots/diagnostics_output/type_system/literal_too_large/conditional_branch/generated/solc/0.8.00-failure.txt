@@ -2,10 +2,10 @@
 
 Diagnostics: 1
 
-[TypeError 2271] Error: Operator ** not compatible with types int_const 2 and int_const 9999
+[TypeError 9717] Error: Invalid mobile type in true expression.
    ╭─[input.sol:7:16]
    │
- 7 │     return c ? 2**9999 : 1;
-   │                ───┬───  
-   │                   ╰───── Error occurred here.
+ 7 │     return c ? 2**300 : 1;
+   │                ───┬──  
+   │                   ╰──── Error occurred here.
 ───╯

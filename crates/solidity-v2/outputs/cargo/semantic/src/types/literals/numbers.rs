@@ -1,3 +1,4 @@
+use std::borrow::Cow;
 use std::fmt;
 use std::str::FromStr;
 
@@ -39,37 +40,60 @@ impl Number {
         let mut decimal = decimal_number_expression.literal.unparse().to_owned();
         decimal.retain(|c| c != '_');
         // Split off the exponent in-place, leaving `decimal` as the mantissa.
-        let exponent = match decimal.find(['e', 'E']) {
-            Some(idx) => {
-                let exp = decimal[idx + 1..].parse::<i64>().ok()?;
-                decimal.truncate(idx);
-                exp
-            }
-            None => 0,
-        };
+        let exponent = decimal.find(['e', 'E']).map(|idx| {
+            let exponent = decimal[idx + 1..].to_owned();
+            decimal.truncate(idx);
+            exponent
+        });
         // Record the fraction width and then strip the `.` so the buffer is
         // pure digits ready to be parsed as the numerator.
         let fraction_len = decimal.find('.').map_or(0, |idx| decimal.len() - idx - 1);
         decimal.retain(|c| c != '.');
         let numerator = BigInt::from_str(&decimal).ok()?;
+        let fraction_denominator = BigInt::from(10u32).pow(u32::try_from(fraction_len).ok()?);
         let unit = decimal_number_expression
             .unit
             .as_ref()
             .map_or_else(|| BigInt::from(1u32), number_unit_multiplier);
-        let scaled_numerator = numerator * unit;
-        let decimal_shift = exponent - i64::try_from(fraction_len).ok()?;
-        let denominator =
-            BigInt::from(10u32).pow(u32::try_from(decimal_shift.unsigned_abs()).ok()?);
-        if decimal_shift >= 0 {
-            Some(Self::Integer(scaled_numerator * denominator))
-        } else if scaled_numerator.is_multiple_of(&denominator) {
-            Some(Self::Integer(scaled_numerator / denominator))
-        } else {
-            Some(Self::from_rational(BigRational::new(
-                scaled_numerator,
-                denominator,
-            )))
+
+        let Some(exponent) = exponent else {
+            // Like solc, a literal without an exponent is not limited in
+            // precision: it is only bounded by its length.
+            let scaled_numerator = numerator * unit;
+            return if scaled_numerator.is_multiple_of(&fraction_denominator) {
+                Some(Self::Integer(scaled_numerator / fraction_denominator))
+            } else {
+                Some(Self::from_rational(BigRational::new(
+                    scaled_numerator,
+                    fraction_denominator,
+                )))
+            };
+        };
+
+        // A zero mantissa is zero, whatever its exponent.
+        if numerator.is_zero() {
+            return Some(Self::Integer(BigInt::zero()));
         }
+        // The exponent must fit in 32 bits, and the mantissa scaled by it in
+        // the precision limit, which solc checks before applying the unit.
+        let exponent = exponent.parse::<i32>().ok()?;
+        let mantissa = BigRational::new(numerator, fraction_denominator);
+        let exp_abs = exponent.unsigned_abs();
+        let limited_part = if exponent >= 0 {
+            mantissa.numer()
+        } else {
+            mantissa.denom()
+        };
+        if !fits_precision_base10(limited_part, exp_abs) {
+            return None;
+        }
+        let scale = BigRational::from(BigInt::from(10u32).pow(exp_abs));
+        let scaled = if exponent >= 0 {
+            mantissa * scale
+        } else {
+            mantissa / scale
+        };
+        Some(Self::from_rational(scaled * BigRational::from(unit)))
     }
 
     pub fn from_literal_kind(kind: &LiteralKind) -> Option<Self> {
@@ -144,38 +168,57 @@ impl Number {
         }
     }
 
-    pub(crate) fn add(&self, other: &Self) -> Self {
+    /// The value as a numerator and a positive denominator, in lowest terms.
+    fn parts(&self) -> (&BigInt, Cow<'_, BigInt>) {
+        match self {
+            Self::Integer(value) => (value, Cow::Owned(BigInt::one())),
+            Self::Rational(value) => (value.numer(), Cow::Borrowed(value.denom())),
+        }
+    }
+
+    /// The result of a binary operator, if it is within solc's precision limit
+    /// for constants: unless it's zero, its numerator and its denominator must
+    /// have their most significant bit at bit 4096 or below.
+    fn within_precision(self) -> Option<Self> {
+        let (numerator, denominator) = self.parts();
+        let fits = numerator.is_zero()
+            || numerator.bits().max(denominator.bits()) <= MAX_PRECISION_BITS + 1;
+        fits.then_some(self)
+    }
+
+    pub(crate) fn add(&self, other: &Self) -> Option<Self> {
         match (self, other) {
             (Self::Integer(lhs), Self::Integer(rhs)) => Self::Integer(lhs + rhs),
             _ => Self::from_rational(self.to_rational() + other.to_rational()),
         }
+        .within_precision()
     }
 
-    pub(crate) fn sub(&self, other: &Self) -> Self {
+    pub(crate) fn sub(&self, other: &Self) -> Option<Self> {
         match (self, other) {
             (Self::Integer(lhs), Self::Integer(rhs)) => Self::Integer(lhs - rhs),
             _ => Self::from_rational(self.to_rational() - other.to_rational()),
         }
+        .within_precision()
     }
 
-    pub(crate) fn mul(&self, other: &Self) -> Self {
+    pub(crate) fn mul(&self, other: &Self) -> Option<Self> {
         match (self, other) {
             (Self::Integer(lhs), Self::Integer(rhs)) => Self::Integer(lhs * rhs),
             _ => Self::from_rational(self.to_rational() * other.to_rational()),
         }
+        .within_precision()
     }
 
     /// Solidity literal arithmetic uses rational division even between two
     /// integer literals — `5 / 2` yields the rational `5/2`, not the integer
-    /// `2`. Only division by zero returns `None`.
+    /// `2`.
     pub(crate) fn div(&self, other: &Self) -> Option<Self> {
         if other.is_zero() {
             // TODO(validation) SDR[1737]: division by zero
             return None;
         }
-        Some(Self::from_rational(
-            self.to_rational() / other.to_rational(),
-        ))
+        Self::from_rational(self.to_rational() / other.to_rational()).within_precision()
     }
 
     pub(crate) fn rem(&self, other: &Self) -> Option<Self> {
@@ -183,15 +226,33 @@ impl Number {
             // TODO(validation) SDR[1737]: division by zero
             return None;
         }
-        Some(Self::from_rational(
-            self.to_rational() % other.to_rational(),
-        ))
+        Self::from_rational(self.to_rational() % other.to_rational()).within_precision()
     }
 
+    /// Follows solc: any value to the power of zero is one, and zero, one and
+    /// minus one to any power are computed without a limit on the exponent.
+    /// Otherwise the exponent must fit in 32 bits, and the result in the
+    /// precision limit, which is checked before computing it.
     pub(crate) fn pow(&self, exponent: &Self) -> Option<Self> {
         // TODO(validation) SDR[1738]: validate range of exponent
         let exponent = exponent.as_integer()?;
-        let exp_abs = exponent.abs().to_u32()?;
+        if exponent.is_zero() {
+            return Some(Self::Integer(BigInt::one()));
+        }
+        if let Self::Integer(base) = self {
+            if base.is_zero() || base.is_one() {
+                return Some(self.clone());
+            }
+            if (-base).is_one() {
+                let sign = if exponent.is_odd() { -1 } else { 1 };
+                return Some(Self::Integer(BigInt::from(sign)));
+            }
+        }
+        let exp_abs = exponent.magnitude().to_u32()?;
+        let (numerator, denominator) = self.parts();
+        if !fits_precision_exp(numerator, exp_abs) || !fits_precision_exp(&denominator, exp_abs) {
+            return None;
+        }
         let raised = match self {
             Self::Integer(base) => Self::Integer(base.pow(exp_abs)),
             Self::Rational(base) => {
@@ -199,29 +260,25 @@ impl Number {
                 Self::from_rational(base.pow(exp_i32))
             }
         };
-        if exponent.is_negative() {
-            if raised.is_zero() {
-                // TODO(validation) SDR[1737]: division by zero
-                return None;
-            }
-            Some(Self::from_rational(
-                BigRational::one() / raised.to_rational(),
-            ))
+        let result = if exponent.is_negative() {
+            // Not zero, as zero to a nonzero power is returned above.
+            Self::from_rational(BigRational::one() / raised.to_rational())
         } else {
-            Some(raised)
-        }
+            raised
+        };
+        result.within_precision()
     }
 
     pub(crate) fn bit_or(&self, other: &Self) -> Option<Self> {
         match (self, other) {
-            (Self::Integer(lhs), Self::Integer(rhs)) => Some(Self::Integer(lhs | rhs)),
+            (Self::Integer(lhs), Self::Integer(rhs)) => Self::Integer(lhs | rhs).within_precision(),
             _ => None,
         }
     }
 
     pub(crate) fn bit_xor(&self, other: &Self) -> Option<Self> {
         match (self, other) {
-            (Self::Integer(lhs), Self::Integer(rhs)) => Some(Self::Integer(lhs ^ rhs)),
+            (Self::Integer(lhs), Self::Integer(rhs)) => Self::Integer(lhs ^ rhs).within_precision(),
             _ => None,
         }
     }
@@ -235,24 +292,90 @@ impl Number {
 
     pub(crate) fn bit_and(&self, other: &Self) -> Option<Self> {
         match (self, other) {
-            (Self::Integer(lhs), Self::Integer(rhs)) => Some(Self::Integer(lhs & rhs)),
+            (Self::Integer(lhs), Self::Integer(rhs)) => Self::Integer(lhs & rhs).within_precision(),
             _ => None,
         }
     }
 
+    /// The shift amount must be a nonnegative integer that fits in 32 bits,
+    /// and the result must be within the precision limit, which is checked
+    /// before computing it.
     pub(crate) fn shl(&self, other: &Self) -> Option<Self> {
-        match (self, other) {
-            (Self::Integer(lhs), Self::Integer(rhs)) => Some(Self::Integer(lhs << rhs.to_u32()?)),
-            _ => None,
+        let (Self::Integer(lhs), Self::Integer(rhs)) = (self, other) else {
+            return None;
+        };
+        let amount = rhs.to_u32()?;
+        if !fits_precision_base2(lhs, amount) {
+            return None;
         }
+        Self::Integer(lhs << amount).within_precision()
     }
 
+    /// The shift amount must be a nonnegative integer that fits in 32 bits.
+    /// A negative value is rounded down, as solc does.
     pub(crate) fn shr(&self, other: &Self) -> Option<Self> {
-        match (self, other) {
-            (Self::Integer(lhs), Self::Integer(rhs)) => Some(Self::Integer(lhs >> rhs.to_u32()?)),
-            _ => None,
-        }
+        let (Self::Integer(lhs), Self::Integer(rhs)) = (self, other) else {
+            return None;
+        };
+        let amount = rhs.to_u32()?;
+        Self::Integer(lhs >> amount).within_precision()
     }
+}
+
+/// solc limits the numerator and the denominator of a constant to have their
+/// most significant bit at this bit or below, after every binary operator.
+const MAX_PRECISION_BITS: u64 = 4096;
+
+/// The index of the most significant bit of a nonzero `value`'s magnitude.
+fn most_significant_bit(value: &BigInt) -> u64 {
+    value.bits() - 1
+}
+
+/// Whether `|mantissa| * base ** exponent` fits in the precision limit, where
+/// `log2_of_base` is the base's logarithm. This is solc's `fitsPrecisionBaseX`,
+/// including its floating point rounding.
+fn fits_precision_base_x(mantissa: &BigInt, log2_of_base: f64, exponent: u32) -> bool {
+    if mantissa.is_zero() {
+        return true;
+    }
+    let msb = most_significant_bit(mantissa);
+    if msb > MAX_PRECISION_BITS {
+        return false;
+    }
+    // `exponent` has at most 32 bits, so the product is exact enough and in
+    // range. solc computes it the same way, with a `double`.
+    #[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
+    let scaled = (f64::from(exponent) * log2_of_base).floor() as u64;
+    // The result needs `msb + scaled + 1` bits.
+    msb + scaled < MAX_PRECISION_BITS
+}
+
+/// Whether `|mantissa| * 2 ** exponent` fits in the precision limit.
+fn fits_precision_base2(mantissa: &BigInt, exponent: u32) -> bool {
+    fits_precision_base_x(mantissa, 1.0, exponent)
+}
+
+/// Whether `|mantissa| * 10 ** exponent` fits in the precision limit.
+fn fits_precision_base10(mantissa: &BigInt, exponent: u32) -> bool {
+    // solc spells it `3.3219280948873624`, which is this same `f64`.
+    fits_precision_base_x(mantissa, std::f64::consts::LOG2_10, exponent)
+}
+
+/// Whether `|base| ** exponent` fits in the precision limit, by solc's
+/// conservative estimate of `exponent * (msb + 1)` bits. This is solc's
+/// `fitsPrecisionExp`.
+fn fits_precision_exp(base: &BigInt, exponent: u32) -> bool {
+    if base.is_zero() {
+        return true;
+    }
+    let msb = most_significant_bit(base);
+    if msb == 0 {
+        return true;
+    }
+    if msb > MAX_PRECISION_BITS {
+        return false;
+    }
+    u64::from(exponent) * (msb + 1) <= MAX_PRECISION_BITS
 }
 
 /// Human-readable form used in diagnostics: `int_const N` for an integer and

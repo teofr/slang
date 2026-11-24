@@ -1,0 +1,11 @@
+# This file is generated automatically by infrastructure scripts. Please don't edit by hand.
+
+Diagnostics: 1
+
+[TypeError 6020] Error: Operator ** not compatible with types int_const 2 and int_const 4294967295
+   ╭─[input.sol:7:13]
+   │
+ 7 │     uint256[2 ** 4294967295 - 2 ** 4294967295 + 1] data;
+   │             ───────┬───────  
+   │                    ╰───────── Error occurred here.
+───╯

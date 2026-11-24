@@ -33,6 +33,11 @@ mod arrays {
     }
 
     #[test]
+    fn fixed_size_past_precision_limit() -> Result<()> {
+        run("arrays", "fixed_size_past_precision_limit")
+    }
+
+    #[test]
     fn fixed_size_with_cyclic_imported_constants() -> Result<()> {
         run("arrays", "fixed_size_with_cyclic_imported_constants")
     }
@@ -65,11 +70,6 @@ mod arrays {
     #[test]
     fn fixed_size_with_shadowed_constants() -> Result<()> {
         run("arrays", "fixed_size_with_shadowed_constants")
-    }
-
-    #[test]
-    fn fixed_size_with_unbounded_precision_literals() -> Result<()> {
-        run("arrays", "fixed_size_with_unbounded_precision_literals")
     }
 
     #[test]

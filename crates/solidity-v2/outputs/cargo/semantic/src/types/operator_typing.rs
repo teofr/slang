@@ -22,12 +22,13 @@ pub(crate) enum BinaryOperator {
 impl BinaryOperator {
     /// Applies the operator to two literal numbers. Returns `None` when the
     /// operation is not defined for the values (eg. division by zero, or a
-    /// bitwise operator on a fractional rational).
+    /// bitwise operator on a fractional rational), or when the result is past
+    /// solc's precision limit for constants.
     pub(crate) fn fold(self, lhs: &Number, rhs: &Number) -> Option<Number> {
         match self {
-            Self::Add => Some(lhs.add(rhs)),
-            Self::Sub => Some(lhs.sub(rhs)),
-            Self::Mul => Some(lhs.mul(rhs)),
+            Self::Add => lhs.add(rhs),
+            Self::Sub => lhs.sub(rhs),
+            Self::Mul => lhs.mul(rhs),
             Self::Div => lhs.div(rhs),
             Self::Rem => lhs.rem(rhs),
             Self::BitOr => lhs.bit_or(rhs),

@@ -6625,6 +6625,25 @@ mod type_system {
         }
     }
 
+    mod constant_precision_limit {
+        use super::*;
+
+        #[test]
+        fn array_length() -> Result<()> {
+            run("type_system/constant_precision_limit", "array_length")
+        }
+
+        #[test]
+        fn function_body() -> Result<()> {
+            run("type_system/constant_precision_limit", "function_body")
+        }
+
+        #[test]
+        fn literal_exponent() -> Result<()> {
+            run("type_system/constant_precision_limit", "literal_exponent")
+        }
+    }
+
     mod contract_too_large_for_storage {
         use super::*;
 
