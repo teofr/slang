@@ -412,5 +412,12 @@ fn test_decimal_literal_values() {
             Some(expected),
             "{expression_text}"
         );
+    } // Exponents at the ends of the range don't overflow computing the shift.
+    for expression_text in ["10e9223372036854775807", "1.5e-9223372036854775808"] {
+        assert_eq!(
+            expression(expression_text).into_type().0,
+            None,
+            "{expression_text}"
+        );
     }
 }

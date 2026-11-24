@@ -64,8 +64,9 @@ impl Number {
             .as_ref()
             .map_or_else(|| BigInt::from(1u32), number_unit_multiplier);
         let scaled_numerator = numerator * unit;
-        let decimal_shift =
-            exponent - i64::try_from(fraction_len).ok()? + i64::try_from(dropped_zeros).ok()?;
+        let decimal_shift = exponent
+            .checked_sub(i64::try_from(fraction_len).ok()?)?
+            .checked_add(i64::try_from(dropped_zeros).ok()?)?;
         let denominator =
             BigInt::from(10u32).pow(u32::try_from(decimal_shift.unsigned_abs()).ok()?);
         if decimal_shift >= 0 {
