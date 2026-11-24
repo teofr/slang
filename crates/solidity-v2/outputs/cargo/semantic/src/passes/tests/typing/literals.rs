@@ -3,10 +3,9 @@
 //! array lengths and storage base slots.
 
 use num_bigint::{BigInt, BigUint};
-use num_rational::BigRational;
 
 use super::expression;
-use crate::types::{AddressType, LiteralKind, Type};
+use crate::types::{AddressType, LiteralKind, Rational, Type};
 
 #[test]
 fn test_value_bearing_integer_literal_types() {
@@ -134,7 +133,7 @@ fn test_binary_arithmetic_folds_to_narrowed_literal() {
     assert_eq!(
         type_,
         Type::Literal(LiteralKind::Rational {
-            value: BigRational::new(BigInt::from(5), BigInt::from(2))
+            value: Rational::new(BigInt::from(5), BigInt::from(2))
         })
     );
 
@@ -336,4 +335,42 @@ fn test_hex_string_literal_value() {
     // Concatenated hex string literals: the pieces are joined.
     let (type_, _) = expression(r#"hex"4142" hex"43""#).into_resolved_type();
     assert_eq!(type_, hex_string_literal(b"ABC"));
+}
+
+/// Digits 1 to 9 from a fixed linear congruential generator. A literal made
+/// of them has a continued fraction about as long as the literal itself.
+fn pseudo_random_digits(count: usize) -> String {
+    let mut state: u64 = 1;
+    (0..count)
+        .map(|_| {
+            state = state
+                .wrapping_mul(6_364_136_223_846_793_005)
+                .wrapping_add(1_442_695_040_888_963_407);
+            char::from(b'1' + u8::try_from((state >> 33) % 9).unwrap())
+        })
+        .collect()
+}
+
+/// Interning the type of a fractional literal with a long continued fraction
+/// used to overflow the stack, as `BigRational` hashes it term by term. The
+/// analysis runs on a thread with a fixed stack, the size of a main thread's,
+/// so the outcome doesn't depend on the test runner's default.
+#[test]
+fn test_long_fractional_literal_types_without_overflowing_the_stack() {
+    let digits = pseudo_random_digits(30_000);
+    let literal = format!("0.{digits}");
+    let type_ = std::thread::Builder::new()
+        .stack_size(8 * 1024 * 1024)
+        .spawn(move || expression(&literal).into_resolved_type().0)
+        .unwrap()
+        .join()
+        .unwrap();
+    let expected = Rational::new(
+        digits.parse::<BigInt>().unwrap(),
+        BigInt::from(10).pow(30_000),
+    );
+    assert_eq!(
+        type_,
+        Type::Literal(LiteralKind::Rational { value: expected })
+    );
 }

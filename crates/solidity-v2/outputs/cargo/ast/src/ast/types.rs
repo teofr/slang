@@ -8,7 +8,7 @@ use slang_solidity_v2_semantic::context::SemanticContext;
 use slang_solidity_v2_semantic::types::{
     self, CallMode, DataLocation, FunctionTypeMutability, TypeId,
 };
-pub use slang_solidity_v2_semantic::types::{LiteralKind, Number};
+pub use slang_solidity_v2_semantic::types::{LiteralKind, Number, Rational};
 
 use super::Definition;
 

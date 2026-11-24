@@ -22,7 +22,7 @@ mod types;
 pub use types::{
     AddressType, ArraySliceType, ArrayType, BooleanType, ByteArrayType, BytesType, ContractType,
     EnumType, ErrorType, EventType, FixedPointNumberType, FixedSizeArrayType, FunctionType,
-    IntegerType, InterfaceType, LiteralKind, LiteralType, MappingType, MetaType, Number,
+    IntegerType, InterfaceType, LiteralKind, LiteralType, MappingType, MetaType, Number, Rational,
     StringType, StructType, TupleType, Type, UserDefinedValueType, UserMetaType,
 };
 

@@ -171,6 +171,7 @@ pub type slang_solidity_v2_ast::abi::AbiMutability = slang_solidity_v2_semantic:
 pub mod slang_solidity_v2_ast::ast
 pub use slang_solidity_v2_ast::ast::LiteralKind
 pub use slang_solidity_v2_ast::ast::Number
+pub use slang_solidity_v2_ast::ast::Rational
 pub mod slang_solidity_v2_ast::ast::visitor
 pub macro slang_solidity_v2_ast::ast::visitor::impl_nonterminal_visitor_hooks!
 pub trait slang_solidity_v2_ast::ast::visitor::Visitor
