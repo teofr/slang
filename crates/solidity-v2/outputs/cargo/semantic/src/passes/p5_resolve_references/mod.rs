@@ -1,3 +1,4 @@
+use slang_solidity_v2_common::collections::Set;
 use slang_solidity_v2_common::diagnostics::DiagnosticCollection;
 use slang_solidity_v2_common::diagnostics::kinds::DiagnosticKind;
 use slang_solidity_v2_common::nodes::NodeId;
@@ -40,6 +41,11 @@ struct Pass<'a> {
     types: &'a mut TypeRegistry,
     file_node_mapper: &'a FileNodeMapper,
     diagnostics: &'a mut DiagnosticCollection,
+    /// The tuples that are written to (on the left of an assignment, or the
+    /// operand of `delete`, `++` or `--`), marked before they are visited.
+    /// Every other tuple is read, which builds a value from its components and
+    /// so asks more of them; see `Pass::check_read_tuple_component`.
+    written_tuples: Set<NodeId>,
 }
 
 impl<'a> Pass<'a> {
@@ -56,6 +62,7 @@ impl<'a> Pass<'a> {
             types,
             file_node_mapper,
             diagnostics,
+            written_tuples: Set::default(),
         };
         ir::visitor::accept_source_unit(file.ir_root(), &mut pass);
         assert!(pass.scope_stack.is_empty());

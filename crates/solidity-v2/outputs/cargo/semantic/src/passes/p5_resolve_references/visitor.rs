@@ -180,8 +180,9 @@ impl Visitor for Pass<'_> {
         // reference a second time, since the expression statement it is written
         // as has already checked (and reported) the same node.
         if let Some(iterator) = &node.iterator {
-            // Check that the iterator expression type resolves unambiguously
+            // The iterator is a statement of its own, as the initialisation is.
             self.check_typing_of_expression(iterator);
+            self.check_not_too_large_literal(iterator);
         }
         self.leave_scope_for_node_id(node.id());
     }
@@ -418,6 +419,33 @@ impl Visitor for Pass<'_> {
         self.binder.set_node_type(node.id(), type_id);
     }
 
+    fn enter_assignment_expression(&mut self, node: &ir::AssignmentExpression) -> bool {
+        // A tuple is written to or read, and only a tuple that is read builds a
+        // value; its own visit needs to know which it is. See
+        // `Pass::check_read_tuple_component`.
+        self.mark_written_tuples(&node.left_operand);
+        true
+    }
+
+    fn enter_postfix_expression(&mut self, node: &ir::PostfixExpression) -> bool {
+        // As for an assignment, `++` and `--` write to their operand.
+        self.mark_written_tuples(&node.operand);
+        true
+    }
+
+    fn enter_prefix_expression(&mut self, node: &ir::PrefixExpression) -> bool {
+        // As for an assignment, `delete`, `++` and `--` write to their operand.
+        if matches!(
+            node.operator,
+            ir::PrefixExpressionOperator::DeleteKeyword(_)
+                | ir::PrefixExpressionOperator::PlusPlus(_)
+                | ir::PrefixExpressionOperator::MinusMinus(_)
+        ) {
+            self.mark_written_tuples(&node.operand);
+        }
+        true
+    }
+
     fn leave_postfix_expression(&mut self, node: &ir::PostfixExpression) {
         // `++` and `--` write back to their operand, which therefore has to be
         // a location.
@@ -460,6 +488,7 @@ impl Visitor for Pass<'_> {
         } else {
             let mut types = Vec::with_capacity(node.items.len());
             let mut all_typed = true;
+            let is_read = !self.written_tuples.contains(&node.id());
             for item in node.items.iter() {
                 // A component may name a type, as every component of the
                 // second argument of `abi.decode` does. The tuple then denotes
@@ -468,6 +497,10 @@ impl Visitor for Pass<'_> {
                 match &item.expression {
                     Some(expression) => {
                         match self.check_type_of_value_or_type_name_expression(expression) {
+                            // A tuple that is read asks more of its components.
+                            Some(_) if is_read && !self.check_read_tuple_component(expression) => {
+                                all_typed = false;
+                            }
                             Some(type_id) => types.push(type_id),
                             None => all_typed = false,
                         }
@@ -872,6 +905,8 @@ impl Visitor for Pass<'_> {
         // statements, so keep the behaviour in sync with
         // [`Self::leave_for_statement`]. __SLANG_EXPRESSION_STATEMENT_TYPE__
         self.check_typing_of_expression(&node.expression);
+        // The expression has no target type to convert to, so it keeps its own.
+        self.check_not_too_large_literal(&node.expression);
     }
 
     fn leave_if_statement(&mut self, node: &ir::IfStatement) {

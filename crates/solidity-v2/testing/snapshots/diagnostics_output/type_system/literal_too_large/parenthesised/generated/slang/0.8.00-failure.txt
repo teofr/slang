@@ -1,0 +1,19 @@
+# This file is generated automatically by infrastructure scripts. Please don't edit by hand.
+
+Diagnostics: 2
+
+[type-system/literal-too-large] Error: This literal value is too large to fit into EVM slots (32 bytes).
+    ╭─[input.sol:10:10]
+    │
+ 10 │         (2**300);
+    │          ───┬──  
+    │             ╰──── Error occurred here.
+────╯
+
+[type-system/literal-too-large] Error: This literal value is too large to fit into EVM slots (32 bytes).
+    ╭─[input.sol:11:14]
+    │
+ 11 │         (1, (2**270));
+    │              ───┬──  
+    │                 ╰──── Error occurred here.
+────╯

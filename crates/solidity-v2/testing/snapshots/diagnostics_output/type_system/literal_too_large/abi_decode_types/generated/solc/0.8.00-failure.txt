@@ -1,0 +1,11 @@
+# This file is generated automatically by infrastructure scripts. Please don't edit by hand.
+
+Diagnostics: 1
+
+[TypeError 3390] Error: Invalid rational number.
+    ╭─[input.sol:10:29]
+    │
+ 10 │     abi.decode(data, (uint, 2**300));
+    │                             ───┬──  
+    │                                ╰──── Error occurred here.
+────╯
