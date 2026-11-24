@@ -1,3 +1,4 @@
+use std::borrow::Cow;
 use std::fmt;
 use std::str::FromStr;
 
@@ -51,24 +52,80 @@ impl Number {
         // pure digits ready to be parsed as the numerator.
         let fraction_len = decimal.find('.').map_or(0, |idx| decimal.len() - idx - 1);
         decimal.retain(|c| c != '.');
+        // Trailing zeros only scale the value by a power of ten, which the
+        // exponent can carry instead. Dropping them keeps them from being
+        // parsed, and from being reduced as factors of 2 and 5.
+        let trailing_zeros = decimal.len() - decimal.trim_end_matches('0').len();
+        let dropped_zeros = trailing_zeros.min(decimal.len().saturating_sub(1));
+        decimal.truncate(decimal.len() - dropped_zeros);
         let numerator = BigInt::from_str(&decimal).ok()?;
         let unit = decimal_number_expression
             .unit
             .as_ref()
             .map_or_else(|| BigInt::from(1u32), number_unit_multiplier);
         let scaled_numerator = numerator * unit;
-        let decimal_shift = exponent - i64::try_from(fraction_len).ok()?;
+        let decimal_shift = exponent
+            .checked_sub(i64::try_from(fraction_len).ok()?)?
+            .checked_add(i64::try_from(dropped_zeros).ok()?)?;
         let denominator =
             BigInt::from(10u32).pow(u32::try_from(decimal_shift.unsigned_abs()).ok()?);
         if decimal_shift >= 0 {
             Some(Self::Integer(scaled_numerator * denominator))
-        } else if scaled_numerator.is_multiple_of(&denominator) {
-            Some(Self::Integer(scaled_numerator / denominator))
         } else {
-            Some(Self::from_rational(BigRational::new(
+            Some(Self::from_decimal_fraction(
                 scaled_numerator,
-                denominator,
-            )))
+                u32::try_from(decimal_shift.unsigned_abs()).ok()?,
+            ))
+        }
+    }
+
+    /// `numerator / 10^exponent`, in lowest terms. As `10^exponent` only has
+    /// the prime factors 2 and 5, it is reduced by counting those in the
+    /// numerator, rather than with a gcd, which is slow on long literals.
+    fn from_decimal_fraction(mut numerator: BigInt, exponent: u32) -> Self {
+        if numerator.is_zero() {
+            return Self::Integer(numerator);
+        }
+        let twos = numerator.trailing_zeros().map_or(exponent, |zeros| {
+            exponent.min(u32::try_from(zeros).unwrap_or(u32::MAX))
+        });
+        numerator >>= twos;
+        let fives = remove_factors_of_five(&mut numerator, exponent);
+        debug_assert!(twos <= exponent && fives <= exponent);
+        let denominator =
+            (BigInt::one() << (exponent - twos)) * BigInt::from(5u32).pow(exponent - fives);
+        if denominator.is_one() {
+            Self::Integer(numerator)
+        } else {
+            Self::Rational(BigRational::new_raw(numerator, denominator))
+        }
+    }
+
+    /// `numerator / denominator`, in lowest terms, normalised to `Integer`
+    /// when the denominator reduces to one. `denominator` must not be zero.
+    fn from_fraction(mut numerator: BigInt, mut denominator: BigInt) -> Self {
+        debug_assert!(!denominator.is_zero());
+        let divisor = gcd(&numerator, &denominator);
+        if !divisor.is_one() {
+            numerator /= &divisor;
+            denominator /= &divisor;
+        }
+        if denominator.is_negative() {
+            numerator = -numerator;
+            denominator = -denominator;
+        }
+        if denominator.is_one() {
+            Self::Integer(numerator)
+        } else {
+            Self::Rational(BigRational::new_raw(numerator, denominator))
+        }
+    }
+
+    /// The value as a numerator and a positive denominator, in lowest terms.
+    fn parts(&self) -> (&BigInt, Cow<'_, BigInt>) {
+        match self {
+            Self::Integer(value) => (value, Cow::Owned(BigInt::one())),
+            Self::Rational(value) => (value.numer(), Cow::Borrowed(value.denom())),
         }
     }
 
@@ -144,25 +201,62 @@ impl Number {
         }
     }
 
-    pub(crate) fn add(&self, other: &Self) -> Self {
-        match (self, other) {
-            (Self::Integer(lhs), Self::Integer(rhs)) => Self::Integer(lhs + rhs),
-            _ => Self::from_rational(self.to_rational() + other.to_rational()),
+    /// A numerator and a positive denominator in lowest terms, normalised to
+    /// `Integer` when the value is whole.
+    fn from_reduced_parts(numerator: BigInt, denominator: BigInt) -> Self {
+        debug_assert!(denominator.is_positive());
+        if numerator.is_zero() || denominator.is_one() {
+            Self::Integer(numerator)
+        } else {
+            Self::Rational(BigRational::new_raw(numerator, denominator))
         }
+    }
+
+    // The arithmetic below works on numerators and denominators rather than
+    // with `BigRational`'s operators, which reduce their results with a gcd of
+    // two numbers as long as the operands. Here, as the operands are already
+    // in lowest terms, each gcd is between parts of different operands, and
+    // starts with a remainder (see `gcd`), so a long literal meeting a short
+    // one costs time linear in its length.
+
+    pub(crate) fn add(&self, other: &Self) -> Self {
+        if let (Self::Integer(lhs), Self::Integer(rhs)) = (self, other) {
+            return Self::Integer(lhs + rhs);
+        }
+        // Henrici's addition: with `g = gcd(b, d)`, `a/b + c/d` is
+        // `t / (b/g * d)` where `t = a * d/g + c * b/g`, and the only factors
+        // `t` can share with that denominator are those of `g`.
+        let ((lhs_numer, lhs_denom), (rhs_numer, rhs_denom)) = (self.parts(), other.parts());
+        let common = gcd(&lhs_denom, &rhs_denom);
+        if common.is_one() {
+            return Self::from_reduced_parts(
+                lhs_numer * &*rhs_denom + rhs_numer * &*lhs_denom,
+                &*lhs_denom * &*rhs_denom,
+            );
+        }
+        let (lhs_cofactor, rhs_cofactor) = (&*lhs_denom / &common, &*rhs_denom / &common);
+        let numerator = lhs_numer * &rhs_cofactor + rhs_numer * &lhs_cofactor;
+        let shared = gcd(&numerator, &common);
+        Self::from_reduced_parts(numerator / &shared, lhs_cofactor * (&*rhs_denom / &shared))
     }
 
     pub(crate) fn sub(&self, other: &Self) -> Self {
-        match (self, other) {
-            (Self::Integer(lhs), Self::Integer(rhs)) => Self::Integer(lhs - rhs),
-            _ => Self::from_rational(self.to_rational() - other.to_rational()),
-        }
+        self.add(&other.negate())
     }
 
     pub(crate) fn mul(&self, other: &Self) -> Self {
-        match (self, other) {
-            (Self::Integer(lhs), Self::Integer(rhs)) => Self::Integer(lhs * rhs),
-            _ => Self::from_rational(self.to_rational() * other.to_rational()),
+        if let (Self::Integer(lhs), Self::Integer(rhs)) = (self, other) {
+            return Self::Integer(lhs * rhs);
         }
+        let ((a, b), (c, d)) = (self.parts(), other.parts());
+        Self::mul_parts(a, &b, c, &d)
+    }
+
+    /// `a/b * c/d`, for both in lowest terms with positive denominators.
+    /// Cancelling `gcd(a, d)` and `gcd(c, b)` leaves it in lowest terms.
+    fn mul_parts(a: &BigInt, b: &BigInt, c: &BigInt, d: &BigInt) -> Self {
+        let (g1, g2) = (gcd(a, d), gcd(c, b));
+        Self::from_reduced_parts((a / &g1) * (c / &g2), (b / &g2) * (d / &g1))
     }
 
     /// Solidity literal arithmetic uses rational division even between two
@@ -173,18 +267,29 @@ impl Number {
             // TODO(validation) SDR[1737]: division by zero
             return None;
         }
-        Some(Self::from_rational(
-            self.to_rational() / other.to_rational(),
-        ))
+        // Multiply by the reciprocal `d/c`, keeping its denominator positive.
+        let ((a, b), (c, d)) = (self.parts(), other.parts());
+        let (d, c) = if c.is_negative() {
+            (-&*d, -c)
+        } else {
+            (d.into_owned(), c.clone())
+        };
+        Some(Self::mul_parts(a, &b, &d, &c))
     }
 
+    /// The remainder of the division truncated toward zero, so it has the sign
+    /// of the dividend.
     pub(crate) fn rem(&self, other: &Self) -> Option<Self> {
         if other.is_zero() {
             // TODO(validation) SDR[1737]: division by zero
             return None;
         }
-        Some(Self::from_rational(
-            self.to_rational() % other.to_rational(),
+        // Over the common denominator `lhs_denom * rhs_denom`, the operands'
+        // numerators are integers, and `BigInt`'s `%` truncates toward zero.
+        let ((lhs_numer, lhs_denom), (rhs_numer, rhs_denom)) = (self.parts(), other.parts());
+        Some(Self::from_fraction(
+            (lhs_numer * &*rhs_denom) % (rhs_numer * &*lhs_denom),
+            &*lhs_denom * &*rhs_denom,
         ))
     }
 
@@ -204,9 +309,7 @@ impl Number {
                 // TODO(validation) SDR[1737]: division by zero
                 return None;
             }
-            Some(Self::from_rational(
-                BigRational::one() / raised.to_rational(),
-            ))
+            Self::Integer(BigInt::one()).div(&raised)
         } else {
             Some(raised)
         }
@@ -253,6 +356,44 @@ impl Number {
             _ => None,
         }
     }
+}
+
+/// `gcd(a, b)`, starting with a step of Euclid's algorithm. num-integer's gcd
+/// is Stein's binary algorithm, which takes `O(bits × words)` when one operand
+/// is much larger than the other, as when a long literal meets a short one.
+/// One remainder first brings the larger operand down to the smaller one's size.
+fn gcd(a: &BigInt, b: &BigInt) -> BigInt {
+    let (larger, smaller) = if a.magnitude() >= b.magnitude() {
+        (a, b)
+    } else {
+        (b, a)
+    };
+    if smaller.is_zero() {
+        return larger.abs();
+    }
+    (larger % smaller).gcd(smaller)
+}
+
+/// Divides `value` by 5 as many times as it divides evenly, up to `limit`
+/// times, and returns how many. It divides by the largest power of 5 that fits
+/// in a machine word while it can, as dividing by a one-word divisor takes a
+/// single pass over `value`. The total is quadratic when `value` has a very
+/// large power of 5 as a factor, but a literal's trailing zeros are dropped
+/// before, so only a literal spelling out such a multiple reaches that.
+fn remove_factors_of_five(value: &mut BigInt, limit: u32) -> u32 {
+    const FIVE_POW_27: u64 = 7_450_580_596_923_828_125;
+    let mut removed = 0;
+    for (step, divisor) in [(27, BigInt::from(FIVE_POW_27)), (1, BigInt::from(5u32))] {
+        while limit - removed >= step {
+            let (quotient, remainder) = value.div_rem(&divisor);
+            if !remainder.is_zero() {
+                break;
+            }
+            *value = quotient;
+            removed += step;
+        }
+    }
+    removed
 }
 
 /// Human-readable form used in diagnostics: `int_const N` for an integer and
@@ -330,16 +471,19 @@ pub(crate) fn integer_literal_fits_in(value: &BigInt, target: &IntegerType) -> b
 /// truncation: scaled by `10^decimal_places`, it must be an integer within
 /// `bits`.
 pub(crate) fn literal_fits_in_fixed_point(value: &Number, target: &FixedPointNumberType) -> bool {
-    let scaled =
-        value.to_rational() * BigRational::from(BigInt::from(10u32).pow(target.decimal_places));
-    scaled.is_integer()
-        && integer_literal_fits_in(
-            &scaled.to_integer(),
+    let scaled = value.mul(&Number::Integer(
+        BigInt::from(10u32).pow(target.decimal_places),
+    ));
+    match scaled {
+        Number::Integer(scaled) => integer_literal_fits_in(
+            &scaled,
             &IntegerType {
                 is_signed: target.is_signed,
                 bits: target.bits,
             },
-        )
+        ),
+        Number::Rational(_) => false,
+    }
 }
 
 /// Returns true if every value of the `source` integer type fits in the
@@ -435,8 +579,11 @@ pub(crate) fn smallest_fixed_point_type_to_fit(value: &BigRational) -> Option<Ty
         .try_into()
         .unwrap();
     remaining_denominator >>= factors_of_two;
+    // Counting past `MAX_DECIMAL_PLACES` would not change the result, as the
+    // natural precision is then over the cap. Each count divides the whole
+    // denominator, which can be as long as a literal.
     let mut factors_of_five: u32 = 0;
-    while remaining_denominator.is_multiple_of(&five) {
+    while factors_of_five <= MAX_DECIMAL_PLACES && remaining_denominator.is_multiple_of(&five) {
         remaining_denominator /= &five;
         factors_of_five += 1;
     }
@@ -517,6 +664,107 @@ mod tests {
             BigInt::from(numerator),
             BigInt::from(denominator),
         ))
+    }
+
+    /// Numbers with small numerators and denominators of either sign, from a
+    /// fixed linear congruential generator.
+    fn sample_numbers() -> Vec<Number> {
+        let mut state: u64 = 1;
+        let mut next = |modulus: u64| {
+            state = state
+                .wrapping_mul(6_364_136_223_846_793_005)
+                .wrapping_add(1_442_695_040_888_963_407);
+            i64::try_from((state >> 33) % modulus).unwrap()
+        };
+        let mut numbers: Vec<Number> = (0..50)
+            .map(|_| {
+                let numerator = next(2001) - 1000;
+                let denominator = next(60) + 1;
+                Number::from_rational(BigRational::new(
+                    BigInt::from(numerator),
+                    BigInt::from(denominator),
+                ))
+            })
+            .collect();
+        // Multi-word parts, with factors in common with the short ones.
+        for (numerator, denominator) in [
+            (BigInt::from(10).pow(40) + 7, BigInt::from(3).pow(25)),
+            (BigInt::from(2).pow(100), BigInt::from(1)),
+            (-BigInt::from(5).pow(50), BigInt::from(2).pow(60) * 3),
+            (BigInt::from(7), BigInt::from(10).pow(30) * 6),
+            (BigInt::from(6).pow(30) + 1, BigInt::from(6).pow(30)),
+        ] {
+            numbers.push(Number::from_rational(BigRational::new(
+                numerator,
+                denominator,
+            )));
+        }
+        numbers
+    }
+
+    /// The arithmetic reduces its results itself, and must agree with
+    /// `BigRational`'s operators.
+    #[test]
+    fn arithmetic_agrees_with_big_rational() {
+        let numbers = sample_numbers();
+        for lhs in &numbers {
+            for rhs in &numbers {
+                let (lhs_rational, rhs_rational) = (lhs.to_rational(), rhs.to_rational());
+                assert_eq!(
+                    lhs.add(rhs),
+                    Number::from_rational(&lhs_rational + &rhs_rational)
+                );
+                assert_eq!(
+                    lhs.sub(rhs),
+                    Number::from_rational(&lhs_rational - &rhs_rational)
+                );
+                assert_eq!(
+                    lhs.mul(rhs),
+                    Number::from_rational(&lhs_rational * &rhs_rational)
+                );
+                if !rhs.is_zero() {
+                    assert_eq!(
+                        lhs.div(rhs),
+                        Some(Number::from_rational(&lhs_rational / &rhs_rational))
+                    );
+                    assert_eq!(
+                        lhs.rem(rhs),
+                        Some(Number::from_rational(&lhs_rational % &rhs_rational))
+                    );
+                }
+            }
+        }
+    }
+
+    /// A decimal fraction is reduced by counting factors of 2 and 5, and must
+    /// agree with `BigRational::new`.
+    #[test]
+    fn decimal_fractions_agree_with_big_rational() {
+        let numerators = [
+            BigInt::from(0),
+            BigInt::from(1),
+            BigInt::from(7),
+            BigInt::from(1000),
+            BigInt::from(1024),
+            BigInt::from(-250),
+            BigInt::from(5).pow(30),
+            BigInt::from(5).pow(60) * 3,
+            BigInt::from(2).pow(70) * BigInt::from(5).pow(40),
+            BigInt::from(10).pow(50) + 1,
+        ];
+        for numerator in numerators {
+            for exponent in [0, 1, 2, 26, 27, 28, 29, 54, 61, 100] {
+                let expected = Number::from_rational(BigRational::new(
+                    numerator.clone(),
+                    BigInt::from(10).pow(exponent),
+                ));
+                assert_eq!(
+                    Number::from_decimal_fraction(numerator.clone(), exponent),
+                    expected,
+                    "{numerator} / 10^{exponent}"
+                );
+            }
+        }
     }
 
     #[test]
