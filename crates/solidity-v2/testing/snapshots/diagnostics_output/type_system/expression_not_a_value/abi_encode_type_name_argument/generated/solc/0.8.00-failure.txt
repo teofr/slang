@@ -1,0 +1,11 @@
+# This file is generated automatically by infrastructure scripts. Please don't edit by hand.
+
+Diagnostics: 1
+
+[TypeError 2056] Error: This type cannot be encoded.
+   ╭─[input.sol:9:23]
+   │
+ 9 │     return abi.encode(uint);
+   │                       ──┬─  
+   │                         ╰─── Error occurred here.
+───╯
