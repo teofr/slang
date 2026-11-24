@@ -6409,6 +6409,34 @@ mod type_system {
         }
     }
 
+    mod assignment_to_type_with_mapping {
+        use super::*;
+
+        #[test]
+        fn accepted_local_pointer() -> Result<()> {
+            run(
+                "type_system/assignment_to_type_with_mapping",
+                "accepted_local_pointer",
+            )
+        }
+
+        #[test]
+        fn state_variable() -> Result<()> {
+            run(
+                "type_system/assignment_to_type_with_mapping",
+                "state_variable",
+            )
+        }
+
+        #[test]
+        fn tuple_component() -> Result<()> {
+            run(
+                "type_system/assignment_to_type_with_mapping",
+                "tuple_component",
+            )
+        }
+    }
+
     mod call_options_already_set {
         use super::*;
 
