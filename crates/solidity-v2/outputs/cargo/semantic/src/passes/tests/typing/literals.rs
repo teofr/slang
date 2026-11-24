@@ -353,24 +353,64 @@ fn type_within(expression_text: String, limit: std::time::Duration) -> Option<Ty
 }
 
 /// A long literal is reduced to lowest terms without a gcd of two long
-/// numbers, and arithmetic with a short one starts with a remainder, rather
-/// than taking time quadratic in its length. Each took seconds before.
+/// numbers, and arithmetic with it only takes the gcd of a long number and a
+/// short one, starting with a remainder. Each of these took from seconds to
+/// minutes before. Parsing the literal still takes time quadratic in its length,
+/// which is most of what's left.
 #[test]
-fn test_long_literals_type_in_linear_time() {
+fn test_long_literals_type_quickly() {
     const DIGITS: usize = 500_000;
     let limit = std::time::Duration::from_secs(30);
+    let nines = "9".repeat(DIGITS - 1);
+    let zeros = "0".repeat(DIGITS - 1);
+    for expression_text in [
+        // `(2·10^(n-1) - 1) / (2·10^(n-1))`
+        format!("0.{nines}5"),
+        format!("0.{nines}5 + 1"),
+        format!("0.{nines}5 * 0.5"),
+        // `/ 3` makes it a rational, which `* 7` multiplies.
+        format!("1{zeros} / 3 * 7"),
+        // Trailing zeros are not reduced as factors of 2 and 5.
+        format!("1.{zeros}1 - 1.{zeros}"),
+    ] {
+        let type_ = type_within(expression_text, limit);
+        assert!(matches!(
+            type_,
+            Some(Type::Literal(LiteralKind::Rational { .. }))
+        ));
+    }
+}
 
-    // `0.99…95` reduces to `(2·10^(n-1) - 1) / (2·10^(n-1))`.
-    let type_ = type_within(format!("0.{}5", "9".repeat(DIGITS - 1)), limit);
-    assert!(matches!(
-        type_,
-        Some(Type::Literal(LiteralKind::Rational { .. }))
-    ));
-
-    // `/ 3` makes it a rational, which `* 7` multiplies.
-    let type_ = type_within(format!("1{} / 3 * 7", "0".repeat(DIGITS - 1)), limit);
-    assert!(matches!(
-        type_,
-        Some(Type::Literal(LiteralKind::Rational { .. }))
-    ));
+/// Decimal literals are reduced to lowest terms, whatever their form.
+#[test]
+fn test_decimal_literal_values() {
+    let rational = |numerator: i64, denominator: i64| {
+        Type::Literal(LiteralKind::Rational {
+            value: BigRational::new(BigInt::from(numerator), BigInt::from(denominator)),
+        })
+    };
+    let integer = |value: i64| {
+        Type::Literal(LiteralKind::Integer {
+            value: BigInt::from(value),
+        })
+    };
+    for (expression_text, expected) in [
+        ("1.000", integer(1)),
+        ("0.50", rational(1, 2)),
+        ("1200e-2", integer(12)),
+        ("100e-3", rational(1, 10)),
+        ("1.5e-3", rational(3, 2000)),
+        ("25e-2 ether", integer(250_000_000_000_000_000)),
+        ("0.000", integer(0)),
+        ("0e-5", integer(0)),
+        ("1_000.0_0", integer(1000)),
+        ("12.5 minutes", integer(750)),
+        ("0.0125", rational(1, 80)),
+    ] {
+        assert_eq!(
+            expression(expression_text).into_type().0,
+            Some(expected),
+            "{expression_text}"
+        );
+    }
 }
