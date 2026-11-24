@@ -337,3 +337,40 @@ fn test_hex_string_literal_value() {
     let (type_, _) = expression(r#"hex"4142" hex"43""#).into_resolved_type();
     assert_eq!(type_, hex_string_literal(b"ABC"));
 }
+
+/// Types `expression_text` on another thread, failing if it takes longer than
+/// `limit`, which is far more than it takes, but far less than it used to.
+fn type_within(expression_text: String, limit: std::time::Duration) -> Option<Type> {
+    let (sender, receiver) = std::sync::mpsc::channel();
+    std::thread::spawn(move || {
+        let (type_, _) = expression(&expression_text).into_type();
+        // The receiver is gone if it timed out.
+        let _ = sender.send(type_);
+    });
+    receiver
+        .recv_timeout(limit)
+        .expect("typing the expression should not take this long")
+}
+
+/// A long literal is reduced to lowest terms without a gcd of two long
+/// numbers, and arithmetic with a short one starts with a remainder, rather
+/// than taking time quadratic in its length. Each took seconds before.
+#[test]
+fn test_long_literals_type_in_linear_time() {
+    const DIGITS: usize = 500_000;
+    let limit = std::time::Duration::from_secs(30);
+
+    // `0.99…95` reduces to `(2·10^(n-1) - 1) / (2·10^(n-1))`.
+    let type_ = type_within(format!("0.{}5", "9".repeat(DIGITS - 1)), limit);
+    assert!(matches!(
+        type_,
+        Some(Type::Literal(LiteralKind::Rational { .. }))
+    ));
+
+    // `/ 3` makes it a rational, which `* 7` multiplies.
+    let type_ = type_within(format!("1{} / 3 * 7", "0".repeat(DIGITS - 1)), limit);
+    assert!(matches!(
+        type_,
+        Some(Type::Literal(LiteralKind::Rational { .. }))
+    ));
+}
