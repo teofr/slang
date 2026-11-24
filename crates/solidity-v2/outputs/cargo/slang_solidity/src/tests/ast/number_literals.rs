@@ -1,7 +1,6 @@
 use num_bigint::BigInt;
-use num_rational::BigRational;
 
-use crate::ast::{self, Number};
+use crate::ast::{self, Number, Rational};
 use crate::define_fixture;
 
 define_fixture!(
@@ -70,7 +69,7 @@ fn integer(value: u128) -> Number {
 }
 
 fn rational(numerator: i64, denominator: u64) -> Number {
-    Number::Rational(BigRational::new(
+    Number::Rational(Rational::new(
         BigInt::from(numerator),
         BigInt::from(denominator),
     ))

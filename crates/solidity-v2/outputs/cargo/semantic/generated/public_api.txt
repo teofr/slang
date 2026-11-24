@@ -562,7 +562,7 @@ pub slang_solidity_v2_semantic::types::LiteralKind::HexString::value: alloc::box
 pub slang_solidity_v2_semantic::types::LiteralKind::Integer
 pub slang_solidity_v2_semantic::types::LiteralKind::Integer::value: num_bigint::bigint::BigInt
 pub slang_solidity_v2_semantic::types::LiteralKind::Rational
-pub slang_solidity_v2_semantic::types::LiteralKind::Rational::value: num_rational::BigRational
+pub slang_solidity_v2_semantic::types::LiteralKind::Rational::value: slang_solidity_v2_semantic::types::Rational
 pub slang_solidity_v2_semantic::types::LiteralKind::String
 pub slang_solidity_v2_semantic::types::LiteralKind::String::value: alloc::boxed::Box<[u8]>
 impl slang_solidity_v2_semantic::types::LiteralKind
@@ -579,19 +579,22 @@ pub fn slang_solidity_v2_semantic::types::LiteralKind::hash<__H: core::hash::Has
 impl core::marker::StructuralPartialEq for slang_solidity_v2_semantic::types::LiteralKind
 pub enum slang_solidity_v2_semantic::types::Number
 pub slang_solidity_v2_semantic::types::Number::Integer(num_bigint::bigint::BigInt)
-pub slang_solidity_v2_semantic::types::Number::Rational(num_rational::BigRational)
+pub slang_solidity_v2_semantic::types::Number::Rational(slang_solidity_v2_semantic::types::Rational)
 impl slang_solidity_v2_semantic::types::Number
 pub fn slang_solidity_v2_semantic::types::Number::from_literal_kind(&slang_solidity_v2_semantic::types::LiteralKind) -> core::option::Option<Self>
 pub fn slang_solidity_v2_semantic::types::Number::is_negative(&self) -> bool
 pub fn slang_solidity_v2_semantic::types::Number::is_zero(&self) -> bool
 impl core::clone::Clone for slang_solidity_v2_semantic::types::Number
 pub fn slang_solidity_v2_semantic::types::Number::clone(&self) -> slang_solidity_v2_semantic::types::Number
+impl core::cmp::Eq for slang_solidity_v2_semantic::types::Number
 impl core::cmp::PartialEq for slang_solidity_v2_semantic::types::Number
 pub fn slang_solidity_v2_semantic::types::Number::eq(&self, &slang_solidity_v2_semantic::types::Number) -> bool
 impl core::fmt::Debug for slang_solidity_v2_semantic::types::Number
 pub fn slang_solidity_v2_semantic::types::Number::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
 impl core::fmt::Display for slang_solidity_v2_semantic::types::Number
 pub fn slang_solidity_v2_semantic::types::Number::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::hash::Hash for slang_solidity_v2_semantic::types::Number
+pub fn slang_solidity_v2_semantic::types::Number::hash<__H: core::hash::Hasher>(&self, &mut __H)
 impl core::marker::StructuralPartialEq for slang_solidity_v2_semantic::types::Number
 pub enum slang_solidity_v2_semantic::types::Type
 pub slang_solidity_v2_semantic::types::Type::Address(slang_solidity_v2_semantic::types::AddressType)
@@ -860,6 +863,24 @@ pub fn slang_solidity_v2_semantic::types::MetaType::fmt(&self, &mut core::fmt::F
 impl core::hash::Hash for slang_solidity_v2_semantic::types::MetaType
 pub fn slang_solidity_v2_semantic::types::MetaType::hash<__H: core::hash::Hasher>(&self, &mut __H)
 impl core::marker::StructuralPartialEq for slang_solidity_v2_semantic::types::MetaType
+pub struct slang_solidity_v2_semantic::types::Rational(_)
+impl slang_solidity_v2_semantic::types::Rational
+pub fn slang_solidity_v2_semantic::types::Rational::as_big_rational(&self) -> &num_rational::BigRational
+pub fn slang_solidity_v2_semantic::types::Rational::denom(&self) -> &num_bigint::bigint::BigInt
+pub fn slang_solidity_v2_semantic::types::Rational::into_big_rational(self) -> num_rational::BigRational
+pub fn slang_solidity_v2_semantic::types::Rational::new(num_bigint::bigint::BigInt, num_bigint::bigint::BigInt) -> Self
+pub fn slang_solidity_v2_semantic::types::Rational::numer(&self) -> &num_bigint::bigint::BigInt
+impl core::clone::Clone for slang_solidity_v2_semantic::types::Rational
+pub fn slang_solidity_v2_semantic::types::Rational::clone(&self) -> slang_solidity_v2_semantic::types::Rational
+impl core::cmp::Eq for slang_solidity_v2_semantic::types::Rational
+impl core::cmp::PartialEq for slang_solidity_v2_semantic::types::Rational
+pub fn slang_solidity_v2_semantic::types::Rational::eq(&self, &Self) -> bool
+impl core::fmt::Debug for slang_solidity_v2_semantic::types::Rational
+pub fn slang_solidity_v2_semantic::types::Rational::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::fmt::Display for slang_solidity_v2_semantic::types::Rational
+pub fn slang_solidity_v2_semantic::types::Rational::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+impl core::hash::Hash for slang_solidity_v2_semantic::types::Rational
+pub fn slang_solidity_v2_semantic::types::Rational::hash<H: core::hash::Hasher>(&self, &mut H)
 pub struct slang_solidity_v2_semantic::types::StringType
 pub slang_solidity_v2_semantic::types::StringType::location: slang_solidity_v2_semantic::types::DataLocation
 impl core::clone::Clone for slang_solidity_v2_semantic::types::StringType

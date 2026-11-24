@@ -3,13 +3,12 @@
 //! integers, byte arrays and literals.
 
 use num_bigint::{BigInt, BigUint};
-use num_rational::BigRational;
 use ruint::aliases::U256;
 
 use super::{Analyse, Analysis, expression, expression_statement_types};
 use crate::types::{
     ArrayType, ByteArrayType, DataLocation, FixedPointNumberType, FixedSizeArrayType, IntegerType,
-    LiteralKind, MappingType, StringType, TupleType, Type, TypeId, TypeRegistry,
+    LiteralKind, MappingType, Rational, StringType, TupleType, Type, TypeId, TypeRegistry,
 };
 
 fn register_uint_type(types: &mut TypeRegistry, bits: u32) -> TypeId {
@@ -58,7 +57,7 @@ fn test_implicit_conversion_uses_literal_value() {
         value: BigInt::from(12_345_678),
     }));
     let lit_half = types.register_type(Type::Literal(LiteralKind::Rational {
-        value: BigRational::new(BigInt::from(1), BigInt::from(2)),
+        value: Rational::new(BigInt::from(1), BigInt::from(2)),
     }));
 
     // Within int8 range (signed):

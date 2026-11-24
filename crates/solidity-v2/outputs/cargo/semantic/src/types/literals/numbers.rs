@@ -1,4 +1,5 @@
 use std::fmt;
+use std::hash::{Hash, Hasher};
 use std::str::FromStr;
 
 use num_bigint::BigInt;
@@ -10,10 +11,88 @@ use slang_solidity_v2_ir::ir;
 
 use crate::types::{FixedPointNumberType, IntegerType, LiteralKind, Type};
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub enum Number {
     Integer(BigInt),
-    Rational(BigRational),
+    Rational(Rational),
+}
+
+/// A fractional number literal, in lowest terms with a positive denominator.
+///
+/// It is compared and hashed by its numerator and denominator. `BigRational`'s
+/// own `Hash` can't assume lowest terms, so it walks the continued fraction of
+/// the value instead, recursing once per term, and so does its `Ord` (and
+/// `PartialEq`, which uses it) unless the denominators or the numerators are
+/// equal. A literal with a long fractional part has tens of thousands of
+/// terms, which overflows the stack. For values in lowest terms the two agree.
+/// For the same reason it has no `Ord`, and doesn't dereference to a
+/// `BigRational`.
+#[derive(Clone, Debug)]
+pub struct Rational(BigRational);
+
+impl Rational {
+    /// The rational `numerator / denominator`, reduced to lowest terms. It is
+    /// not normalised to an integer: `Rational::new(4, 2)` is the rational
+    /// `2/1`, which the analysis represents as `Number::Integer(2)` instead.
+    ///
+    /// # Panics
+    ///
+    /// If `denominator` is zero.
+    pub fn new(numerator: BigInt, denominator: BigInt) -> Self {
+        Self(BigRational::new(numerator, denominator))
+    }
+
+    /// Wraps a value already in lowest terms with a positive denominator, as
+    /// `BigRational::new` and the arithmetic on `BigRational` produce it.
+    /// Reducing it again would repeat a gcd, which is slow on long literals.
+    pub(crate) fn from_reduced(value: BigRational) -> Self {
+        debug_assert!(value.denom().is_positive());
+        Self(value)
+    }
+
+    /// The numerator, which carries the sign.
+    pub fn numer(&self) -> &BigInt {
+        self.0.numer()
+    }
+
+    /// The denominator, which is always positive.
+    pub fn denom(&self) -> &BigInt {
+        self.0.denom()
+    }
+
+    /// The value as a `BigRational`. Beware that comparing two of them with
+    /// `==` or `<`, or hashing one, recurses once per term of its continued
+    /// fraction.
+    pub fn as_big_rational(&self) -> &BigRational {
+        &self.0
+    }
+
+    /// Converts into the underlying `BigRational`, with the same caveat as
+    /// [`Rational::as_big_rational`].
+    pub fn into_big_rational(self) -> BigRational {
+        self.0
+    }
+}
+
+impl PartialEq for Rational {
+    fn eq(&self, other: &Self) -> bool {
+        self.0.numer() == other.0.numer() && self.0.denom() == other.0.denom()
+    }
+}
+
+impl Eq for Rational {}
+
+impl Hash for Rational {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        self.0.numer().hash(state);
+        self.0.denom().hash(state);
+    }
+}
+
+impl fmt::Display for Rational {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        self.0.fmt(f)
+    }
 }
 
 /// The integer a hex number literal spells, whatever its type (a 40-digit one is an `address`).
@@ -109,21 +188,21 @@ impl Number {
     pub fn is_zero(&self) -> bool {
         match self {
             Self::Integer(value) => value.is_zero(),
-            Self::Rational(value) => value.is_zero(),
+            Self::Rational(value) => value.as_big_rational().is_zero(),
         }
     }
 
     pub fn is_negative(&self) -> bool {
         match self {
             Self::Integer(value) => value.is_negative(),
-            Self::Rational(value) => value.is_negative(),
+            Self::Rational(value) => value.as_big_rational().is_negative(),
         }
     }
 
     fn to_rational(&self) -> BigRational {
         match self {
             Self::Integer(value) => BigRational::from(value.clone()),
-            Self::Rational(value) => value.clone(),
+            Self::Rational(value) => value.as_big_rational().clone(),
         }
     }
 
@@ -133,14 +212,16 @@ impl Number {
         if value.is_integer() {
             Self::Integer(value.to_integer())
         } else {
-            Self::Rational(value)
+            Self::Rational(Rational::from_reduced(value))
         }
     }
 
     pub(crate) fn negate(&self) -> Self {
         match self {
             Self::Integer(value) => Self::Integer(-value),
-            Self::Rational(value) => Self::Rational(-value.clone()),
+            Self::Rational(value) => {
+                Self::Rational(Rational::from_reduced(-value.as_big_rational()))
+            }
         }
     }
 
@@ -196,7 +277,7 @@ impl Number {
             Self::Integer(base) => Self::Integer(base.pow(exp_abs)),
             Self::Rational(base) => {
                 let exp_i32 = i32::try_from(exp_abs).ok()?;
-                Self::from_rational(base.pow(exp_i32))
+                Self::from_rational(base.as_big_rational().pow(exp_i32))
             }
         };
         if exponent.is_negative() {
@@ -502,21 +583,91 @@ pub(crate) fn smallest_fixed_point_type_to_fit(value: &BigRational) -> Option<Ty
 
 #[cfg(test)]
 mod tests {
+    use std::hash::BuildHasher;
+
     use num_bigint::BigInt;
     use num_rational::BigRational;
+    use num_traits::One;
+    use slang_solidity_v2_common::collections::DeterministicState;
 
-    use super::{Number, Type, rational_literal_fits_in, smallest_fixed_point_type_to_fit};
-    use crate::types::{FixedPointNumberType, IntegerType};
+    use super::{
+        Number, Rational, Type, rational_literal_fits_in, smallest_fixed_point_type_to_fit,
+    };
+    use crate::types::{FixedPointNumberType, IntegerType, LiteralKind};
 
     fn integer(value: i64) -> Number {
         Number::Integer(BigInt::from(value))
     }
 
     fn rational(numerator: i64, denominator: i64) -> Number {
-        Number::Rational(BigRational::new(
+        Number::Rational(Rational::new(
             BigInt::from(numerator),
             BigInt::from(denominator),
         ))
+    }
+
+    /// `F(n + 1) / F(n)` for consecutive Fibonacci numbers, whose continued
+    /// fraction is `n` ones: the longest for its size.
+    fn fibonacci_ratio(n: usize) -> BigRational {
+        let (mut previous, mut current) = (BigInt::one(), BigInt::one());
+        for _ in 0..n {
+            let next = &previous + &current;
+            previous = std::mem::replace(&mut current, next);
+        }
+        BigRational::new(current, previous)
+    }
+
+    fn hash_of<T: std::hash::Hash>(value: &T) -> u64 {
+        DeterministicState::default().hash_one(value)
+    }
+
+    /// `BigRational` hashes and compares by walking the continued fraction,
+    /// recursing once per term, which overflows the stack on long ones. These
+    /// run on a small stack, so that recursing would fail regardless of the
+    /// test runner's default.
+    #[test]
+    fn rationals_with_long_continued_fractions_hash_and_compare() {
+        std::thread::Builder::new()
+            .stack_size(256 * 1024)
+            .spawn(|| {
+                let first = Rational::from_reduced(fibonacci_ratio(20_000));
+                let second = Rational::from_reduced(fibonacci_ratio(20_001));
+
+                assert_eq!(first, first.clone());
+                assert_ne!(first, second);
+                assert_eq!(hash_of(&first), hash_of(&first.clone()));
+                assert_ne!(hash_of(&first), hash_of(&second));
+
+                // The types that carry it derive both from it.
+                let first_number = Number::Rational(first.clone());
+                let second_number = Number::Rational(second.clone());
+                assert_ne!(first_number, second_number);
+                assert_ne!(hash_of(&first_number), hash_of(&second_number));
+
+                let first_literal = LiteralKind::Rational { value: first };
+                let second_literal = LiteralKind::Rational { value: second };
+                assert_ne!(first_literal, second_literal);
+                assert_ne!(hash_of(&first_literal), hash_of(&second_literal));
+            })
+            .unwrap()
+            .join()
+            .unwrap();
+    }
+
+    #[test]
+    fn equal_rationals_are_equal_and_hash_alike() {
+        let half = Rational::new(BigInt::from(1), BigInt::from(2));
+        // `new` reduces to lowest terms, so `2/4` is the same value as `1/2`.
+        let two_quarters = Rational::new(BigInt::from(2), BigInt::from(4));
+        assert_eq!(half, two_quarters);
+        assert_eq!(hash_of(&half), hash_of(&two_quarters));
+        // The sign is carried by the numerator.
+        let negative_half = Rational::new(BigInt::from(1), BigInt::from(-2));
+        assert_ne!(half, negative_half);
+        assert_eq!(
+            negative_half,
+            Rational::new(BigInt::from(-1), BigInt::from(2))
+        );
     }
 
     #[test]
@@ -613,7 +764,7 @@ mod tests {
         assert_eq!(rational(2, 6).to_string(), "rational_const 1 / 3");
         // A huge numerator is abbreviated like an integer.
         assert_eq!(
-            Number::Rational(BigRational::new(pow10(40) + 1, BigInt::from(2))).to_string(),
+            Number::Rational(Rational::new(pow10(40) + 1, BigInt::from(2))).to_string(),
             "rational_const 1000...(33 digits omitted)...0001 / 2"
         );
     }

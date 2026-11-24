@@ -24,6 +24,6 @@ pub(crate) fn rational_value_of_node(
 ) -> Option<BigRational> {
     match number_value_of_node(semantic, node_id)? {
         Number::Integer(value) => Some(BigRational::from(value)),
-        Number::Rational(value) => Some(value),
+        Number::Rational(value) => Some(value.into_big_rational()),
     }
 }

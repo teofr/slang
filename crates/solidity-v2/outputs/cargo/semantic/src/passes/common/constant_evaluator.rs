@@ -173,9 +173,12 @@ impl Number {
                 .then(|| TypedValue::Integer(self.clone(), target.clone())),
             // Convert the rational number to an integer if it fits within
             // the integer range.
-            Number::Rational(rational) => rational_literal_fits_in(rational, target).then(|| {
-                TypedValue::Integer(Number::Integer(rational.to_integer()), target.clone())
-            }),
+            Number::Rational(rational) => {
+                let rational = rational.as_big_rational();
+                rational_literal_fits_in(rational, target).then(|| {
+                    TypedValue::Integer(Number::Integer(rational.to_integer()), target.clone())
+                })
+            }
         }
     }
 }
@@ -705,13 +708,13 @@ impl ConstantIdentifierResolver<ScopeId> for ConstantResolver<'_> {
 #[cfg(test)]
 mod tests {
     use num_bigint::{BigInt, ToBigInt};
-    use num_rational::BigRational;
     use num_traits::Num;
     use slang_solidity_v2_common::collections::Map;
     use slang_solidity_v2_common::versions::LanguageVersion;
     use slang_solidity_v2_parser::{ParseOutput, Parser};
 
     use super::*;
+    use crate::types::Rational;
 
     struct MapResolver {
         // qualified identifier => (target expression, target scope)
@@ -846,7 +849,7 @@ mod tests {
     }
 
     fn rational(numerator: i64, denominator: i64) -> Number {
-        Number::Rational(BigRational::new(
+        Number::Rational(Rational::new(
             BigInt::from(numerator),
             BigInt::from(denominator),
         ))

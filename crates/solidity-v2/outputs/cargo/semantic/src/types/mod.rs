@@ -1,6 +1,5 @@
 use literals::numbers;
 use num_bigint::{BigInt, BigUint};
-use num_rational::BigRational;
 use ruint::aliases::U256;
 use slang_solidity_v2_common::nodes::NodeId;
 use slang_solidity_v2_ir::ir;
@@ -10,7 +9,7 @@ mod operator_typing;
 mod parsing;
 mod registry;
 
-pub use literals::numbers::Number;
+pub use literals::numbers::{Number, Rational};
 pub(crate) use operator_typing::{BinaryOperator, UnaryOperator};
 pub(crate) use registry::NoMobileType;
 pub use registry::TypeRegistry;
@@ -188,7 +187,7 @@ pub enum LiteralKind {
         bytes: u32,
     },
     Rational {
-        value: BigRational,
+        value: Rational,
     },
     /// A hex string literal, eg. `hex"a000"`, with its decoded bytes.
     HexString {
@@ -214,7 +213,9 @@ impl LiteralKind {
             LiteralKind::HexInteger { value, .. } => {
                 numbers::smallest_integer_type_to_fit(&BigInt::from(value.clone()))
             }
-            LiteralKind::Rational { value } => numbers::smallest_fixed_point_type_to_fit(value),
+            LiteralKind::Rational { value } => {
+                numbers::smallest_fixed_point_type_to_fit(value.as_big_rational())
+            }
             LiteralKind::HexString { .. } | LiteralKind::String { .. } => {
                 Some(Type::String(StringType {
                     location: DataLocation::Memory,
