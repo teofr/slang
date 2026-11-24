@@ -3,6 +3,7 @@ mod array_length_negative;
 mod array_length_not_constant;
 mod array_length_too_large;
 mod array_length_zero;
+mod assignment_to_type_with_mapping;
 mod call_options_already_set;
 mod call_options_not_allowed;
 mod cannot_call_via_contract_type_name;
@@ -47,6 +48,7 @@ pub use array_length_negative::ArrayLengthNegative;
 pub use array_length_not_constant::ArrayLengthNotConstant;
 pub use array_length_too_large::ArrayLengthTooLarge;
 pub use array_length_zero::ArrayLengthZero;
+pub use assignment_to_type_with_mapping::AssignmentToTypeWithMapping;
 pub use call_options_already_set::CallOptionsAlreadySet;
 pub use call_options_not_allowed::CallOptionsNotAllowed;
 pub use cannot_call_via_contract_type_name::CannotCallViaContractTypeName;
@@ -197,6 +199,9 @@ define_diagnostic_kind! {
         /// An element of a calldata array or a member of a calldata struct is
         /// written to.
         WriteToCalldata(WriteToCalldata),
+        /// An assignment targets a location in storage whose type is or
+        /// contains a mapping.
+        AssignmentToTypeWithMapping(AssignmentToTypeWithMapping),
         /// An explicit type conversion is not allowed from the type of its
         /// argument to the target type.
         ExplicitConversionNotAllowed(ExplicitConversionNotAllowed),
