@@ -1,0 +1,19 @@
+# This file is generated automatically by infrastructure scripts. Please don't edit by hand.
+
+Diagnostics: 2
+
+[TypeError 2271] Error: Built-in binary operator ** cannot be applied to types int_const 2 and int_const 4294967295.
+   ╭─[input.sol:7:12]
+   │
+ 7 │     return 2 ** 4294967295 - 2 ** 4294967295 + 1;
+   │            ───────┬───────  
+   │                   ╰───────── Error occurred here.
+───╯
+
+[TypeError 2271] Error: Built-in binary operator ** cannot be applied to types int_const 2 and int_const 4294967295.
+   ╭─[input.sol:7:30]
+   │
+ 7 │     return 2 ** 4294967295 - 2 ** 4294967295 + 1;
+   │                              ───────┬───────  
+   │                                     ╰───────── Error occurred here.
+───╯

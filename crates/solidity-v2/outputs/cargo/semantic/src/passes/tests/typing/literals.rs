@@ -337,3 +337,148 @@ fn test_hex_string_literal_value() {
     let (type_, _) = expression(r#"hex"4142" hex"43""#).into_resolved_type();
     assert_eq!(type_, hex_string_literal(b"ABC"));
 }
+
+/// The value a literal expression folds to, or `None` if it has no type, as
+/// when it is past solc's precision limit for constants.
+fn folded_integer(expression_text: &str) -> Option<BigInt> {
+    match expression(expression_text).into_type().0? {
+        Type::Literal(LiteralKind::Integer { value }) => Some(value),
+        other => panic!("expected an integer literal type, got {other:?}"),
+    }
+}
+
+/// `2^exponent`.
+fn power_of_two(exponent: u32) -> BigInt {
+    BigInt::from(2).pow(exponent)
+}
+
+/// solc limits a constant's numerator and denominator to have their most
+/// significant bit at bit 4096 or below, after every binary operator.
+#[test]
+fn test_folding_is_limited_to_4096_bits() {
+    // `2^4096` has its most significant bit at bit 4096.
+    assert_eq!(
+        folded_integer("2 ** 2048 * 2 ** 2048"),
+        Some(power_of_two(4096))
+    );
+    assert_eq!(folded_integer("2 ** 2048 * 2 ** 2048 * 2"), None);
+    assert_eq!(
+        folded_integer("2 ** 2048 * 2 ** 2048 + 2 ** 2048 * 2 ** 2048"),
+        None
+    );
+    assert_eq!(
+        folded_integer("2 ** 2048 * 2 ** 2048 - 1"),
+        Some(power_of_two(4096) - 1)
+    );
+    // A chain of multiplications stops at the limit rather than growing.
+    assert_eq!(folded_integer("1e1233 * 1e1233 * 1e1233 * 1e1233"), None);
+    assert!(
+        expression("1e-1233 * 1e-1233 * 1e-1233 * 1e-1233")
+            .into_type()
+            .0
+            .is_none()
+    );
+}
+
+/// solc estimates the size of a power before computing it, as
+/// `exponent * (msb(base) + 1)` bits.
+#[test]
+fn test_exponentiation_is_limited_before_computing() {
+    assert_eq!(folded_integer("2 ** 2048"), Some(power_of_two(2048)));
+    assert_eq!(folded_integer("2 ** 2049"), None);
+    // `3^2049` has 3248 bits, but the estimate is `2049 * 2`.
+    assert_eq!(folded_integer("3 ** 2048"), Some(BigInt::from(3).pow(2048)));
+    assert_eq!(folded_integer("3 ** 2049"), None);
+    // These would take 512 MB each to compute.
+    assert_eq!(folded_integer("2 ** 4294967295"), None);
+    assert_eq!(folded_integer("2 ** 4294967296"), None);
+    // Zero, one and minus one to any power are computed without a limit, and
+    // anything to the power of zero is one.
+    assert_eq!(folded_integer("1 ** (2 ** 40)"), Some(BigInt::from(1)));
+    assert_eq!(folded_integer("0 ** (2 ** 40)"), Some(BigInt::from(0)));
+    assert_eq!(
+        folded_integer("(-1) ** (2 ** 40 + 1)"),
+        Some(BigInt::from(-1))
+    );
+    assert_eq!(folded_integer("(2 ** 2048) ** 0"), Some(BigInt::from(1)));
+    // Including a negative power of zero, which solc folds to zero.
+    assert_eq!(folded_integer("0 ** -1"), Some(BigInt::from(0)));
+}
+
+#[test]
+fn test_left_shift_is_limited_before_computing() {
+    // The estimate before computing it is `msb + amount + 1` bits, so it is
+    // one bit stricter than the check after an operator: `2 ** 2048 * 2 **
+    // 2048` is `2^4096`, but `1 << 4096` is rejected.
+    assert_eq!(folded_integer("1 << 4095"), Some(power_of_two(4095)));
+    assert_eq!(folded_integer("1 << 4096"), None);
+    assert_eq!(folded_integer("1 << 4294967295"), None);
+    assert_eq!(folded_integer("1 << 4294967296"), None);
+    // Shifting zero never grows it.
+    assert_eq!(folded_integer("0 << 4294967295"), Some(BigInt::from(0)));
+    // A right shift can only shrink its operand.
+    assert_eq!(folded_integer("1 >> 4294967295"), Some(BigInt::from(0)));
+    assert_eq!(folded_integer("-1 >> 4294967295"), Some(BigInt::from(-1)));
+}
+
+/// A literal with an exponent is limited before computing `10^exponent`.
+#[test]
+fn test_literal_exponent_is_limited_before_computing() {
+    // `10^1233` is just under `2^4096`.
+    assert_eq!(folded_integer("1e1233"), Some(BigInt::from(10).pow(1233)));
+    assert_eq!(folded_integer("1e1234"), None);
+    assert_eq!(folded_integer("2e1233"), None);
+    // This would take minutes to compute.
+    assert_eq!(folded_integer("1e400000000"), None);
+    // The exponent must fit in 32 bits.
+    assert_eq!(folded_integer("1e4294967296"), None);
+    // The check is on the mantissa in lowest terms.
+    assert_eq!(folded_integer("1.0e1233"), Some(BigInt::from(10).pow(1233)));
+    assert_eq!(
+        folded_integer("0.5e1233"),
+        Some(BigInt::from(5) * BigInt::from(10).pow(1232))
+    );
+    assert_eq!(folded_integer("1.5e1233"), None);
+    // A negative exponent checks the denominator.
+    assert!(matches!(
+        expression("1e-1233").into_type().0,
+        Some(Type::Literal(LiteralKind::Rational { .. }))
+    ));
+    assert!(expression("1e-1234").into_type().0.is_none());
+    // A zero mantissa is zero, whatever the exponent.
+    assert_eq!(
+        folded_integer("0e99999999999999999999"),
+        Some(BigInt::from(0))
+    );
+    // The unit is applied after the check.
+    assert_eq!(
+        folded_integer("1e1233 ether"),
+        Some(BigInt::from(10).pow(1233 + 18))
+    );
+    // A literal without an exponent, or with a zero one, is not limited, as
+    // in solc.
+    let large = format!("1{}", "0".repeat(1300));
+    assert_eq!(
+        folded_integer(&format!("{large}e0")),
+        Some(BigInt::from(10).pow(1300))
+    );
+    assert_eq!(
+        folded_integer(&format!("{large}.0e-0")),
+        Some(BigInt::from(10).pow(1300))
+    );
+    assert_eq!(
+        folded_integer(&format!("1{}", "0".repeat(1300))),
+        Some(BigInt::from(10).pow(1300))
+    );
+    // But arithmetic on it is, unless the result is zero.
+    assert_eq!(
+        folded_integer(&format!("{large} * 0")),
+        Some(BigInt::from(0))
+    );
+    assert_eq!(
+        folded_integer(&format!("{large} - {large}")),
+        Some(BigInt::from(0))
+    );
+    assert_eq!(folded_integer(&format!("{large} >> 0")), None);
+    assert_eq!(folded_integer(&format!("{large} | 0")), None);
+}

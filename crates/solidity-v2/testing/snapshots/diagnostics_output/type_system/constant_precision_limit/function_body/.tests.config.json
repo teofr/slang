@@ -1,0 +1,8 @@
+{
+  "expected_solc_divergence": [
+    {
+      "specifier": { "type": "From", "from": "0.8.0" },
+      "reason": "solc reports that the operator is not compatible with its operands past the precision limit. Slang leaves the expression untyped without a diagnostic, as for any operator with incompatible operands (SDR[43])."
+    }
+  ]
+}
