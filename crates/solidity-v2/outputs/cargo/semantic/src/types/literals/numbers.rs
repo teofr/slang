@@ -75,7 +75,11 @@ impl Number {
             return Some(Self::Integer(BigInt::zero()));
         }
         // The exponent must fit in 32 bits, and the mantissa scaled by it in
-        // the precision limit, which solc checks before applying the unit.
+        // the precision limit, which solc checks before applying the unit. A
+        // zero exponent is not checked, like a literal without one.
+        // TODO(validation) SDR[903]: report the invalid literal
+        // TODO(v2): solc parses an exponent with a leading zero as octal, so
+        // `1e010` is `1e8`, and `1e09` is invalid.
         let exponent = exponent.parse::<i32>().ok()?;
         let mantissa = BigRational::new(numerator, fraction_denominator);
         let exp_abs = exponent.unsigned_abs();
@@ -84,7 +88,7 @@ impl Number {
         } else {
             mantissa.denom()
         };
-        if !fits_precision_base10(limited_part, exp_abs) {
+        if exponent != 0 && !fits_precision_base10(limited_part, exp_abs) {
             return None;
         }
         let scale = BigRational::from(BigInt::from(10u32).pow(exp_abs));
@@ -234,7 +238,7 @@ impl Number {
     /// Otherwise the exponent must fit in 32 bits, and the result in the
     /// precision limit, which is checked before computing it.
     pub(crate) fn pow(&self, exponent: &Self) -> Option<Self> {
-        // TODO(validation) SDR[1738]: validate range of exponent
+        // TODO(validation) SDR[1738]: report an exponent past the precision limit
         let exponent = exponent.as_integer()?;
         if exponent.is_zero() {
             return Some(Self::Integer(BigInt::one()));
@@ -256,7 +260,8 @@ impl Number {
         let raised = match self {
             Self::Integer(base) => Self::Integer(base.pow(exp_abs)),
             Self::Rational(base) => {
-                let exp_i32 = i32::try_from(exp_abs).ok()?;
+                // A denominator of at least 2 limits the exponent to 2048.
+                let exp_i32 = i32::try_from(exp_abs).expect("checked against the precision limit");
                 Self::from_rational(base.pow(exp_i32))
             }
         };

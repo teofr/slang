@@ -407,7 +407,9 @@ fn test_exponentiation_is_limited_before_computing() {
 
 #[test]
 fn test_left_shift_is_limited_before_computing() {
-    // The estimate is `msb + amount + 1` bits, one more than the result has.
+    // The estimate before computing it is `msb + amount + 1` bits, so it is
+    // one bit stricter than the check after an operator: `2 ** 2048 * 2 **
+    // 2048` is `2^4096`, but `1 << 4096` is rejected.
     assert_eq!(folded_integer("1 << 4095"), Some(power_of_two(4095)));
     assert_eq!(folded_integer("1 << 4096"), None);
     assert_eq!(folded_integer("1 << 4294967295"), None);
@@ -453,13 +455,22 @@ fn test_literal_exponent_is_limited_before_computing() {
         folded_integer("1e1233 ether"),
         Some(BigInt::from(10).pow(1233 + 18))
     );
-    // A literal without an exponent is not limited, as in solc.
+    // A literal without an exponent, or with a zero one, is not limited, as
+    // in solc.
+    let large = format!("1{}", "0".repeat(1300));
+    assert_eq!(
+        folded_integer(&format!("{large}e0")),
+        Some(BigInt::from(10).pow(1300))
+    );
+    assert_eq!(
+        folded_integer(&format!("{large}.0e-0")),
+        Some(BigInt::from(10).pow(1300))
+    );
     assert_eq!(
         folded_integer(&format!("1{}", "0".repeat(1300))),
         Some(BigInt::from(10).pow(1300))
     );
     // But arithmetic on it is, unless the result is zero.
-    let large = format!("1{}", "0".repeat(1300));
     assert_eq!(
         folded_integer(&format!("{large} * 0")),
         Some(BigInt::from(0))
