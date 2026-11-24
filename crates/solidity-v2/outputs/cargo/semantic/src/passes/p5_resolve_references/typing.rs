@@ -29,6 +29,18 @@ use crate::types::{
     UserMetaType, literals,
 };
 
+/// The expression inside any pairs of parentheses around `node`. A check
+/// reports the expression it judges, never the parentheses around it.
+pub(super) fn peel_parentheses(mut node: &ir::Expression) -> &ir::Expression {
+    while let ir::Expression::TupleExpression(tuple) = node
+        && let [item] = &tuple.items[..]
+        && let Some(inner) = &item.expression
+    {
+        node = inner;
+    }
+    node
+}
+
 impl Pass<'_> {
     /// Registers `inner` and the [`Type::MetaType`] wrapping it, returning the
     /// meta-type as a `Typing::Resolved`.
@@ -308,6 +320,55 @@ impl Pass<'_> {
             }
             _ => false,
         }
+    }
+
+    /// Marks every tuple in `node`, which is written to, however deeply it is
+    /// nested in other tuples: a tuple on the left of an assignment is written
+    /// component by component. An expression of another kind is not marked,
+    /// nor anything under it, as it is not itself written to (eg. the index in
+    /// `(x, a[(1, 2)]) = …` is read).
+    pub(super) fn mark_written_tuples(&mut self, node: &ir::Expression) {
+        if let ir::Expression::TupleExpression(tuple) = node {
+            self.written_tuples.insert(tuple.id());
+            for component in tuple
+                .items
+                .iter()
+                .filter_map(|item| item.expression.as_ref())
+            {
+                self.mark_written_tuples(component);
+            }
+        }
+    }
+
+    /// What a tuple of two or more that is read requires of `component`, on
+    /// top of being a value or a type name: a type of its own, as the tuple
+    /// builds its value from its components' own types. Reports it, returning
+    /// whether it has one. A tuple that is written to asks none of this: each
+    /// component is a location instead, which `Self::check_lvalues_under`
+    /// judges.
+    pub(super) fn check_read_tuple_component(&mut self, component: &ir::Expression) -> bool {
+        self.check_not_too_large_literal(component)
+    }
+
+    /// Reports `node` if it is typed as a number literal that no type can
+    /// hold, eg. `2**256`, returning whether it is not one. It is the rule of
+    /// an expression that keeps its own type, having no target type to convert
+    /// to: the expression of a statement, and a component of a tuple that is
+    /// read. Parentheses around it are looked through, and it is reported at
+    /// the literal.
+    pub(super) fn check_not_too_large_literal(&mut self, node: &ir::Expression) -> bool {
+        let node = peel_parentheses(node);
+        let is_too_large_literal = self
+            .raw_typing_of_expression(node)
+            .as_type_id()
+            .is_some_and(|type_id| match self.types.get_type_by_id(type_id) {
+                Type::Literal(kind) => kind.mobile_type().is_none(),
+                _ => false,
+            });
+        if is_too_large_literal {
+            self.push_diagnostic(node, LiteralTooLarge);
+        }
+        !is_too_large_literal
     }
 
     /// What `node`, in a position that is written to, denotes.
@@ -1326,6 +1387,11 @@ impl Pass<'_> {
             self.push_diagnostic(node, AbiDecodeTypesNotATuple);
             return;
         };
+        // A tuple with no type has a component that was rejected, and
+        // reported, as it was built.
+        if self.raw_typing_of_expression(node).as_type_id().is_none() {
+            return;
+        }
         for component in tuple
             .items
             .iter()
