@@ -3743,10 +3743,26 @@ mod semantic {
             }
 
             #[test]
+            fn deep_reference_first() -> Result<()> {
+                run(
+                    "semantic/constant_cycles/array_size",
+                    "deep_reference_first",
+                )
+            }
+
+            #[test]
             fn evaluation_depth_exceeded() -> Result<()> {
                 run(
                     "semantic/constant_cycles/array_size",
                     "evaluation_depth_exceeded",
+                )
+            }
+
+            #[test]
+            fn shallow_reference_first() -> Result<()> {
+                run(
+                    "semantic/constant_cycles/array_size",
+                    "shallow_reference_first",
                 )
             }
         }
