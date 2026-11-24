@@ -1,12 +1,14 @@
 use num_bigint::{BigInt, Sign};
 use ruint::aliases::U256;
 use sha3::{Digest, Keccak256};
+use slang_solidity_v2_common::collections::Map;
 use slang_solidity_v2_common::diagnostics::kinds::DiagnosticKind;
 use slang_solidity_v2_common::diagnostics::kinds::semantic::CyclicConstantDefinition;
 use slang_solidity_v2_common::diagnostics::kinds::type_system::{
     ConstantArithmeticError, IncompatibleConstantOperator, TypeSystemDiagnosticKind,
 };
 use slang_solidity_v2_common::files::FileId;
+use slang_solidity_v2_common::nodes::NodeId;
 use slang_solidity_v2_ir::ir;
 
 use crate::binder::{Binder, Definition, Resolution, Scope, ScopeId};
@@ -57,6 +59,7 @@ pub(crate) fn evaluate_compile_time_constant<Scope>(
         identifier_resolver,
         types,
         scope_stack: Vec::new(),
+        constant_values: Map::default(),
     };
     evaluator
         .evaluate_expression_in_scope(expression, start_scope)
@@ -64,6 +67,7 @@ pub(crate) fn evaluate_compile_time_constant<Scope>(
 }
 
 /// An evaluated value together with its type.
+#[derive(Clone)]
 enum TypedValue {
     /// A literal number.
     Literal(Number),
@@ -187,6 +191,8 @@ pub(crate) enum ComptimeResolution<Scope> {
     /// The identifier resolves to nothing, not even a built-in.
     Unresolved,
     Constant {
+        /// The constant's definition, which identifies it while evaluating.
+        definition_id: NodeId,
         value: ir::Expression,
         target_scope: Scope,
         /// Integer type of a constant, or `None` if it is not.
@@ -212,6 +218,16 @@ struct CompileConstantEvaluator<'a, Scope> {
     identifier_resolver: &'a dyn ConstantIdentifierResolver<Scope>,
     types: &'a mut TypeRegistry,
     scope_stack: Vec<Scope>,
+    /// The value of each constant evaluated so far, by its definition. Without
+    /// it, a constant would be evaluated again at every reference, so a chain
+    /// of constants that each reference the previous one twice would take
+    /// exponential time.
+    ///
+    /// Only successful evaluations are recorded: a failure aborts the whole
+    /// evaluation. A value doesn't depend on where the constant is referenced
+    /// from, as it is evaluated in the constant's own scope. Whether it can be
+    /// referenced at all can, so that is still resolved at each reference.
+    constant_values: Map<NodeId, TypedValue>,
 }
 
 impl<Scope> CompileConstantEvaluator<'_, Scope> {
@@ -390,15 +406,16 @@ impl<Scope> CompileConstantEvaluator<'_, Scope> {
         identifier: &ir::Identifier,
     ) -> Result<TypedValue, EvaluationError> {
         let current_scope = self.scope_stack.last().expect("scope stack is empty");
-        let (target_expression, target_scope, integer_type) = match self
+        let (definition_id, target_expression, target_scope, integer_type) = match self
             .identifier_resolver
             .resolve_identifier_in_scope(identifier.unparse(), current_scope)
         {
             ComptimeResolution::Constant {
+                definition_id,
                 value,
                 target_scope,
                 integer_type,
-            } => (value, target_scope, integer_type),
+            } => (definition_id, value, target_scope, integer_type),
             ComptimeResolution::Unresolved => return Err(EvaluationError::Unresolved),
             ComptimeResolution::NotConstant | ComptimeResolution::BuiltIn(_) => {
                 return Err(EvaluationError::CouldNotEvaluate);
@@ -406,11 +423,16 @@ impl<Scope> CompileConstantEvaluator<'_, Scope> {
         };
         // Reject constants that are not declared with an integer type.
         let integer_type = integer_type.ok_or(EvaluationError::CouldNotEvaluate)?;
+        if let Some(value) = self.constant_values.get(&definition_id) {
+            return Ok(value.clone());
+        }
         let evaluated = self.evaluate_expression_in_scope(&target_expression, target_scope)?;
-        evaluated
+        let value = evaluated
             .value()
             .coerce_to_integer(&integer_type)
-            .ok_or(EvaluationError::CouldNotEvaluate)
+            .ok_or(EvaluationError::CouldNotEvaluate)?;
+        self.constant_values.insert(definition_id, value.clone());
+        Ok(value)
     }
 
     fn evaluate_tuple_expression(
@@ -601,6 +623,7 @@ impl ConstantResolver<'_> {
     /// state variables.
     fn resolve_constant(
         &self,
+        definition_id: NodeId,
         declaration_start: usize,
         enclosing_scope_id: ScopeId,
         value: Option<&ir::Expression>,
@@ -618,6 +641,7 @@ impl ConstantResolver<'_> {
             return ComptimeResolution::NotConstant;
         };
         ComptimeResolution::Constant {
+            definition_id,
             value: value.clone(),
             target_scope: enclosing_scope_id,
             integer_type: declared_integer_type(type_name),
@@ -641,6 +665,7 @@ impl ConstantIdentifierResolver<ScopeId> for ConstantResolver<'_> {
                     .expect("resolved definition is found")
                 {
                     Definition::Constant(constant_definition) => self.resolve_constant(
+                        definition_id,
                         constant_definition.ir_node.range.start,
                         constant_definition.enclosing_scope_id,
                         constant_definition.ir_node.value.as_ref(),
@@ -662,6 +687,7 @@ impl ConstantIdentifierResolver<ScopeId> for ConstantResolver<'_> {
                             "non-public constants are lowered to `ConstantDefinition` in the IR"
                         );
                         self.resolve_constant(
+                            definition_id,
                             variable_definition.ir_node.range.start,
                             variable_definition.enclosing_scope_id,
                             variable_definition.ir_node.value.as_ref(),
@@ -704,6 +730,8 @@ impl ConstantIdentifierResolver<ScopeId> for ConstantResolver<'_> {
 
 #[cfg(test)]
 mod tests {
+    use std::cell::Cell;
+
     use num_bigint::{BigInt, ToBigInt};
     use num_rational::BigRational;
     use num_traits::Num;
@@ -714,9 +742,11 @@ mod tests {
     use super::*;
 
     struct MapResolver {
-        // qualified identifier => (target expression, target scope)
+        // qualified identifier => (definition id, target expression, target scope)
         // qualified identifier is the concatenation of the scope and identifier
-        context: Map<String, (ir::Expression, String)>,
+        context: Map<String, (NodeId, ir::Expression, String)>,
+        // How many times an identifier was resolved to a constant.
+        constant_resolutions: Cell<usize>,
         // Tests that exercise the erc7201 evaluation path opt in by toggling
         // this flag, mirroring what the production resolver does when the
         // language version enables the built-in and it isn't shadowed.
@@ -729,10 +759,13 @@ mod tests {
             identifier: &str,
             scope: &String,
         ) -> ComptimeResolution<String> {
-            if let Some((target_expression, target_scope)) =
+            if let Some((definition_id, target_expression, target_scope)) =
                 self.context.get(&format!("{scope}{identifier}"))
             {
+                self.constant_resolutions
+                    .set(self.constant_resolutions.get() + 1);
                 ComptimeResolution::Constant {
+                    definition_id: *definition_id,
                     value: target_expression.clone(),
                     target_scope: target_scope.clone(),
                     // The tests model every known constant as a `uint256`.
@@ -750,13 +783,21 @@ mod tests {
     }
 
     impl MapResolver {
-        fn build_context(context: &[(&str, &str, &str)]) -> Map<String, (ir::Expression, String)> {
-            context
-                .iter()
-                .map(|(name, input, target_scope)| {
+        /// Each constant is identified by its position in `context`, as the
+        /// node ids of separately parsed expressions are not unique.
+        fn build_context(
+            context: &[(&str, &str, &str)],
+        ) -> Map<String, (NodeId, ir::Expression, String)> {
+            (0u64..)
+                .zip(context)
+                .map(|(index, (name, input, target_scope))| {
                     (
                         (*name).to_string(),
-                        (parse_expression(input), (*target_scope).to_string()),
+                        (
+                            NodeId::from(index),
+                            parse_expression(input),
+                            (*target_scope).to_string(),
+                        ),
                     )
                 })
                 .collect()
@@ -765,6 +806,7 @@ mod tests {
         fn with_context(context: &[(&str, &str, &str)]) -> Self {
             Self {
                 context: Self::build_context(context),
+                constant_resolutions: Cell::new(0),
                 recognise_erc7201: false,
             }
         }
@@ -772,6 +814,7 @@ mod tests {
         fn recognise_erc7201_with_context(context: &[(&str, &str, &str)]) -> Self {
             Self {
                 context: Self::build_context(context),
+                constant_resolutions: Cell::new(0),
                 recognise_erc7201: true,
             }
         }
@@ -982,6 +1025,42 @@ mod tests {
             eval_string_with_context("FOO", &[("FOO", "BAR", "CTX."), ("CTX.BAR", "42", "CTX.")])
                 .is_some_and(|value| value == integer(42))
         );
+    }
+
+    /// `X0 = 1` and `Xi = X(i-1) + X(i-1)` for `i` in `1..=depth`.
+    fn doubling_chain(depth: usize) -> (Vec<String>, Vec<String>) {
+        let names: Vec<String> = (0..=depth).map(|index| format!("X{index}")).collect();
+        let values = (0..=depth)
+            .map(|index| match index {
+                0 => "1".to_owned(),
+                _ => format!("X{previous} + X{previous}", previous = index - 1),
+            })
+            .collect();
+        (names, values)
+    }
+
+    #[test]
+    fn test_constant_is_evaluated_once_per_evaluation() {
+        // Each constant references the previous one twice, so evaluating
+        // every reference would resolve `2^21 - 2` constants.
+        let depth = 20;
+        let (names, values) = doubling_chain(depth);
+        let context: Vec<(&str, &str, &str)> = names
+            .iter()
+            .zip(&values)
+            .map(|(name, value)| (name.as_str(), value.as_str(), ""))
+            .collect();
+        let resolver = MapResolver::with_context(&context);
+        let mut types = TypeRegistry::new(LanguageVersion::LATEST);
+        let expression = parse_expression(&format!("X{depth} + X{depth}"));
+
+        let value =
+            evaluate_compile_time_constant(&expression, String::new(), &mut types, &resolver).ok();
+
+        assert_eq!(value, Some(Number::Integer(BigInt::from(2).pow(21))));
+        // Each identifier is still resolved at every reference, but a constant
+        // is only evaluated at the first one: two references per constant.
+        assert_eq!(resolver.constant_resolutions.get(), 2 * (depth + 1));
     }
 
     #[test]
