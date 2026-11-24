@@ -223,10 +223,14 @@ struct CompileConstantEvaluator<'a, Scope> {
     /// of constants that each reference the previous one twice would take
     /// exponential time.
     ///
-    /// Only successful evaluations are recorded: a failure aborts the whole
-    /// evaluation. A value doesn't depend on where the constant is referenced
-    /// from, as it is evaluated in the constant's own scope. Whether it can be
-    /// referenced at all can, so that is still resolved at each reference.
+    /// Only successful evaluations are recorded, as a failure aborts the whole
+    /// evaluation. A constant's value is evaluated in its own scope, so it
+    /// doesn't depend on where it is referenced from. Whether a reference to it
+    /// is allowed can, so references are still resolved every time.
+    ///
+    /// Like solc, a constant evaluated once is not checked against
+    /// `MAX_SCOPE_DEPTH` again when referenced deeper, so whether a chain of
+    /// constants is too deep can depend on the order of the references.
     constant_values: Map<NodeId, TypedValue>,
 }
 
