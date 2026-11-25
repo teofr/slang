@@ -1,0 +1,39 @@
+name: "zz_stack_test"
+
+# Temporary: prints which commit a PR's job checks out, to see how GitHub builds stacked PRs' test merges.
+on:
+  pull_request:
+    types:
+      - "opened"
+      - "synchronize"
+      - "reopened"
+
+permissions: {}
+
+jobs:
+  print:
+    runs-on: "ubuntu-24.04"
+    permissions:
+      contents: "read"
+    steps:
+      - uses: "actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1" # v7.0.1
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - name: "Print commits"
+        env:
+          PAYLOAD_BASE_REF: "${{ github.event.pull_request.base.ref }}"
+          PAYLOAD_BASE_SHA: "${{ github.event.pull_request.base.sha }}"
+          PAYLOAD_HEAD_REF: "${{ github.event.pull_request.head.ref }}"
+          PAYLOAD_HEAD_SHA: "${{ github.event.pull_request.head.sha }}"
+        run: |
+          echo "native stack run"
+          echo "GITHUB_SHA=${GITHUB_SHA}"
+          echo "GITHUB_REF=${GITHUB_REF}"
+          echo "GITHUB_BASE_REF=${GITHUB_BASE_REF}"
+          echo "GITHUB_HEAD_REF=${GITHUB_HEAD_REF}"
+          echo "payload base.ref=${PAYLOAD_BASE_REF} base.sha=${PAYLOAD_BASE_SHA}"
+          echo "payload head.ref=${PAYLOAD_HEAD_REF} head.sha=${PAYLOAD_HEAD_SHA}"
+          for rev in HEAD HEAD^1 HEAD^2 HEAD^1^1 HEAD^1^2; do
+            git log -1 --format="${rev}: %H parents=[%P] %s" "${rev}" 2> /dev/null || echo "${rev}: (none)"
+          done
