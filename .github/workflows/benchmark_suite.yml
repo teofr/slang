@@ -14,6 +14,10 @@ on:
         type: "string"
         required: false
         default: ""
+      bencher-project:
+        description: "The bencher project the results are uploaded to."
+        type: "string"
+        required: true
       setup-args:
         description: "Arguments to 'task setup'."
         type: "string"
@@ -55,6 +59,7 @@ jobs:
     runs-on: "ubuntu-24.04" # _SLANG_DEV_CONTAINER_BASE_IMAGE_ (keep in sync)
 
     permissions:
+      actions: "read" # To link the base branch's benchmark run, if a PR has to wait for it.
       contents: "read"
       pull-requests: "write"
       checks: "write"
@@ -77,6 +82,16 @@ jobs:
           persist-credentials: false
           fetch-depth: 0 # Full history is needed by 'git/restore-mtime' to find each file's last commit time.
 
+      # Before anything else, to fail fast if the base branch commit has no report to compare against yet:
+      - name: "Benchmark > Check the base branch report"
+        id: "base-report"
+        if: "${{ github.event_name == 'pull_request' && inputs.pr-benchmark }}"
+        run: './scripts/bencher/check-base-report.sh "${BENCHER_PROJECT}"'
+        env:
+          BENCHER_PROJECT: "${{ inputs.bencher-project }}"
+          BENCHER_PR_HEAD_HASH: "${{ github.event.pull_request.head.sha }}"
+          GH_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+
       - name: "Setup"
         uses: "./.github/actions/common-setup"
         with:
@@ -98,6 +113,7 @@ jobs:
           MODE_FLAG: "${{ github.event_name == 'pull_request' && inputs.pr-benchmark-flag || (inputs.dry-run && '--dry-run' || '') }}"
           BENCHER_API_KEY: "${{ secrets.bencher-api-key }}"
           BENCHER_PR_HEAD_HASH: "${{ github.event.pull_request.head.sha }}"
+          BENCHER_START_POINT_HASH: "${{ steps.base-report.outputs.hash }}"
           GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
 
       - name: "Benchmark > Upload Benchmarking Data"

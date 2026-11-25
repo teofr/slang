@@ -37,6 +37,7 @@ concurrency:
 jobs:
   benchmark:
     permissions:
+      actions: "read"
       contents: "read"
       pull-requests: "write"
       checks: "write"
@@ -44,6 +45,7 @@ jobs:
     uses: "./.github/workflows/benchmark_suite.yml"
     with:
       infra-command: "npm"
+      bencher-project: "slang-dashboard-npm"
       setup-args: "setup:cargo setup:npm"
       check-npm: true
       pr-benchmark: "${{ contains(github.event.pull_request.labels.*.name, 'ci:perf') }}"

@@ -36,6 +36,7 @@ concurrency:
 jobs:
   benchmark:
     permissions:
+      actions: "read"
       contents: "read"
       pull-requests: "write"
       checks: "write"
@@ -44,6 +45,7 @@ jobs:
     with:
       infra-command: "cargo"
       infra-suite: "slang-v2"
+      bencher-project: "slang-dashboard-cargo-slang-v2"
       setup-args: "setup:cargo setup:pipenv"
       pr-benchmark: true # Every PR runs the full benchmark.
       pr-benchmark-flag: "--pr-benchmark=full"

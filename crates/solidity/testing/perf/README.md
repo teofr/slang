@@ -48,6 +48,10 @@ DHAT accuracy depends on its `num-callers` argument (see [`config.rs`](./cargo/s
 
 Whether DHAT runs on a given PR is therefore a per-suite CI decision: each workflow picks `--pr-benchmark` (fast, Callgrind only) or `--pr-benchmark=full`. `infra perf cargo` just maps the mode to DHAT on/off by setting the `SLANG_PERF_SKIP_DHAT` environment variable on the benchmark process (a CLI flag on the bench binary isn't possible, since `iai-callgrind`'s `main!` owns argument parsing).
 
+### PR baselines
+
+Every push to `main` is benchmarked, in parallel, and its report is dated at the commit time. A PR benchmark measures GitHub's test merge commit, so it is compared against the base branch's report for that merge's base commit (not the latest one). Before running anything, [`check-base-report.sh`](../../../../scripts/bencher/check-base-report.sh) checks that this report exists: if the base commit's benchmark run hasn't finished yet, the PR job fails with a link to that run, and has to be re-run once it is done.
+
 ### Wall-clock benchmarks
 
 Valgrind's counters are deterministic, which makes them useful for reliably detecting regressions on CI.

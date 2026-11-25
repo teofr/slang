@@ -37,6 +37,7 @@ concurrency:
 jobs:
   benchmark:
     permissions:
+      actions: "read"
       contents: "read"
       pull-requests: "write"
       checks: "write"
@@ -45,6 +46,7 @@ jobs:
     with:
       infra-command: "cargo"
       infra-suite: "slang"
+      bencher-project: "slang-dashboard-cargo-slang"
       setup-args: "setup:cargo setup:pipenv"
       pr-benchmark: "${{ contains(github.event.pull_request.labels.*.name, 'ci:perf') || contains(github.event.pull_request.labels.*.name, 'ci:perf:full') }}"
       pr-benchmark-flag: "${{ contains(github.event.pull_request.labels.*.name, 'ci:perf:full') && '--pr-benchmark=full' || '--pr-benchmark' }}"
