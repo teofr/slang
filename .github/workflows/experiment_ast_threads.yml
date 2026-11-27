@@ -50,10 +50,22 @@ jobs:
       - name: "Install deps and build"
         run: "./scripts/bin/infra perf cargo --smoke slang-v2"
 
-      - name: "cargo bench slang_v2 (AST benchmarks only)"
+      - name: "cargo bench slang_v2"
         env:
           SLANG_PERF_SKIP_DHAT: "1"
-        run: "./bin/cargo bench --package solidity_testing_perf_cargo --bench slang_v2 -- '*::ast_*'"
+        run: |
+          set -euo pipefail
+          ./bin/cargo bench --package solidity_testing_perf_cargo --bench slang_v2 2>&1 | tee "${RUNNER_TEMP}/bench.log"
+
+          # One line per benchmark: instructions (Ir), atomic instructions (Ge), and Ge per 1000 Ir.
+          echo "SUMMARY benchmark project Ir Ge Ge_per_1000_Ir"
+          awk '
+            function flush() { if (name != "") printf "SUMMARY %s %s %d %d %.3f\n", name, project, ir, ge, (ir ? 1000 * ge / ir : 0) }
+            /^slang_v2::/ { flush(); split($1, path, "::"); name = path[3]; project = $2; sub(/:.*/, "", project); ir = 0; ge = 0 }
+            /^  Instructions:/ { split($2, value, "|"); ir = value[1] }
+            /^  Ge:/ { split($2, value, "|"); ge = value[1] }
+            END { flush() }
+          ' "${RUNNER_TEMP}/bench.log"
 
   # Wall clock: both variants are built and run on the same runner, interleaved, so that they are
   # comparable.
