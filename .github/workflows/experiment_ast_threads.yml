@@ -1,0 +1,115 @@
+name: "experiment_ast_threads"
+
+# TEMPORARY, experiment only: measures AST traversal on several threads, before and after turning
+# the AST wrappers into borrowed views. Nothing is reported to bencher.
+
+on:
+  push:
+    branches:
+      - "claude/elegant-meitner-1jkhir"
+
+permissions: {}
+
+concurrency:
+  group: "${{ github.workflow }}-${{ github.sha }}"
+  cancel-in-progress: false
+
+env:
+  # The commit holding the benchmarks, with the Arc-based AST:
+  BASELINE_SHA: "e2c9caf645c5d1a4b77d87b8cc0e915695c2bff1"
+
+jobs:
+  # Deterministic (Valgrind) counters: one job per variant, runners don't matter.
+  gungraun:
+    runs-on: "ubuntu-24.04" # _SLANG_DEV_CONTAINER_BASE_IMAGE_ (keep in sync)
+
+    permissions:
+      contents: "read"
+
+    strategy:
+      fail-fast: false
+      matrix:
+        variant:
+          - "baseline"
+          - "head"
+
+    steps:
+      - name: "Checkout Repository"
+        uses: "actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1" # v7.0.1
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+          ref: "${{ matrix.variant == 'baseline' && env.BASELINE_SHA || github.sha }}"
+
+      - name: "Setup"
+        uses: "./.github/actions/common-setup"
+        with:
+          task-setup-args: "setup:cargo setup:pipenv"
+          sfw-optional: "true"
+
+      - name: "Install deps and build"
+        run: "./scripts/bin/infra perf cargo --smoke slang-v2"
+
+      - name: "cargo bench slang_v2 -- ast_"
+        env:
+          SLANG_PERF_SKIP_DHAT: "1"
+        run: "./bin/cargo bench --package solidity_testing_perf_cargo --bench slang_v2 -- ast_"
+
+  # Wall clock: both variants are built and run on the same runner, interleaved, so that they are
+  # comparable.
+  wall-clock:
+    runs-on: "ubuntu-24.04" # _SLANG_DEV_CONTAINER_BASE_IMAGE_ (keep in sync)
+
+    permissions:
+      contents: "read"
+
+    steps:
+      - name: "Checkout Repository"
+        uses: "actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1" # v7.0.1
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+
+      - name: "Setup"
+        uses: "./.github/actions/common-setup"
+        with:
+          task-setup-args: "setup:cargo"
+          sfw-optional: "true"
+
+      - name: "Machine"
+        run: "nproc && lscpu"
+
+      - name: "Build both variants"
+        run: |
+          set -euo pipefail
+          mkdir -p "${RUNNER_TEMP}/bins"
+
+          build() {
+            local name="$1" ref="$2"
+            git checkout --quiet --detach "${ref}"
+            rm -f target/release/deps/slang_v2_wall_clock-*
+            ./bin/cargo bench --package solidity_testing_perf_cargo --bench slang_v2_wall_clock --no-run
+            local binary
+            binary="$(find target/release/deps -maxdepth 1 -type f -executable -name 'slang_v2_wall_clock-*' | head -n 1)"
+            cp "${binary}" "${RUNNER_TEMP}/bins/${name}"
+          }
+
+          build "baseline" "${BASELINE_SHA}"
+          if [[ "${GITHUB_SHA}" != "${BASELINE_SHA}" ]]; then
+            build "head" "${GITHUB_SHA}"
+          fi
+          git checkout --quiet --detach "${GITHUB_SHA}"
+
+      - name: "Run, interleaved"
+        run: |
+          set -euo pipefail
+          export REPO_ROOT="${GITHUB_WORKSPACE}"
+          cd crates/solidity/testing/perf/cargo
+
+          for round in 1 2 3; do
+            for binary in "${RUNNER_TEMP}"/bins/*; do
+              echo "::group::round ${round}: $(basename "${binary}")"
+              "${binary}" --bench ast_thread_scaling
+              echo "::endgroup::"
+            done
+          done
