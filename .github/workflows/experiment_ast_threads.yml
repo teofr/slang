@@ -50,10 +50,10 @@ jobs:
       - name: "Install deps and build"
         run: "./scripts/bin/infra perf cargo --smoke slang-v2"
 
-      - name: "cargo bench slang_v2 -- ast_"
+      - name: "cargo bench slang_v2 (AST benchmarks only)"
         env:
           SLANG_PERF_SKIP_DHAT: "1"
-        run: "./bin/cargo bench --package solidity_testing_perf_cargo --bench slang_v2 -- ast_"
+        run: "./bin/cargo bench --package solidity_testing_perf_cargo --bench slang_v2 -- '*::ast_*'"
 
   # Wall clock: both variants are built and run on the same runner, interleaved, so that they are
   # comparable.
