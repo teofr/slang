@@ -7,7 +7,7 @@ use crate::abi::entries::{Constructor, Entry, Fallback, Function, Receive, Spell
 use crate::abi::{AbiMutability, SignatureHasher};
 use crate::ast::{Definition, FunctionDefinitionStruct, FunctionVisibility};
 
-impl FunctionDefinitionStruct {
+impl<'a> FunctionDefinitionStruct<'a> {
     pub fn is_externally_visible(&self) -> bool {
         matches!(
             self.attributes().visibility(),

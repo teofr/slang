@@ -1,11 +1,11 @@
 use super::super::{ElementaryType, Expression, Type};
 
-impl Expression {
+impl<'a> Expression<'a> {
     /// Strips any parentheses around this expression, which are represented as
     /// single-element tuples: `((x))` unwraps to `x`, and `((a, b))` to `(a, b)`.
     /// Other expressions are returned as is.
     #[must_use]
-    pub fn unwrap_singleton_tuple(&self) -> Expression {
+    pub fn unwrap_singleton_tuple(&self) -> Expression<'a> {
         let mut expression = self.clone();
         while let Expression::TupleExpression(tuple) = &expression {
             let items = tuple.items();
@@ -23,7 +23,7 @@ impl Expression {
 
     /// Returns the type assigned to this expression by the typing pass, or
     /// `None` when no type was recorded for the underlying node.
-    pub fn get_type(&self) -> Option<Type> {
+    pub fn get_type(&self) -> Option<Type<'a>> {
         match self {
             Expression::AssignmentExpression(expression) => expression.get_type(),
             Expression::ConditionalExpression(expression) => expression.get_type(),
@@ -62,10 +62,10 @@ impl Expression {
     }
 }
 
-impl ElementaryType {
+impl<'a> ElementaryType<'a> {
     /// Returns the type assigned to this elementary type by the typing pass,
     /// dispatched to the underlying keyword/terminal node.
-    pub fn get_type(&self) -> Option<Type> {
+    pub fn get_type(&self) -> Option<Type<'a>> {
         match self {
             ElementaryType::BoolKeyword(keyword) => keyword.get_type(),
             ElementaryType::StringKeyword(keyword) => keyword.get_type(),

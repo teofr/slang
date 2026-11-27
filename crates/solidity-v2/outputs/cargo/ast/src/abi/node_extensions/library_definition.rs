@@ -7,11 +7,11 @@ use crate::ast::{
     StorageLocation,
 };
 
-impl LibraryDefinitionStruct {
+impl<'a> LibraryDefinitionStruct<'a> {
     /// The ABI of the library's `view` and `pure` external functions, public constants' getters,
     /// errors and events. A function that writes state or takes or returns a storage reference is
     /// reachable only by `DELEGATECALL` from a contract and is left out.
-    pub fn compute_abi(&self) -> Option<ContractAbi> {
+    pub fn compute_abi(&self) -> Option<ContractAbi<'a>> {
         let mut entries = self
             .members()
             .iter()
@@ -50,14 +50,14 @@ impl LibraryDefinitionStruct {
             self.ir_node.name.unparse().to_string(),
             self.get_file_id().clone(),
             entries,
-            &self.semantic,
+            self.semantic,
         ))
     }
 }
 
 /// A library function a contract can `CALL` rather than `DELEGATECALL`: it neither writes state
 /// nor takes or returns a storage reference.
-fn is_callable_on_library(function: &FunctionDefinition) -> bool {
+fn is_callable_on_library(function: &FunctionDefinition<'_>) -> bool {
     let reads_only = matches!(
         function.attributes().mutability(),
         FunctionMutability::View | FunctionMutability::Pure

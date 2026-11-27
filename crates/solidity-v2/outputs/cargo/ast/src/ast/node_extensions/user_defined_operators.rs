@@ -6,10 +6,10 @@ use crate::ast::{
 
 /// An operator expression a `using {f as op} for T global;` directive can
 /// rebind to a free function.
-pub trait UserDefinedOperatorExpression {
+pub trait UserDefinedOperatorExpression<'a> {
     /// The function this operator is bound to, or `None` when it keeps its
     /// built-in meaning.
-    fn resolve_operator_to_function(&self) -> Option<FunctionDefinition>;
+    fn resolve_operator_to_function(&self) -> Option<FunctionDefinition<'a>>;
 }
 
 /// The reference pass resolves every operator expression that a `using`
@@ -17,14 +17,14 @@ pub trait UserDefinedOperatorExpression {
 macro_rules! impl_resolve_operator_to_function {
     ($($node:ident),* $(,)?) => {
         $(
-            impl UserDefinedOperatorExpression for $node {
-                fn resolve_operator_to_function(&self) -> Option<FunctionDefinition> {
+            impl<'a> UserDefinedOperatorExpression<'a> for $node<'a> {
+                fn resolve_operator_to_function(&self) -> Option<FunctionDefinition<'a>> {
                     let definition_id = self
                         .semantic
                         .binder()
                         .resolved_operator_function(self.ir_node.id())?;
                     let Some(Definition::Function(function)) =
-                        Definition::try_create(definition_id, &self.semantic)
+                        Definition::try_create(definition_id, self.semantic)
                     else {
                         unreachable!("a using directive binds an operator to a function definition");
                     };

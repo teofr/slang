@@ -65,7 +65,7 @@ impl FileStruct {
         &self.file.id
     }
 
-    pub fn ast(&self) -> ast::SourceUnit {
+    pub fn ast(&self) -> ast::SourceUnit<'_> {
         ast::create_source_unit(&self.file.ir_root, &self.semantic)
     }
 

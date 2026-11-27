@@ -2,12 +2,12 @@ use slang_solidity_v2_common::files::FileId;
 
 use super::super::{ContractDefinition, SourceUnitMember, SourceUnitStruct};
 
-impl SourceUnitStruct {
+impl<'a> SourceUnitStruct<'a> {
     pub fn file_id(&self) -> &FileId {
         self.semantic.file_id_from_node_id(self.ir_node.id())
     }
 
-    pub fn contracts(&self) -> Vec<ContractDefinition> {
+    pub fn contracts(&self) -> Vec<ContractDefinition<'a>> {
         self.members()
             .iter()
             .filter_map(|member| {

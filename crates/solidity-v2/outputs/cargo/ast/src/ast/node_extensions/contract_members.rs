@@ -7,9 +7,9 @@ use super::super::{
 /// `ContractMember`, so one iterator body serves every member kind each admits.
 macro_rules! define_member_iterators {
     ($list:ident { $($method:ident($member:ident),)+ }) => {
-        impl $list {
+        impl<'a> $list<'a> {
             $(
-                pub(crate) fn $method(&self) -> impl Iterator<Item = $member> + use<'_> {
+                pub(crate) fn $method(&self) -> impl Iterator<Item = $member<'a>> + use<'a> {
                     self.iter().filter_map(|member| {
                         if let ContractMember::$member(definition) = member {
                             Some(definition)

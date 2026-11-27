@@ -28,7 +28,7 @@ pub trait NodeLocation {
 }
 
 {% for parent_type, sequence in target.sequences %}
-    impl NodeLocation for {{ parent_type }}Struct {
+    impl NodeLocation for {{ parent_type }}Struct<'_> {
         fn calculate_file_id(&self) -> Option<&FileId> {
             Some(self.get_file_id())
         }
@@ -40,7 +40,7 @@ pub trait NodeLocation {
 {% endfor %}
 
 {% for parent_type, choice in target.choices %}
-    impl NodeLocation for {{ parent_type }} {
+    impl NodeLocation for {{ parent_type }}{% if target.borrowed[parent_type] %}<'_>{% endif %} {
         fn calculate_file_id(&self) -> Option<&FileId> {
             match self {
                 {% for variant in choice.variants -%}
@@ -72,7 +72,7 @@ pub trait NodeLocation {
 {% endfor %}
 
 {% for parent_type, collection in target.collections %}
-    impl NodeLocation for {{ parent_type }}Struct {
+    impl NodeLocation for {{ parent_type }}Struct<'_> {
         fn calculate_file_id(&self) -> Option<&FileId> {
             self.ir_nodes.node_id().map(|node_id| self.semantic.file_id_from_node_id(node_id))
         }
@@ -84,7 +84,7 @@ pub trait NodeLocation {
 {% endfor %}
 
 {% for terminal_type, terminal in target.terminals %}
-    impl NodeLocation for {{ terminal_type }}Struct {
+    impl NodeLocation for {{ terminal_type }}Struct<'_> {
         fn calculate_file_id(&self) -> Option<&FileId> {
             Some(self.get_file_id())
         }

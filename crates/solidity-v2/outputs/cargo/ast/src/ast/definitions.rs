@@ -1,5 +1,3 @@
-use std::sync::Arc;
-
 use paste::paste;
 use slang_solidity_v2_common::nodes::NodeId;
 use slang_solidity_v2_semantic::binder;
@@ -28,33 +26,33 @@ use super::references::{Reference, references_binding_to_definition};
 
 // __SLANG_DEFINITION_TYPES__ keep in sync with binder
 #[derive(Clone)]
-pub enum Definition {
-    Constant(ConstantDefinition),
-    Contract(ContractDefinition),
-    Enum(EnumDefinition),
-    EnumMember(Identifier),
-    Error(ErrorDefinition),
-    Event(EventDefinition),
-    Function(FunctionDefinition),
-    Import(PathImport),
-    ImportedSymbol(ImportDeconstructionSymbol),
-    Interface(InterfaceDefinition),
-    Library(LibraryDefinition),
-    Modifier(ModifierDefinition),
-    Parameter(Parameter),
-    StateVariable(StateVariableDefinition),
-    Struct(StructDefinition),
-    StructMember(StructMember),
-    TypeParameter(Parameter),
-    UserDefinedValueType(UserDefinedValueTypeDefinition),
-    Variable(VariableDeclaration),
-    YulFunction(YulFunctionDefinition),
-    YulParameter(Identifier),
-    YulVariable(Identifier),
+pub enum Definition<'a> {
+    Constant(ConstantDefinition<'a>),
+    Contract(ContractDefinition<'a>),
+    Enum(EnumDefinition<'a>),
+    EnumMember(Identifier<'a>),
+    Error(ErrorDefinition<'a>),
+    Event(EventDefinition<'a>),
+    Function(FunctionDefinition<'a>),
+    Import(PathImport<'a>),
+    ImportedSymbol(ImportDeconstructionSymbol<'a>),
+    Interface(InterfaceDefinition<'a>),
+    Library(LibraryDefinition<'a>),
+    Modifier(ModifierDefinition<'a>),
+    Parameter(Parameter<'a>),
+    StateVariable(StateVariableDefinition<'a>),
+    Struct(StructDefinition<'a>),
+    StructMember(StructMember<'a>),
+    TypeParameter(Parameter<'a>),
+    UserDefinedValueType(UserDefinedValueTypeDefinition<'a>),
+    Variable(VariableDeclaration<'a>),
+    YulFunction(YulFunctionDefinition<'a>),
+    YulParameter(Identifier<'a>),
+    YulVariable(Identifier<'a>),
 }
 
-impl Definition {
-    pub fn try_create(definition_id: NodeId, semantic: &Arc<SemanticContext>) -> Option<Self> {
+impl<'a> Definition<'a> {
+    pub fn try_create(definition_id: NodeId, semantic: &'a SemanticContext) -> Option<Self> {
         let definition = semantic.binder().find_definition_by_id(definition_id)?;
 
         let definition = match definition {
@@ -166,7 +164,7 @@ impl Definition {
         }
     }
 
-    pub fn identifier(&self) -> Identifier {
+    pub fn identifier(&self) -> Identifier<'a> {
         match self {
             Definition::Constant(constant_definition) => constant_definition.name(),
             Definition::Contract(contract_definition) => contract_definition.name(),
@@ -221,7 +219,7 @@ impl Definition {
         }
     }
 
-    pub fn references(&self) -> Vec<Reference> {
+    pub fn references(&self) -> Vec<Reference<'a>> {
         match self {
             Definition::Constant(constant_definition) => constant_definition.references(),
             Definition::Contract(contract_definition) => contract_definition.references(),
@@ -259,7 +257,7 @@ impl Definition {
     /// Returns the definition this one is declared immediately in. Returns
     /// `None` for top-level definitions or those not direct members of another
     /// definition.
-    pub fn enclosing_definition(&self) -> Option<Definition> {
+    pub fn enclosing_definition(&self) -> Option<Definition<'a>> {
         match self {
             Definition::Constant(constant_definition) => constant_definition.enclosing_definition(),
             Definition::Enum(enum_definition) => enum_definition.enclosing_definition(),
@@ -282,12 +280,12 @@ impl Definition {
 macro_rules! define_references_method {
     ($type:ident) => {
         paste! {
-            impl [<$type Struct>] {
-                pub fn references(&self) -> Vec<Reference> {
-                    references_binding_to_definition(self.ir_node.id(), &self.semantic)
+            impl<'a> [<$type Struct>]<'a> {
+                pub fn references(&self) -> Vec<Reference<'a>> {
+                    references_binding_to_definition(self.ir_node.id(), self.semantic)
                 }
-                pub fn as_definition(&self) -> Option<Definition> {
-                    Definition::try_create(self.ir_node.id(), &self.semantic)
+                pub fn as_definition(&self) -> Option<Definition<'a>> {
+                    Definition::try_create(self.ir_node.id(), self.semantic)
                 }
             }
         }
@@ -297,14 +295,14 @@ macro_rules! define_references_method {
 macro_rules! define_enclosing_definition_method {
     ($type:ident) => {
         paste! {
-            impl [<$type Struct>] {
+            impl<'a> [<$type Struct>]<'a> {
                 /// Returns the definition this one is declared in, or `None` if it is declared at file level.
-                pub fn enclosing_definition(&self) -> Option<Definition> {
+                pub fn enclosing_definition(&self) -> Option<Definition<'a>> {
                     let enclosing = self
                         .semantic
                         .binder()
                         .enclosing_definition_node_id(self.ir_node.id())?;
-                    Definition::try_create(enclosing, &self.semantic)
+                    Definition::try_create(enclosing, self.semantic)
                 }
             }
         }

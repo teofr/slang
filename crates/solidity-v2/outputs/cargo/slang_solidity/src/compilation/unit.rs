@@ -92,13 +92,13 @@ impl CompilationUnit {
         Some(dependencies)
     }
 
-    pub fn all_definitions(&self) -> impl Iterator<Item = ast::Definition> + use<'_> {
+    pub fn all_definitions(&self) -> impl Iterator<Item = ast::Definition<'_>> + use<'_> {
         self.semantic.all_definitions().map(|definition| {
             ast::Definition::try_create(definition.node_id(), &self.semantic).unwrap()
         })
     }
 
-    pub fn all_references(&self) -> impl Iterator<Item = ast::Reference> + use<'_> {
+    pub fn all_references(&self) -> impl Iterator<Item = ast::Reference<'_>> + use<'_> {
         self.semantic.all_references().map(|reference| {
             ast::Reference::try_create(&reference.identifier, &self.semantic).unwrap()
         })
@@ -107,17 +107,17 @@ impl CompilationUnit {
     pub fn find_contract_by_name<'a, 'b>(
         &'a self,
         name: &'b str,
-    ) -> impl Iterator<Item = ast::ContractDefinition> + use<'a>
+    ) -> impl Iterator<Item = ast::ContractDefinition<'a>> + use<'a>
     where
         'b: 'a,
     {
         self.semantic
             .find_contract_by_name(name)
-            .map(|contract| ast::create_contract_definition(&contract, &self.semantic))
+            .map(|contract| ast::create_contract_definition(contract, &self.semantic))
     }
 
     /// Iterates over every contract definition in this compilation unit.
-    pub fn all_contracts(&self) -> impl Iterator<Item = ast::ContractDefinition> + use<'_> {
+    pub fn all_contracts(&self) -> impl Iterator<Item = ast::ContractDefinition<'_>> + use<'_> {
         self.semantic
             .all_contracts()
             .map(|contract| ast::create_contract_definition(contract, &self.semantic))
@@ -125,7 +125,7 @@ impl CompilationUnit {
 
     /// Returns the ABIs of every contract, interface, and library in this
     /// compilation unit. A definition whose ABI cannot be computed is left out.
-    pub fn compute_abi(&self) -> Vec<abi::ContractAbi> {
+    pub fn compute_abi(&self) -> Vec<abi::ContractAbi<'_>> {
         self.files
             .values()
             .flat_map(|file| ast::create_source_unit(file.ir_root(), &self.semantic).compute_abi())

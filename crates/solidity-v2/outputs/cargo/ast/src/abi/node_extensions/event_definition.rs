@@ -2,7 +2,7 @@ use crate::abi::entries::{Entry, Event};
 use crate::abi::hash_from_signature;
 use crate::ast::EventDefinitionStruct;
 
-impl EventDefinitionStruct {
+impl<'a> EventDefinitionStruct<'a> {
     pub fn compute_canonical_signature(&self) -> Option<String> {
         let name = self.ir_node.name.unparse();
         let parameters = self.parameters().compute_canonical_signature()?;

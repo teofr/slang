@@ -47,7 +47,7 @@ struct NodeWalk {
 }
 
 impl Visitor for NodeWalk {
-    fn visit_identifier(&mut self, _node: &Identifier) {
+    fn visit_identifier(&mut self, _node: &Identifier<'_>) {
         self.identifier_count += 1;
     }
 }

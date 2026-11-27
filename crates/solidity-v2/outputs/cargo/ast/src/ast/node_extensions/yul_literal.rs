@@ -3,7 +3,7 @@ use slang_solidity_v2_semantic::types::literals;
 
 use super::super::YulLiteral;
 
-impl YulLiteral {
+impl<'a> YulLiteral<'a> {
     /// The 256-bit word this Yul literal denotes: booleans as 0 / 1, decimal and
     /// hex numbers by their integer value, and string / `hex"…"` literals packed
     /// left-aligned (most-significant end) into the word, keeping only the first
@@ -23,10 +23,10 @@ impl YulLiteral {
                 .parse()
                 .expect("semantic analysis rejects Yul hex literals wider than 256 bits"),
             YulLiteral::StringLiteral(string) => Self::pack_word(
-                &literals::value_of_string_literals(std::slice::from_ref(&string.ir_node)),
+                &literals::value_of_string_literals(std::slice::from_ref(string.ir_node)),
             ),
             YulLiteral::HexStringLiteral(hex_string) => Self::pack_word(
-                &literals::value_of_hex_string_literals(std::slice::from_ref(&hex_string.ir_node)),
+                &literals::value_of_hex_string_literals(std::slice::from_ref(hex_string.ir_node)),
             ),
         }
     }

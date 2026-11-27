@@ -9,7 +9,7 @@ use serde::ser::{SerializeMap, Serializer};
 
 use super::{AbiEntries, AbiEntry, AbiMutability, AbiParameter, AbiParameters, ContractAbi};
 
-impl Serialize for ContractAbi {
+impl Serialize for ContractAbi<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         self.entries().serialize(serializer)
     }

@@ -23,7 +23,7 @@ impl Serialize for SerializeRange<'_> {
 // Sequences
 //
 
-impl Serialize for AbicoderPragmaStruct {
+impl Serialize for AbicoderPragmaStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut map = serializer.serialize_map(Some(5))?;
         map.serialize_entry("id", &self.node_id())?;
@@ -35,7 +35,7 @@ impl Serialize for AbicoderPragmaStruct {
     }
 }
 
-impl Serialize for AdditiveExpressionStruct {
+impl Serialize for AdditiveExpressionStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut map = serializer.serialize_map(Some(7))?;
         map.serialize_entry("id", &self.node_id())?;
@@ -49,7 +49,7 @@ impl Serialize for AdditiveExpressionStruct {
     }
 }
 
-impl Serialize for AddressTypeStruct {
+impl Serialize for AddressTypeStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut map = serializer.serialize_map(Some(5))?;
         map.serialize_entry("id", &self.node_id())?;
@@ -61,7 +61,7 @@ impl Serialize for AddressTypeStruct {
     }
 }
 
-impl Serialize for AndExpressionStruct {
+impl Serialize for AndExpressionStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut map = serializer.serialize_map(Some(6))?;
         map.serialize_entry("id", &self.node_id())?;
@@ -74,7 +74,7 @@ impl Serialize for AndExpressionStruct {
     }
 }
 
-impl Serialize for ArrayExpressionStruct {
+impl Serialize for ArrayExpressionStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut map = serializer.serialize_map(Some(5))?;
         map.serialize_entry("id", &self.node_id())?;
@@ -86,7 +86,7 @@ impl Serialize for ArrayExpressionStruct {
     }
 }
 
-impl Serialize for ArrayTypeNameStruct {
+impl Serialize for ArrayTypeNameStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut map = serializer.serialize_map(Some(6))?;
         map.serialize_entry("id", &self.node_id())?;
@@ -99,7 +99,7 @@ impl Serialize for ArrayTypeNameStruct {
     }
 }
 
-impl Serialize for AssemblyStatementStruct {
+impl Serialize for AssemblyStatementStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut map = serializer.serialize_map(Some(6))?;
         map.serialize_entry("id", &self.node_id())?;
@@ -112,7 +112,7 @@ impl Serialize for AssemblyStatementStruct {
     }
 }
 
-impl Serialize for AssignmentExpressionStruct {
+impl Serialize for AssignmentExpressionStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut map = serializer.serialize_map(Some(7))?;
         map.serialize_entry("id", &self.node_id())?;
@@ -126,7 +126,7 @@ impl Serialize for AssignmentExpressionStruct {
     }
 }
 
-impl Serialize for BitwiseAndExpressionStruct {
+impl Serialize for BitwiseAndExpressionStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut map = serializer.serialize_map(Some(6))?;
         map.serialize_entry("id", &self.node_id())?;
@@ -139,7 +139,7 @@ impl Serialize for BitwiseAndExpressionStruct {
     }
 }
 
-impl Serialize for BitwiseOrExpressionStruct {
+impl Serialize for BitwiseOrExpressionStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut map = serializer.serialize_map(Some(6))?;
         map.serialize_entry("id", &self.node_id())?;
@@ -152,7 +152,7 @@ impl Serialize for BitwiseOrExpressionStruct {
     }
 }
 
-impl Serialize for BitwiseXorExpressionStruct {
+impl Serialize for BitwiseXorExpressionStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut map = serializer.serialize_map(Some(6))?;
         map.serialize_entry("id", &self.node_id())?;
@@ -165,7 +165,7 @@ impl Serialize for BitwiseXorExpressionStruct {
     }
 }
 
-impl Serialize for BlockStruct {
+impl Serialize for BlockStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut map = serializer.serialize_map(Some(5))?;
         map.serialize_entry("id", &self.node_id())?;
@@ -177,7 +177,7 @@ impl Serialize for BlockStruct {
     }
 }
 
-impl Serialize for BreakStatementStruct {
+impl Serialize for BreakStatementStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut map = serializer.serialize_map(Some(4))?;
         map.serialize_entry("id", &self.node_id())?;
@@ -188,7 +188,7 @@ impl Serialize for BreakStatementStruct {
     }
 }
 
-impl Serialize for CallOptionsExpressionStruct {
+impl Serialize for CallOptionsExpressionStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut map = serializer.serialize_map(Some(6))?;
         map.serialize_entry("id", &self.node_id())?;
@@ -201,7 +201,7 @@ impl Serialize for CallOptionsExpressionStruct {
     }
 }
 
-impl Serialize for CatchClauseStruct {
+impl Serialize for CatchClauseStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut map = serializer.serialize_map(Some(7))?;
         map.serialize_entry("id", &self.node_id())?;
@@ -215,7 +215,7 @@ impl Serialize for CatchClauseStruct {
     }
 }
 
-impl Serialize for ConditionalExpressionStruct {
+impl Serialize for ConditionalExpressionStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut map = serializer.serialize_map(Some(7))?;
         map.serialize_entry("id", &self.node_id())?;
@@ -229,7 +229,7 @@ impl Serialize for ConditionalExpressionStruct {
     }
 }
 
-impl Serialize for ConstantDefinitionStruct {
+impl Serialize for ConstantDefinitionStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut map = serializer.serialize_map(Some(8))?;
         map.serialize_entry("id", &self.node_id())?;
@@ -244,7 +244,7 @@ impl Serialize for ConstantDefinitionStruct {
     }
 }
 
-impl Serialize for ContinueStatementStruct {
+impl Serialize for ContinueStatementStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut map = serializer.serialize_map(Some(4))?;
         map.serialize_entry("id", &self.node_id())?;
@@ -255,7 +255,7 @@ impl Serialize for ContinueStatementStruct {
     }
 }
 
-impl Serialize for ContractDefinitionStruct {
+impl Serialize for ContractDefinitionStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut map = serializer.serialize_map(Some(9))?;
         map.serialize_entry("id", &self.node_id())?;
@@ -271,7 +271,7 @@ impl Serialize for ContractDefinitionStruct {
     }
 }
 
-impl Serialize for DecimalNumberExpressionStruct {
+impl Serialize for DecimalNumberExpressionStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut map = serializer.serialize_map(Some(6))?;
         map.serialize_entry("id", &self.node_id())?;
@@ -284,7 +284,7 @@ impl Serialize for DecimalNumberExpressionStruct {
     }
 }
 
-impl Serialize for DoWhileStatementStruct {
+impl Serialize for DoWhileStatementStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut map = serializer.serialize_map(Some(6))?;
         map.serialize_entry("id", &self.node_id())?;
@@ -297,7 +297,7 @@ impl Serialize for DoWhileStatementStruct {
     }
 }
 
-impl Serialize for EmitStatementStruct {
+impl Serialize for EmitStatementStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut map = serializer.serialize_map(Some(6))?;
         map.serialize_entry("id", &self.node_id())?;
@@ -310,7 +310,7 @@ impl Serialize for EmitStatementStruct {
     }
 }
 
-impl Serialize for EnumDefinitionStruct {
+impl Serialize for EnumDefinitionStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut map = serializer.serialize_map(Some(6))?;
         map.serialize_entry("id", &self.node_id())?;
@@ -323,7 +323,7 @@ impl Serialize for EnumDefinitionStruct {
     }
 }
 
-impl Serialize for EqualityExpressionStruct {
+impl Serialize for EqualityExpressionStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut map = serializer.serialize_map(Some(7))?;
         map.serialize_entry("id", &self.node_id())?;
@@ -337,7 +337,7 @@ impl Serialize for EqualityExpressionStruct {
     }
 }
 
-impl Serialize for ErrorDefinitionStruct {
+impl Serialize for ErrorDefinitionStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut map = serializer.serialize_map(Some(6))?;
         map.serialize_entry("id", &self.node_id())?;
@@ -350,7 +350,7 @@ impl Serialize for ErrorDefinitionStruct {
     }
 }
 
-impl Serialize for EventDefinitionStruct {
+impl Serialize for EventDefinitionStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut map = serializer.serialize_map(Some(7))?;
         map.serialize_entry("id", &self.node_id())?;
@@ -364,7 +364,7 @@ impl Serialize for EventDefinitionStruct {
     }
 }
 
-impl Serialize for ExperimentalPragmaStruct {
+impl Serialize for ExperimentalPragmaStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut map = serializer.serialize_map(Some(5))?;
         map.serialize_entry("id", &self.node_id())?;
@@ -376,7 +376,7 @@ impl Serialize for ExperimentalPragmaStruct {
     }
 }
 
-impl Serialize for ExponentiationExpressionStruct {
+impl Serialize for ExponentiationExpressionStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut map = serializer.serialize_map(Some(6))?;
         map.serialize_entry("id", &self.node_id())?;
@@ -389,7 +389,7 @@ impl Serialize for ExponentiationExpressionStruct {
     }
 }
 
-impl Serialize for ExpressionStatementStruct {
+impl Serialize for ExpressionStatementStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut map = serializer.serialize_map(Some(5))?;
         map.serialize_entry("id", &self.node_id())?;
@@ -401,7 +401,7 @@ impl Serialize for ExpressionStatementStruct {
     }
 }
 
-impl Serialize for ForStatementStruct {
+impl Serialize for ForStatementStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut map = serializer.serialize_map(Some(8))?;
         map.serialize_entry("id", &self.node_id())?;
@@ -416,7 +416,7 @@ impl Serialize for ForStatementStruct {
     }
 }
 
-impl Serialize for FunctionAttributesStruct {
+impl Serialize for FunctionAttributesStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut map = serializer.serialize_map(Some(10))?;
         map.serialize_entry("id", &self.node_id())?;
@@ -433,7 +433,7 @@ impl Serialize for FunctionAttributesStruct {
     }
 }
 
-impl Serialize for FunctionCallExpressionStruct {
+impl Serialize for FunctionCallExpressionStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut map = serializer.serialize_map(Some(6))?;
         map.serialize_entry("id", &self.node_id())?;
@@ -446,7 +446,7 @@ impl Serialize for FunctionCallExpressionStruct {
     }
 }
 
-impl Serialize for FunctionDefinitionStruct {
+impl Serialize for FunctionDefinitionStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut map = serializer.serialize_map(Some(10))?;
         map.serialize_entry("id", &self.node_id())?;
@@ -463,7 +463,7 @@ impl Serialize for FunctionDefinitionStruct {
     }
 }
 
-impl Serialize for FunctionTypeStruct {
+impl Serialize for FunctionTypeStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut map = serializer.serialize_map(Some(7))?;
         map.serialize_entry("id", &self.node_id())?;
@@ -477,7 +477,7 @@ impl Serialize for FunctionTypeStruct {
     }
 }
 
-impl Serialize for FunctionTypeAttributesStruct {
+impl Serialize for FunctionTypeAttributesStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut map = serializer.serialize_map(Some(6))?;
         map.serialize_entry("id", &self.node_id())?;
@@ -490,7 +490,7 @@ impl Serialize for FunctionTypeAttributesStruct {
     }
 }
 
-impl Serialize for HexNumberExpressionStruct {
+impl Serialize for HexNumberExpressionStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut map = serializer.serialize_map(Some(5))?;
         map.serialize_entry("id", &self.node_id())?;
@@ -502,7 +502,7 @@ impl Serialize for HexNumberExpressionStruct {
     }
 }
 
-impl Serialize for IfStatementStruct {
+impl Serialize for IfStatementStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut map = serializer.serialize_map(Some(7))?;
         map.serialize_entry("id", &self.node_id())?;
@@ -516,7 +516,7 @@ impl Serialize for IfStatementStruct {
     }
 }
 
-impl Serialize for ImportDeconstructionStruct {
+impl Serialize for ImportDeconstructionStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut map = serializer.serialize_map(Some(6))?;
         map.serialize_entry("id", &self.node_id())?;
@@ -529,7 +529,7 @@ impl Serialize for ImportDeconstructionStruct {
     }
 }
 
-impl Serialize for ImportDeconstructionSymbolStruct {
+impl Serialize for ImportDeconstructionSymbolStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut map = serializer.serialize_map(Some(6))?;
         map.serialize_entry("id", &self.node_id())?;
@@ -542,7 +542,7 @@ impl Serialize for ImportDeconstructionSymbolStruct {
     }
 }
 
-impl Serialize for IndexAccessExpressionStruct {
+impl Serialize for IndexAccessExpressionStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut map = serializer.serialize_map(Some(8))?;
         map.serialize_entry("id", &self.node_id())?;
@@ -557,7 +557,7 @@ impl Serialize for IndexAccessExpressionStruct {
     }
 }
 
-impl Serialize for InequalityExpressionStruct {
+impl Serialize for InequalityExpressionStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut map = serializer.serialize_map(Some(7))?;
         map.serialize_entry("id", &self.node_id())?;
@@ -571,7 +571,7 @@ impl Serialize for InequalityExpressionStruct {
     }
 }
 
-impl Serialize for InheritanceTypeStruct {
+impl Serialize for InheritanceTypeStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut map = serializer.serialize_map(Some(6))?;
         map.serialize_entry("id", &self.node_id())?;
@@ -584,7 +584,7 @@ impl Serialize for InheritanceTypeStruct {
     }
 }
 
-impl Serialize for InterfaceDefinitionStruct {
+impl Serialize for InterfaceDefinitionStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut map = serializer.serialize_map(Some(7))?;
         map.serialize_entry("id", &self.node_id())?;
@@ -598,7 +598,7 @@ impl Serialize for InterfaceDefinitionStruct {
     }
 }
 
-impl Serialize for LibraryDefinitionStruct {
+impl Serialize for LibraryDefinitionStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut map = serializer.serialize_map(Some(6))?;
         map.serialize_entry("id", &self.node_id())?;
@@ -611,7 +611,7 @@ impl Serialize for LibraryDefinitionStruct {
     }
 }
 
-impl Serialize for MappingTypeStruct {
+impl Serialize for MappingTypeStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut map = serializer.serialize_map(Some(6))?;
         map.serialize_entry("id", &self.node_id())?;
@@ -624,7 +624,7 @@ impl Serialize for MappingTypeStruct {
     }
 }
 
-impl Serialize for MemberAccessExpressionStruct {
+impl Serialize for MemberAccessExpressionStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut map = serializer.serialize_map(Some(6))?;
         map.serialize_entry("id", &self.node_id())?;
@@ -637,7 +637,7 @@ impl Serialize for MemberAccessExpressionStruct {
     }
 }
 
-impl Serialize for ModifierAttributesStruct {
+impl Serialize for ModifierAttributesStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut map = serializer.serialize_map(Some(6))?;
         map.serialize_entry("id", &self.node_id())?;
@@ -650,7 +650,7 @@ impl Serialize for ModifierAttributesStruct {
     }
 }
 
-impl Serialize for ModifierDefinitionStruct {
+impl Serialize for ModifierDefinitionStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut map = serializer.serialize_map(Some(8))?;
         map.serialize_entry("id", &self.node_id())?;
@@ -665,7 +665,7 @@ impl Serialize for ModifierDefinitionStruct {
     }
 }
 
-impl Serialize for ModifierInvocationStruct {
+impl Serialize for ModifierInvocationStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut map = serializer.serialize_map(Some(6))?;
         map.serialize_entry("id", &self.node_id())?;
@@ -678,7 +678,7 @@ impl Serialize for ModifierInvocationStruct {
     }
 }
 
-impl Serialize for MultiTypedDeclarationStruct {
+impl Serialize for MultiTypedDeclarationStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut map = serializer.serialize_map(Some(6))?;
         map.serialize_entry("id", &self.node_id())?;
@@ -691,7 +691,7 @@ impl Serialize for MultiTypedDeclarationStruct {
     }
 }
 
-impl Serialize for MultiTypedDeclarationElementStruct {
+impl Serialize for MultiTypedDeclarationElementStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut map = serializer.serialize_map(Some(5))?;
         map.serialize_entry("id", &self.node_id())?;
@@ -703,7 +703,7 @@ impl Serialize for MultiTypedDeclarationElementStruct {
     }
 }
 
-impl Serialize for MultiplicativeExpressionStruct {
+impl Serialize for MultiplicativeExpressionStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut map = serializer.serialize_map(Some(7))?;
         map.serialize_entry("id", &self.node_id())?;
@@ -717,7 +717,7 @@ impl Serialize for MultiplicativeExpressionStruct {
     }
 }
 
-impl Serialize for NamedArgumentStruct {
+impl Serialize for NamedArgumentStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut map = serializer.serialize_map(Some(6))?;
         map.serialize_entry("id", &self.node_id())?;
@@ -730,7 +730,7 @@ impl Serialize for NamedArgumentStruct {
     }
 }
 
-impl Serialize for NewExpressionStruct {
+impl Serialize for NewExpressionStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut map = serializer.serialize_map(Some(5))?;
         map.serialize_entry("id", &self.node_id())?;
@@ -742,7 +742,7 @@ impl Serialize for NewExpressionStruct {
     }
 }
 
-impl Serialize for OrExpressionStruct {
+impl Serialize for OrExpressionStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut map = serializer.serialize_map(Some(6))?;
         map.serialize_entry("id", &self.node_id())?;
@@ -755,7 +755,7 @@ impl Serialize for OrExpressionStruct {
     }
 }
 
-impl Serialize for ParameterStruct {
+impl Serialize for ParameterStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut map = serializer.serialize_map(Some(8))?;
         map.serialize_entry("id", &self.node_id())?;
@@ -770,7 +770,7 @@ impl Serialize for ParameterStruct {
     }
 }
 
-impl Serialize for PathImportStruct {
+impl Serialize for PathImportStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut map = serializer.serialize_map(Some(6))?;
         map.serialize_entry("id", &self.node_id())?;
@@ -783,7 +783,7 @@ impl Serialize for PathImportStruct {
     }
 }
 
-impl Serialize for PostfixExpressionStruct {
+impl Serialize for PostfixExpressionStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut map = serializer.serialize_map(Some(6))?;
         map.serialize_entry("id", &self.node_id())?;
@@ -796,7 +796,7 @@ impl Serialize for PostfixExpressionStruct {
     }
 }
 
-impl Serialize for PragmaDirectiveStruct {
+impl Serialize for PragmaDirectiveStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut map = serializer.serialize_map(Some(5))?;
         map.serialize_entry("id", &self.node_id())?;
@@ -808,7 +808,7 @@ impl Serialize for PragmaDirectiveStruct {
     }
 }
 
-impl Serialize for PrefixExpressionStruct {
+impl Serialize for PrefixExpressionStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut map = serializer.serialize_map(Some(6))?;
         map.serialize_entry("id", &self.node_id())?;
@@ -821,7 +821,7 @@ impl Serialize for PrefixExpressionStruct {
     }
 }
 
-impl Serialize for ReturnStatementStruct {
+impl Serialize for ReturnStatementStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut map = serializer.serialize_map(Some(5))?;
         map.serialize_entry("id", &self.node_id())?;
@@ -833,7 +833,7 @@ impl Serialize for ReturnStatementStruct {
     }
 }
 
-impl Serialize for RevertStatementStruct {
+impl Serialize for RevertStatementStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut map = serializer.serialize_map(Some(6))?;
         map.serialize_entry("id", &self.node_id())?;
@@ -846,7 +846,7 @@ impl Serialize for RevertStatementStruct {
     }
 }
 
-impl Serialize for ShiftExpressionStruct {
+impl Serialize for ShiftExpressionStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut map = serializer.serialize_map(Some(7))?;
         map.serialize_entry("id", &self.node_id())?;
@@ -860,7 +860,7 @@ impl Serialize for ShiftExpressionStruct {
     }
 }
 
-impl Serialize for SingleTypedDeclarationStruct {
+impl Serialize for SingleTypedDeclarationStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut map = serializer.serialize_map(Some(6))?;
         map.serialize_entry("id", &self.node_id())?;
@@ -873,7 +873,7 @@ impl Serialize for SingleTypedDeclarationStruct {
     }
 }
 
-impl Serialize for SourceUnitStruct {
+impl Serialize for SourceUnitStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut map = serializer.serialize_map(Some(5))?;
         map.serialize_entry("id", &self.node_id())?;
@@ -885,7 +885,7 @@ impl Serialize for SourceUnitStruct {
     }
 }
 
-impl Serialize for StateVariableAttributesStruct {
+impl Serialize for StateVariableAttributesStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut map = serializer.serialize_map(Some(7))?;
         map.serialize_entry("id", &self.node_id())?;
@@ -899,7 +899,7 @@ impl Serialize for StateVariableAttributesStruct {
     }
 }
 
-impl Serialize for StateVariableDefinitionStruct {
+impl Serialize for StateVariableDefinitionStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut map = serializer.serialize_map(Some(8))?;
         map.serialize_entry("id", &self.node_id())?;
@@ -914,7 +914,7 @@ impl Serialize for StateVariableDefinitionStruct {
     }
 }
 
-impl Serialize for StructDefinitionStruct {
+impl Serialize for StructDefinitionStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut map = serializer.serialize_map(Some(6))?;
         map.serialize_entry("id", &self.node_id())?;
@@ -927,7 +927,7 @@ impl Serialize for StructDefinitionStruct {
     }
 }
 
-impl Serialize for StructMemberStruct {
+impl Serialize for StructMemberStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut map = serializer.serialize_map(Some(6))?;
         map.serialize_entry("id", &self.node_id())?;
@@ -940,7 +940,7 @@ impl Serialize for StructMemberStruct {
     }
 }
 
-impl Serialize for TryStatementStruct {
+impl Serialize for TryStatementStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut map = serializer.serialize_map(Some(8))?;
         map.serialize_entry("id", &self.node_id())?;
@@ -955,7 +955,7 @@ impl Serialize for TryStatementStruct {
     }
 }
 
-impl Serialize for TupleExpressionStruct {
+impl Serialize for TupleExpressionStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut map = serializer.serialize_map(Some(5))?;
         map.serialize_entry("id", &self.node_id())?;
@@ -967,7 +967,7 @@ impl Serialize for TupleExpressionStruct {
     }
 }
 
-impl Serialize for TupleValueStruct {
+impl Serialize for TupleValueStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut map = serializer.serialize_map(Some(5))?;
         map.serialize_entry("id", &self.node_id())?;
@@ -979,7 +979,7 @@ impl Serialize for TupleValueStruct {
     }
 }
 
-impl Serialize for TypeExpressionStruct {
+impl Serialize for TypeExpressionStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut map = serializer.serialize_map(Some(5))?;
         map.serialize_entry("id", &self.node_id())?;
@@ -991,7 +991,7 @@ impl Serialize for TypeExpressionStruct {
     }
 }
 
-impl Serialize for UncheckedBlockStruct {
+impl Serialize for UncheckedBlockStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut map = serializer.serialize_map(Some(5))?;
         map.serialize_entry("id", &self.node_id())?;
@@ -1003,7 +1003,7 @@ impl Serialize for UncheckedBlockStruct {
     }
 }
 
-impl Serialize for UserDefinedValueTypeDefinitionStruct {
+impl Serialize for UserDefinedValueTypeDefinitionStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut map = serializer.serialize_map(Some(6))?;
         map.serialize_entry("id", &self.node_id())?;
@@ -1016,7 +1016,7 @@ impl Serialize for UserDefinedValueTypeDefinitionStruct {
     }
 }
 
-impl Serialize for UsingDeconstructionStruct {
+impl Serialize for UsingDeconstructionStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut map = serializer.serialize_map(Some(5))?;
         map.serialize_entry("id", &self.node_id())?;
@@ -1028,7 +1028,7 @@ impl Serialize for UsingDeconstructionStruct {
     }
 }
 
-impl Serialize for UsingDeconstructionSymbolStruct {
+impl Serialize for UsingDeconstructionSymbolStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut map = serializer.serialize_map(Some(6))?;
         map.serialize_entry("id", &self.node_id())?;
@@ -1041,7 +1041,7 @@ impl Serialize for UsingDeconstructionSymbolStruct {
     }
 }
 
-impl Serialize for UsingDirectiveStruct {
+impl Serialize for UsingDirectiveStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut map = serializer.serialize_map(Some(7))?;
         map.serialize_entry("id", &self.node_id())?;
@@ -1055,7 +1055,7 @@ impl Serialize for UsingDirectiveStruct {
     }
 }
 
-impl Serialize for VariableDeclarationStruct {
+impl Serialize for VariableDeclarationStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut map = serializer.serialize_map(Some(7))?;
         map.serialize_entry("id", &self.node_id())?;
@@ -1069,7 +1069,7 @@ impl Serialize for VariableDeclarationStruct {
     }
 }
 
-impl Serialize for VariableDeclarationStatementStruct {
+impl Serialize for VariableDeclarationStatementStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut map = serializer.serialize_map(Some(5))?;
         map.serialize_entry("id", &self.node_id())?;
@@ -1081,7 +1081,7 @@ impl Serialize for VariableDeclarationStatementStruct {
     }
 }
 
-impl Serialize for VersionPragmaStruct {
+impl Serialize for VersionPragmaStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut map = serializer.serialize_map(Some(5))?;
         map.serialize_entry("id", &self.node_id())?;
@@ -1093,7 +1093,7 @@ impl Serialize for VersionPragmaStruct {
     }
 }
 
-impl Serialize for VersionPragmaComparatorStruct {
+impl Serialize for VersionPragmaComparatorStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut map = serializer.serialize_map(Some(6))?;
         map.serialize_entry("id", &self.node_id())?;
@@ -1106,7 +1106,7 @@ impl Serialize for VersionPragmaComparatorStruct {
     }
 }
 
-impl Serialize for WhileStatementStruct {
+impl Serialize for WhileStatementStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut map = serializer.serialize_map(Some(6))?;
         map.serialize_entry("id", &self.node_id())?;
@@ -1119,7 +1119,7 @@ impl Serialize for WhileStatementStruct {
     }
 }
 
-impl Serialize for YulBlockStruct {
+impl Serialize for YulBlockStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut map = serializer.serialize_map(Some(5))?;
         map.serialize_entry("id", &self.node_id())?;
@@ -1131,7 +1131,7 @@ impl Serialize for YulBlockStruct {
     }
 }
 
-impl Serialize for YulBreakStatementStruct {
+impl Serialize for YulBreakStatementStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut map = serializer.serialize_map(Some(4))?;
         map.serialize_entry("id", &self.node_id())?;
@@ -1142,7 +1142,7 @@ impl Serialize for YulBreakStatementStruct {
     }
 }
 
-impl Serialize for YulContinueStatementStruct {
+impl Serialize for YulContinueStatementStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut map = serializer.serialize_map(Some(4))?;
         map.serialize_entry("id", &self.node_id())?;
@@ -1153,7 +1153,7 @@ impl Serialize for YulContinueStatementStruct {
     }
 }
 
-impl Serialize for YulDefaultCaseStruct {
+impl Serialize for YulDefaultCaseStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut map = serializer.serialize_map(Some(5))?;
         map.serialize_entry("id", &self.node_id())?;
@@ -1165,7 +1165,7 @@ impl Serialize for YulDefaultCaseStruct {
     }
 }
 
-impl Serialize for YulForStatementStruct {
+impl Serialize for YulForStatementStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut map = serializer.serialize_map(Some(8))?;
         map.serialize_entry("id", &self.node_id())?;
@@ -1180,7 +1180,7 @@ impl Serialize for YulForStatementStruct {
     }
 }
 
-impl Serialize for YulFunctionCallExpressionStruct {
+impl Serialize for YulFunctionCallExpressionStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut map = serializer.serialize_map(Some(6))?;
         map.serialize_entry("id", &self.node_id())?;
@@ -1193,7 +1193,7 @@ impl Serialize for YulFunctionCallExpressionStruct {
     }
 }
 
-impl Serialize for YulFunctionDefinitionStruct {
+impl Serialize for YulFunctionDefinitionStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut map = serializer.serialize_map(Some(8))?;
         map.serialize_entry("id", &self.node_id())?;
@@ -1208,7 +1208,7 @@ impl Serialize for YulFunctionDefinitionStruct {
     }
 }
 
-impl Serialize for YulIfStatementStruct {
+impl Serialize for YulIfStatementStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut map = serializer.serialize_map(Some(6))?;
         map.serialize_entry("id", &self.node_id())?;
@@ -1221,7 +1221,7 @@ impl Serialize for YulIfStatementStruct {
     }
 }
 
-impl Serialize for YulLeaveStatementStruct {
+impl Serialize for YulLeaveStatementStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut map = serializer.serialize_map(Some(4))?;
         map.serialize_entry("id", &self.node_id())?;
@@ -1232,7 +1232,7 @@ impl Serialize for YulLeaveStatementStruct {
     }
 }
 
-impl Serialize for YulSwitchStatementStruct {
+impl Serialize for YulSwitchStatementStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut map = serializer.serialize_map(Some(7))?;
         map.serialize_entry("id", &self.node_id())?;
@@ -1246,7 +1246,7 @@ impl Serialize for YulSwitchStatementStruct {
     }
 }
 
-impl Serialize for YulValueCaseStruct {
+impl Serialize for YulValueCaseStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut map = serializer.serialize_map(Some(6))?;
         map.serialize_entry("id", &self.node_id())?;
@@ -1259,7 +1259,7 @@ impl Serialize for YulValueCaseStruct {
     }
 }
 
-impl Serialize for YulVariableAssignmentStatementStruct {
+impl Serialize for YulVariableAssignmentStatementStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut map = serializer.serialize_map(Some(6))?;
         map.serialize_entry("id", &self.node_id())?;
@@ -1272,7 +1272,7 @@ impl Serialize for YulVariableAssignmentStatementStruct {
     }
 }
 
-impl Serialize for YulVariableDeclarationStatementStruct {
+impl Serialize for YulVariableDeclarationStatementStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut map = serializer.serialize_map(Some(6))?;
         map.serialize_entry("id", &self.node_id())?;
@@ -1285,7 +1285,7 @@ impl Serialize for YulVariableDeclarationStatementStruct {
     }
 }
 
-impl Serialize for YulVariableDeclarationValueStruct {
+impl Serialize for YulVariableDeclarationValueStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut map = serializer.serialize_map(Some(5))?;
         map.serialize_entry("id", &self.node_id())?;
@@ -1318,7 +1318,7 @@ impl Serialize for AbicoderVersion {
     }
 }
 
-impl Serialize for AdditiveExpressionOperator {
+impl Serialize for AdditiveExpressionOperator<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         match self {
             AdditiveExpressionOperator::Minus(inner) => inner.serialize(serializer),
@@ -1327,7 +1327,7 @@ impl Serialize for AdditiveExpressionOperator {
     }
 }
 
-impl Serialize for ArgumentsDeclaration {
+impl Serialize for ArgumentsDeclaration<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         match self {
             ArgumentsDeclaration::PositionalArguments(inner) => inner.serialize(serializer),
@@ -1336,7 +1336,7 @@ impl Serialize for ArgumentsDeclaration {
     }
 }
 
-impl Serialize for AssignmentExpressionOperator {
+impl Serialize for AssignmentExpressionOperator<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         match self {
             AssignmentExpressionOperator::AmpersandEqual(inner) => inner.serialize(serializer),
@@ -1383,7 +1383,7 @@ impl Serialize for CatchClauseKind {
     }
 }
 
-impl Serialize for ContractMember {
+impl Serialize for ContractMember<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         match self {
             ContractMember::UsingDirective(inner) => inner.serialize(serializer),
@@ -1400,7 +1400,7 @@ impl Serialize for ContractMember {
     }
 }
 
-impl Serialize for ElementaryType {
+impl Serialize for ElementaryType<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         match self {
             ElementaryType::BoolKeyword(inner) => inner.serialize(serializer),
@@ -1415,7 +1415,7 @@ impl Serialize for ElementaryType {
     }
 }
 
-impl Serialize for EqualityExpressionOperator {
+impl Serialize for EqualityExpressionOperator<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         match self {
             EqualityExpressionOperator::BangEqual(inner) => inner.serialize(serializer),
@@ -1451,7 +1451,7 @@ impl Serialize for ExperimentalFeature {
     }
 }
 
-impl Serialize for Expression {
+impl Serialize for Expression<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         match self {
             Expression::AssignmentExpression(inner) => inner.serialize(serializer),
@@ -1491,7 +1491,7 @@ impl Serialize for Expression {
     }
 }
 
-impl Serialize for ForStatementCondition {
+impl Serialize for ForStatementCondition<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         match self {
             ForStatementCondition::ExpressionStatement(inner) => inner.serialize(serializer),
@@ -1500,7 +1500,7 @@ impl Serialize for ForStatementCondition {
     }
 }
 
-impl Serialize for ForStatementInitialization {
+impl Serialize for ForStatementInitialization<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         match self {
             ForStatementInitialization::VariableDeclarationStatement(inner) => {
@@ -1593,7 +1593,7 @@ impl Serialize for FunctionVisibility {
     }
 }
 
-impl Serialize for ImportClause {
+impl Serialize for ImportClause<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         match self {
             ImportClause::PathImport(inner) => inner.serialize(serializer),
@@ -1602,7 +1602,7 @@ impl Serialize for ImportClause {
     }
 }
 
-impl Serialize for InequalityExpressionOperator {
+impl Serialize for InequalityExpressionOperator<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         match self {
             InequalityExpressionOperator::GreaterThan(inner) => inner.serialize(serializer),
@@ -1613,7 +1613,7 @@ impl Serialize for InequalityExpressionOperator {
     }
 }
 
-impl Serialize for MultiplicativeExpressionOperator {
+impl Serialize for MultiplicativeExpressionOperator<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         match self {
             MultiplicativeExpressionOperator::Asterisk(inner) => inner.serialize(serializer),
@@ -1623,7 +1623,7 @@ impl Serialize for MultiplicativeExpressionOperator {
     }
 }
 
-impl Serialize for NumberUnit {
+impl Serialize for NumberUnit<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         match self {
             NumberUnit::WeiKeyword(inner) => inner.serialize(serializer),
@@ -1638,7 +1638,7 @@ impl Serialize for NumberUnit {
     }
 }
 
-impl Serialize for PostfixExpressionOperator {
+impl Serialize for PostfixExpressionOperator<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         match self {
             PostfixExpressionOperator::MinusMinus(inner) => inner.serialize(serializer),
@@ -1647,7 +1647,7 @@ impl Serialize for PostfixExpressionOperator {
     }
 }
 
-impl Serialize for Pragma {
+impl Serialize for Pragma<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         match self {
             Pragma::VersionPragma(inner) => inner.serialize(serializer),
@@ -1657,7 +1657,7 @@ impl Serialize for Pragma {
     }
 }
 
-impl Serialize for PrefixExpressionOperator {
+impl Serialize for PrefixExpressionOperator<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         match self {
             PrefixExpressionOperator::Bang(inner) => inner.serialize(serializer),
@@ -1670,7 +1670,7 @@ impl Serialize for PrefixExpressionOperator {
     }
 }
 
-impl Serialize for ShiftExpressionOperator {
+impl Serialize for ShiftExpressionOperator<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         match self {
             ShiftExpressionOperator::GreaterThanGreaterThan(inner) => inner.serialize(serializer),
@@ -1682,7 +1682,7 @@ impl Serialize for ShiftExpressionOperator {
     }
 }
 
-impl Serialize for SourceUnitMember {
+impl Serialize for SourceUnitMember<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         match self {
             SourceUnitMember::PragmaDirective(inner) => inner.serialize(serializer),
@@ -1751,7 +1751,7 @@ impl Serialize for StateVariableVisibility {
     }
 }
 
-impl Serialize for Statement {
+impl Serialize for Statement<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         match self {
             Statement::IfStatement(inner) => inner.serialize(serializer),
@@ -1773,7 +1773,7 @@ impl Serialize for Statement {
     }
 }
 
-impl Serialize for StorageLocation {
+impl Serialize for StorageLocation<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         match self {
             StorageLocation::MemoryKeyword(inner) => inner.serialize(serializer),
@@ -1783,7 +1783,7 @@ impl Serialize for StorageLocation {
     }
 }
 
-impl Serialize for StringExpression {
+impl Serialize for StringExpression<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         match self {
             StringExpression::StringLiterals(inner) => inner.serialize(serializer),
@@ -1793,7 +1793,7 @@ impl Serialize for StringExpression {
     }
 }
 
-impl Serialize for TypeName {
+impl Serialize for TypeName<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         match self {
             TypeName::ArrayTypeName(inner) => inner.serialize(serializer),
@@ -1805,7 +1805,7 @@ impl Serialize for TypeName {
     }
 }
 
-impl Serialize for UsingClause {
+impl Serialize for UsingClause<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         match self {
             UsingClause::IdentifierPath(inner) => inner.serialize(serializer),
@@ -1814,7 +1814,7 @@ impl Serialize for UsingClause {
     }
 }
 
-impl Serialize for UsingOperator {
+impl Serialize for UsingOperator<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         match self {
             UsingOperator::Ampersand(inner) => inner.serialize(serializer),
@@ -1836,7 +1836,7 @@ impl Serialize for UsingOperator {
     }
 }
 
-impl Serialize for UsingTarget {
+impl Serialize for UsingTarget<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         match self {
             UsingTarget::TypeName(inner) => inner.serialize(serializer),
@@ -1845,7 +1845,7 @@ impl Serialize for UsingTarget {
     }
 }
 
-impl Serialize for VariableDeclarationTarget {
+impl Serialize for VariableDeclarationTarget<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         match self {
             VariableDeclarationTarget::SingleTypedDeclaration(inner) => inner.serialize(serializer),
@@ -1854,7 +1854,7 @@ impl Serialize for VariableDeclarationTarget {
     }
 }
 
-impl Serialize for VersionPragmaComponent {
+impl Serialize for VersionPragmaComponent<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         match self {
             VersionPragmaComponent::Wildcard => {
@@ -1919,7 +1919,7 @@ impl Serialize for VersionPragmaOperator {
     }
 }
 
-impl Serialize for YulExpression {
+impl Serialize for YulExpression<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         match self {
             YulExpression::YulFunctionCallExpression(inner) => inner.serialize(serializer),
@@ -1929,7 +1929,7 @@ impl Serialize for YulExpression {
     }
 }
 
-impl Serialize for YulLiteral {
+impl Serialize for YulLiteral<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         match self {
             YulLiteral::TrueKeyword(inner) => inner.serialize(serializer),
@@ -1942,7 +1942,7 @@ impl Serialize for YulLiteral {
     }
 }
 
-impl Serialize for YulStatement {
+impl Serialize for YulStatement<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         match self {
             YulStatement::YulBlock(inner) => inner.serialize(serializer),
@@ -1964,7 +1964,7 @@ impl Serialize for YulStatement {
 // Repeated & Separated
 //
 
-impl Serialize for ArrayValuesStruct {
+impl Serialize for ArrayValuesStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut seq = serializer.serialize_seq(Some(self.len()))?;
         for item in self.iter() {
@@ -1974,7 +1974,7 @@ impl Serialize for ArrayValuesStruct {
     }
 }
 
-impl Serialize for CallOptionsStruct {
+impl Serialize for CallOptionsStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut seq = serializer.serialize_seq(Some(self.len()))?;
         for item in self.iter() {
@@ -1984,7 +1984,7 @@ impl Serialize for CallOptionsStruct {
     }
 }
 
-impl Serialize for CatchClausesStruct {
+impl Serialize for CatchClausesStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut seq = serializer.serialize_seq(Some(self.len()))?;
         for item in self.iter() {
@@ -1994,7 +1994,7 @@ impl Serialize for CatchClausesStruct {
     }
 }
 
-impl Serialize for ContractMembersStruct {
+impl Serialize for ContractMembersStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut seq = serializer.serialize_seq(Some(self.len()))?;
         for item in self.iter() {
@@ -2004,7 +2004,7 @@ impl Serialize for ContractMembersStruct {
     }
 }
 
-impl Serialize for EnumMembersStruct {
+impl Serialize for EnumMembersStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut seq = serializer.serialize_seq(Some(self.len()))?;
         for item in self.iter() {
@@ -2014,7 +2014,7 @@ impl Serialize for EnumMembersStruct {
     }
 }
 
-impl Serialize for HexStringLiteralsStruct {
+impl Serialize for HexStringLiteralsStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut seq = serializer.serialize_seq(Some(self.len()))?;
         for item in self.iter() {
@@ -2024,7 +2024,7 @@ impl Serialize for HexStringLiteralsStruct {
     }
 }
 
-impl Serialize for IdentifierPathStruct {
+impl Serialize for IdentifierPathStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut seq = serializer.serialize_seq(Some(self.len()))?;
         for item in self.iter() {
@@ -2034,7 +2034,7 @@ impl Serialize for IdentifierPathStruct {
     }
 }
 
-impl Serialize for ImportDeconstructionSymbolsStruct {
+impl Serialize for ImportDeconstructionSymbolsStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut seq = serializer.serialize_seq(Some(self.len()))?;
         for item in self.iter() {
@@ -2044,7 +2044,7 @@ impl Serialize for ImportDeconstructionSymbolsStruct {
     }
 }
 
-impl Serialize for InheritanceTypesStruct {
+impl Serialize for InheritanceTypesStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut seq = serializer.serialize_seq(Some(self.len()))?;
         for item in self.iter() {
@@ -2054,7 +2054,7 @@ impl Serialize for InheritanceTypesStruct {
     }
 }
 
-impl Serialize for InterfaceMembersStruct {
+impl Serialize for InterfaceMembersStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut seq = serializer.serialize_seq(Some(self.len()))?;
         for item in self.iter() {
@@ -2064,7 +2064,7 @@ impl Serialize for InterfaceMembersStruct {
     }
 }
 
-impl Serialize for LibraryMembersStruct {
+impl Serialize for LibraryMembersStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut seq = serializer.serialize_seq(Some(self.len()))?;
         for item in self.iter() {
@@ -2074,7 +2074,7 @@ impl Serialize for LibraryMembersStruct {
     }
 }
 
-impl Serialize for ModifierInvocationsStruct {
+impl Serialize for ModifierInvocationsStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut seq = serializer.serialize_seq(Some(self.len()))?;
         for item in self.iter() {
@@ -2084,7 +2084,7 @@ impl Serialize for ModifierInvocationsStruct {
     }
 }
 
-impl Serialize for MultiTypedDeclarationElementsStruct {
+impl Serialize for MultiTypedDeclarationElementsStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut seq = serializer.serialize_seq(Some(self.len()))?;
         for item in self.iter() {
@@ -2094,7 +2094,7 @@ impl Serialize for MultiTypedDeclarationElementsStruct {
     }
 }
 
-impl Serialize for NamedArgumentsStruct {
+impl Serialize for NamedArgumentsStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut seq = serializer.serialize_seq(Some(self.len()))?;
         for item in self.iter() {
@@ -2104,7 +2104,7 @@ impl Serialize for NamedArgumentsStruct {
     }
 }
 
-impl Serialize for OverridePathsStruct {
+impl Serialize for OverridePathsStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut seq = serializer.serialize_seq(Some(self.len()))?;
         for item in self.iter() {
@@ -2114,7 +2114,7 @@ impl Serialize for OverridePathsStruct {
     }
 }
 
-impl Serialize for ParametersStruct {
+impl Serialize for ParametersStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut seq = serializer.serialize_seq(Some(self.len()))?;
         for item in self.iter() {
@@ -2124,7 +2124,7 @@ impl Serialize for ParametersStruct {
     }
 }
 
-impl Serialize for PositionalArgumentsStruct {
+impl Serialize for PositionalArgumentsStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut seq = serializer.serialize_seq(Some(self.len()))?;
         for item in self.iter() {
@@ -2134,7 +2134,7 @@ impl Serialize for PositionalArgumentsStruct {
     }
 }
 
-impl Serialize for SourceUnitMembersStruct {
+impl Serialize for SourceUnitMembersStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut seq = serializer.serialize_seq(Some(self.len()))?;
         for item in self.iter() {
@@ -2144,7 +2144,7 @@ impl Serialize for SourceUnitMembersStruct {
     }
 }
 
-impl Serialize for StatementsStruct {
+impl Serialize for StatementsStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut seq = serializer.serialize_seq(Some(self.len()))?;
         for item in self.iter() {
@@ -2154,7 +2154,7 @@ impl Serialize for StatementsStruct {
     }
 }
 
-impl Serialize for StringLiteralsStruct {
+impl Serialize for StringLiteralsStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut seq = serializer.serialize_seq(Some(self.len()))?;
         for item in self.iter() {
@@ -2164,7 +2164,7 @@ impl Serialize for StringLiteralsStruct {
     }
 }
 
-impl Serialize for StructMembersStruct {
+impl Serialize for StructMembersStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut seq = serializer.serialize_seq(Some(self.len()))?;
         for item in self.iter() {
@@ -2174,7 +2174,7 @@ impl Serialize for StructMembersStruct {
     }
 }
 
-impl Serialize for TupleValuesStruct {
+impl Serialize for TupleValuesStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut seq = serializer.serialize_seq(Some(self.len()))?;
         for item in self.iter() {
@@ -2184,7 +2184,7 @@ impl Serialize for TupleValuesStruct {
     }
 }
 
-impl Serialize for UnicodeStringLiteralsStruct {
+impl Serialize for UnicodeStringLiteralsStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut seq = serializer.serialize_seq(Some(self.len()))?;
         for item in self.iter() {
@@ -2194,7 +2194,7 @@ impl Serialize for UnicodeStringLiteralsStruct {
     }
 }
 
-impl Serialize for UsingDeconstructionSymbolsStruct {
+impl Serialize for UsingDeconstructionSymbolsStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut seq = serializer.serialize_seq(Some(self.len()))?;
         for item in self.iter() {
@@ -2204,7 +2204,7 @@ impl Serialize for UsingDeconstructionSymbolsStruct {
     }
 }
 
-impl Serialize for VersionPragmaExpressionSetStruct {
+impl Serialize for VersionPragmaExpressionSetStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut seq = serializer.serialize_seq(Some(self.len()))?;
         for item in self.iter() {
@@ -2214,7 +2214,7 @@ impl Serialize for VersionPragmaExpressionSetStruct {
     }
 }
 
-impl Serialize for VersionPragmaExpressionSetsStruct {
+impl Serialize for VersionPragmaExpressionSetsStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut seq = serializer.serialize_seq(Some(self.len()))?;
         for item in self.iter() {
@@ -2224,7 +2224,7 @@ impl Serialize for VersionPragmaExpressionSetsStruct {
     }
 }
 
-impl Serialize for VersionPragmaSpecifierStruct {
+impl Serialize for VersionPragmaSpecifierStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut seq = serializer.serialize_seq(Some(self.len()))?;
         for item in self.iter() {
@@ -2234,7 +2234,7 @@ impl Serialize for VersionPragmaSpecifierStruct {
     }
 }
 
-impl Serialize for YulArgumentsStruct {
+impl Serialize for YulArgumentsStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut seq = serializer.serialize_seq(Some(self.len()))?;
         for item in self.iter() {
@@ -2244,7 +2244,7 @@ impl Serialize for YulArgumentsStruct {
     }
 }
 
-impl Serialize for YulParametersStruct {
+impl Serialize for YulParametersStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut seq = serializer.serialize_seq(Some(self.len()))?;
         for item in self.iter() {
@@ -2254,7 +2254,7 @@ impl Serialize for YulParametersStruct {
     }
 }
 
-impl Serialize for YulPathStruct {
+impl Serialize for YulPathStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut seq = serializer.serialize_seq(Some(self.len()))?;
         for item in self.iter() {
@@ -2264,7 +2264,7 @@ impl Serialize for YulPathStruct {
     }
 }
 
-impl Serialize for YulPathsStruct {
+impl Serialize for YulPathsStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut seq = serializer.serialize_seq(Some(self.len()))?;
         for item in self.iter() {
@@ -2274,7 +2274,7 @@ impl Serialize for YulPathsStruct {
     }
 }
 
-impl Serialize for YulStatementsStruct {
+impl Serialize for YulStatementsStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut seq = serializer.serialize_seq(Some(self.len()))?;
         for item in self.iter() {
@@ -2284,7 +2284,7 @@ impl Serialize for YulStatementsStruct {
     }
 }
 
-impl Serialize for YulValueCasesStruct {
+impl Serialize for YulValueCasesStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut seq = serializer.serialize_seq(Some(self.len()))?;
         for item in self.iter() {
@@ -2294,7 +2294,7 @@ impl Serialize for YulValueCasesStruct {
     }
 }
 
-impl Serialize for YulVariableNamesStruct {
+impl Serialize for YulVariableNamesStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut seq = serializer.serialize_seq(Some(self.len()))?;
         for item in self.iter() {
@@ -2308,7 +2308,7 @@ impl Serialize for YulVariableNamesStruct {
 // Terminals
 //
 
-impl Serialize for AmpersandStruct {
+impl Serialize for AmpersandStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut map = serializer.serialize_map(Some(4))?;
         map.serialize_entry("id", &self.ir_node.id())?;
@@ -2319,7 +2319,7 @@ impl Serialize for AmpersandStruct {
     }
 }
 
-impl Serialize for AmpersandEqualStruct {
+impl Serialize for AmpersandEqualStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut map = serializer.serialize_map(Some(4))?;
         map.serialize_entry("id", &self.ir_node.id())?;
@@ -2330,7 +2330,7 @@ impl Serialize for AmpersandEqualStruct {
     }
 }
 
-impl Serialize for AsteriskStruct {
+impl Serialize for AsteriskStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut map = serializer.serialize_map(Some(4))?;
         map.serialize_entry("id", &self.ir_node.id())?;
@@ -2341,7 +2341,7 @@ impl Serialize for AsteriskStruct {
     }
 }
 
-impl Serialize for AsteriskEqualStruct {
+impl Serialize for AsteriskEqualStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut map = serializer.serialize_map(Some(4))?;
         map.serialize_entry("id", &self.ir_node.id())?;
@@ -2352,7 +2352,7 @@ impl Serialize for AsteriskEqualStruct {
     }
 }
 
-impl Serialize for BangStruct {
+impl Serialize for BangStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut map = serializer.serialize_map(Some(4))?;
         map.serialize_entry("id", &self.ir_node.id())?;
@@ -2363,7 +2363,7 @@ impl Serialize for BangStruct {
     }
 }
 
-impl Serialize for BangEqualStruct {
+impl Serialize for BangEqualStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut map = serializer.serialize_map(Some(4))?;
         map.serialize_entry("id", &self.ir_node.id())?;
@@ -2374,7 +2374,7 @@ impl Serialize for BangEqualStruct {
     }
 }
 
-impl Serialize for BarStruct {
+impl Serialize for BarStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut map = serializer.serialize_map(Some(4))?;
         map.serialize_entry("id", &self.ir_node.id())?;
@@ -2385,7 +2385,7 @@ impl Serialize for BarStruct {
     }
 }
 
-impl Serialize for BarEqualStruct {
+impl Serialize for BarEqualStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut map = serializer.serialize_map(Some(4))?;
         map.serialize_entry("id", &self.ir_node.id())?;
@@ -2396,7 +2396,7 @@ impl Serialize for BarEqualStruct {
     }
 }
 
-impl Serialize for BoolKeywordStruct {
+impl Serialize for BoolKeywordStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut map = serializer.serialize_map(Some(4))?;
         map.serialize_entry("id", &self.ir_node.id())?;
@@ -2407,7 +2407,7 @@ impl Serialize for BoolKeywordStruct {
     }
 }
 
-impl Serialize for BytesKeywordStruct {
+impl Serialize for BytesKeywordStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut map = serializer.serialize_map(Some(5))?;
         map.serialize_entry("id", &self.ir_node.id())?;
@@ -2419,7 +2419,7 @@ impl Serialize for BytesKeywordStruct {
     }
 }
 
-impl Serialize for CallDataKeywordStruct {
+impl Serialize for CallDataKeywordStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut map = serializer.serialize_map(Some(4))?;
         map.serialize_entry("id", &self.ir_node.id())?;
@@ -2430,7 +2430,7 @@ impl Serialize for CallDataKeywordStruct {
     }
 }
 
-impl Serialize for CaretStruct {
+impl Serialize for CaretStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut map = serializer.serialize_map(Some(4))?;
         map.serialize_entry("id", &self.ir_node.id())?;
@@ -2441,7 +2441,7 @@ impl Serialize for CaretStruct {
     }
 }
 
-impl Serialize for CaretEqualStruct {
+impl Serialize for CaretEqualStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut map = serializer.serialize_map(Some(4))?;
         map.serialize_entry("id", &self.ir_node.id())?;
@@ -2452,7 +2452,7 @@ impl Serialize for CaretEqualStruct {
     }
 }
 
-impl Serialize for DaysKeywordStruct {
+impl Serialize for DaysKeywordStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut map = serializer.serialize_map(Some(4))?;
         map.serialize_entry("id", &self.ir_node.id())?;
@@ -2463,7 +2463,7 @@ impl Serialize for DaysKeywordStruct {
     }
 }
 
-impl Serialize for DecimalLiteralStruct {
+impl Serialize for DecimalLiteralStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut map = serializer.serialize_map(Some(5))?;
         map.serialize_entry("id", &self.ir_node.id())?;
@@ -2475,7 +2475,7 @@ impl Serialize for DecimalLiteralStruct {
     }
 }
 
-impl Serialize for DeleteKeywordStruct {
+impl Serialize for DeleteKeywordStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut map = serializer.serialize_map(Some(4))?;
         map.serialize_entry("id", &self.ir_node.id())?;
@@ -2486,7 +2486,7 @@ impl Serialize for DeleteKeywordStruct {
     }
 }
 
-impl Serialize for EqualStruct {
+impl Serialize for EqualStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut map = serializer.serialize_map(Some(4))?;
         map.serialize_entry("id", &self.ir_node.id())?;
@@ -2497,7 +2497,7 @@ impl Serialize for EqualStruct {
     }
 }
 
-impl Serialize for EqualEqualStruct {
+impl Serialize for EqualEqualStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut map = serializer.serialize_map(Some(4))?;
         map.serialize_entry("id", &self.ir_node.id())?;
@@ -2508,7 +2508,7 @@ impl Serialize for EqualEqualStruct {
     }
 }
 
-impl Serialize for EtherKeywordStruct {
+impl Serialize for EtherKeywordStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut map = serializer.serialize_map(Some(4))?;
         map.serialize_entry("id", &self.ir_node.id())?;
@@ -2519,7 +2519,7 @@ impl Serialize for EtherKeywordStruct {
     }
 }
 
-impl Serialize for FalseKeywordStruct {
+impl Serialize for FalseKeywordStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut map = serializer.serialize_map(Some(4))?;
         map.serialize_entry("id", &self.ir_node.id())?;
@@ -2530,7 +2530,7 @@ impl Serialize for FalseKeywordStruct {
     }
 }
 
-impl Serialize for FixedKeywordStruct {
+impl Serialize for FixedKeywordStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut map = serializer.serialize_map(Some(5))?;
         map.serialize_entry("id", &self.ir_node.id())?;
@@ -2542,7 +2542,7 @@ impl Serialize for FixedKeywordStruct {
     }
 }
 
-impl Serialize for GreaterThanStruct {
+impl Serialize for GreaterThanStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut map = serializer.serialize_map(Some(4))?;
         map.serialize_entry("id", &self.ir_node.id())?;
@@ -2553,7 +2553,7 @@ impl Serialize for GreaterThanStruct {
     }
 }
 
-impl Serialize for GreaterThanEqualStruct {
+impl Serialize for GreaterThanEqualStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut map = serializer.serialize_map(Some(4))?;
         map.serialize_entry("id", &self.ir_node.id())?;
@@ -2564,7 +2564,7 @@ impl Serialize for GreaterThanEqualStruct {
     }
 }
 
-impl Serialize for GreaterThanGreaterThanStruct {
+impl Serialize for GreaterThanGreaterThanStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut map = serializer.serialize_map(Some(4))?;
         map.serialize_entry("id", &self.ir_node.id())?;
@@ -2575,7 +2575,7 @@ impl Serialize for GreaterThanGreaterThanStruct {
     }
 }
 
-impl Serialize for GreaterThanGreaterThanEqualStruct {
+impl Serialize for GreaterThanGreaterThanEqualStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut map = serializer.serialize_map(Some(4))?;
         map.serialize_entry("id", &self.ir_node.id())?;
@@ -2586,7 +2586,7 @@ impl Serialize for GreaterThanGreaterThanEqualStruct {
     }
 }
 
-impl Serialize for GreaterThanGreaterThanGreaterThanStruct {
+impl Serialize for GreaterThanGreaterThanGreaterThanStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut map = serializer.serialize_map(Some(4))?;
         map.serialize_entry("id", &self.ir_node.id())?;
@@ -2597,7 +2597,7 @@ impl Serialize for GreaterThanGreaterThanGreaterThanStruct {
     }
 }
 
-impl Serialize for GreaterThanGreaterThanGreaterThanEqualStruct {
+impl Serialize for GreaterThanGreaterThanGreaterThanEqualStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut map = serializer.serialize_map(Some(4))?;
         map.serialize_entry("id", &self.ir_node.id())?;
@@ -2608,7 +2608,7 @@ impl Serialize for GreaterThanGreaterThanGreaterThanEqualStruct {
     }
 }
 
-impl Serialize for GweiKeywordStruct {
+impl Serialize for GweiKeywordStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut map = serializer.serialize_map(Some(4))?;
         map.serialize_entry("id", &self.ir_node.id())?;
@@ -2619,7 +2619,7 @@ impl Serialize for GweiKeywordStruct {
     }
 }
 
-impl Serialize for HexLiteralStruct {
+impl Serialize for HexLiteralStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut map = serializer.serialize_map(Some(5))?;
         map.serialize_entry("id", &self.ir_node.id())?;
@@ -2631,7 +2631,7 @@ impl Serialize for HexLiteralStruct {
     }
 }
 
-impl Serialize for HexStringLiteralStruct {
+impl Serialize for HexStringLiteralStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut map = serializer.serialize_map(Some(5))?;
         map.serialize_entry("id", &self.ir_node.id())?;
@@ -2643,7 +2643,7 @@ impl Serialize for HexStringLiteralStruct {
     }
 }
 
-impl Serialize for HoursKeywordStruct {
+impl Serialize for HoursKeywordStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut map = serializer.serialize_map(Some(4))?;
         map.serialize_entry("id", &self.ir_node.id())?;
@@ -2654,7 +2654,7 @@ impl Serialize for HoursKeywordStruct {
     }
 }
 
-impl Serialize for IdentifierStruct {
+impl Serialize for IdentifierStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut map = serializer.serialize_map(Some(5))?;
         map.serialize_entry("id", &self.ir_node.id())?;
@@ -2666,7 +2666,7 @@ impl Serialize for IdentifierStruct {
     }
 }
 
-impl Serialize for IntKeywordStruct {
+impl Serialize for IntKeywordStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut map = serializer.serialize_map(Some(5))?;
         map.serialize_entry("id", &self.ir_node.id())?;
@@ -2678,7 +2678,7 @@ impl Serialize for IntKeywordStruct {
     }
 }
 
-impl Serialize for LessThanStruct {
+impl Serialize for LessThanStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut map = serializer.serialize_map(Some(4))?;
         map.serialize_entry("id", &self.ir_node.id())?;
@@ -2689,7 +2689,7 @@ impl Serialize for LessThanStruct {
     }
 }
 
-impl Serialize for LessThanEqualStruct {
+impl Serialize for LessThanEqualStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut map = serializer.serialize_map(Some(4))?;
         map.serialize_entry("id", &self.ir_node.id())?;
@@ -2700,7 +2700,7 @@ impl Serialize for LessThanEqualStruct {
     }
 }
 
-impl Serialize for LessThanLessThanStruct {
+impl Serialize for LessThanLessThanStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut map = serializer.serialize_map(Some(4))?;
         map.serialize_entry("id", &self.ir_node.id())?;
@@ -2711,7 +2711,7 @@ impl Serialize for LessThanLessThanStruct {
     }
 }
 
-impl Serialize for LessThanLessThanEqualStruct {
+impl Serialize for LessThanLessThanEqualStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut map = serializer.serialize_map(Some(4))?;
         map.serialize_entry("id", &self.ir_node.id())?;
@@ -2722,7 +2722,7 @@ impl Serialize for LessThanLessThanEqualStruct {
     }
 }
 
-impl Serialize for MemoryKeywordStruct {
+impl Serialize for MemoryKeywordStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut map = serializer.serialize_map(Some(4))?;
         map.serialize_entry("id", &self.ir_node.id())?;
@@ -2733,7 +2733,7 @@ impl Serialize for MemoryKeywordStruct {
     }
 }
 
-impl Serialize for MinusStruct {
+impl Serialize for MinusStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut map = serializer.serialize_map(Some(4))?;
         map.serialize_entry("id", &self.ir_node.id())?;
@@ -2744,7 +2744,7 @@ impl Serialize for MinusStruct {
     }
 }
 
-impl Serialize for MinusEqualStruct {
+impl Serialize for MinusEqualStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut map = serializer.serialize_map(Some(4))?;
         map.serialize_entry("id", &self.ir_node.id())?;
@@ -2755,7 +2755,7 @@ impl Serialize for MinusEqualStruct {
     }
 }
 
-impl Serialize for MinusMinusStruct {
+impl Serialize for MinusMinusStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut map = serializer.serialize_map(Some(4))?;
         map.serialize_entry("id", &self.ir_node.id())?;
@@ -2766,7 +2766,7 @@ impl Serialize for MinusMinusStruct {
     }
 }
 
-impl Serialize for MinutesKeywordStruct {
+impl Serialize for MinutesKeywordStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut map = serializer.serialize_map(Some(4))?;
         map.serialize_entry("id", &self.ir_node.id())?;
@@ -2777,7 +2777,7 @@ impl Serialize for MinutesKeywordStruct {
     }
 }
 
-impl Serialize for PayableKeywordStruct {
+impl Serialize for PayableKeywordStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut map = serializer.serialize_map(Some(4))?;
         map.serialize_entry("id", &self.ir_node.id())?;
@@ -2788,7 +2788,7 @@ impl Serialize for PayableKeywordStruct {
     }
 }
 
-impl Serialize for PercentStruct {
+impl Serialize for PercentStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut map = serializer.serialize_map(Some(4))?;
         map.serialize_entry("id", &self.ir_node.id())?;
@@ -2799,7 +2799,7 @@ impl Serialize for PercentStruct {
     }
 }
 
-impl Serialize for PercentEqualStruct {
+impl Serialize for PercentEqualStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut map = serializer.serialize_map(Some(4))?;
         map.serialize_entry("id", &self.ir_node.id())?;
@@ -2810,7 +2810,7 @@ impl Serialize for PercentEqualStruct {
     }
 }
 
-impl Serialize for PlusStruct {
+impl Serialize for PlusStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut map = serializer.serialize_map(Some(4))?;
         map.serialize_entry("id", &self.ir_node.id())?;
@@ -2821,7 +2821,7 @@ impl Serialize for PlusStruct {
     }
 }
 
-impl Serialize for PlusEqualStruct {
+impl Serialize for PlusEqualStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut map = serializer.serialize_map(Some(4))?;
         map.serialize_entry("id", &self.ir_node.id())?;
@@ -2832,7 +2832,7 @@ impl Serialize for PlusEqualStruct {
     }
 }
 
-impl Serialize for PlusPlusStruct {
+impl Serialize for PlusPlusStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut map = serializer.serialize_map(Some(4))?;
         map.serialize_entry("id", &self.ir_node.id())?;
@@ -2843,7 +2843,7 @@ impl Serialize for PlusPlusStruct {
     }
 }
 
-impl Serialize for SecondsKeywordStruct {
+impl Serialize for SecondsKeywordStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut map = serializer.serialize_map(Some(4))?;
         map.serialize_entry("id", &self.ir_node.id())?;
@@ -2854,7 +2854,7 @@ impl Serialize for SecondsKeywordStruct {
     }
 }
 
-impl Serialize for SemicolonStruct {
+impl Serialize for SemicolonStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut map = serializer.serialize_map(Some(4))?;
         map.serialize_entry("id", &self.ir_node.id())?;
@@ -2865,7 +2865,7 @@ impl Serialize for SemicolonStruct {
     }
 }
 
-impl Serialize for SlashStruct {
+impl Serialize for SlashStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut map = serializer.serialize_map(Some(4))?;
         map.serialize_entry("id", &self.ir_node.id())?;
@@ -2876,7 +2876,7 @@ impl Serialize for SlashStruct {
     }
 }
 
-impl Serialize for SlashEqualStruct {
+impl Serialize for SlashEqualStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut map = serializer.serialize_map(Some(4))?;
         map.serialize_entry("id", &self.ir_node.id())?;
@@ -2887,7 +2887,7 @@ impl Serialize for SlashEqualStruct {
     }
 }
 
-impl Serialize for StorageKeywordStruct {
+impl Serialize for StorageKeywordStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut map = serializer.serialize_map(Some(4))?;
         map.serialize_entry("id", &self.ir_node.id())?;
@@ -2898,7 +2898,7 @@ impl Serialize for StorageKeywordStruct {
     }
 }
 
-impl Serialize for StringKeywordStruct {
+impl Serialize for StringKeywordStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut map = serializer.serialize_map(Some(4))?;
         map.serialize_entry("id", &self.ir_node.id())?;
@@ -2909,7 +2909,7 @@ impl Serialize for StringKeywordStruct {
     }
 }
 
-impl Serialize for StringLiteralStruct {
+impl Serialize for StringLiteralStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut map = serializer.serialize_map(Some(5))?;
         map.serialize_entry("id", &self.ir_node.id())?;
@@ -2921,7 +2921,7 @@ impl Serialize for StringLiteralStruct {
     }
 }
 
-impl Serialize for SuperKeywordStruct {
+impl Serialize for SuperKeywordStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut map = serializer.serialize_map(Some(4))?;
         map.serialize_entry("id", &self.ir_node.id())?;
@@ -2932,7 +2932,7 @@ impl Serialize for SuperKeywordStruct {
     }
 }
 
-impl Serialize for ThisKeywordStruct {
+impl Serialize for ThisKeywordStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut map = serializer.serialize_map(Some(4))?;
         map.serialize_entry("id", &self.ir_node.id())?;
@@ -2943,7 +2943,7 @@ impl Serialize for ThisKeywordStruct {
     }
 }
 
-impl Serialize for TildeStruct {
+impl Serialize for TildeStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut map = serializer.serialize_map(Some(4))?;
         map.serialize_entry("id", &self.ir_node.id())?;
@@ -2954,7 +2954,7 @@ impl Serialize for TildeStruct {
     }
 }
 
-impl Serialize for TrueKeywordStruct {
+impl Serialize for TrueKeywordStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut map = serializer.serialize_map(Some(4))?;
         map.serialize_entry("id", &self.ir_node.id())?;
@@ -2965,7 +2965,7 @@ impl Serialize for TrueKeywordStruct {
     }
 }
 
-impl Serialize for UfixedKeywordStruct {
+impl Serialize for UfixedKeywordStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut map = serializer.serialize_map(Some(5))?;
         map.serialize_entry("id", &self.ir_node.id())?;
@@ -2977,7 +2977,7 @@ impl Serialize for UfixedKeywordStruct {
     }
 }
 
-impl Serialize for UintKeywordStruct {
+impl Serialize for UintKeywordStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut map = serializer.serialize_map(Some(5))?;
         map.serialize_entry("id", &self.ir_node.id())?;
@@ -2989,7 +2989,7 @@ impl Serialize for UintKeywordStruct {
     }
 }
 
-impl Serialize for UnicodeStringLiteralStruct {
+impl Serialize for UnicodeStringLiteralStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut map = serializer.serialize_map(Some(5))?;
         map.serialize_entry("id", &self.ir_node.id())?;
@@ -3001,7 +3001,7 @@ impl Serialize for UnicodeStringLiteralStruct {
     }
 }
 
-impl Serialize for WeeksKeywordStruct {
+impl Serialize for WeeksKeywordStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut map = serializer.serialize_map(Some(4))?;
         map.serialize_entry("id", &self.ir_node.id())?;
@@ -3012,7 +3012,7 @@ impl Serialize for WeeksKeywordStruct {
     }
 }
 
-impl Serialize for WeiKeywordStruct {
+impl Serialize for WeiKeywordStruct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut map = serializer.serialize_map(Some(4))?;
         map.serialize_entry("id", &self.ir_node.id())?;

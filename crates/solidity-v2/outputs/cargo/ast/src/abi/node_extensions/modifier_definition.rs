@@ -1,6 +1,6 @@
 use crate::ast::ModifierDefinitionStruct;
 
-impl ModifierDefinitionStruct {
+impl<'a> ModifierDefinitionStruct<'a> {
     /// Returns the signature for this modifier using internal type names for
     /// parameters. A modifier is never part of the ABI, so this is its only
     /// signature form.

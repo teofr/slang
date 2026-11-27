@@ -6,7 +6,7 @@ use slang_solidity_v2_semantic::types::TypeId;
 use crate::abi::entries::Parameter;
 use crate::ast::ParametersStruct;
 
-impl ParametersStruct {
+impl<'a> ParametersStruct<'a> {
     pub(crate) fn compute_abi_parameters(&self) -> Option<Vec<Parameter>> {
         let mut result = Vec::with_capacity(self.ir_nodes.len());
         for parameter in self.ir_nodes.iter() {
@@ -21,7 +21,7 @@ impl ParametersStruct {
                 name,
                 type_id,
                 parameter.is_indexed,
-                &self.semantic,
+                self.semantic,
             )?);
         }
         Some(result)

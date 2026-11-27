@@ -23,7 +23,7 @@ impl Serialize for SerializeRange<'_> {
 //
 
 {% for parent_type, sequence in target.sequences %}
-impl Serialize for {{ parent_type }}Struct {
+impl Serialize for {{ parent_type }}Struct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut map = serializer.serialize_map(Some({{ sequence.fields | length + 4 }}))?;
         map.serialize_entry("id", &self.node_id())?;
@@ -45,7 +45,7 @@ impl Serialize for {{ parent_type }}Struct {
 //
 
 {% for parent_type, choice in target.choices %}
-impl Serialize for {{ parent_type }} {
+impl Serialize for {{ parent_type }}{% if target.borrowed[parent_type] %}<'_>{% endif %} {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         match self {
             {%- for variant in choice.variants %}
@@ -77,7 +77,7 @@ impl Serialize for {{ parent_type }} {
 //
 
 {% for parent_type, collection in target.collections %}
-impl Serialize for {{ parent_type }}Struct {
+impl Serialize for {{ parent_type }}Struct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut seq = serializer.serialize_seq(Some(self.len()))?;
         for item in self.iter() {
@@ -94,7 +94,7 @@ impl Serialize for {{ parent_type }}Struct {
 //
 
 {% for terminal_type, terminal in target.terminals %}
-impl Serialize for {{ terminal_type }}Struct {
+impl Serialize for {{ terminal_type }}Struct<'_> {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         let mut map = serializer.serialize_map(Some({% if terminal.unique_symbol %}4{% else %}5{% endif %}))?;
         map.serialize_entry("id", &self.ir_node.id())?;

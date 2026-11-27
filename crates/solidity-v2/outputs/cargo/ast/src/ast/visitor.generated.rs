@@ -4,576 +4,598 @@
 use super::nodes::*;
 
 pub trait Visitor {
-    fn enter_abicoder_pragma(&mut self, _node: &AbicoderPragma) -> bool {
+    fn enter_abicoder_pragma(&mut self, _node: &AbicoderPragma<'_>) -> bool {
         true
     }
-    fn leave_abicoder_pragma(&mut self, _node: &AbicoderPragma) {}
+    fn leave_abicoder_pragma(&mut self, _node: &AbicoderPragma<'_>) {}
 
-    fn enter_additive_expression(&mut self, _node: &AdditiveExpression) -> bool {
+    fn enter_additive_expression(&mut self, _node: &AdditiveExpression<'_>) -> bool {
         true
     }
-    fn leave_additive_expression(&mut self, _node: &AdditiveExpression) {}
+    fn leave_additive_expression(&mut self, _node: &AdditiveExpression<'_>) {}
 
-    fn enter_address_type(&mut self, _node: &AddressType) -> bool {
+    fn enter_address_type(&mut self, _node: &AddressType<'_>) -> bool {
         true
     }
-    fn leave_address_type(&mut self, _node: &AddressType) {}
+    fn leave_address_type(&mut self, _node: &AddressType<'_>) {}
 
-    fn enter_and_expression(&mut self, _node: &AndExpression) -> bool {
+    fn enter_and_expression(&mut self, _node: &AndExpression<'_>) -> bool {
         true
     }
-    fn leave_and_expression(&mut self, _node: &AndExpression) {}
+    fn leave_and_expression(&mut self, _node: &AndExpression<'_>) {}
 
-    fn enter_array_expression(&mut self, _node: &ArrayExpression) -> bool {
+    fn enter_array_expression(&mut self, _node: &ArrayExpression<'_>) -> bool {
         true
     }
-    fn leave_array_expression(&mut self, _node: &ArrayExpression) {}
+    fn leave_array_expression(&mut self, _node: &ArrayExpression<'_>) {}
 
-    fn enter_array_type_name(&mut self, _node: &ArrayTypeName) -> bool {
+    fn enter_array_type_name(&mut self, _node: &ArrayTypeName<'_>) -> bool {
         true
     }
-    fn leave_array_type_name(&mut self, _node: &ArrayTypeName) {}
+    fn leave_array_type_name(&mut self, _node: &ArrayTypeName<'_>) {}
 
-    fn enter_assembly_statement(&mut self, _node: &AssemblyStatement) -> bool {
+    fn enter_assembly_statement(&mut self, _node: &AssemblyStatement<'_>) -> bool {
         true
     }
-    fn leave_assembly_statement(&mut self, _node: &AssemblyStatement) {}
+    fn leave_assembly_statement(&mut self, _node: &AssemblyStatement<'_>) {}
 
-    fn enter_assignment_expression(&mut self, _node: &AssignmentExpression) -> bool {
+    fn enter_assignment_expression(&mut self, _node: &AssignmentExpression<'_>) -> bool {
         true
     }
-    fn leave_assignment_expression(&mut self, _node: &AssignmentExpression) {}
+    fn leave_assignment_expression(&mut self, _node: &AssignmentExpression<'_>) {}
 
-    fn enter_bitwise_and_expression(&mut self, _node: &BitwiseAndExpression) -> bool {
+    fn enter_bitwise_and_expression(&mut self, _node: &BitwiseAndExpression<'_>) -> bool {
         true
     }
-    fn leave_bitwise_and_expression(&mut self, _node: &BitwiseAndExpression) {}
+    fn leave_bitwise_and_expression(&mut self, _node: &BitwiseAndExpression<'_>) {}
 
-    fn enter_bitwise_or_expression(&mut self, _node: &BitwiseOrExpression) -> bool {
+    fn enter_bitwise_or_expression(&mut self, _node: &BitwiseOrExpression<'_>) -> bool {
         true
     }
-    fn leave_bitwise_or_expression(&mut self, _node: &BitwiseOrExpression) {}
+    fn leave_bitwise_or_expression(&mut self, _node: &BitwiseOrExpression<'_>) {}
 
-    fn enter_bitwise_xor_expression(&mut self, _node: &BitwiseXorExpression) -> bool {
+    fn enter_bitwise_xor_expression(&mut self, _node: &BitwiseXorExpression<'_>) -> bool {
         true
     }
-    fn leave_bitwise_xor_expression(&mut self, _node: &BitwiseXorExpression) {}
+    fn leave_bitwise_xor_expression(&mut self, _node: &BitwiseXorExpression<'_>) {}
 
-    fn enter_block(&mut self, _node: &Block) -> bool {
+    fn enter_block(&mut self, _node: &Block<'_>) -> bool {
         true
     }
-    fn leave_block(&mut self, _node: &Block) {}
+    fn leave_block(&mut self, _node: &Block<'_>) {}
 
-    fn enter_break_statement(&mut self, _node: &BreakStatement) -> bool {
+    fn enter_break_statement(&mut self, _node: &BreakStatement<'_>) -> bool {
         true
     }
-    fn leave_break_statement(&mut self, _node: &BreakStatement) {}
+    fn leave_break_statement(&mut self, _node: &BreakStatement<'_>) {}
 
-    fn enter_call_options_expression(&mut self, _node: &CallOptionsExpression) -> bool {
+    fn enter_call_options_expression(&mut self, _node: &CallOptionsExpression<'_>) -> bool {
         true
     }
-    fn leave_call_options_expression(&mut self, _node: &CallOptionsExpression) {}
+    fn leave_call_options_expression(&mut self, _node: &CallOptionsExpression<'_>) {}
 
-    fn enter_catch_clause(&mut self, _node: &CatchClause) -> bool {
+    fn enter_catch_clause(&mut self, _node: &CatchClause<'_>) -> bool {
         true
     }
-    fn leave_catch_clause(&mut self, _node: &CatchClause) {}
+    fn leave_catch_clause(&mut self, _node: &CatchClause<'_>) {}
 
-    fn enter_conditional_expression(&mut self, _node: &ConditionalExpression) -> bool {
+    fn enter_conditional_expression(&mut self, _node: &ConditionalExpression<'_>) -> bool {
         true
     }
-    fn leave_conditional_expression(&mut self, _node: &ConditionalExpression) {}
+    fn leave_conditional_expression(&mut self, _node: &ConditionalExpression<'_>) {}
 
-    fn enter_constant_definition(&mut self, _node: &ConstantDefinition) -> bool {
+    fn enter_constant_definition(&mut self, _node: &ConstantDefinition<'_>) -> bool {
         true
     }
-    fn leave_constant_definition(&mut self, _node: &ConstantDefinition) {}
+    fn leave_constant_definition(&mut self, _node: &ConstantDefinition<'_>) {}
 
-    fn enter_continue_statement(&mut self, _node: &ContinueStatement) -> bool {
+    fn enter_continue_statement(&mut self, _node: &ContinueStatement<'_>) -> bool {
         true
     }
-    fn leave_continue_statement(&mut self, _node: &ContinueStatement) {}
+    fn leave_continue_statement(&mut self, _node: &ContinueStatement<'_>) {}
 
-    fn enter_contract_definition(&mut self, _node: &ContractDefinition) -> bool {
+    fn enter_contract_definition(&mut self, _node: &ContractDefinition<'_>) -> bool {
         true
     }
-    fn leave_contract_definition(&mut self, _node: &ContractDefinition) {}
+    fn leave_contract_definition(&mut self, _node: &ContractDefinition<'_>) {}
 
-    fn enter_decimal_number_expression(&mut self, _node: &DecimalNumberExpression) -> bool {
+    fn enter_decimal_number_expression(&mut self, _node: &DecimalNumberExpression<'_>) -> bool {
         true
     }
-    fn leave_decimal_number_expression(&mut self, _node: &DecimalNumberExpression) {}
+    fn leave_decimal_number_expression(&mut self, _node: &DecimalNumberExpression<'_>) {}
 
-    fn enter_do_while_statement(&mut self, _node: &DoWhileStatement) -> bool {
+    fn enter_do_while_statement(&mut self, _node: &DoWhileStatement<'_>) -> bool {
         true
     }
-    fn leave_do_while_statement(&mut self, _node: &DoWhileStatement) {}
+    fn leave_do_while_statement(&mut self, _node: &DoWhileStatement<'_>) {}
 
-    fn enter_emit_statement(&mut self, _node: &EmitStatement) -> bool {
+    fn enter_emit_statement(&mut self, _node: &EmitStatement<'_>) -> bool {
         true
     }
-    fn leave_emit_statement(&mut self, _node: &EmitStatement) {}
+    fn leave_emit_statement(&mut self, _node: &EmitStatement<'_>) {}
 
-    fn enter_enum_definition(&mut self, _node: &EnumDefinition) -> bool {
+    fn enter_enum_definition(&mut self, _node: &EnumDefinition<'_>) -> bool {
         true
     }
-    fn leave_enum_definition(&mut self, _node: &EnumDefinition) {}
+    fn leave_enum_definition(&mut self, _node: &EnumDefinition<'_>) {}
 
-    fn enter_equality_expression(&mut self, _node: &EqualityExpression) -> bool {
+    fn enter_equality_expression(&mut self, _node: &EqualityExpression<'_>) -> bool {
         true
     }
-    fn leave_equality_expression(&mut self, _node: &EqualityExpression) {}
+    fn leave_equality_expression(&mut self, _node: &EqualityExpression<'_>) {}
 
-    fn enter_error_definition(&mut self, _node: &ErrorDefinition) -> bool {
+    fn enter_error_definition(&mut self, _node: &ErrorDefinition<'_>) -> bool {
         true
     }
-    fn leave_error_definition(&mut self, _node: &ErrorDefinition) {}
+    fn leave_error_definition(&mut self, _node: &ErrorDefinition<'_>) {}
 
-    fn enter_event_definition(&mut self, _node: &EventDefinition) -> bool {
+    fn enter_event_definition(&mut self, _node: &EventDefinition<'_>) -> bool {
         true
     }
-    fn leave_event_definition(&mut self, _node: &EventDefinition) {}
+    fn leave_event_definition(&mut self, _node: &EventDefinition<'_>) {}
 
-    fn enter_experimental_pragma(&mut self, _node: &ExperimentalPragma) -> bool {
+    fn enter_experimental_pragma(&mut self, _node: &ExperimentalPragma<'_>) -> bool {
         true
     }
-    fn leave_experimental_pragma(&mut self, _node: &ExperimentalPragma) {}
+    fn leave_experimental_pragma(&mut self, _node: &ExperimentalPragma<'_>) {}
 
-    fn enter_exponentiation_expression(&mut self, _node: &ExponentiationExpression) -> bool {
+    fn enter_exponentiation_expression(&mut self, _node: &ExponentiationExpression<'_>) -> bool {
         true
     }
-    fn leave_exponentiation_expression(&mut self, _node: &ExponentiationExpression) {}
+    fn leave_exponentiation_expression(&mut self, _node: &ExponentiationExpression<'_>) {}
 
-    fn enter_expression_statement(&mut self, _node: &ExpressionStatement) -> bool {
+    fn enter_expression_statement(&mut self, _node: &ExpressionStatement<'_>) -> bool {
         true
     }
-    fn leave_expression_statement(&mut self, _node: &ExpressionStatement) {}
+    fn leave_expression_statement(&mut self, _node: &ExpressionStatement<'_>) {}
 
-    fn enter_for_statement(&mut self, _node: &ForStatement) -> bool {
+    fn enter_for_statement(&mut self, _node: &ForStatement<'_>) -> bool {
         true
     }
-    fn leave_for_statement(&mut self, _node: &ForStatement) {}
+    fn leave_for_statement(&mut self, _node: &ForStatement<'_>) {}
 
-    fn enter_function_attributes(&mut self, _node: &FunctionAttributes) -> bool {
+    fn enter_function_attributes(&mut self, _node: &FunctionAttributes<'_>) -> bool {
         true
     }
-    fn leave_function_attributes(&mut self, _node: &FunctionAttributes) {}
+    fn leave_function_attributes(&mut self, _node: &FunctionAttributes<'_>) {}
 
-    fn enter_function_call_expression(&mut self, _node: &FunctionCallExpression) -> bool {
+    fn enter_function_call_expression(&mut self, _node: &FunctionCallExpression<'_>) -> bool {
         true
     }
-    fn leave_function_call_expression(&mut self, _node: &FunctionCallExpression) {}
+    fn leave_function_call_expression(&mut self, _node: &FunctionCallExpression<'_>) {}
 
-    fn enter_function_definition(&mut self, _node: &FunctionDefinition) -> bool {
+    fn enter_function_definition(&mut self, _node: &FunctionDefinition<'_>) -> bool {
         true
     }
-    fn leave_function_definition(&mut self, _node: &FunctionDefinition) {}
+    fn leave_function_definition(&mut self, _node: &FunctionDefinition<'_>) {}
 
-    fn enter_function_type(&mut self, _node: &FunctionType) -> bool {
+    fn enter_function_type(&mut self, _node: &FunctionType<'_>) -> bool {
         true
     }
-    fn leave_function_type(&mut self, _node: &FunctionType) {}
+    fn leave_function_type(&mut self, _node: &FunctionType<'_>) {}
 
-    fn enter_function_type_attributes(&mut self, _node: &FunctionTypeAttributes) -> bool {
+    fn enter_function_type_attributes(&mut self, _node: &FunctionTypeAttributes<'_>) -> bool {
         true
     }
-    fn leave_function_type_attributes(&mut self, _node: &FunctionTypeAttributes) {}
+    fn leave_function_type_attributes(&mut self, _node: &FunctionTypeAttributes<'_>) {}
 
-    fn enter_hex_number_expression(&mut self, _node: &HexNumberExpression) -> bool {
+    fn enter_hex_number_expression(&mut self, _node: &HexNumberExpression<'_>) -> bool {
         true
     }
-    fn leave_hex_number_expression(&mut self, _node: &HexNumberExpression) {}
+    fn leave_hex_number_expression(&mut self, _node: &HexNumberExpression<'_>) {}
 
-    fn enter_if_statement(&mut self, _node: &IfStatement) -> bool {
+    fn enter_if_statement(&mut self, _node: &IfStatement<'_>) -> bool {
         true
     }
-    fn leave_if_statement(&mut self, _node: &IfStatement) {}
+    fn leave_if_statement(&mut self, _node: &IfStatement<'_>) {}
 
-    fn enter_import_deconstruction(&mut self, _node: &ImportDeconstruction) -> bool {
+    fn enter_import_deconstruction(&mut self, _node: &ImportDeconstruction<'_>) -> bool {
         true
     }
-    fn leave_import_deconstruction(&mut self, _node: &ImportDeconstruction) {}
+    fn leave_import_deconstruction(&mut self, _node: &ImportDeconstruction<'_>) {}
 
-    fn enter_import_deconstruction_symbol(&mut self, _node: &ImportDeconstructionSymbol) -> bool {
+    fn enter_import_deconstruction_symbol(
+        &mut self,
+        _node: &ImportDeconstructionSymbol<'_>,
+    ) -> bool {
         true
     }
-    fn leave_import_deconstruction_symbol(&mut self, _node: &ImportDeconstructionSymbol) {}
+    fn leave_import_deconstruction_symbol(&mut self, _node: &ImportDeconstructionSymbol<'_>) {}
 
-    fn enter_index_access_expression(&mut self, _node: &IndexAccessExpression) -> bool {
+    fn enter_index_access_expression(&mut self, _node: &IndexAccessExpression<'_>) -> bool {
         true
     }
-    fn leave_index_access_expression(&mut self, _node: &IndexAccessExpression) {}
+    fn leave_index_access_expression(&mut self, _node: &IndexAccessExpression<'_>) {}
 
-    fn enter_inequality_expression(&mut self, _node: &InequalityExpression) -> bool {
+    fn enter_inequality_expression(&mut self, _node: &InequalityExpression<'_>) -> bool {
         true
     }
-    fn leave_inequality_expression(&mut self, _node: &InequalityExpression) {}
+    fn leave_inequality_expression(&mut self, _node: &InequalityExpression<'_>) {}
 
-    fn enter_inheritance_type(&mut self, _node: &InheritanceType) -> bool {
+    fn enter_inheritance_type(&mut self, _node: &InheritanceType<'_>) -> bool {
         true
     }
-    fn leave_inheritance_type(&mut self, _node: &InheritanceType) {}
+    fn leave_inheritance_type(&mut self, _node: &InheritanceType<'_>) {}
 
-    fn enter_interface_definition(&mut self, _node: &InterfaceDefinition) -> bool {
+    fn enter_interface_definition(&mut self, _node: &InterfaceDefinition<'_>) -> bool {
         true
     }
-    fn leave_interface_definition(&mut self, _node: &InterfaceDefinition) {}
+    fn leave_interface_definition(&mut self, _node: &InterfaceDefinition<'_>) {}
 
-    fn enter_library_definition(&mut self, _node: &LibraryDefinition) -> bool {
+    fn enter_library_definition(&mut self, _node: &LibraryDefinition<'_>) -> bool {
         true
     }
-    fn leave_library_definition(&mut self, _node: &LibraryDefinition) {}
+    fn leave_library_definition(&mut self, _node: &LibraryDefinition<'_>) {}
 
-    fn enter_mapping_type(&mut self, _node: &MappingType) -> bool {
+    fn enter_mapping_type(&mut self, _node: &MappingType<'_>) -> bool {
         true
     }
-    fn leave_mapping_type(&mut self, _node: &MappingType) {}
+    fn leave_mapping_type(&mut self, _node: &MappingType<'_>) {}
 
-    fn enter_member_access_expression(&mut self, _node: &MemberAccessExpression) -> bool {
+    fn enter_member_access_expression(&mut self, _node: &MemberAccessExpression<'_>) -> bool {
         true
     }
-    fn leave_member_access_expression(&mut self, _node: &MemberAccessExpression) {}
+    fn leave_member_access_expression(&mut self, _node: &MemberAccessExpression<'_>) {}
 
-    fn enter_modifier_attributes(&mut self, _node: &ModifierAttributes) -> bool {
+    fn enter_modifier_attributes(&mut self, _node: &ModifierAttributes<'_>) -> bool {
         true
     }
-    fn leave_modifier_attributes(&mut self, _node: &ModifierAttributes) {}
+    fn leave_modifier_attributes(&mut self, _node: &ModifierAttributes<'_>) {}
 
-    fn enter_modifier_definition(&mut self, _node: &ModifierDefinition) -> bool {
+    fn enter_modifier_definition(&mut self, _node: &ModifierDefinition<'_>) -> bool {
         true
     }
-    fn leave_modifier_definition(&mut self, _node: &ModifierDefinition) {}
+    fn leave_modifier_definition(&mut self, _node: &ModifierDefinition<'_>) {}
 
-    fn enter_modifier_invocation(&mut self, _node: &ModifierInvocation) -> bool {
+    fn enter_modifier_invocation(&mut self, _node: &ModifierInvocation<'_>) -> bool {
         true
     }
-    fn leave_modifier_invocation(&mut self, _node: &ModifierInvocation) {}
+    fn leave_modifier_invocation(&mut self, _node: &ModifierInvocation<'_>) {}
 
-    fn enter_multi_typed_declaration(&mut self, _node: &MultiTypedDeclaration) -> bool {
+    fn enter_multi_typed_declaration(&mut self, _node: &MultiTypedDeclaration<'_>) -> bool {
         true
     }
-    fn leave_multi_typed_declaration(&mut self, _node: &MultiTypedDeclaration) {}
+    fn leave_multi_typed_declaration(&mut self, _node: &MultiTypedDeclaration<'_>) {}
 
     fn enter_multi_typed_declaration_element(
         &mut self,
-        _node: &MultiTypedDeclarationElement,
+        _node: &MultiTypedDeclarationElement<'_>,
     ) -> bool {
         true
     }
-    fn leave_multi_typed_declaration_element(&mut self, _node: &MultiTypedDeclarationElement) {}
+    fn leave_multi_typed_declaration_element(&mut self, _node: &MultiTypedDeclarationElement<'_>) {}
 
-    fn enter_multiplicative_expression(&mut self, _node: &MultiplicativeExpression) -> bool {
+    fn enter_multiplicative_expression(&mut self, _node: &MultiplicativeExpression<'_>) -> bool {
         true
     }
-    fn leave_multiplicative_expression(&mut self, _node: &MultiplicativeExpression) {}
+    fn leave_multiplicative_expression(&mut self, _node: &MultiplicativeExpression<'_>) {}
 
-    fn enter_named_argument(&mut self, _node: &NamedArgument) -> bool {
+    fn enter_named_argument(&mut self, _node: &NamedArgument<'_>) -> bool {
         true
     }
-    fn leave_named_argument(&mut self, _node: &NamedArgument) {}
+    fn leave_named_argument(&mut self, _node: &NamedArgument<'_>) {}
 
-    fn enter_new_expression(&mut self, _node: &NewExpression) -> bool {
+    fn enter_new_expression(&mut self, _node: &NewExpression<'_>) -> bool {
         true
     }
-    fn leave_new_expression(&mut self, _node: &NewExpression) {}
+    fn leave_new_expression(&mut self, _node: &NewExpression<'_>) {}
 
-    fn enter_or_expression(&mut self, _node: &OrExpression) -> bool {
+    fn enter_or_expression(&mut self, _node: &OrExpression<'_>) -> bool {
         true
     }
-    fn leave_or_expression(&mut self, _node: &OrExpression) {}
+    fn leave_or_expression(&mut self, _node: &OrExpression<'_>) {}
 
-    fn enter_parameter(&mut self, _node: &Parameter) -> bool {
+    fn enter_parameter(&mut self, _node: &Parameter<'_>) -> bool {
         true
     }
-    fn leave_parameter(&mut self, _node: &Parameter) {}
+    fn leave_parameter(&mut self, _node: &Parameter<'_>) {}
 
-    fn enter_path_import(&mut self, _node: &PathImport) -> bool {
+    fn enter_path_import(&mut self, _node: &PathImport<'_>) -> bool {
         true
     }
-    fn leave_path_import(&mut self, _node: &PathImport) {}
+    fn leave_path_import(&mut self, _node: &PathImport<'_>) {}
 
-    fn enter_postfix_expression(&mut self, _node: &PostfixExpression) -> bool {
+    fn enter_postfix_expression(&mut self, _node: &PostfixExpression<'_>) -> bool {
         true
     }
-    fn leave_postfix_expression(&mut self, _node: &PostfixExpression) {}
+    fn leave_postfix_expression(&mut self, _node: &PostfixExpression<'_>) {}
 
-    fn enter_pragma_directive(&mut self, _node: &PragmaDirective) -> bool {
+    fn enter_pragma_directive(&mut self, _node: &PragmaDirective<'_>) -> bool {
         true
     }
-    fn leave_pragma_directive(&mut self, _node: &PragmaDirective) {}
+    fn leave_pragma_directive(&mut self, _node: &PragmaDirective<'_>) {}
 
-    fn enter_prefix_expression(&mut self, _node: &PrefixExpression) -> bool {
+    fn enter_prefix_expression(&mut self, _node: &PrefixExpression<'_>) -> bool {
         true
     }
-    fn leave_prefix_expression(&mut self, _node: &PrefixExpression) {}
+    fn leave_prefix_expression(&mut self, _node: &PrefixExpression<'_>) {}
 
-    fn enter_return_statement(&mut self, _node: &ReturnStatement) -> bool {
+    fn enter_return_statement(&mut self, _node: &ReturnStatement<'_>) -> bool {
         true
     }
-    fn leave_return_statement(&mut self, _node: &ReturnStatement) {}
+    fn leave_return_statement(&mut self, _node: &ReturnStatement<'_>) {}
 
-    fn enter_revert_statement(&mut self, _node: &RevertStatement) -> bool {
+    fn enter_revert_statement(&mut self, _node: &RevertStatement<'_>) -> bool {
         true
     }
-    fn leave_revert_statement(&mut self, _node: &RevertStatement) {}
+    fn leave_revert_statement(&mut self, _node: &RevertStatement<'_>) {}
 
-    fn enter_shift_expression(&mut self, _node: &ShiftExpression) -> bool {
+    fn enter_shift_expression(&mut self, _node: &ShiftExpression<'_>) -> bool {
         true
     }
-    fn leave_shift_expression(&mut self, _node: &ShiftExpression) {}
+    fn leave_shift_expression(&mut self, _node: &ShiftExpression<'_>) {}
 
-    fn enter_single_typed_declaration(&mut self, _node: &SingleTypedDeclaration) -> bool {
+    fn enter_single_typed_declaration(&mut self, _node: &SingleTypedDeclaration<'_>) -> bool {
         true
     }
-    fn leave_single_typed_declaration(&mut self, _node: &SingleTypedDeclaration) {}
+    fn leave_single_typed_declaration(&mut self, _node: &SingleTypedDeclaration<'_>) {}
 
-    fn enter_source_unit(&mut self, _node: &SourceUnit) -> bool {
+    fn enter_source_unit(&mut self, _node: &SourceUnit<'_>) -> bool {
         true
     }
-    fn leave_source_unit(&mut self, _node: &SourceUnit) {}
+    fn leave_source_unit(&mut self, _node: &SourceUnit<'_>) {}
 
-    fn enter_state_variable_attributes(&mut self, _node: &StateVariableAttributes) -> bool {
+    fn enter_state_variable_attributes(&mut self, _node: &StateVariableAttributes<'_>) -> bool {
         true
     }
-    fn leave_state_variable_attributes(&mut self, _node: &StateVariableAttributes) {}
+    fn leave_state_variable_attributes(&mut self, _node: &StateVariableAttributes<'_>) {}
 
-    fn enter_state_variable_definition(&mut self, _node: &StateVariableDefinition) -> bool {
+    fn enter_state_variable_definition(&mut self, _node: &StateVariableDefinition<'_>) -> bool {
         true
     }
-    fn leave_state_variable_definition(&mut self, _node: &StateVariableDefinition) {}
+    fn leave_state_variable_definition(&mut self, _node: &StateVariableDefinition<'_>) {}
 
-    fn enter_struct_definition(&mut self, _node: &StructDefinition) -> bool {
+    fn enter_struct_definition(&mut self, _node: &StructDefinition<'_>) -> bool {
         true
     }
-    fn leave_struct_definition(&mut self, _node: &StructDefinition) {}
+    fn leave_struct_definition(&mut self, _node: &StructDefinition<'_>) {}
 
-    fn enter_struct_member(&mut self, _node: &StructMember) -> bool {
+    fn enter_struct_member(&mut self, _node: &StructMember<'_>) -> bool {
         true
     }
-    fn leave_struct_member(&mut self, _node: &StructMember) {}
+    fn leave_struct_member(&mut self, _node: &StructMember<'_>) {}
 
-    fn enter_try_statement(&mut self, _node: &TryStatement) -> bool {
+    fn enter_try_statement(&mut self, _node: &TryStatement<'_>) -> bool {
         true
     }
-    fn leave_try_statement(&mut self, _node: &TryStatement) {}
+    fn leave_try_statement(&mut self, _node: &TryStatement<'_>) {}
 
-    fn enter_tuple_expression(&mut self, _node: &TupleExpression) -> bool {
+    fn enter_tuple_expression(&mut self, _node: &TupleExpression<'_>) -> bool {
         true
     }
-    fn leave_tuple_expression(&mut self, _node: &TupleExpression) {}
+    fn leave_tuple_expression(&mut self, _node: &TupleExpression<'_>) {}
 
-    fn enter_tuple_value(&mut self, _node: &TupleValue) -> bool {
+    fn enter_tuple_value(&mut self, _node: &TupleValue<'_>) -> bool {
         true
     }
-    fn leave_tuple_value(&mut self, _node: &TupleValue) {}
+    fn leave_tuple_value(&mut self, _node: &TupleValue<'_>) {}
 
-    fn enter_type_expression(&mut self, _node: &TypeExpression) -> bool {
+    fn enter_type_expression(&mut self, _node: &TypeExpression<'_>) -> bool {
         true
     }
-    fn leave_type_expression(&mut self, _node: &TypeExpression) {}
+    fn leave_type_expression(&mut self, _node: &TypeExpression<'_>) {}
 
-    fn enter_unchecked_block(&mut self, _node: &UncheckedBlock) -> bool {
+    fn enter_unchecked_block(&mut self, _node: &UncheckedBlock<'_>) -> bool {
         true
     }
-    fn leave_unchecked_block(&mut self, _node: &UncheckedBlock) {}
+    fn leave_unchecked_block(&mut self, _node: &UncheckedBlock<'_>) {}
 
     fn enter_user_defined_value_type_definition(
         &mut self,
-        _node: &UserDefinedValueTypeDefinition,
+        _node: &UserDefinedValueTypeDefinition<'_>,
     ) -> bool {
         true
     }
-    fn leave_user_defined_value_type_definition(&mut self, _node: &UserDefinedValueTypeDefinition) {
+    fn leave_user_defined_value_type_definition(
+        &mut self,
+        _node: &UserDefinedValueTypeDefinition<'_>,
+    ) {
     }
 
-    fn enter_using_deconstruction(&mut self, _node: &UsingDeconstruction) -> bool {
+    fn enter_using_deconstruction(&mut self, _node: &UsingDeconstruction<'_>) -> bool {
         true
     }
-    fn leave_using_deconstruction(&mut self, _node: &UsingDeconstruction) {}
+    fn leave_using_deconstruction(&mut self, _node: &UsingDeconstruction<'_>) {}
 
-    fn enter_using_deconstruction_symbol(&mut self, _node: &UsingDeconstructionSymbol) -> bool {
+    fn enter_using_deconstruction_symbol(&mut self, _node: &UsingDeconstructionSymbol<'_>) -> bool {
         true
     }
-    fn leave_using_deconstruction_symbol(&mut self, _node: &UsingDeconstructionSymbol) {}
+    fn leave_using_deconstruction_symbol(&mut self, _node: &UsingDeconstructionSymbol<'_>) {}
 
-    fn enter_using_directive(&mut self, _node: &UsingDirective) -> bool {
+    fn enter_using_directive(&mut self, _node: &UsingDirective<'_>) -> bool {
         true
     }
-    fn leave_using_directive(&mut self, _node: &UsingDirective) {}
+    fn leave_using_directive(&mut self, _node: &UsingDirective<'_>) {}
 
-    fn enter_variable_declaration(&mut self, _node: &VariableDeclaration) -> bool {
+    fn enter_variable_declaration(&mut self, _node: &VariableDeclaration<'_>) -> bool {
         true
     }
-    fn leave_variable_declaration(&mut self, _node: &VariableDeclaration) {}
+    fn leave_variable_declaration(&mut self, _node: &VariableDeclaration<'_>) {}
 
     fn enter_variable_declaration_statement(
         &mut self,
-        _node: &VariableDeclarationStatement,
+        _node: &VariableDeclarationStatement<'_>,
     ) -> bool {
         true
     }
-    fn leave_variable_declaration_statement(&mut self, _node: &VariableDeclarationStatement) {}
+    fn leave_variable_declaration_statement(&mut self, _node: &VariableDeclarationStatement<'_>) {}
 
-    fn enter_version_pragma(&mut self, _node: &VersionPragma) -> bool {
+    fn enter_version_pragma(&mut self, _node: &VersionPragma<'_>) -> bool {
         true
     }
-    fn leave_version_pragma(&mut self, _node: &VersionPragma) {}
+    fn leave_version_pragma(&mut self, _node: &VersionPragma<'_>) {}
 
-    fn enter_version_pragma_comparator(&mut self, _node: &VersionPragmaComparator) -> bool {
+    fn enter_version_pragma_comparator(&mut self, _node: &VersionPragmaComparator<'_>) -> bool {
         true
     }
-    fn leave_version_pragma_comparator(&mut self, _node: &VersionPragmaComparator) {}
+    fn leave_version_pragma_comparator(&mut self, _node: &VersionPragmaComparator<'_>) {}
 
-    fn enter_while_statement(&mut self, _node: &WhileStatement) -> bool {
+    fn enter_while_statement(&mut self, _node: &WhileStatement<'_>) -> bool {
         true
     }
-    fn leave_while_statement(&mut self, _node: &WhileStatement) {}
+    fn leave_while_statement(&mut self, _node: &WhileStatement<'_>) {}
 
-    fn enter_yul_block(&mut self, _node: &YulBlock) -> bool {
+    fn enter_yul_block(&mut self, _node: &YulBlock<'_>) -> bool {
         true
     }
-    fn leave_yul_block(&mut self, _node: &YulBlock) {}
+    fn leave_yul_block(&mut self, _node: &YulBlock<'_>) {}
 
-    fn enter_yul_break_statement(&mut self, _node: &YulBreakStatement) -> bool {
+    fn enter_yul_break_statement(&mut self, _node: &YulBreakStatement<'_>) -> bool {
         true
     }
-    fn leave_yul_break_statement(&mut self, _node: &YulBreakStatement) {}
+    fn leave_yul_break_statement(&mut self, _node: &YulBreakStatement<'_>) {}
 
-    fn enter_yul_continue_statement(&mut self, _node: &YulContinueStatement) -> bool {
+    fn enter_yul_continue_statement(&mut self, _node: &YulContinueStatement<'_>) -> bool {
         true
     }
-    fn leave_yul_continue_statement(&mut self, _node: &YulContinueStatement) {}
+    fn leave_yul_continue_statement(&mut self, _node: &YulContinueStatement<'_>) {}
 
-    fn enter_yul_default_case(&mut self, _node: &YulDefaultCase) -> bool {
+    fn enter_yul_default_case(&mut self, _node: &YulDefaultCase<'_>) -> bool {
         true
     }
-    fn leave_yul_default_case(&mut self, _node: &YulDefaultCase) {}
+    fn leave_yul_default_case(&mut self, _node: &YulDefaultCase<'_>) {}
 
-    fn enter_yul_for_statement(&mut self, _node: &YulForStatement) -> bool {
+    fn enter_yul_for_statement(&mut self, _node: &YulForStatement<'_>) -> bool {
         true
     }
-    fn leave_yul_for_statement(&mut self, _node: &YulForStatement) {}
+    fn leave_yul_for_statement(&mut self, _node: &YulForStatement<'_>) {}
 
-    fn enter_yul_function_call_expression(&mut self, _node: &YulFunctionCallExpression) -> bool {
+    fn enter_yul_function_call_expression(
+        &mut self,
+        _node: &YulFunctionCallExpression<'_>,
+    ) -> bool {
         true
     }
-    fn leave_yul_function_call_expression(&mut self, _node: &YulFunctionCallExpression) {}
+    fn leave_yul_function_call_expression(&mut self, _node: &YulFunctionCallExpression<'_>) {}
 
-    fn enter_yul_function_definition(&mut self, _node: &YulFunctionDefinition) -> bool {
+    fn enter_yul_function_definition(&mut self, _node: &YulFunctionDefinition<'_>) -> bool {
         true
     }
-    fn leave_yul_function_definition(&mut self, _node: &YulFunctionDefinition) {}
+    fn leave_yul_function_definition(&mut self, _node: &YulFunctionDefinition<'_>) {}
 
-    fn enter_yul_if_statement(&mut self, _node: &YulIfStatement) -> bool {
+    fn enter_yul_if_statement(&mut self, _node: &YulIfStatement<'_>) -> bool {
         true
     }
-    fn leave_yul_if_statement(&mut self, _node: &YulIfStatement) {}
+    fn leave_yul_if_statement(&mut self, _node: &YulIfStatement<'_>) {}
 
-    fn enter_yul_leave_statement(&mut self, _node: &YulLeaveStatement) -> bool {
+    fn enter_yul_leave_statement(&mut self, _node: &YulLeaveStatement<'_>) -> bool {
         true
     }
-    fn leave_yul_leave_statement(&mut self, _node: &YulLeaveStatement) {}
+    fn leave_yul_leave_statement(&mut self, _node: &YulLeaveStatement<'_>) {}
 
-    fn enter_yul_switch_statement(&mut self, _node: &YulSwitchStatement) -> bool {
+    fn enter_yul_switch_statement(&mut self, _node: &YulSwitchStatement<'_>) -> bool {
         true
     }
-    fn leave_yul_switch_statement(&mut self, _node: &YulSwitchStatement) {}
+    fn leave_yul_switch_statement(&mut self, _node: &YulSwitchStatement<'_>) {}
 
-    fn enter_yul_value_case(&mut self, _node: &YulValueCase) -> bool {
+    fn enter_yul_value_case(&mut self, _node: &YulValueCase<'_>) -> bool {
         true
     }
-    fn leave_yul_value_case(&mut self, _node: &YulValueCase) {}
+    fn leave_yul_value_case(&mut self, _node: &YulValueCase<'_>) {}
 
     fn enter_yul_variable_assignment_statement(
         &mut self,
-        _node: &YulVariableAssignmentStatement,
+        _node: &YulVariableAssignmentStatement<'_>,
     ) -> bool {
         true
     }
-    fn leave_yul_variable_assignment_statement(&mut self, _node: &YulVariableAssignmentStatement) {}
+    fn leave_yul_variable_assignment_statement(
+        &mut self,
+        _node: &YulVariableAssignmentStatement<'_>,
+    ) {
+    }
 
     fn enter_yul_variable_declaration_statement(
         &mut self,
-        _node: &YulVariableDeclarationStatement,
+        _node: &YulVariableDeclarationStatement<'_>,
     ) -> bool {
         true
     }
     fn leave_yul_variable_declaration_statement(
         &mut self,
-        _node: &YulVariableDeclarationStatement,
+        _node: &YulVariableDeclarationStatement<'_>,
     ) {
     }
 
     fn enter_yul_variable_declaration_value(
         &mut self,
-        _node: &YulVariableDeclarationValue,
+        _node: &YulVariableDeclarationValue<'_>,
     ) -> bool {
         true
     }
-    fn leave_yul_variable_declaration_value(&mut self, _node: &YulVariableDeclarationValue) {}
+    fn leave_yul_variable_declaration_value(&mut self, _node: &YulVariableDeclarationValue<'_>) {}
 
     fn enter_abicoder_version(&mut self, _node: &AbicoderVersion) -> bool {
         true
     }
     fn leave_abicoder_version(&mut self, _node: &AbicoderVersion) {}
 
-    fn enter_additive_expression_operator(&mut self, _node: &AdditiveExpressionOperator) -> bool {
-        true
-    }
-    fn leave_additive_expression_operator(&mut self, _node: &AdditiveExpressionOperator) {}
-
-    fn enter_arguments_declaration(&mut self, _node: &ArgumentsDeclaration) -> bool {
-        true
-    }
-    fn leave_arguments_declaration(&mut self, _node: &ArgumentsDeclaration) {}
-
-    fn enter_assignment_expression_operator(
+    fn enter_additive_expression_operator(
         &mut self,
-        _node: &AssignmentExpressionOperator,
+        _node: &AdditiveExpressionOperator<'_>,
     ) -> bool {
         true
     }
-    fn leave_assignment_expression_operator(&mut self, _node: &AssignmentExpressionOperator) {}
+    fn leave_additive_expression_operator(&mut self, _node: &AdditiveExpressionOperator<'_>) {}
+
+    fn enter_arguments_declaration(&mut self, _node: &ArgumentsDeclaration<'_>) -> bool {
+        true
+    }
+    fn leave_arguments_declaration(&mut self, _node: &ArgumentsDeclaration<'_>) {}
+
+    fn enter_assignment_expression_operator(
+        &mut self,
+        _node: &AssignmentExpressionOperator<'_>,
+    ) -> bool {
+        true
+    }
+    fn leave_assignment_expression_operator(&mut self, _node: &AssignmentExpressionOperator<'_>) {}
 
     fn enter_catch_clause_kind(&mut self, _node: &CatchClauseKind) -> bool {
         true
     }
     fn leave_catch_clause_kind(&mut self, _node: &CatchClauseKind) {}
 
-    fn enter_contract_member(&mut self, _node: &ContractMember) -> bool {
+    fn enter_contract_member(&mut self, _node: &ContractMember<'_>) -> bool {
         true
     }
-    fn leave_contract_member(&mut self, _node: &ContractMember) {}
+    fn leave_contract_member(&mut self, _node: &ContractMember<'_>) {}
 
-    fn enter_elementary_type(&mut self, _node: &ElementaryType) -> bool {
+    fn enter_elementary_type(&mut self, _node: &ElementaryType<'_>) -> bool {
         true
     }
-    fn leave_elementary_type(&mut self, _node: &ElementaryType) {}
+    fn leave_elementary_type(&mut self, _node: &ElementaryType<'_>) {}
 
-    fn enter_equality_expression_operator(&mut self, _node: &EqualityExpressionOperator) -> bool {
+    fn enter_equality_expression_operator(
+        &mut self,
+        _node: &EqualityExpressionOperator<'_>,
+    ) -> bool {
         true
     }
-    fn leave_equality_expression_operator(&mut self, _node: &EqualityExpressionOperator) {}
+    fn leave_equality_expression_operator(&mut self, _node: &EqualityExpressionOperator<'_>) {}
 
     fn enter_experimental_feature(&mut self, _node: &ExperimentalFeature) -> bool {
         true
     }
     fn leave_experimental_feature(&mut self, _node: &ExperimentalFeature) {}
 
-    fn enter_expression(&mut self, _node: &Expression) -> bool {
+    fn enter_expression(&mut self, _node: &Expression<'_>) -> bool {
         true
     }
-    fn leave_expression(&mut self, _node: &Expression) {}
+    fn leave_expression(&mut self, _node: &Expression<'_>) {}
 
-    fn enter_for_statement_condition(&mut self, _node: &ForStatementCondition) -> bool {
+    fn enter_for_statement_condition(&mut self, _node: &ForStatementCondition<'_>) -> bool {
         true
     }
-    fn leave_for_statement_condition(&mut self, _node: &ForStatementCondition) {}
+    fn leave_for_statement_condition(&mut self, _node: &ForStatementCondition<'_>) {}
 
-    fn enter_for_statement_initialization(&mut self, _node: &ForStatementInitialization) -> bool {
+    fn enter_for_statement_initialization(
+        &mut self,
+        _node: &ForStatementInitialization<'_>,
+    ) -> bool {
         true
     }
-    fn leave_for_statement_initialization(&mut self, _node: &ForStatementInitialization) {}
+    fn leave_for_statement_initialization(&mut self, _node: &ForStatementInitialization<'_>) {}
 
     fn enter_function_kind(&mut self, _node: &FunctionKind) -> bool {
         true
@@ -590,60 +612,60 @@ pub trait Visitor {
     }
     fn leave_function_visibility(&mut self, _node: &FunctionVisibility) {}
 
-    fn enter_import_clause(&mut self, _node: &ImportClause) -> bool {
+    fn enter_import_clause(&mut self, _node: &ImportClause<'_>) -> bool {
         true
     }
-    fn leave_import_clause(&mut self, _node: &ImportClause) {}
+    fn leave_import_clause(&mut self, _node: &ImportClause<'_>) {}
 
     fn enter_inequality_expression_operator(
         &mut self,
-        _node: &InequalityExpressionOperator,
+        _node: &InequalityExpressionOperator<'_>,
     ) -> bool {
         true
     }
-    fn leave_inequality_expression_operator(&mut self, _node: &InequalityExpressionOperator) {}
+    fn leave_inequality_expression_operator(&mut self, _node: &InequalityExpressionOperator<'_>) {}
 
     fn enter_multiplicative_expression_operator(
         &mut self,
-        _node: &MultiplicativeExpressionOperator,
+        _node: &MultiplicativeExpressionOperator<'_>,
     ) -> bool {
         true
     }
     fn leave_multiplicative_expression_operator(
         &mut self,
-        _node: &MultiplicativeExpressionOperator,
+        _node: &MultiplicativeExpressionOperator<'_>,
     ) {
     }
 
-    fn enter_number_unit(&mut self, _node: &NumberUnit) -> bool {
+    fn enter_number_unit(&mut self, _node: &NumberUnit<'_>) -> bool {
         true
     }
-    fn leave_number_unit(&mut self, _node: &NumberUnit) {}
+    fn leave_number_unit(&mut self, _node: &NumberUnit<'_>) {}
 
-    fn enter_postfix_expression_operator(&mut self, _node: &PostfixExpressionOperator) -> bool {
+    fn enter_postfix_expression_operator(&mut self, _node: &PostfixExpressionOperator<'_>) -> bool {
         true
     }
-    fn leave_postfix_expression_operator(&mut self, _node: &PostfixExpressionOperator) {}
+    fn leave_postfix_expression_operator(&mut self, _node: &PostfixExpressionOperator<'_>) {}
 
-    fn enter_pragma(&mut self, _node: &Pragma) -> bool {
+    fn enter_pragma(&mut self, _node: &Pragma<'_>) -> bool {
         true
     }
-    fn leave_pragma(&mut self, _node: &Pragma) {}
+    fn leave_pragma(&mut self, _node: &Pragma<'_>) {}
 
-    fn enter_prefix_expression_operator(&mut self, _node: &PrefixExpressionOperator) -> bool {
+    fn enter_prefix_expression_operator(&mut self, _node: &PrefixExpressionOperator<'_>) -> bool {
         true
     }
-    fn leave_prefix_expression_operator(&mut self, _node: &PrefixExpressionOperator) {}
+    fn leave_prefix_expression_operator(&mut self, _node: &PrefixExpressionOperator<'_>) {}
 
-    fn enter_shift_expression_operator(&mut self, _node: &ShiftExpressionOperator) -> bool {
+    fn enter_shift_expression_operator(&mut self, _node: &ShiftExpressionOperator<'_>) -> bool {
         true
     }
-    fn leave_shift_expression_operator(&mut self, _node: &ShiftExpressionOperator) {}
+    fn leave_shift_expression_operator(&mut self, _node: &ShiftExpressionOperator<'_>) {}
 
-    fn enter_source_unit_member(&mut self, _node: &SourceUnitMember) -> bool {
+    fn enter_source_unit_member(&mut self, _node: &SourceUnitMember<'_>) -> bool {
         true
     }
-    fn leave_source_unit_member(&mut self, _node: &SourceUnitMember) {}
+    fn leave_source_unit_member(&mut self, _node: &SourceUnitMember<'_>) {}
 
     fn enter_state_variable_mutability(&mut self, _node: &StateVariableMutability) -> bool {
         true
@@ -655,271 +677,281 @@ pub trait Visitor {
     }
     fn leave_state_variable_visibility(&mut self, _node: &StateVariableVisibility) {}
 
-    fn enter_statement(&mut self, _node: &Statement) -> bool {
+    fn enter_statement(&mut self, _node: &Statement<'_>) -> bool {
         true
     }
-    fn leave_statement(&mut self, _node: &Statement) {}
+    fn leave_statement(&mut self, _node: &Statement<'_>) {}
 
-    fn enter_storage_location(&mut self, _node: &StorageLocation) -> bool {
+    fn enter_storage_location(&mut self, _node: &StorageLocation<'_>) -> bool {
         true
     }
-    fn leave_storage_location(&mut self, _node: &StorageLocation) {}
+    fn leave_storage_location(&mut self, _node: &StorageLocation<'_>) {}
 
-    fn enter_string_expression(&mut self, _node: &StringExpression) -> bool {
+    fn enter_string_expression(&mut self, _node: &StringExpression<'_>) -> bool {
         true
     }
-    fn leave_string_expression(&mut self, _node: &StringExpression) {}
+    fn leave_string_expression(&mut self, _node: &StringExpression<'_>) {}
 
-    fn enter_type_name(&mut self, _node: &TypeName) -> bool {
+    fn enter_type_name(&mut self, _node: &TypeName<'_>) -> bool {
         true
     }
-    fn leave_type_name(&mut self, _node: &TypeName) {}
+    fn leave_type_name(&mut self, _node: &TypeName<'_>) {}
 
-    fn enter_using_clause(&mut self, _node: &UsingClause) -> bool {
+    fn enter_using_clause(&mut self, _node: &UsingClause<'_>) -> bool {
         true
     }
-    fn leave_using_clause(&mut self, _node: &UsingClause) {}
+    fn leave_using_clause(&mut self, _node: &UsingClause<'_>) {}
 
-    fn enter_using_operator(&mut self, _node: &UsingOperator) -> bool {
+    fn enter_using_operator(&mut self, _node: &UsingOperator<'_>) -> bool {
         true
     }
-    fn leave_using_operator(&mut self, _node: &UsingOperator) {}
+    fn leave_using_operator(&mut self, _node: &UsingOperator<'_>) {}
 
-    fn enter_using_target(&mut self, _node: &UsingTarget) -> bool {
+    fn enter_using_target(&mut self, _node: &UsingTarget<'_>) -> bool {
         true
     }
-    fn leave_using_target(&mut self, _node: &UsingTarget) {}
+    fn leave_using_target(&mut self, _node: &UsingTarget<'_>) {}
 
-    fn enter_variable_declaration_target(&mut self, _node: &VariableDeclarationTarget) -> bool {
+    fn enter_variable_declaration_target(&mut self, _node: &VariableDeclarationTarget<'_>) -> bool {
         true
     }
-    fn leave_variable_declaration_target(&mut self, _node: &VariableDeclarationTarget) {}
+    fn leave_variable_declaration_target(&mut self, _node: &VariableDeclarationTarget<'_>) {}
 
-    fn enter_version_pragma_component(&mut self, _node: &VersionPragmaComponent) -> bool {
+    fn enter_version_pragma_component(&mut self, _node: &VersionPragmaComponent<'_>) -> bool {
         true
     }
-    fn leave_version_pragma_component(&mut self, _node: &VersionPragmaComponent) {}
+    fn leave_version_pragma_component(&mut self, _node: &VersionPragmaComponent<'_>) {}
 
     fn enter_version_pragma_operator(&mut self, _node: &VersionPragmaOperator) -> bool {
         true
     }
     fn leave_version_pragma_operator(&mut self, _node: &VersionPragmaOperator) {}
 
-    fn enter_yul_expression(&mut self, _node: &YulExpression) -> bool {
+    fn enter_yul_expression(&mut self, _node: &YulExpression<'_>) -> bool {
         true
     }
-    fn leave_yul_expression(&mut self, _node: &YulExpression) {}
+    fn leave_yul_expression(&mut self, _node: &YulExpression<'_>) {}
 
-    fn enter_yul_literal(&mut self, _node: &YulLiteral) -> bool {
+    fn enter_yul_literal(&mut self, _node: &YulLiteral<'_>) -> bool {
         true
     }
-    fn leave_yul_literal(&mut self, _node: &YulLiteral) {}
+    fn leave_yul_literal(&mut self, _node: &YulLiteral<'_>) {}
 
-    fn enter_yul_statement(&mut self, _node: &YulStatement) -> bool {
+    fn enter_yul_statement(&mut self, _node: &YulStatement<'_>) -> bool {
         true
     }
-    fn leave_yul_statement(&mut self, _node: &YulStatement) {}
+    fn leave_yul_statement(&mut self, _node: &YulStatement<'_>) {}
 
-    fn enter_array_values(&mut self, _items: &ArrayValues) -> bool {
+    fn enter_array_values(&mut self, _items: &ArrayValues<'_>) -> bool {
         true
     }
-    fn leave_array_values(&mut self, _items: &ArrayValues) {}
+    fn leave_array_values(&mut self, _items: &ArrayValues<'_>) {}
 
-    fn enter_call_options(&mut self, _items: &CallOptions) -> bool {
+    fn enter_call_options(&mut self, _items: &CallOptions<'_>) -> bool {
         true
     }
-    fn leave_call_options(&mut self, _items: &CallOptions) {}
+    fn leave_call_options(&mut self, _items: &CallOptions<'_>) {}
 
-    fn enter_catch_clauses(&mut self, _items: &CatchClauses) -> bool {
+    fn enter_catch_clauses(&mut self, _items: &CatchClauses<'_>) -> bool {
         true
     }
-    fn leave_catch_clauses(&mut self, _items: &CatchClauses) {}
+    fn leave_catch_clauses(&mut self, _items: &CatchClauses<'_>) {}
 
-    fn enter_contract_members(&mut self, _items: &ContractMembers) -> bool {
+    fn enter_contract_members(&mut self, _items: &ContractMembers<'_>) -> bool {
         true
     }
-    fn leave_contract_members(&mut self, _items: &ContractMembers) {}
+    fn leave_contract_members(&mut self, _items: &ContractMembers<'_>) {}
 
-    fn enter_enum_members(&mut self, _items: &EnumMembers) -> bool {
+    fn enter_enum_members(&mut self, _items: &EnumMembers<'_>) -> bool {
         true
     }
-    fn leave_enum_members(&mut self, _items: &EnumMembers) {}
+    fn leave_enum_members(&mut self, _items: &EnumMembers<'_>) {}
 
-    fn enter_hex_string_literals(&mut self, _items: &HexStringLiterals) -> bool {
+    fn enter_hex_string_literals(&mut self, _items: &HexStringLiterals<'_>) -> bool {
         true
     }
-    fn leave_hex_string_literals(&mut self, _items: &HexStringLiterals) {}
+    fn leave_hex_string_literals(&mut self, _items: &HexStringLiterals<'_>) {}
 
-    fn enter_identifier_path(&mut self, _items: &IdentifierPath) -> bool {
+    fn enter_identifier_path(&mut self, _items: &IdentifierPath<'_>) -> bool {
         true
     }
-    fn leave_identifier_path(&mut self, _items: &IdentifierPath) {}
+    fn leave_identifier_path(&mut self, _items: &IdentifierPath<'_>) {}
 
     fn enter_import_deconstruction_symbols(
         &mut self,
-        _items: &ImportDeconstructionSymbols,
+        _items: &ImportDeconstructionSymbols<'_>,
     ) -> bool {
         true
     }
-    fn leave_import_deconstruction_symbols(&mut self, _items: &ImportDeconstructionSymbols) {}
+    fn leave_import_deconstruction_symbols(&mut self, _items: &ImportDeconstructionSymbols<'_>) {}
 
-    fn enter_inheritance_types(&mut self, _items: &InheritanceTypes) -> bool {
+    fn enter_inheritance_types(&mut self, _items: &InheritanceTypes<'_>) -> bool {
         true
     }
-    fn leave_inheritance_types(&mut self, _items: &InheritanceTypes) {}
+    fn leave_inheritance_types(&mut self, _items: &InheritanceTypes<'_>) {}
 
-    fn enter_interface_members(&mut self, _items: &InterfaceMembers) -> bool {
+    fn enter_interface_members(&mut self, _items: &InterfaceMembers<'_>) -> bool {
         true
     }
-    fn leave_interface_members(&mut self, _items: &InterfaceMembers) {}
+    fn leave_interface_members(&mut self, _items: &InterfaceMembers<'_>) {}
 
-    fn enter_library_members(&mut self, _items: &LibraryMembers) -> bool {
+    fn enter_library_members(&mut self, _items: &LibraryMembers<'_>) -> bool {
         true
     }
-    fn leave_library_members(&mut self, _items: &LibraryMembers) {}
+    fn leave_library_members(&mut self, _items: &LibraryMembers<'_>) {}
 
-    fn enter_modifier_invocations(&mut self, _items: &ModifierInvocations) -> bool {
+    fn enter_modifier_invocations(&mut self, _items: &ModifierInvocations<'_>) -> bool {
         true
     }
-    fn leave_modifier_invocations(&mut self, _items: &ModifierInvocations) {}
+    fn leave_modifier_invocations(&mut self, _items: &ModifierInvocations<'_>) {}
 
     fn enter_multi_typed_declaration_elements(
         &mut self,
-        _items: &MultiTypedDeclarationElements,
+        _items: &MultiTypedDeclarationElements<'_>,
     ) -> bool {
         true
     }
-    fn leave_multi_typed_declaration_elements(&mut self, _items: &MultiTypedDeclarationElements) {}
+    fn leave_multi_typed_declaration_elements(
+        &mut self,
+        _items: &MultiTypedDeclarationElements<'_>,
+    ) {
+    }
 
-    fn enter_named_arguments(&mut self, _items: &NamedArguments) -> bool {
+    fn enter_named_arguments(&mut self, _items: &NamedArguments<'_>) -> bool {
         true
     }
-    fn leave_named_arguments(&mut self, _items: &NamedArguments) {}
+    fn leave_named_arguments(&mut self, _items: &NamedArguments<'_>) {}
 
-    fn enter_override_paths(&mut self, _items: &OverridePaths) -> bool {
+    fn enter_override_paths(&mut self, _items: &OverridePaths<'_>) -> bool {
         true
     }
-    fn leave_override_paths(&mut self, _items: &OverridePaths) {}
+    fn leave_override_paths(&mut self, _items: &OverridePaths<'_>) {}
 
-    fn enter_parameters(&mut self, _items: &Parameters) -> bool {
+    fn enter_parameters(&mut self, _items: &Parameters<'_>) -> bool {
         true
     }
-    fn leave_parameters(&mut self, _items: &Parameters) {}
+    fn leave_parameters(&mut self, _items: &Parameters<'_>) {}
 
-    fn enter_positional_arguments(&mut self, _items: &PositionalArguments) -> bool {
+    fn enter_positional_arguments(&mut self, _items: &PositionalArguments<'_>) -> bool {
         true
     }
-    fn leave_positional_arguments(&mut self, _items: &PositionalArguments) {}
+    fn leave_positional_arguments(&mut self, _items: &PositionalArguments<'_>) {}
 
-    fn enter_source_unit_members(&mut self, _items: &SourceUnitMembers) -> bool {
+    fn enter_source_unit_members(&mut self, _items: &SourceUnitMembers<'_>) -> bool {
         true
     }
-    fn leave_source_unit_members(&mut self, _items: &SourceUnitMembers) {}
+    fn leave_source_unit_members(&mut self, _items: &SourceUnitMembers<'_>) {}
 
-    fn enter_statements(&mut self, _items: &Statements) -> bool {
+    fn enter_statements(&mut self, _items: &Statements<'_>) -> bool {
         true
     }
-    fn leave_statements(&mut self, _items: &Statements) {}
+    fn leave_statements(&mut self, _items: &Statements<'_>) {}
 
-    fn enter_string_literals(&mut self, _items: &StringLiterals) -> bool {
+    fn enter_string_literals(&mut self, _items: &StringLiterals<'_>) -> bool {
         true
     }
-    fn leave_string_literals(&mut self, _items: &StringLiterals) {}
+    fn leave_string_literals(&mut self, _items: &StringLiterals<'_>) {}
 
-    fn enter_struct_members(&mut self, _items: &StructMembers) -> bool {
+    fn enter_struct_members(&mut self, _items: &StructMembers<'_>) -> bool {
         true
     }
-    fn leave_struct_members(&mut self, _items: &StructMembers) {}
+    fn leave_struct_members(&mut self, _items: &StructMembers<'_>) {}
 
-    fn enter_tuple_values(&mut self, _items: &TupleValues) -> bool {
+    fn enter_tuple_values(&mut self, _items: &TupleValues<'_>) -> bool {
         true
     }
-    fn leave_tuple_values(&mut self, _items: &TupleValues) {}
+    fn leave_tuple_values(&mut self, _items: &TupleValues<'_>) {}
 
-    fn enter_unicode_string_literals(&mut self, _items: &UnicodeStringLiterals) -> bool {
+    fn enter_unicode_string_literals(&mut self, _items: &UnicodeStringLiterals<'_>) -> bool {
         true
     }
-    fn leave_unicode_string_literals(&mut self, _items: &UnicodeStringLiterals) {}
+    fn leave_unicode_string_literals(&mut self, _items: &UnicodeStringLiterals<'_>) {}
 
-    fn enter_using_deconstruction_symbols(&mut self, _items: &UsingDeconstructionSymbols) -> bool {
+    fn enter_using_deconstruction_symbols(
+        &mut self,
+        _items: &UsingDeconstructionSymbols<'_>,
+    ) -> bool {
         true
     }
-    fn leave_using_deconstruction_symbols(&mut self, _items: &UsingDeconstructionSymbols) {}
+    fn leave_using_deconstruction_symbols(&mut self, _items: &UsingDeconstructionSymbols<'_>) {}
 
-    fn enter_version_pragma_expression_set(&mut self, _items: &VersionPragmaExpressionSet) -> bool {
+    fn enter_version_pragma_expression_set(
+        &mut self,
+        _items: &VersionPragmaExpressionSet<'_>,
+    ) -> bool {
         true
     }
-    fn leave_version_pragma_expression_set(&mut self, _items: &VersionPragmaExpressionSet) {}
+    fn leave_version_pragma_expression_set(&mut self, _items: &VersionPragmaExpressionSet<'_>) {}
 
     fn enter_version_pragma_expression_sets(
         &mut self,
-        _items: &VersionPragmaExpressionSets,
+        _items: &VersionPragmaExpressionSets<'_>,
     ) -> bool {
         true
     }
-    fn leave_version_pragma_expression_sets(&mut self, _items: &VersionPragmaExpressionSets) {}
+    fn leave_version_pragma_expression_sets(&mut self, _items: &VersionPragmaExpressionSets<'_>) {}
 
-    fn enter_version_pragma_specifier(&mut self, _items: &VersionPragmaSpecifier) -> bool {
+    fn enter_version_pragma_specifier(&mut self, _items: &VersionPragmaSpecifier<'_>) -> bool {
         true
     }
-    fn leave_version_pragma_specifier(&mut self, _items: &VersionPragmaSpecifier) {}
+    fn leave_version_pragma_specifier(&mut self, _items: &VersionPragmaSpecifier<'_>) {}
 
-    fn enter_yul_arguments(&mut self, _items: &YulArguments) -> bool {
+    fn enter_yul_arguments(&mut self, _items: &YulArguments<'_>) -> bool {
         true
     }
-    fn leave_yul_arguments(&mut self, _items: &YulArguments) {}
+    fn leave_yul_arguments(&mut self, _items: &YulArguments<'_>) {}
 
-    fn enter_yul_parameters(&mut self, _items: &YulParameters) -> bool {
+    fn enter_yul_parameters(&mut self, _items: &YulParameters<'_>) -> bool {
         true
     }
-    fn leave_yul_parameters(&mut self, _items: &YulParameters) {}
+    fn leave_yul_parameters(&mut self, _items: &YulParameters<'_>) {}
 
-    fn enter_yul_path(&mut self, _items: &YulPath) -> bool {
+    fn enter_yul_path(&mut self, _items: &YulPath<'_>) -> bool {
         true
     }
-    fn leave_yul_path(&mut self, _items: &YulPath) {}
+    fn leave_yul_path(&mut self, _items: &YulPath<'_>) {}
 
-    fn enter_yul_paths(&mut self, _items: &YulPaths) -> bool {
+    fn enter_yul_paths(&mut self, _items: &YulPaths<'_>) -> bool {
         true
     }
-    fn leave_yul_paths(&mut self, _items: &YulPaths) {}
+    fn leave_yul_paths(&mut self, _items: &YulPaths<'_>) {}
 
-    fn enter_yul_statements(&mut self, _items: &YulStatements) -> bool {
+    fn enter_yul_statements(&mut self, _items: &YulStatements<'_>) -> bool {
         true
     }
-    fn leave_yul_statements(&mut self, _items: &YulStatements) {}
+    fn leave_yul_statements(&mut self, _items: &YulStatements<'_>) {}
 
-    fn enter_yul_value_cases(&mut self, _items: &YulValueCases) -> bool {
+    fn enter_yul_value_cases(&mut self, _items: &YulValueCases<'_>) -> bool {
         true
     }
-    fn leave_yul_value_cases(&mut self, _items: &YulValueCases) {}
+    fn leave_yul_value_cases(&mut self, _items: &YulValueCases<'_>) {}
 
-    fn enter_yul_variable_names(&mut self, _items: &YulVariableNames) -> bool {
+    fn enter_yul_variable_names(&mut self, _items: &YulVariableNames<'_>) -> bool {
         true
     }
-    fn leave_yul_variable_names(&mut self, _items: &YulVariableNames) {}
+    fn leave_yul_variable_names(&mut self, _items: &YulVariableNames<'_>) {}
 
-    fn visit_bytes_keyword(&mut self, _node: &BytesKeyword) {}
+    fn visit_bytes_keyword(&mut self, _node: &BytesKeyword<'_>) {}
 
-    fn visit_decimal_literal(&mut self, _node: &DecimalLiteral) {}
+    fn visit_decimal_literal(&mut self, _node: &DecimalLiteral<'_>) {}
 
-    fn visit_fixed_keyword(&mut self, _node: &FixedKeyword) {}
+    fn visit_fixed_keyword(&mut self, _node: &FixedKeyword<'_>) {}
 
-    fn visit_hex_literal(&mut self, _node: &HexLiteral) {}
+    fn visit_hex_literal(&mut self, _node: &HexLiteral<'_>) {}
 
-    fn visit_hex_string_literal(&mut self, _node: &HexStringLiteral) {}
+    fn visit_hex_string_literal(&mut self, _node: &HexStringLiteral<'_>) {}
 
-    fn visit_identifier(&mut self, _node: &Identifier) {}
+    fn visit_identifier(&mut self, _node: &Identifier<'_>) {}
 
-    fn visit_int_keyword(&mut self, _node: &IntKeyword) {}
+    fn visit_int_keyword(&mut self, _node: &IntKeyword<'_>) {}
 
-    fn visit_string_literal(&mut self, _node: &StringLiteral) {}
+    fn visit_string_literal(&mut self, _node: &StringLiteral<'_>) {}
 
-    fn visit_ufixed_keyword(&mut self, _node: &UfixedKeyword) {}
+    fn visit_ufixed_keyword(&mut self, _node: &UfixedKeyword<'_>) {}
 
-    fn visit_uint_keyword(&mut self, _node: &UintKeyword) {}
+    fn visit_uint_keyword(&mut self, _node: &UintKeyword<'_>) {}
 
-    fn visit_unicode_string_literal(&mut self, _node: &UnicodeStringLiteral) {}
+    fn visit_unicode_string_literal(&mut self, _node: &UnicodeStringLiteral<'_>) {}
 }
 
 /// Implements the `enter_*` and `leave_*` methods of [`Visitor`] for every sequence and collection
@@ -928,398 +960,398 @@ pub trait Visitor {
 #[macro_export]
 macro_rules! impl_nonterminal_visitor_hooks {
     (enter = $enter:ident $(, leave = $leave:ident)?) => {
-        fn enter_abicoder_pragma(&mut self, node: &$crate::ast::AbicoderPragmaStruct) -> bool { self.$enter(node) }
-        $(fn leave_abicoder_pragma(&mut self, node: &$crate::ast::AbicoderPragmaStruct) { self.$leave(node); })?
+        fn enter_abicoder_pragma(&mut self, node: &$crate::ast::AbicoderPragmaStruct<'_>) -> bool { self.$enter(node) }
+        $(fn leave_abicoder_pragma(&mut self, node: &$crate::ast::AbicoderPragmaStruct<'_>) { self.$leave(node); })?
 
-        fn enter_additive_expression(&mut self, node: &$crate::ast::AdditiveExpressionStruct) -> bool { self.$enter(node) }
-        $(fn leave_additive_expression(&mut self, node: &$crate::ast::AdditiveExpressionStruct) { self.$leave(node); })?
+        fn enter_additive_expression(&mut self, node: &$crate::ast::AdditiveExpressionStruct<'_>) -> bool { self.$enter(node) }
+        $(fn leave_additive_expression(&mut self, node: &$crate::ast::AdditiveExpressionStruct<'_>) { self.$leave(node); })?
 
-        fn enter_address_type(&mut self, node: &$crate::ast::AddressTypeStruct) -> bool { self.$enter(node) }
-        $(fn leave_address_type(&mut self, node: &$crate::ast::AddressTypeStruct) { self.$leave(node); })?
+        fn enter_address_type(&mut self, node: &$crate::ast::AddressTypeStruct<'_>) -> bool { self.$enter(node) }
+        $(fn leave_address_type(&mut self, node: &$crate::ast::AddressTypeStruct<'_>) { self.$leave(node); })?
 
-        fn enter_and_expression(&mut self, node: &$crate::ast::AndExpressionStruct) -> bool { self.$enter(node) }
-        $(fn leave_and_expression(&mut self, node: &$crate::ast::AndExpressionStruct) { self.$leave(node); })?
+        fn enter_and_expression(&mut self, node: &$crate::ast::AndExpressionStruct<'_>) -> bool { self.$enter(node) }
+        $(fn leave_and_expression(&mut self, node: &$crate::ast::AndExpressionStruct<'_>) { self.$leave(node); })?
 
-        fn enter_array_expression(&mut self, node: &$crate::ast::ArrayExpressionStruct) -> bool { self.$enter(node) }
-        $(fn leave_array_expression(&mut self, node: &$crate::ast::ArrayExpressionStruct) { self.$leave(node); })?
+        fn enter_array_expression(&mut self, node: &$crate::ast::ArrayExpressionStruct<'_>) -> bool { self.$enter(node) }
+        $(fn leave_array_expression(&mut self, node: &$crate::ast::ArrayExpressionStruct<'_>) { self.$leave(node); })?
 
-        fn enter_array_type_name(&mut self, node: &$crate::ast::ArrayTypeNameStruct) -> bool { self.$enter(node) }
-        $(fn leave_array_type_name(&mut self, node: &$crate::ast::ArrayTypeNameStruct) { self.$leave(node); })?
+        fn enter_array_type_name(&mut self, node: &$crate::ast::ArrayTypeNameStruct<'_>) -> bool { self.$enter(node) }
+        $(fn leave_array_type_name(&mut self, node: &$crate::ast::ArrayTypeNameStruct<'_>) { self.$leave(node); })?
 
-        fn enter_assembly_statement(&mut self, node: &$crate::ast::AssemblyStatementStruct) -> bool { self.$enter(node) }
-        $(fn leave_assembly_statement(&mut self, node: &$crate::ast::AssemblyStatementStruct) { self.$leave(node); })?
+        fn enter_assembly_statement(&mut self, node: &$crate::ast::AssemblyStatementStruct<'_>) -> bool { self.$enter(node) }
+        $(fn leave_assembly_statement(&mut self, node: &$crate::ast::AssemblyStatementStruct<'_>) { self.$leave(node); })?
 
-        fn enter_assignment_expression(&mut self, node: &$crate::ast::AssignmentExpressionStruct) -> bool { self.$enter(node) }
-        $(fn leave_assignment_expression(&mut self, node: &$crate::ast::AssignmentExpressionStruct) { self.$leave(node); })?
+        fn enter_assignment_expression(&mut self, node: &$crate::ast::AssignmentExpressionStruct<'_>) -> bool { self.$enter(node) }
+        $(fn leave_assignment_expression(&mut self, node: &$crate::ast::AssignmentExpressionStruct<'_>) { self.$leave(node); })?
 
-        fn enter_bitwise_and_expression(&mut self, node: &$crate::ast::BitwiseAndExpressionStruct) -> bool { self.$enter(node) }
-        $(fn leave_bitwise_and_expression(&mut self, node: &$crate::ast::BitwiseAndExpressionStruct) { self.$leave(node); })?
+        fn enter_bitwise_and_expression(&mut self, node: &$crate::ast::BitwiseAndExpressionStruct<'_>) -> bool { self.$enter(node) }
+        $(fn leave_bitwise_and_expression(&mut self, node: &$crate::ast::BitwiseAndExpressionStruct<'_>) { self.$leave(node); })?
 
-        fn enter_bitwise_or_expression(&mut self, node: &$crate::ast::BitwiseOrExpressionStruct) -> bool { self.$enter(node) }
-        $(fn leave_bitwise_or_expression(&mut self, node: &$crate::ast::BitwiseOrExpressionStruct) { self.$leave(node); })?
+        fn enter_bitwise_or_expression(&mut self, node: &$crate::ast::BitwiseOrExpressionStruct<'_>) -> bool { self.$enter(node) }
+        $(fn leave_bitwise_or_expression(&mut self, node: &$crate::ast::BitwiseOrExpressionStruct<'_>) { self.$leave(node); })?
 
-        fn enter_bitwise_xor_expression(&mut self, node: &$crate::ast::BitwiseXorExpressionStruct) -> bool { self.$enter(node) }
-        $(fn leave_bitwise_xor_expression(&mut self, node: &$crate::ast::BitwiseXorExpressionStruct) { self.$leave(node); })?
+        fn enter_bitwise_xor_expression(&mut self, node: &$crate::ast::BitwiseXorExpressionStruct<'_>) -> bool { self.$enter(node) }
+        $(fn leave_bitwise_xor_expression(&mut self, node: &$crate::ast::BitwiseXorExpressionStruct<'_>) { self.$leave(node); })?
 
-        fn enter_block(&mut self, node: &$crate::ast::BlockStruct) -> bool { self.$enter(node) }
-        $(fn leave_block(&mut self, node: &$crate::ast::BlockStruct) { self.$leave(node); })?
+        fn enter_block(&mut self, node: &$crate::ast::BlockStruct<'_>) -> bool { self.$enter(node) }
+        $(fn leave_block(&mut self, node: &$crate::ast::BlockStruct<'_>) { self.$leave(node); })?
 
-        fn enter_break_statement(&mut self, node: &$crate::ast::BreakStatementStruct) -> bool { self.$enter(node) }
-        $(fn leave_break_statement(&mut self, node: &$crate::ast::BreakStatementStruct) { self.$leave(node); })?
+        fn enter_break_statement(&mut self, node: &$crate::ast::BreakStatementStruct<'_>) -> bool { self.$enter(node) }
+        $(fn leave_break_statement(&mut self, node: &$crate::ast::BreakStatementStruct<'_>) { self.$leave(node); })?
 
-        fn enter_call_options_expression(&mut self, node: &$crate::ast::CallOptionsExpressionStruct) -> bool { self.$enter(node) }
-        $(fn leave_call_options_expression(&mut self, node: &$crate::ast::CallOptionsExpressionStruct) { self.$leave(node); })?
+        fn enter_call_options_expression(&mut self, node: &$crate::ast::CallOptionsExpressionStruct<'_>) -> bool { self.$enter(node) }
+        $(fn leave_call_options_expression(&mut self, node: &$crate::ast::CallOptionsExpressionStruct<'_>) { self.$leave(node); })?
 
-        fn enter_catch_clause(&mut self, node: &$crate::ast::CatchClauseStruct) -> bool { self.$enter(node) }
-        $(fn leave_catch_clause(&mut self, node: &$crate::ast::CatchClauseStruct) { self.$leave(node); })?
+        fn enter_catch_clause(&mut self, node: &$crate::ast::CatchClauseStruct<'_>) -> bool { self.$enter(node) }
+        $(fn leave_catch_clause(&mut self, node: &$crate::ast::CatchClauseStruct<'_>) { self.$leave(node); })?
 
-        fn enter_conditional_expression(&mut self, node: &$crate::ast::ConditionalExpressionStruct) -> bool { self.$enter(node) }
-        $(fn leave_conditional_expression(&mut self, node: &$crate::ast::ConditionalExpressionStruct) { self.$leave(node); })?
+        fn enter_conditional_expression(&mut self, node: &$crate::ast::ConditionalExpressionStruct<'_>) -> bool { self.$enter(node) }
+        $(fn leave_conditional_expression(&mut self, node: &$crate::ast::ConditionalExpressionStruct<'_>) { self.$leave(node); })?
 
-        fn enter_constant_definition(&mut self, node: &$crate::ast::ConstantDefinitionStruct) -> bool { self.$enter(node) }
-        $(fn leave_constant_definition(&mut self, node: &$crate::ast::ConstantDefinitionStruct) { self.$leave(node); })?
+        fn enter_constant_definition(&mut self, node: &$crate::ast::ConstantDefinitionStruct<'_>) -> bool { self.$enter(node) }
+        $(fn leave_constant_definition(&mut self, node: &$crate::ast::ConstantDefinitionStruct<'_>) { self.$leave(node); })?
 
-        fn enter_continue_statement(&mut self, node: &$crate::ast::ContinueStatementStruct) -> bool { self.$enter(node) }
-        $(fn leave_continue_statement(&mut self, node: &$crate::ast::ContinueStatementStruct) { self.$leave(node); })?
+        fn enter_continue_statement(&mut self, node: &$crate::ast::ContinueStatementStruct<'_>) -> bool { self.$enter(node) }
+        $(fn leave_continue_statement(&mut self, node: &$crate::ast::ContinueStatementStruct<'_>) { self.$leave(node); })?
 
-        fn enter_contract_definition(&mut self, node: &$crate::ast::ContractDefinitionStruct) -> bool { self.$enter(node) }
-        $(fn leave_contract_definition(&mut self, node: &$crate::ast::ContractDefinitionStruct) { self.$leave(node); })?
+        fn enter_contract_definition(&mut self, node: &$crate::ast::ContractDefinitionStruct<'_>) -> bool { self.$enter(node) }
+        $(fn leave_contract_definition(&mut self, node: &$crate::ast::ContractDefinitionStruct<'_>) { self.$leave(node); })?
 
-        fn enter_decimal_number_expression(&mut self, node: &$crate::ast::DecimalNumberExpressionStruct) -> bool { self.$enter(node) }
-        $(fn leave_decimal_number_expression(&mut self, node: &$crate::ast::DecimalNumberExpressionStruct) { self.$leave(node); })?
+        fn enter_decimal_number_expression(&mut self, node: &$crate::ast::DecimalNumberExpressionStruct<'_>) -> bool { self.$enter(node) }
+        $(fn leave_decimal_number_expression(&mut self, node: &$crate::ast::DecimalNumberExpressionStruct<'_>) { self.$leave(node); })?
 
-        fn enter_do_while_statement(&mut self, node: &$crate::ast::DoWhileStatementStruct) -> bool { self.$enter(node) }
-        $(fn leave_do_while_statement(&mut self, node: &$crate::ast::DoWhileStatementStruct) { self.$leave(node); })?
+        fn enter_do_while_statement(&mut self, node: &$crate::ast::DoWhileStatementStruct<'_>) -> bool { self.$enter(node) }
+        $(fn leave_do_while_statement(&mut self, node: &$crate::ast::DoWhileStatementStruct<'_>) { self.$leave(node); })?
 
-        fn enter_emit_statement(&mut self, node: &$crate::ast::EmitStatementStruct) -> bool { self.$enter(node) }
-        $(fn leave_emit_statement(&mut self, node: &$crate::ast::EmitStatementStruct) { self.$leave(node); })?
+        fn enter_emit_statement(&mut self, node: &$crate::ast::EmitStatementStruct<'_>) -> bool { self.$enter(node) }
+        $(fn leave_emit_statement(&mut self, node: &$crate::ast::EmitStatementStruct<'_>) { self.$leave(node); })?
 
-        fn enter_enum_definition(&mut self, node: &$crate::ast::EnumDefinitionStruct) -> bool { self.$enter(node) }
-        $(fn leave_enum_definition(&mut self, node: &$crate::ast::EnumDefinitionStruct) { self.$leave(node); })?
+        fn enter_enum_definition(&mut self, node: &$crate::ast::EnumDefinitionStruct<'_>) -> bool { self.$enter(node) }
+        $(fn leave_enum_definition(&mut self, node: &$crate::ast::EnumDefinitionStruct<'_>) { self.$leave(node); })?
 
-        fn enter_equality_expression(&mut self, node: &$crate::ast::EqualityExpressionStruct) -> bool { self.$enter(node) }
-        $(fn leave_equality_expression(&mut self, node: &$crate::ast::EqualityExpressionStruct) { self.$leave(node); })?
+        fn enter_equality_expression(&mut self, node: &$crate::ast::EqualityExpressionStruct<'_>) -> bool { self.$enter(node) }
+        $(fn leave_equality_expression(&mut self, node: &$crate::ast::EqualityExpressionStruct<'_>) { self.$leave(node); })?
 
-        fn enter_error_definition(&mut self, node: &$crate::ast::ErrorDefinitionStruct) -> bool { self.$enter(node) }
-        $(fn leave_error_definition(&mut self, node: &$crate::ast::ErrorDefinitionStruct) { self.$leave(node); })?
+        fn enter_error_definition(&mut self, node: &$crate::ast::ErrorDefinitionStruct<'_>) -> bool { self.$enter(node) }
+        $(fn leave_error_definition(&mut self, node: &$crate::ast::ErrorDefinitionStruct<'_>) { self.$leave(node); })?
 
-        fn enter_event_definition(&mut self, node: &$crate::ast::EventDefinitionStruct) -> bool { self.$enter(node) }
-        $(fn leave_event_definition(&mut self, node: &$crate::ast::EventDefinitionStruct) { self.$leave(node); })?
+        fn enter_event_definition(&mut self, node: &$crate::ast::EventDefinitionStruct<'_>) -> bool { self.$enter(node) }
+        $(fn leave_event_definition(&mut self, node: &$crate::ast::EventDefinitionStruct<'_>) { self.$leave(node); })?
 
-        fn enter_experimental_pragma(&mut self, node: &$crate::ast::ExperimentalPragmaStruct) -> bool { self.$enter(node) }
-        $(fn leave_experimental_pragma(&mut self, node: &$crate::ast::ExperimentalPragmaStruct) { self.$leave(node); })?
+        fn enter_experimental_pragma(&mut self, node: &$crate::ast::ExperimentalPragmaStruct<'_>) -> bool { self.$enter(node) }
+        $(fn leave_experimental_pragma(&mut self, node: &$crate::ast::ExperimentalPragmaStruct<'_>) { self.$leave(node); })?
 
-        fn enter_exponentiation_expression(&mut self, node: &$crate::ast::ExponentiationExpressionStruct) -> bool { self.$enter(node) }
-        $(fn leave_exponentiation_expression(&mut self, node: &$crate::ast::ExponentiationExpressionStruct) { self.$leave(node); })?
+        fn enter_exponentiation_expression(&mut self, node: &$crate::ast::ExponentiationExpressionStruct<'_>) -> bool { self.$enter(node) }
+        $(fn leave_exponentiation_expression(&mut self, node: &$crate::ast::ExponentiationExpressionStruct<'_>) { self.$leave(node); })?
 
-        fn enter_expression_statement(&mut self, node: &$crate::ast::ExpressionStatementStruct) -> bool { self.$enter(node) }
-        $(fn leave_expression_statement(&mut self, node: &$crate::ast::ExpressionStatementStruct) { self.$leave(node); })?
+        fn enter_expression_statement(&mut self, node: &$crate::ast::ExpressionStatementStruct<'_>) -> bool { self.$enter(node) }
+        $(fn leave_expression_statement(&mut self, node: &$crate::ast::ExpressionStatementStruct<'_>) { self.$leave(node); })?
 
-        fn enter_for_statement(&mut self, node: &$crate::ast::ForStatementStruct) -> bool { self.$enter(node) }
-        $(fn leave_for_statement(&mut self, node: &$crate::ast::ForStatementStruct) { self.$leave(node); })?
+        fn enter_for_statement(&mut self, node: &$crate::ast::ForStatementStruct<'_>) -> bool { self.$enter(node) }
+        $(fn leave_for_statement(&mut self, node: &$crate::ast::ForStatementStruct<'_>) { self.$leave(node); })?
 
-        fn enter_function_attributes(&mut self, node: &$crate::ast::FunctionAttributesStruct) -> bool { self.$enter(node) }
-        $(fn leave_function_attributes(&mut self, node: &$crate::ast::FunctionAttributesStruct) { self.$leave(node); })?
+        fn enter_function_attributes(&mut self, node: &$crate::ast::FunctionAttributesStruct<'_>) -> bool { self.$enter(node) }
+        $(fn leave_function_attributes(&mut self, node: &$crate::ast::FunctionAttributesStruct<'_>) { self.$leave(node); })?
 
-        fn enter_function_call_expression(&mut self, node: &$crate::ast::FunctionCallExpressionStruct) -> bool { self.$enter(node) }
-        $(fn leave_function_call_expression(&mut self, node: &$crate::ast::FunctionCallExpressionStruct) { self.$leave(node); })?
+        fn enter_function_call_expression(&mut self, node: &$crate::ast::FunctionCallExpressionStruct<'_>) -> bool { self.$enter(node) }
+        $(fn leave_function_call_expression(&mut self, node: &$crate::ast::FunctionCallExpressionStruct<'_>) { self.$leave(node); })?
 
-        fn enter_function_definition(&mut self, node: &$crate::ast::FunctionDefinitionStruct) -> bool { self.$enter(node) }
-        $(fn leave_function_definition(&mut self, node: &$crate::ast::FunctionDefinitionStruct) { self.$leave(node); })?
+        fn enter_function_definition(&mut self, node: &$crate::ast::FunctionDefinitionStruct<'_>) -> bool { self.$enter(node) }
+        $(fn leave_function_definition(&mut self, node: &$crate::ast::FunctionDefinitionStruct<'_>) { self.$leave(node); })?
 
-        fn enter_function_type(&mut self, node: &$crate::ast::FunctionTypeStruct) -> bool { self.$enter(node) }
-        $(fn leave_function_type(&mut self, node: &$crate::ast::FunctionTypeStruct) { self.$leave(node); })?
+        fn enter_function_type(&mut self, node: &$crate::ast::FunctionTypeStruct<'_>) -> bool { self.$enter(node) }
+        $(fn leave_function_type(&mut self, node: &$crate::ast::FunctionTypeStruct<'_>) { self.$leave(node); })?
 
-        fn enter_function_type_attributes(&mut self, node: &$crate::ast::FunctionTypeAttributesStruct) -> bool { self.$enter(node) }
-        $(fn leave_function_type_attributes(&mut self, node: &$crate::ast::FunctionTypeAttributesStruct) { self.$leave(node); })?
+        fn enter_function_type_attributes(&mut self, node: &$crate::ast::FunctionTypeAttributesStruct<'_>) -> bool { self.$enter(node) }
+        $(fn leave_function_type_attributes(&mut self, node: &$crate::ast::FunctionTypeAttributesStruct<'_>) { self.$leave(node); })?
 
-        fn enter_hex_number_expression(&mut self, node: &$crate::ast::HexNumberExpressionStruct) -> bool { self.$enter(node) }
-        $(fn leave_hex_number_expression(&mut self, node: &$crate::ast::HexNumberExpressionStruct) { self.$leave(node); })?
+        fn enter_hex_number_expression(&mut self, node: &$crate::ast::HexNumberExpressionStruct<'_>) -> bool { self.$enter(node) }
+        $(fn leave_hex_number_expression(&mut self, node: &$crate::ast::HexNumberExpressionStruct<'_>) { self.$leave(node); })?
 
-        fn enter_if_statement(&mut self, node: &$crate::ast::IfStatementStruct) -> bool { self.$enter(node) }
-        $(fn leave_if_statement(&mut self, node: &$crate::ast::IfStatementStruct) { self.$leave(node); })?
+        fn enter_if_statement(&mut self, node: &$crate::ast::IfStatementStruct<'_>) -> bool { self.$enter(node) }
+        $(fn leave_if_statement(&mut self, node: &$crate::ast::IfStatementStruct<'_>) { self.$leave(node); })?
 
-        fn enter_import_deconstruction(&mut self, node: &$crate::ast::ImportDeconstructionStruct) -> bool { self.$enter(node) }
-        $(fn leave_import_deconstruction(&mut self, node: &$crate::ast::ImportDeconstructionStruct) { self.$leave(node); })?
+        fn enter_import_deconstruction(&mut self, node: &$crate::ast::ImportDeconstructionStruct<'_>) -> bool { self.$enter(node) }
+        $(fn leave_import_deconstruction(&mut self, node: &$crate::ast::ImportDeconstructionStruct<'_>) { self.$leave(node); })?
 
-        fn enter_import_deconstruction_symbol(&mut self, node: &$crate::ast::ImportDeconstructionSymbolStruct) -> bool { self.$enter(node) }
-        $(fn leave_import_deconstruction_symbol(&mut self, node: &$crate::ast::ImportDeconstructionSymbolStruct) { self.$leave(node); })?
+        fn enter_import_deconstruction_symbol(&mut self, node: &$crate::ast::ImportDeconstructionSymbolStruct<'_>) -> bool { self.$enter(node) }
+        $(fn leave_import_deconstruction_symbol(&mut self, node: &$crate::ast::ImportDeconstructionSymbolStruct<'_>) { self.$leave(node); })?
 
-        fn enter_index_access_expression(&mut self, node: &$crate::ast::IndexAccessExpressionStruct) -> bool { self.$enter(node) }
-        $(fn leave_index_access_expression(&mut self, node: &$crate::ast::IndexAccessExpressionStruct) { self.$leave(node); })?
+        fn enter_index_access_expression(&mut self, node: &$crate::ast::IndexAccessExpressionStruct<'_>) -> bool { self.$enter(node) }
+        $(fn leave_index_access_expression(&mut self, node: &$crate::ast::IndexAccessExpressionStruct<'_>) { self.$leave(node); })?
 
-        fn enter_inequality_expression(&mut self, node: &$crate::ast::InequalityExpressionStruct) -> bool { self.$enter(node) }
-        $(fn leave_inequality_expression(&mut self, node: &$crate::ast::InequalityExpressionStruct) { self.$leave(node); })?
+        fn enter_inequality_expression(&mut self, node: &$crate::ast::InequalityExpressionStruct<'_>) -> bool { self.$enter(node) }
+        $(fn leave_inequality_expression(&mut self, node: &$crate::ast::InequalityExpressionStruct<'_>) { self.$leave(node); })?
 
-        fn enter_inheritance_type(&mut self, node: &$crate::ast::InheritanceTypeStruct) -> bool { self.$enter(node) }
-        $(fn leave_inheritance_type(&mut self, node: &$crate::ast::InheritanceTypeStruct) { self.$leave(node); })?
+        fn enter_inheritance_type(&mut self, node: &$crate::ast::InheritanceTypeStruct<'_>) -> bool { self.$enter(node) }
+        $(fn leave_inheritance_type(&mut self, node: &$crate::ast::InheritanceTypeStruct<'_>) { self.$leave(node); })?
 
-        fn enter_interface_definition(&mut self, node: &$crate::ast::InterfaceDefinitionStruct) -> bool { self.$enter(node) }
-        $(fn leave_interface_definition(&mut self, node: &$crate::ast::InterfaceDefinitionStruct) { self.$leave(node); })?
+        fn enter_interface_definition(&mut self, node: &$crate::ast::InterfaceDefinitionStruct<'_>) -> bool { self.$enter(node) }
+        $(fn leave_interface_definition(&mut self, node: &$crate::ast::InterfaceDefinitionStruct<'_>) { self.$leave(node); })?
 
-        fn enter_library_definition(&mut self, node: &$crate::ast::LibraryDefinitionStruct) -> bool { self.$enter(node) }
-        $(fn leave_library_definition(&mut self, node: &$crate::ast::LibraryDefinitionStruct) { self.$leave(node); })?
+        fn enter_library_definition(&mut self, node: &$crate::ast::LibraryDefinitionStruct<'_>) -> bool { self.$enter(node) }
+        $(fn leave_library_definition(&mut self, node: &$crate::ast::LibraryDefinitionStruct<'_>) { self.$leave(node); })?
 
-        fn enter_mapping_type(&mut self, node: &$crate::ast::MappingTypeStruct) -> bool { self.$enter(node) }
-        $(fn leave_mapping_type(&mut self, node: &$crate::ast::MappingTypeStruct) { self.$leave(node); })?
+        fn enter_mapping_type(&mut self, node: &$crate::ast::MappingTypeStruct<'_>) -> bool { self.$enter(node) }
+        $(fn leave_mapping_type(&mut self, node: &$crate::ast::MappingTypeStruct<'_>) { self.$leave(node); })?
 
-        fn enter_member_access_expression(&mut self, node: &$crate::ast::MemberAccessExpressionStruct) -> bool { self.$enter(node) }
-        $(fn leave_member_access_expression(&mut self, node: &$crate::ast::MemberAccessExpressionStruct) { self.$leave(node); })?
+        fn enter_member_access_expression(&mut self, node: &$crate::ast::MemberAccessExpressionStruct<'_>) -> bool { self.$enter(node) }
+        $(fn leave_member_access_expression(&mut self, node: &$crate::ast::MemberAccessExpressionStruct<'_>) { self.$leave(node); })?
 
-        fn enter_modifier_attributes(&mut self, node: &$crate::ast::ModifierAttributesStruct) -> bool { self.$enter(node) }
-        $(fn leave_modifier_attributes(&mut self, node: &$crate::ast::ModifierAttributesStruct) { self.$leave(node); })?
+        fn enter_modifier_attributes(&mut self, node: &$crate::ast::ModifierAttributesStruct<'_>) -> bool { self.$enter(node) }
+        $(fn leave_modifier_attributes(&mut self, node: &$crate::ast::ModifierAttributesStruct<'_>) { self.$leave(node); })?
 
-        fn enter_modifier_definition(&mut self, node: &$crate::ast::ModifierDefinitionStruct) -> bool { self.$enter(node) }
-        $(fn leave_modifier_definition(&mut self, node: &$crate::ast::ModifierDefinitionStruct) { self.$leave(node); })?
+        fn enter_modifier_definition(&mut self, node: &$crate::ast::ModifierDefinitionStruct<'_>) -> bool { self.$enter(node) }
+        $(fn leave_modifier_definition(&mut self, node: &$crate::ast::ModifierDefinitionStruct<'_>) { self.$leave(node); })?
 
-        fn enter_modifier_invocation(&mut self, node: &$crate::ast::ModifierInvocationStruct) -> bool { self.$enter(node) }
-        $(fn leave_modifier_invocation(&mut self, node: &$crate::ast::ModifierInvocationStruct) { self.$leave(node); })?
+        fn enter_modifier_invocation(&mut self, node: &$crate::ast::ModifierInvocationStruct<'_>) -> bool { self.$enter(node) }
+        $(fn leave_modifier_invocation(&mut self, node: &$crate::ast::ModifierInvocationStruct<'_>) { self.$leave(node); })?
 
-        fn enter_multi_typed_declaration(&mut self, node: &$crate::ast::MultiTypedDeclarationStruct) -> bool { self.$enter(node) }
-        $(fn leave_multi_typed_declaration(&mut self, node: &$crate::ast::MultiTypedDeclarationStruct) { self.$leave(node); })?
+        fn enter_multi_typed_declaration(&mut self, node: &$crate::ast::MultiTypedDeclarationStruct<'_>) -> bool { self.$enter(node) }
+        $(fn leave_multi_typed_declaration(&mut self, node: &$crate::ast::MultiTypedDeclarationStruct<'_>) { self.$leave(node); })?
 
-        fn enter_multi_typed_declaration_element(&mut self, node: &$crate::ast::MultiTypedDeclarationElementStruct) -> bool { self.$enter(node) }
-        $(fn leave_multi_typed_declaration_element(&mut self, node: &$crate::ast::MultiTypedDeclarationElementStruct) { self.$leave(node); })?
+        fn enter_multi_typed_declaration_element(&mut self, node: &$crate::ast::MultiTypedDeclarationElementStruct<'_>) -> bool { self.$enter(node) }
+        $(fn leave_multi_typed_declaration_element(&mut self, node: &$crate::ast::MultiTypedDeclarationElementStruct<'_>) { self.$leave(node); })?
 
-        fn enter_multiplicative_expression(&mut self, node: &$crate::ast::MultiplicativeExpressionStruct) -> bool { self.$enter(node) }
-        $(fn leave_multiplicative_expression(&mut self, node: &$crate::ast::MultiplicativeExpressionStruct) { self.$leave(node); })?
+        fn enter_multiplicative_expression(&mut self, node: &$crate::ast::MultiplicativeExpressionStruct<'_>) -> bool { self.$enter(node) }
+        $(fn leave_multiplicative_expression(&mut self, node: &$crate::ast::MultiplicativeExpressionStruct<'_>) { self.$leave(node); })?
 
-        fn enter_named_argument(&mut self, node: &$crate::ast::NamedArgumentStruct) -> bool { self.$enter(node) }
-        $(fn leave_named_argument(&mut self, node: &$crate::ast::NamedArgumentStruct) { self.$leave(node); })?
+        fn enter_named_argument(&mut self, node: &$crate::ast::NamedArgumentStruct<'_>) -> bool { self.$enter(node) }
+        $(fn leave_named_argument(&mut self, node: &$crate::ast::NamedArgumentStruct<'_>) { self.$leave(node); })?
 
-        fn enter_new_expression(&mut self, node: &$crate::ast::NewExpressionStruct) -> bool { self.$enter(node) }
-        $(fn leave_new_expression(&mut self, node: &$crate::ast::NewExpressionStruct) { self.$leave(node); })?
+        fn enter_new_expression(&mut self, node: &$crate::ast::NewExpressionStruct<'_>) -> bool { self.$enter(node) }
+        $(fn leave_new_expression(&mut self, node: &$crate::ast::NewExpressionStruct<'_>) { self.$leave(node); })?
 
-        fn enter_or_expression(&mut self, node: &$crate::ast::OrExpressionStruct) -> bool { self.$enter(node) }
-        $(fn leave_or_expression(&mut self, node: &$crate::ast::OrExpressionStruct) { self.$leave(node); })?
+        fn enter_or_expression(&mut self, node: &$crate::ast::OrExpressionStruct<'_>) -> bool { self.$enter(node) }
+        $(fn leave_or_expression(&mut self, node: &$crate::ast::OrExpressionStruct<'_>) { self.$leave(node); })?
 
-        fn enter_parameter(&mut self, node: &$crate::ast::ParameterStruct) -> bool { self.$enter(node) }
-        $(fn leave_parameter(&mut self, node: &$crate::ast::ParameterStruct) { self.$leave(node); })?
+        fn enter_parameter(&mut self, node: &$crate::ast::ParameterStruct<'_>) -> bool { self.$enter(node) }
+        $(fn leave_parameter(&mut self, node: &$crate::ast::ParameterStruct<'_>) { self.$leave(node); })?
 
-        fn enter_path_import(&mut self, node: &$crate::ast::PathImportStruct) -> bool { self.$enter(node) }
-        $(fn leave_path_import(&mut self, node: &$crate::ast::PathImportStruct) { self.$leave(node); })?
+        fn enter_path_import(&mut self, node: &$crate::ast::PathImportStruct<'_>) -> bool { self.$enter(node) }
+        $(fn leave_path_import(&mut self, node: &$crate::ast::PathImportStruct<'_>) { self.$leave(node); })?
 
-        fn enter_postfix_expression(&mut self, node: &$crate::ast::PostfixExpressionStruct) -> bool { self.$enter(node) }
-        $(fn leave_postfix_expression(&mut self, node: &$crate::ast::PostfixExpressionStruct) { self.$leave(node); })?
+        fn enter_postfix_expression(&mut self, node: &$crate::ast::PostfixExpressionStruct<'_>) -> bool { self.$enter(node) }
+        $(fn leave_postfix_expression(&mut self, node: &$crate::ast::PostfixExpressionStruct<'_>) { self.$leave(node); })?
 
-        fn enter_pragma_directive(&mut self, node: &$crate::ast::PragmaDirectiveStruct) -> bool { self.$enter(node) }
-        $(fn leave_pragma_directive(&mut self, node: &$crate::ast::PragmaDirectiveStruct) { self.$leave(node); })?
+        fn enter_pragma_directive(&mut self, node: &$crate::ast::PragmaDirectiveStruct<'_>) -> bool { self.$enter(node) }
+        $(fn leave_pragma_directive(&mut self, node: &$crate::ast::PragmaDirectiveStruct<'_>) { self.$leave(node); })?
 
-        fn enter_prefix_expression(&mut self, node: &$crate::ast::PrefixExpressionStruct) -> bool { self.$enter(node) }
-        $(fn leave_prefix_expression(&mut self, node: &$crate::ast::PrefixExpressionStruct) { self.$leave(node); })?
+        fn enter_prefix_expression(&mut self, node: &$crate::ast::PrefixExpressionStruct<'_>) -> bool { self.$enter(node) }
+        $(fn leave_prefix_expression(&mut self, node: &$crate::ast::PrefixExpressionStruct<'_>) { self.$leave(node); })?
 
-        fn enter_return_statement(&mut self, node: &$crate::ast::ReturnStatementStruct) -> bool { self.$enter(node) }
-        $(fn leave_return_statement(&mut self, node: &$crate::ast::ReturnStatementStruct) { self.$leave(node); })?
+        fn enter_return_statement(&mut self, node: &$crate::ast::ReturnStatementStruct<'_>) -> bool { self.$enter(node) }
+        $(fn leave_return_statement(&mut self, node: &$crate::ast::ReturnStatementStruct<'_>) { self.$leave(node); })?
 
-        fn enter_revert_statement(&mut self, node: &$crate::ast::RevertStatementStruct) -> bool { self.$enter(node) }
-        $(fn leave_revert_statement(&mut self, node: &$crate::ast::RevertStatementStruct) { self.$leave(node); })?
+        fn enter_revert_statement(&mut self, node: &$crate::ast::RevertStatementStruct<'_>) -> bool { self.$enter(node) }
+        $(fn leave_revert_statement(&mut self, node: &$crate::ast::RevertStatementStruct<'_>) { self.$leave(node); })?
 
-        fn enter_shift_expression(&mut self, node: &$crate::ast::ShiftExpressionStruct) -> bool { self.$enter(node) }
-        $(fn leave_shift_expression(&mut self, node: &$crate::ast::ShiftExpressionStruct) { self.$leave(node); })?
+        fn enter_shift_expression(&mut self, node: &$crate::ast::ShiftExpressionStruct<'_>) -> bool { self.$enter(node) }
+        $(fn leave_shift_expression(&mut self, node: &$crate::ast::ShiftExpressionStruct<'_>) { self.$leave(node); })?
 
-        fn enter_single_typed_declaration(&mut self, node: &$crate::ast::SingleTypedDeclarationStruct) -> bool { self.$enter(node) }
-        $(fn leave_single_typed_declaration(&mut self, node: &$crate::ast::SingleTypedDeclarationStruct) { self.$leave(node); })?
+        fn enter_single_typed_declaration(&mut self, node: &$crate::ast::SingleTypedDeclarationStruct<'_>) -> bool { self.$enter(node) }
+        $(fn leave_single_typed_declaration(&mut self, node: &$crate::ast::SingleTypedDeclarationStruct<'_>) { self.$leave(node); })?
 
-        fn enter_source_unit(&mut self, node: &$crate::ast::SourceUnitStruct) -> bool { self.$enter(node) }
-        $(fn leave_source_unit(&mut self, node: &$crate::ast::SourceUnitStruct) { self.$leave(node); })?
+        fn enter_source_unit(&mut self, node: &$crate::ast::SourceUnitStruct<'_>) -> bool { self.$enter(node) }
+        $(fn leave_source_unit(&mut self, node: &$crate::ast::SourceUnitStruct<'_>) { self.$leave(node); })?
 
-        fn enter_state_variable_attributes(&mut self, node: &$crate::ast::StateVariableAttributesStruct) -> bool { self.$enter(node) }
-        $(fn leave_state_variable_attributes(&mut self, node: &$crate::ast::StateVariableAttributesStruct) { self.$leave(node); })?
+        fn enter_state_variable_attributes(&mut self, node: &$crate::ast::StateVariableAttributesStruct<'_>) -> bool { self.$enter(node) }
+        $(fn leave_state_variable_attributes(&mut self, node: &$crate::ast::StateVariableAttributesStruct<'_>) { self.$leave(node); })?
 
-        fn enter_state_variable_definition(&mut self, node: &$crate::ast::StateVariableDefinitionStruct) -> bool { self.$enter(node) }
-        $(fn leave_state_variable_definition(&mut self, node: &$crate::ast::StateVariableDefinitionStruct) { self.$leave(node); })?
+        fn enter_state_variable_definition(&mut self, node: &$crate::ast::StateVariableDefinitionStruct<'_>) -> bool { self.$enter(node) }
+        $(fn leave_state_variable_definition(&mut self, node: &$crate::ast::StateVariableDefinitionStruct<'_>) { self.$leave(node); })?
 
-        fn enter_struct_definition(&mut self, node: &$crate::ast::StructDefinitionStruct) -> bool { self.$enter(node) }
-        $(fn leave_struct_definition(&mut self, node: &$crate::ast::StructDefinitionStruct) { self.$leave(node); })?
+        fn enter_struct_definition(&mut self, node: &$crate::ast::StructDefinitionStruct<'_>) -> bool { self.$enter(node) }
+        $(fn leave_struct_definition(&mut self, node: &$crate::ast::StructDefinitionStruct<'_>) { self.$leave(node); })?
 
-        fn enter_struct_member(&mut self, node: &$crate::ast::StructMemberStruct) -> bool { self.$enter(node) }
-        $(fn leave_struct_member(&mut self, node: &$crate::ast::StructMemberStruct) { self.$leave(node); })?
+        fn enter_struct_member(&mut self, node: &$crate::ast::StructMemberStruct<'_>) -> bool { self.$enter(node) }
+        $(fn leave_struct_member(&mut self, node: &$crate::ast::StructMemberStruct<'_>) { self.$leave(node); })?
 
-        fn enter_try_statement(&mut self, node: &$crate::ast::TryStatementStruct) -> bool { self.$enter(node) }
-        $(fn leave_try_statement(&mut self, node: &$crate::ast::TryStatementStruct) { self.$leave(node); })?
+        fn enter_try_statement(&mut self, node: &$crate::ast::TryStatementStruct<'_>) -> bool { self.$enter(node) }
+        $(fn leave_try_statement(&mut self, node: &$crate::ast::TryStatementStruct<'_>) { self.$leave(node); })?
 
-        fn enter_tuple_expression(&mut self, node: &$crate::ast::TupleExpressionStruct) -> bool { self.$enter(node) }
-        $(fn leave_tuple_expression(&mut self, node: &$crate::ast::TupleExpressionStruct) { self.$leave(node); })?
+        fn enter_tuple_expression(&mut self, node: &$crate::ast::TupleExpressionStruct<'_>) -> bool { self.$enter(node) }
+        $(fn leave_tuple_expression(&mut self, node: &$crate::ast::TupleExpressionStruct<'_>) { self.$leave(node); })?
 
-        fn enter_tuple_value(&mut self, node: &$crate::ast::TupleValueStruct) -> bool { self.$enter(node) }
-        $(fn leave_tuple_value(&mut self, node: &$crate::ast::TupleValueStruct) { self.$leave(node); })?
+        fn enter_tuple_value(&mut self, node: &$crate::ast::TupleValueStruct<'_>) -> bool { self.$enter(node) }
+        $(fn leave_tuple_value(&mut self, node: &$crate::ast::TupleValueStruct<'_>) { self.$leave(node); })?
 
-        fn enter_type_expression(&mut self, node: &$crate::ast::TypeExpressionStruct) -> bool { self.$enter(node) }
-        $(fn leave_type_expression(&mut self, node: &$crate::ast::TypeExpressionStruct) { self.$leave(node); })?
+        fn enter_type_expression(&mut self, node: &$crate::ast::TypeExpressionStruct<'_>) -> bool { self.$enter(node) }
+        $(fn leave_type_expression(&mut self, node: &$crate::ast::TypeExpressionStruct<'_>) { self.$leave(node); })?
 
-        fn enter_unchecked_block(&mut self, node: &$crate::ast::UncheckedBlockStruct) -> bool { self.$enter(node) }
-        $(fn leave_unchecked_block(&mut self, node: &$crate::ast::UncheckedBlockStruct) { self.$leave(node); })?
+        fn enter_unchecked_block(&mut self, node: &$crate::ast::UncheckedBlockStruct<'_>) -> bool { self.$enter(node) }
+        $(fn leave_unchecked_block(&mut self, node: &$crate::ast::UncheckedBlockStruct<'_>) { self.$leave(node); })?
 
-        fn enter_user_defined_value_type_definition(&mut self, node: &$crate::ast::UserDefinedValueTypeDefinitionStruct) -> bool { self.$enter(node) }
-        $(fn leave_user_defined_value_type_definition(&mut self, node: &$crate::ast::UserDefinedValueTypeDefinitionStruct) { self.$leave(node); })?
+        fn enter_user_defined_value_type_definition(&mut self, node: &$crate::ast::UserDefinedValueTypeDefinitionStruct<'_>) -> bool { self.$enter(node) }
+        $(fn leave_user_defined_value_type_definition(&mut self, node: &$crate::ast::UserDefinedValueTypeDefinitionStruct<'_>) { self.$leave(node); })?
 
-        fn enter_using_deconstruction(&mut self, node: &$crate::ast::UsingDeconstructionStruct) -> bool { self.$enter(node) }
-        $(fn leave_using_deconstruction(&mut self, node: &$crate::ast::UsingDeconstructionStruct) { self.$leave(node); })?
+        fn enter_using_deconstruction(&mut self, node: &$crate::ast::UsingDeconstructionStruct<'_>) -> bool { self.$enter(node) }
+        $(fn leave_using_deconstruction(&mut self, node: &$crate::ast::UsingDeconstructionStruct<'_>) { self.$leave(node); })?
 
-        fn enter_using_deconstruction_symbol(&mut self, node: &$crate::ast::UsingDeconstructionSymbolStruct) -> bool { self.$enter(node) }
-        $(fn leave_using_deconstruction_symbol(&mut self, node: &$crate::ast::UsingDeconstructionSymbolStruct) { self.$leave(node); })?
+        fn enter_using_deconstruction_symbol(&mut self, node: &$crate::ast::UsingDeconstructionSymbolStruct<'_>) -> bool { self.$enter(node) }
+        $(fn leave_using_deconstruction_symbol(&mut self, node: &$crate::ast::UsingDeconstructionSymbolStruct<'_>) { self.$leave(node); })?
 
-        fn enter_using_directive(&mut self, node: &$crate::ast::UsingDirectiveStruct) -> bool { self.$enter(node) }
-        $(fn leave_using_directive(&mut self, node: &$crate::ast::UsingDirectiveStruct) { self.$leave(node); })?
+        fn enter_using_directive(&mut self, node: &$crate::ast::UsingDirectiveStruct<'_>) -> bool { self.$enter(node) }
+        $(fn leave_using_directive(&mut self, node: &$crate::ast::UsingDirectiveStruct<'_>) { self.$leave(node); })?
 
-        fn enter_variable_declaration(&mut self, node: &$crate::ast::VariableDeclarationStruct) -> bool { self.$enter(node) }
-        $(fn leave_variable_declaration(&mut self, node: &$crate::ast::VariableDeclarationStruct) { self.$leave(node); })?
+        fn enter_variable_declaration(&mut self, node: &$crate::ast::VariableDeclarationStruct<'_>) -> bool { self.$enter(node) }
+        $(fn leave_variable_declaration(&mut self, node: &$crate::ast::VariableDeclarationStruct<'_>) { self.$leave(node); })?
 
-        fn enter_variable_declaration_statement(&mut self, node: &$crate::ast::VariableDeclarationStatementStruct) -> bool { self.$enter(node) }
-        $(fn leave_variable_declaration_statement(&mut self, node: &$crate::ast::VariableDeclarationStatementStruct) { self.$leave(node); })?
+        fn enter_variable_declaration_statement(&mut self, node: &$crate::ast::VariableDeclarationStatementStruct<'_>) -> bool { self.$enter(node) }
+        $(fn leave_variable_declaration_statement(&mut self, node: &$crate::ast::VariableDeclarationStatementStruct<'_>) { self.$leave(node); })?
 
-        fn enter_version_pragma(&mut self, node: &$crate::ast::VersionPragmaStruct) -> bool { self.$enter(node) }
-        $(fn leave_version_pragma(&mut self, node: &$crate::ast::VersionPragmaStruct) { self.$leave(node); })?
+        fn enter_version_pragma(&mut self, node: &$crate::ast::VersionPragmaStruct<'_>) -> bool { self.$enter(node) }
+        $(fn leave_version_pragma(&mut self, node: &$crate::ast::VersionPragmaStruct<'_>) { self.$leave(node); })?
 
-        fn enter_version_pragma_comparator(&mut self, node: &$crate::ast::VersionPragmaComparatorStruct) -> bool { self.$enter(node) }
-        $(fn leave_version_pragma_comparator(&mut self, node: &$crate::ast::VersionPragmaComparatorStruct) { self.$leave(node); })?
+        fn enter_version_pragma_comparator(&mut self, node: &$crate::ast::VersionPragmaComparatorStruct<'_>) -> bool { self.$enter(node) }
+        $(fn leave_version_pragma_comparator(&mut self, node: &$crate::ast::VersionPragmaComparatorStruct<'_>) { self.$leave(node); })?
 
-        fn enter_while_statement(&mut self, node: &$crate::ast::WhileStatementStruct) -> bool { self.$enter(node) }
-        $(fn leave_while_statement(&mut self, node: &$crate::ast::WhileStatementStruct) { self.$leave(node); })?
+        fn enter_while_statement(&mut self, node: &$crate::ast::WhileStatementStruct<'_>) -> bool { self.$enter(node) }
+        $(fn leave_while_statement(&mut self, node: &$crate::ast::WhileStatementStruct<'_>) { self.$leave(node); })?
 
-        fn enter_yul_block(&mut self, node: &$crate::ast::YulBlockStruct) -> bool { self.$enter(node) }
-        $(fn leave_yul_block(&mut self, node: &$crate::ast::YulBlockStruct) { self.$leave(node); })?
+        fn enter_yul_block(&mut self, node: &$crate::ast::YulBlockStruct<'_>) -> bool { self.$enter(node) }
+        $(fn leave_yul_block(&mut self, node: &$crate::ast::YulBlockStruct<'_>) { self.$leave(node); })?
 
-        fn enter_yul_break_statement(&mut self, node: &$crate::ast::YulBreakStatementStruct) -> bool { self.$enter(node) }
-        $(fn leave_yul_break_statement(&mut self, node: &$crate::ast::YulBreakStatementStruct) { self.$leave(node); })?
+        fn enter_yul_break_statement(&mut self, node: &$crate::ast::YulBreakStatementStruct<'_>) -> bool { self.$enter(node) }
+        $(fn leave_yul_break_statement(&mut self, node: &$crate::ast::YulBreakStatementStruct<'_>) { self.$leave(node); })?
 
-        fn enter_yul_continue_statement(&mut self, node: &$crate::ast::YulContinueStatementStruct) -> bool { self.$enter(node) }
-        $(fn leave_yul_continue_statement(&mut self, node: &$crate::ast::YulContinueStatementStruct) { self.$leave(node); })?
+        fn enter_yul_continue_statement(&mut self, node: &$crate::ast::YulContinueStatementStruct<'_>) -> bool { self.$enter(node) }
+        $(fn leave_yul_continue_statement(&mut self, node: &$crate::ast::YulContinueStatementStruct<'_>) { self.$leave(node); })?
 
-        fn enter_yul_default_case(&mut self, node: &$crate::ast::YulDefaultCaseStruct) -> bool { self.$enter(node) }
-        $(fn leave_yul_default_case(&mut self, node: &$crate::ast::YulDefaultCaseStruct) { self.$leave(node); })?
+        fn enter_yul_default_case(&mut self, node: &$crate::ast::YulDefaultCaseStruct<'_>) -> bool { self.$enter(node) }
+        $(fn leave_yul_default_case(&mut self, node: &$crate::ast::YulDefaultCaseStruct<'_>) { self.$leave(node); })?
 
-        fn enter_yul_for_statement(&mut self, node: &$crate::ast::YulForStatementStruct) -> bool { self.$enter(node) }
-        $(fn leave_yul_for_statement(&mut self, node: &$crate::ast::YulForStatementStruct) { self.$leave(node); })?
+        fn enter_yul_for_statement(&mut self, node: &$crate::ast::YulForStatementStruct<'_>) -> bool { self.$enter(node) }
+        $(fn leave_yul_for_statement(&mut self, node: &$crate::ast::YulForStatementStruct<'_>) { self.$leave(node); })?
 
-        fn enter_yul_function_call_expression(&mut self, node: &$crate::ast::YulFunctionCallExpressionStruct) -> bool { self.$enter(node) }
-        $(fn leave_yul_function_call_expression(&mut self, node: &$crate::ast::YulFunctionCallExpressionStruct) { self.$leave(node); })?
+        fn enter_yul_function_call_expression(&mut self, node: &$crate::ast::YulFunctionCallExpressionStruct<'_>) -> bool { self.$enter(node) }
+        $(fn leave_yul_function_call_expression(&mut self, node: &$crate::ast::YulFunctionCallExpressionStruct<'_>) { self.$leave(node); })?
 
-        fn enter_yul_function_definition(&mut self, node: &$crate::ast::YulFunctionDefinitionStruct) -> bool { self.$enter(node) }
-        $(fn leave_yul_function_definition(&mut self, node: &$crate::ast::YulFunctionDefinitionStruct) { self.$leave(node); })?
+        fn enter_yul_function_definition(&mut self, node: &$crate::ast::YulFunctionDefinitionStruct<'_>) -> bool { self.$enter(node) }
+        $(fn leave_yul_function_definition(&mut self, node: &$crate::ast::YulFunctionDefinitionStruct<'_>) { self.$leave(node); })?
 
-        fn enter_yul_if_statement(&mut self, node: &$crate::ast::YulIfStatementStruct) -> bool { self.$enter(node) }
-        $(fn leave_yul_if_statement(&mut self, node: &$crate::ast::YulIfStatementStruct) { self.$leave(node); })?
+        fn enter_yul_if_statement(&mut self, node: &$crate::ast::YulIfStatementStruct<'_>) -> bool { self.$enter(node) }
+        $(fn leave_yul_if_statement(&mut self, node: &$crate::ast::YulIfStatementStruct<'_>) { self.$leave(node); })?
 
-        fn enter_yul_leave_statement(&mut self, node: &$crate::ast::YulLeaveStatementStruct) -> bool { self.$enter(node) }
-        $(fn leave_yul_leave_statement(&mut self, node: &$crate::ast::YulLeaveStatementStruct) { self.$leave(node); })?
+        fn enter_yul_leave_statement(&mut self, node: &$crate::ast::YulLeaveStatementStruct<'_>) -> bool { self.$enter(node) }
+        $(fn leave_yul_leave_statement(&mut self, node: &$crate::ast::YulLeaveStatementStruct<'_>) { self.$leave(node); })?
 
-        fn enter_yul_switch_statement(&mut self, node: &$crate::ast::YulSwitchStatementStruct) -> bool { self.$enter(node) }
-        $(fn leave_yul_switch_statement(&mut self, node: &$crate::ast::YulSwitchStatementStruct) { self.$leave(node); })?
+        fn enter_yul_switch_statement(&mut self, node: &$crate::ast::YulSwitchStatementStruct<'_>) -> bool { self.$enter(node) }
+        $(fn leave_yul_switch_statement(&mut self, node: &$crate::ast::YulSwitchStatementStruct<'_>) { self.$leave(node); })?
 
-        fn enter_yul_value_case(&mut self, node: &$crate::ast::YulValueCaseStruct) -> bool { self.$enter(node) }
-        $(fn leave_yul_value_case(&mut self, node: &$crate::ast::YulValueCaseStruct) { self.$leave(node); })?
+        fn enter_yul_value_case(&mut self, node: &$crate::ast::YulValueCaseStruct<'_>) -> bool { self.$enter(node) }
+        $(fn leave_yul_value_case(&mut self, node: &$crate::ast::YulValueCaseStruct<'_>) { self.$leave(node); })?
 
-        fn enter_yul_variable_assignment_statement(&mut self, node: &$crate::ast::YulVariableAssignmentStatementStruct) -> bool { self.$enter(node) }
-        $(fn leave_yul_variable_assignment_statement(&mut self, node: &$crate::ast::YulVariableAssignmentStatementStruct) { self.$leave(node); })?
+        fn enter_yul_variable_assignment_statement(&mut self, node: &$crate::ast::YulVariableAssignmentStatementStruct<'_>) -> bool { self.$enter(node) }
+        $(fn leave_yul_variable_assignment_statement(&mut self, node: &$crate::ast::YulVariableAssignmentStatementStruct<'_>) { self.$leave(node); })?
 
-        fn enter_yul_variable_declaration_statement(&mut self, node: &$crate::ast::YulVariableDeclarationStatementStruct) -> bool { self.$enter(node) }
-        $(fn leave_yul_variable_declaration_statement(&mut self, node: &$crate::ast::YulVariableDeclarationStatementStruct) { self.$leave(node); })?
+        fn enter_yul_variable_declaration_statement(&mut self, node: &$crate::ast::YulVariableDeclarationStatementStruct<'_>) -> bool { self.$enter(node) }
+        $(fn leave_yul_variable_declaration_statement(&mut self, node: &$crate::ast::YulVariableDeclarationStatementStruct<'_>) { self.$leave(node); })?
 
-        fn enter_yul_variable_declaration_value(&mut self, node: &$crate::ast::YulVariableDeclarationValueStruct) -> bool { self.$enter(node) }
-        $(fn leave_yul_variable_declaration_value(&mut self, node: &$crate::ast::YulVariableDeclarationValueStruct) { self.$leave(node); })?
+        fn enter_yul_variable_declaration_value(&mut self, node: &$crate::ast::YulVariableDeclarationValueStruct<'_>) -> bool { self.$enter(node) }
+        $(fn leave_yul_variable_declaration_value(&mut self, node: &$crate::ast::YulVariableDeclarationValueStruct<'_>) { self.$leave(node); })?
 
-        fn enter_array_values(&mut self, items: &$crate::ast::ArrayValuesStruct) -> bool { self.$enter(items) }
-        $(fn leave_array_values(&mut self, items: &$crate::ast::ArrayValuesStruct) { self.$leave(items); })?
+        fn enter_array_values(&mut self, items: &$crate::ast::ArrayValuesStruct<'_>) -> bool { self.$enter(items) }
+        $(fn leave_array_values(&mut self, items: &$crate::ast::ArrayValuesStruct<'_>) { self.$leave(items); })?
 
-        fn enter_call_options(&mut self, items: &$crate::ast::CallOptionsStruct) -> bool { self.$enter(items) }
-        $(fn leave_call_options(&mut self, items: &$crate::ast::CallOptionsStruct) { self.$leave(items); })?
+        fn enter_call_options(&mut self, items: &$crate::ast::CallOptionsStruct<'_>) -> bool { self.$enter(items) }
+        $(fn leave_call_options(&mut self, items: &$crate::ast::CallOptionsStruct<'_>) { self.$leave(items); })?
 
-        fn enter_catch_clauses(&mut self, items: &$crate::ast::CatchClausesStruct) -> bool { self.$enter(items) }
-        $(fn leave_catch_clauses(&mut self, items: &$crate::ast::CatchClausesStruct) { self.$leave(items); })?
+        fn enter_catch_clauses(&mut self, items: &$crate::ast::CatchClausesStruct<'_>) -> bool { self.$enter(items) }
+        $(fn leave_catch_clauses(&mut self, items: &$crate::ast::CatchClausesStruct<'_>) { self.$leave(items); })?
 
-        fn enter_contract_members(&mut self, items: &$crate::ast::ContractMembersStruct) -> bool { self.$enter(items) }
-        $(fn leave_contract_members(&mut self, items: &$crate::ast::ContractMembersStruct) { self.$leave(items); })?
+        fn enter_contract_members(&mut self, items: &$crate::ast::ContractMembersStruct<'_>) -> bool { self.$enter(items) }
+        $(fn leave_contract_members(&mut self, items: &$crate::ast::ContractMembersStruct<'_>) { self.$leave(items); })?
 
-        fn enter_enum_members(&mut self, items: &$crate::ast::EnumMembersStruct) -> bool { self.$enter(items) }
-        $(fn leave_enum_members(&mut self, items: &$crate::ast::EnumMembersStruct) { self.$leave(items); })?
+        fn enter_enum_members(&mut self, items: &$crate::ast::EnumMembersStruct<'_>) -> bool { self.$enter(items) }
+        $(fn leave_enum_members(&mut self, items: &$crate::ast::EnumMembersStruct<'_>) { self.$leave(items); })?
 
-        fn enter_hex_string_literals(&mut self, items: &$crate::ast::HexStringLiteralsStruct) -> bool { self.$enter(items) }
-        $(fn leave_hex_string_literals(&mut self, items: &$crate::ast::HexStringLiteralsStruct) { self.$leave(items); })?
+        fn enter_hex_string_literals(&mut self, items: &$crate::ast::HexStringLiteralsStruct<'_>) -> bool { self.$enter(items) }
+        $(fn leave_hex_string_literals(&mut self, items: &$crate::ast::HexStringLiteralsStruct<'_>) { self.$leave(items); })?
 
-        fn enter_identifier_path(&mut self, items: &$crate::ast::IdentifierPathStruct) -> bool { self.$enter(items) }
-        $(fn leave_identifier_path(&mut self, items: &$crate::ast::IdentifierPathStruct) { self.$leave(items); })?
+        fn enter_identifier_path(&mut self, items: &$crate::ast::IdentifierPathStruct<'_>) -> bool { self.$enter(items) }
+        $(fn leave_identifier_path(&mut self, items: &$crate::ast::IdentifierPathStruct<'_>) { self.$leave(items); })?
 
-        fn enter_import_deconstruction_symbols(&mut self, items: &$crate::ast::ImportDeconstructionSymbolsStruct) -> bool { self.$enter(items) }
-        $(fn leave_import_deconstruction_symbols(&mut self, items: &$crate::ast::ImportDeconstructionSymbolsStruct) { self.$leave(items); })?
+        fn enter_import_deconstruction_symbols(&mut self, items: &$crate::ast::ImportDeconstructionSymbolsStruct<'_>) -> bool { self.$enter(items) }
+        $(fn leave_import_deconstruction_symbols(&mut self, items: &$crate::ast::ImportDeconstructionSymbolsStruct<'_>) { self.$leave(items); })?
 
-        fn enter_inheritance_types(&mut self, items: &$crate::ast::InheritanceTypesStruct) -> bool { self.$enter(items) }
-        $(fn leave_inheritance_types(&mut self, items: &$crate::ast::InheritanceTypesStruct) { self.$leave(items); })?
+        fn enter_inheritance_types(&mut self, items: &$crate::ast::InheritanceTypesStruct<'_>) -> bool { self.$enter(items) }
+        $(fn leave_inheritance_types(&mut self, items: &$crate::ast::InheritanceTypesStruct<'_>) { self.$leave(items); })?
 
-        fn enter_interface_members(&mut self, items: &$crate::ast::InterfaceMembersStruct) -> bool { self.$enter(items) }
-        $(fn leave_interface_members(&mut self, items: &$crate::ast::InterfaceMembersStruct) { self.$leave(items); })?
+        fn enter_interface_members(&mut self, items: &$crate::ast::InterfaceMembersStruct<'_>) -> bool { self.$enter(items) }
+        $(fn leave_interface_members(&mut self, items: &$crate::ast::InterfaceMembersStruct<'_>) { self.$leave(items); })?
 
-        fn enter_library_members(&mut self, items: &$crate::ast::LibraryMembersStruct) -> bool { self.$enter(items) }
-        $(fn leave_library_members(&mut self, items: &$crate::ast::LibraryMembersStruct) { self.$leave(items); })?
+        fn enter_library_members(&mut self, items: &$crate::ast::LibraryMembersStruct<'_>) -> bool { self.$enter(items) }
+        $(fn leave_library_members(&mut self, items: &$crate::ast::LibraryMembersStruct<'_>) { self.$leave(items); })?
 
-        fn enter_modifier_invocations(&mut self, items: &$crate::ast::ModifierInvocationsStruct) -> bool { self.$enter(items) }
-        $(fn leave_modifier_invocations(&mut self, items: &$crate::ast::ModifierInvocationsStruct) { self.$leave(items); })?
+        fn enter_modifier_invocations(&mut self, items: &$crate::ast::ModifierInvocationsStruct<'_>) -> bool { self.$enter(items) }
+        $(fn leave_modifier_invocations(&mut self, items: &$crate::ast::ModifierInvocationsStruct<'_>) { self.$leave(items); })?
 
-        fn enter_multi_typed_declaration_elements(&mut self, items: &$crate::ast::MultiTypedDeclarationElementsStruct) -> bool { self.$enter(items) }
-        $(fn leave_multi_typed_declaration_elements(&mut self, items: &$crate::ast::MultiTypedDeclarationElementsStruct) { self.$leave(items); })?
+        fn enter_multi_typed_declaration_elements(&mut self, items: &$crate::ast::MultiTypedDeclarationElementsStruct<'_>) -> bool { self.$enter(items) }
+        $(fn leave_multi_typed_declaration_elements(&mut self, items: &$crate::ast::MultiTypedDeclarationElementsStruct<'_>) { self.$leave(items); })?
 
-        fn enter_named_arguments(&mut self, items: &$crate::ast::NamedArgumentsStruct) -> bool { self.$enter(items) }
-        $(fn leave_named_arguments(&mut self, items: &$crate::ast::NamedArgumentsStruct) { self.$leave(items); })?
+        fn enter_named_arguments(&mut self, items: &$crate::ast::NamedArgumentsStruct<'_>) -> bool { self.$enter(items) }
+        $(fn leave_named_arguments(&mut self, items: &$crate::ast::NamedArgumentsStruct<'_>) { self.$leave(items); })?
 
-        fn enter_override_paths(&mut self, items: &$crate::ast::OverridePathsStruct) -> bool { self.$enter(items) }
-        $(fn leave_override_paths(&mut self, items: &$crate::ast::OverridePathsStruct) { self.$leave(items); })?
+        fn enter_override_paths(&mut self, items: &$crate::ast::OverridePathsStruct<'_>) -> bool { self.$enter(items) }
+        $(fn leave_override_paths(&mut self, items: &$crate::ast::OverridePathsStruct<'_>) { self.$leave(items); })?
 
-        fn enter_parameters(&mut self, items: &$crate::ast::ParametersStruct) -> bool { self.$enter(items) }
-        $(fn leave_parameters(&mut self, items: &$crate::ast::ParametersStruct) { self.$leave(items); })?
+        fn enter_parameters(&mut self, items: &$crate::ast::ParametersStruct<'_>) -> bool { self.$enter(items) }
+        $(fn leave_parameters(&mut self, items: &$crate::ast::ParametersStruct<'_>) { self.$leave(items); })?
 
-        fn enter_positional_arguments(&mut self, items: &$crate::ast::PositionalArgumentsStruct) -> bool { self.$enter(items) }
-        $(fn leave_positional_arguments(&mut self, items: &$crate::ast::PositionalArgumentsStruct) { self.$leave(items); })?
+        fn enter_positional_arguments(&mut self, items: &$crate::ast::PositionalArgumentsStruct<'_>) -> bool { self.$enter(items) }
+        $(fn leave_positional_arguments(&mut self, items: &$crate::ast::PositionalArgumentsStruct<'_>) { self.$leave(items); })?
 
-        fn enter_source_unit_members(&mut self, items: &$crate::ast::SourceUnitMembersStruct) -> bool { self.$enter(items) }
-        $(fn leave_source_unit_members(&mut self, items: &$crate::ast::SourceUnitMembersStruct) { self.$leave(items); })?
+        fn enter_source_unit_members(&mut self, items: &$crate::ast::SourceUnitMembersStruct<'_>) -> bool { self.$enter(items) }
+        $(fn leave_source_unit_members(&mut self, items: &$crate::ast::SourceUnitMembersStruct<'_>) { self.$leave(items); })?
 
-        fn enter_statements(&mut self, items: &$crate::ast::StatementsStruct) -> bool { self.$enter(items) }
-        $(fn leave_statements(&mut self, items: &$crate::ast::StatementsStruct) { self.$leave(items); })?
+        fn enter_statements(&mut self, items: &$crate::ast::StatementsStruct<'_>) -> bool { self.$enter(items) }
+        $(fn leave_statements(&mut self, items: &$crate::ast::StatementsStruct<'_>) { self.$leave(items); })?
 
-        fn enter_string_literals(&mut self, items: &$crate::ast::StringLiteralsStruct) -> bool { self.$enter(items) }
-        $(fn leave_string_literals(&mut self, items: &$crate::ast::StringLiteralsStruct) { self.$leave(items); })?
+        fn enter_string_literals(&mut self, items: &$crate::ast::StringLiteralsStruct<'_>) -> bool { self.$enter(items) }
+        $(fn leave_string_literals(&mut self, items: &$crate::ast::StringLiteralsStruct<'_>) { self.$leave(items); })?
 
-        fn enter_struct_members(&mut self, items: &$crate::ast::StructMembersStruct) -> bool { self.$enter(items) }
-        $(fn leave_struct_members(&mut self, items: &$crate::ast::StructMembersStruct) { self.$leave(items); })?
+        fn enter_struct_members(&mut self, items: &$crate::ast::StructMembersStruct<'_>) -> bool { self.$enter(items) }
+        $(fn leave_struct_members(&mut self, items: &$crate::ast::StructMembersStruct<'_>) { self.$leave(items); })?
 
-        fn enter_tuple_values(&mut self, items: &$crate::ast::TupleValuesStruct) -> bool { self.$enter(items) }
-        $(fn leave_tuple_values(&mut self, items: &$crate::ast::TupleValuesStruct) { self.$leave(items); })?
+        fn enter_tuple_values(&mut self, items: &$crate::ast::TupleValuesStruct<'_>) -> bool { self.$enter(items) }
+        $(fn leave_tuple_values(&mut self, items: &$crate::ast::TupleValuesStruct<'_>) { self.$leave(items); })?
 
-        fn enter_unicode_string_literals(&mut self, items: &$crate::ast::UnicodeStringLiteralsStruct) -> bool { self.$enter(items) }
-        $(fn leave_unicode_string_literals(&mut self, items: &$crate::ast::UnicodeStringLiteralsStruct) { self.$leave(items); })?
+        fn enter_unicode_string_literals(&mut self, items: &$crate::ast::UnicodeStringLiteralsStruct<'_>) -> bool { self.$enter(items) }
+        $(fn leave_unicode_string_literals(&mut self, items: &$crate::ast::UnicodeStringLiteralsStruct<'_>) { self.$leave(items); })?
 
-        fn enter_using_deconstruction_symbols(&mut self, items: &$crate::ast::UsingDeconstructionSymbolsStruct) -> bool { self.$enter(items) }
-        $(fn leave_using_deconstruction_symbols(&mut self, items: &$crate::ast::UsingDeconstructionSymbolsStruct) { self.$leave(items); })?
+        fn enter_using_deconstruction_symbols(&mut self, items: &$crate::ast::UsingDeconstructionSymbolsStruct<'_>) -> bool { self.$enter(items) }
+        $(fn leave_using_deconstruction_symbols(&mut self, items: &$crate::ast::UsingDeconstructionSymbolsStruct<'_>) { self.$leave(items); })?
 
-        fn enter_version_pragma_expression_set(&mut self, items: &$crate::ast::VersionPragmaExpressionSetStruct) -> bool { self.$enter(items) }
-        $(fn leave_version_pragma_expression_set(&mut self, items: &$crate::ast::VersionPragmaExpressionSetStruct) { self.$leave(items); })?
+        fn enter_version_pragma_expression_set(&mut self, items: &$crate::ast::VersionPragmaExpressionSetStruct<'_>) -> bool { self.$enter(items) }
+        $(fn leave_version_pragma_expression_set(&mut self, items: &$crate::ast::VersionPragmaExpressionSetStruct<'_>) { self.$leave(items); })?
 
-        fn enter_version_pragma_expression_sets(&mut self, items: &$crate::ast::VersionPragmaExpressionSetsStruct) -> bool { self.$enter(items) }
-        $(fn leave_version_pragma_expression_sets(&mut self, items: &$crate::ast::VersionPragmaExpressionSetsStruct) { self.$leave(items); })?
+        fn enter_version_pragma_expression_sets(&mut self, items: &$crate::ast::VersionPragmaExpressionSetsStruct<'_>) -> bool { self.$enter(items) }
+        $(fn leave_version_pragma_expression_sets(&mut self, items: &$crate::ast::VersionPragmaExpressionSetsStruct<'_>) { self.$leave(items); })?
 
-        fn enter_version_pragma_specifier(&mut self, items: &$crate::ast::VersionPragmaSpecifierStruct) -> bool { self.$enter(items) }
-        $(fn leave_version_pragma_specifier(&mut self, items: &$crate::ast::VersionPragmaSpecifierStruct) { self.$leave(items); })?
+        fn enter_version_pragma_specifier(&mut self, items: &$crate::ast::VersionPragmaSpecifierStruct<'_>) -> bool { self.$enter(items) }
+        $(fn leave_version_pragma_specifier(&mut self, items: &$crate::ast::VersionPragmaSpecifierStruct<'_>) { self.$leave(items); })?
 
-        fn enter_yul_arguments(&mut self, items: &$crate::ast::YulArgumentsStruct) -> bool { self.$enter(items) }
-        $(fn leave_yul_arguments(&mut self, items: &$crate::ast::YulArgumentsStruct) { self.$leave(items); })?
+        fn enter_yul_arguments(&mut self, items: &$crate::ast::YulArgumentsStruct<'_>) -> bool { self.$enter(items) }
+        $(fn leave_yul_arguments(&mut self, items: &$crate::ast::YulArgumentsStruct<'_>) { self.$leave(items); })?
 
-        fn enter_yul_parameters(&mut self, items: &$crate::ast::YulParametersStruct) -> bool { self.$enter(items) }
-        $(fn leave_yul_parameters(&mut self, items: &$crate::ast::YulParametersStruct) { self.$leave(items); })?
+        fn enter_yul_parameters(&mut self, items: &$crate::ast::YulParametersStruct<'_>) -> bool { self.$enter(items) }
+        $(fn leave_yul_parameters(&mut self, items: &$crate::ast::YulParametersStruct<'_>) { self.$leave(items); })?
 
-        fn enter_yul_path(&mut self, items: &$crate::ast::YulPathStruct) -> bool { self.$enter(items) }
-        $(fn leave_yul_path(&mut self, items: &$crate::ast::YulPathStruct) { self.$leave(items); })?
+        fn enter_yul_path(&mut self, items: &$crate::ast::YulPathStruct<'_>) -> bool { self.$enter(items) }
+        $(fn leave_yul_path(&mut self, items: &$crate::ast::YulPathStruct<'_>) { self.$leave(items); })?
 
-        fn enter_yul_paths(&mut self, items: &$crate::ast::YulPathsStruct) -> bool { self.$enter(items) }
-        $(fn leave_yul_paths(&mut self, items: &$crate::ast::YulPathsStruct) { self.$leave(items); })?
+        fn enter_yul_paths(&mut self, items: &$crate::ast::YulPathsStruct<'_>) -> bool { self.$enter(items) }
+        $(fn leave_yul_paths(&mut self, items: &$crate::ast::YulPathsStruct<'_>) { self.$leave(items); })?
 
-        fn enter_yul_statements(&mut self, items: &$crate::ast::YulStatementsStruct) -> bool { self.$enter(items) }
-        $(fn leave_yul_statements(&mut self, items: &$crate::ast::YulStatementsStruct) { self.$leave(items); })?
+        fn enter_yul_statements(&mut self, items: &$crate::ast::YulStatementsStruct<'_>) -> bool { self.$enter(items) }
+        $(fn leave_yul_statements(&mut self, items: &$crate::ast::YulStatementsStruct<'_>) { self.$leave(items); })?
 
-        fn enter_yul_value_cases(&mut self, items: &$crate::ast::YulValueCasesStruct) -> bool { self.$enter(items) }
-        $(fn leave_yul_value_cases(&mut self, items: &$crate::ast::YulValueCasesStruct) { self.$leave(items); })?
+        fn enter_yul_value_cases(&mut self, items: &$crate::ast::YulValueCasesStruct<'_>) -> bool { self.$enter(items) }
+        $(fn leave_yul_value_cases(&mut self, items: &$crate::ast::YulValueCasesStruct<'_>) { self.$leave(items); })?
 
-        fn enter_yul_variable_names(&mut self, items: &$crate::ast::YulVariableNamesStruct) -> bool { self.$enter(items) }
-        $(fn leave_yul_variable_names(&mut self, items: &$crate::ast::YulVariableNamesStruct) { self.$leave(items); })?
+        fn enter_yul_variable_names(&mut self, items: &$crate::ast::YulVariableNamesStruct<'_>) -> bool { self.$enter(items) }
+        $(fn leave_yul_variable_names(&mut self, items: &$crate::ast::YulVariableNamesStruct<'_>) { self.$leave(items); })?
       };
 }
 
@@ -1329,7 +1361,7 @@ pub use crate::impl_nonterminal_visitor_hooks;
 // Sequences
 //
 
-pub fn accept_abicoder_pragma(node: &AbicoderPragma, visitor: &mut impl Visitor) {
+pub fn accept_abicoder_pragma(node: &AbicoderPragma<'_>, visitor: &mut impl Visitor) {
     if !visitor.enter_abicoder_pragma(node) {
         return;
     }
@@ -1337,7 +1369,7 @@ pub fn accept_abicoder_pragma(node: &AbicoderPragma, visitor: &mut impl Visitor)
     visitor.leave_abicoder_pragma(node);
 }
 
-pub fn accept_additive_expression(node: &AdditiveExpression, visitor: &mut impl Visitor) {
+pub fn accept_additive_expression(node: &AdditiveExpression<'_>, visitor: &mut impl Visitor) {
     if !visitor.enter_additive_expression(node) {
         return;
     }
@@ -1347,14 +1379,14 @@ pub fn accept_additive_expression(node: &AdditiveExpression, visitor: &mut impl 
     visitor.leave_additive_expression(node);
 }
 
-pub fn accept_address_type(node: &AddressType, visitor: &mut impl Visitor) {
+pub fn accept_address_type(node: &AddressType<'_>, visitor: &mut impl Visitor) {
     if !visitor.enter_address_type(node) {
         return;
     }
     visitor.leave_address_type(node);
 }
 
-pub fn accept_and_expression(node: &AndExpression, visitor: &mut impl Visitor) {
+pub fn accept_and_expression(node: &AndExpression<'_>, visitor: &mut impl Visitor) {
     if !visitor.enter_and_expression(node) {
         return;
     }
@@ -1363,7 +1395,7 @@ pub fn accept_and_expression(node: &AndExpression, visitor: &mut impl Visitor) {
     visitor.leave_and_expression(node);
 }
 
-pub fn accept_array_expression(node: &ArrayExpression, visitor: &mut impl Visitor) {
+pub fn accept_array_expression(node: &ArrayExpression<'_>, visitor: &mut impl Visitor) {
     if !visitor.enter_array_expression(node) {
         return;
     }
@@ -1371,7 +1403,7 @@ pub fn accept_array_expression(node: &ArrayExpression, visitor: &mut impl Visito
     visitor.leave_array_expression(node);
 }
 
-pub fn accept_array_type_name(node: &ArrayTypeName, visitor: &mut impl Visitor) {
+pub fn accept_array_type_name(node: &ArrayTypeName<'_>, visitor: &mut impl Visitor) {
     if !visitor.enter_array_type_name(node) {
         return;
     }
@@ -1382,7 +1414,7 @@ pub fn accept_array_type_name(node: &ArrayTypeName, visitor: &mut impl Visitor) 
     visitor.leave_array_type_name(node);
 }
 
-pub fn accept_assembly_statement(node: &AssemblyStatement, visitor: &mut impl Visitor) {
+pub fn accept_assembly_statement(node: &AssemblyStatement<'_>, visitor: &mut impl Visitor) {
     if !visitor.enter_assembly_statement(node) {
         return;
     }
@@ -1390,7 +1422,7 @@ pub fn accept_assembly_statement(node: &AssemblyStatement, visitor: &mut impl Vi
     visitor.leave_assembly_statement(node);
 }
 
-pub fn accept_assignment_expression(node: &AssignmentExpression, visitor: &mut impl Visitor) {
+pub fn accept_assignment_expression(node: &AssignmentExpression<'_>, visitor: &mut impl Visitor) {
     if !visitor.enter_assignment_expression(node) {
         return;
     }
@@ -1400,7 +1432,7 @@ pub fn accept_assignment_expression(node: &AssignmentExpression, visitor: &mut i
     visitor.leave_assignment_expression(node);
 }
 
-pub fn accept_bitwise_and_expression(node: &BitwiseAndExpression, visitor: &mut impl Visitor) {
+pub fn accept_bitwise_and_expression(node: &BitwiseAndExpression<'_>, visitor: &mut impl Visitor) {
     if !visitor.enter_bitwise_and_expression(node) {
         return;
     }
@@ -1409,7 +1441,7 @@ pub fn accept_bitwise_and_expression(node: &BitwiseAndExpression, visitor: &mut 
     visitor.leave_bitwise_and_expression(node);
 }
 
-pub fn accept_bitwise_or_expression(node: &BitwiseOrExpression, visitor: &mut impl Visitor) {
+pub fn accept_bitwise_or_expression(node: &BitwiseOrExpression<'_>, visitor: &mut impl Visitor) {
     if !visitor.enter_bitwise_or_expression(node) {
         return;
     }
@@ -1418,7 +1450,7 @@ pub fn accept_bitwise_or_expression(node: &BitwiseOrExpression, visitor: &mut im
     visitor.leave_bitwise_or_expression(node);
 }
 
-pub fn accept_bitwise_xor_expression(node: &BitwiseXorExpression, visitor: &mut impl Visitor) {
+pub fn accept_bitwise_xor_expression(node: &BitwiseXorExpression<'_>, visitor: &mut impl Visitor) {
     if !visitor.enter_bitwise_xor_expression(node) {
         return;
     }
@@ -1427,7 +1459,7 @@ pub fn accept_bitwise_xor_expression(node: &BitwiseXorExpression, visitor: &mut 
     visitor.leave_bitwise_xor_expression(node);
 }
 
-pub fn accept_block(node: &Block, visitor: &mut impl Visitor) {
+pub fn accept_block(node: &Block<'_>, visitor: &mut impl Visitor) {
     if !visitor.enter_block(node) {
         return;
     }
@@ -1435,14 +1467,17 @@ pub fn accept_block(node: &Block, visitor: &mut impl Visitor) {
     visitor.leave_block(node);
 }
 
-pub fn accept_break_statement(node: &BreakStatement, visitor: &mut impl Visitor) {
+pub fn accept_break_statement(node: &BreakStatement<'_>, visitor: &mut impl Visitor) {
     if !visitor.enter_break_statement(node) {
         return;
     }
     visitor.leave_break_statement(node);
 }
 
-pub fn accept_call_options_expression(node: &CallOptionsExpression, visitor: &mut impl Visitor) {
+pub fn accept_call_options_expression(
+    node: &CallOptionsExpression<'_>,
+    visitor: &mut impl Visitor,
+) {
     if !visitor.enter_call_options_expression(node) {
         return;
     }
@@ -1451,7 +1486,7 @@ pub fn accept_call_options_expression(node: &CallOptionsExpression, visitor: &mu
     visitor.leave_call_options_expression(node);
 }
 
-pub fn accept_catch_clause(node: &CatchClause, visitor: &mut impl Visitor) {
+pub fn accept_catch_clause(node: &CatchClause<'_>, visitor: &mut impl Visitor) {
     if !visitor.enter_catch_clause(node) {
         return;
     }
@@ -1463,7 +1498,7 @@ pub fn accept_catch_clause(node: &CatchClause, visitor: &mut impl Visitor) {
     visitor.leave_catch_clause(node);
 }
 
-pub fn accept_conditional_expression(node: &ConditionalExpression, visitor: &mut impl Visitor) {
+pub fn accept_conditional_expression(node: &ConditionalExpression<'_>, visitor: &mut impl Visitor) {
     if !visitor.enter_conditional_expression(node) {
         return;
     }
@@ -1473,7 +1508,7 @@ pub fn accept_conditional_expression(node: &ConditionalExpression, visitor: &mut
     visitor.leave_conditional_expression(node);
 }
 
-pub fn accept_constant_definition(node: &ConstantDefinition, visitor: &mut impl Visitor) {
+pub fn accept_constant_definition(node: &ConstantDefinition<'_>, visitor: &mut impl Visitor) {
     if !visitor.enter_constant_definition(node) {
         return;
     }
@@ -1488,14 +1523,14 @@ pub fn accept_constant_definition(node: &ConstantDefinition, visitor: &mut impl 
     visitor.leave_constant_definition(node);
 }
 
-pub fn accept_continue_statement(node: &ContinueStatement, visitor: &mut impl Visitor) {
+pub fn accept_continue_statement(node: &ContinueStatement<'_>, visitor: &mut impl Visitor) {
     if !visitor.enter_continue_statement(node) {
         return;
     }
     visitor.leave_continue_statement(node);
 }
 
-pub fn accept_contract_definition(node: &ContractDefinition, visitor: &mut impl Visitor) {
+pub fn accept_contract_definition(node: &ContractDefinition<'_>, visitor: &mut impl Visitor) {
     if !visitor.enter_contract_definition(node) {
         return;
     }
@@ -1509,7 +1544,7 @@ pub fn accept_contract_definition(node: &ContractDefinition, visitor: &mut impl 
 }
 
 pub fn accept_decimal_number_expression(
-    node: &DecimalNumberExpression,
+    node: &DecimalNumberExpression<'_>,
     visitor: &mut impl Visitor,
 ) {
     if !visitor.enter_decimal_number_expression(node) {
@@ -1522,7 +1557,7 @@ pub fn accept_decimal_number_expression(
     visitor.leave_decimal_number_expression(node);
 }
 
-pub fn accept_do_while_statement(node: &DoWhileStatement, visitor: &mut impl Visitor) {
+pub fn accept_do_while_statement(node: &DoWhileStatement<'_>, visitor: &mut impl Visitor) {
     if !visitor.enter_do_while_statement(node) {
         return;
     }
@@ -1531,7 +1566,7 @@ pub fn accept_do_while_statement(node: &DoWhileStatement, visitor: &mut impl Vis
     visitor.leave_do_while_statement(node);
 }
 
-pub fn accept_emit_statement(node: &EmitStatement, visitor: &mut impl Visitor) {
+pub fn accept_emit_statement(node: &EmitStatement<'_>, visitor: &mut impl Visitor) {
     if !visitor.enter_emit_statement(node) {
         return;
     }
@@ -1540,7 +1575,7 @@ pub fn accept_emit_statement(node: &EmitStatement, visitor: &mut impl Visitor) {
     visitor.leave_emit_statement(node);
 }
 
-pub fn accept_enum_definition(node: &EnumDefinition, visitor: &mut impl Visitor) {
+pub fn accept_enum_definition(node: &EnumDefinition<'_>, visitor: &mut impl Visitor) {
     if !visitor.enter_enum_definition(node) {
         return;
     }
@@ -1549,7 +1584,7 @@ pub fn accept_enum_definition(node: &EnumDefinition, visitor: &mut impl Visitor)
     visitor.leave_enum_definition(node);
 }
 
-pub fn accept_equality_expression(node: &EqualityExpression, visitor: &mut impl Visitor) {
+pub fn accept_equality_expression(node: &EqualityExpression<'_>, visitor: &mut impl Visitor) {
     if !visitor.enter_equality_expression(node) {
         return;
     }
@@ -1559,7 +1594,7 @@ pub fn accept_equality_expression(node: &EqualityExpression, visitor: &mut impl 
     visitor.leave_equality_expression(node);
 }
 
-pub fn accept_error_definition(node: &ErrorDefinition, visitor: &mut impl Visitor) {
+pub fn accept_error_definition(node: &ErrorDefinition<'_>, visitor: &mut impl Visitor) {
     if !visitor.enter_error_definition(node) {
         return;
     }
@@ -1568,7 +1603,7 @@ pub fn accept_error_definition(node: &ErrorDefinition, visitor: &mut impl Visito
     visitor.leave_error_definition(node);
 }
 
-pub fn accept_event_definition(node: &EventDefinition, visitor: &mut impl Visitor) {
+pub fn accept_event_definition(node: &EventDefinition<'_>, visitor: &mut impl Visitor) {
     if !visitor.enter_event_definition(node) {
         return;
     }
@@ -1577,7 +1612,7 @@ pub fn accept_event_definition(node: &EventDefinition, visitor: &mut impl Visito
     visitor.leave_event_definition(node);
 }
 
-pub fn accept_experimental_pragma(node: &ExperimentalPragma, visitor: &mut impl Visitor) {
+pub fn accept_experimental_pragma(node: &ExperimentalPragma<'_>, visitor: &mut impl Visitor) {
     if !visitor.enter_experimental_pragma(node) {
         return;
     }
@@ -1586,7 +1621,7 @@ pub fn accept_experimental_pragma(node: &ExperimentalPragma, visitor: &mut impl 
 }
 
 pub fn accept_exponentiation_expression(
-    node: &ExponentiationExpression,
+    node: &ExponentiationExpression<'_>,
     visitor: &mut impl Visitor,
 ) {
     if !visitor.enter_exponentiation_expression(node) {
@@ -1597,7 +1632,7 @@ pub fn accept_exponentiation_expression(
     visitor.leave_exponentiation_expression(node);
 }
 
-pub fn accept_expression_statement(node: &ExpressionStatement, visitor: &mut impl Visitor) {
+pub fn accept_expression_statement(node: &ExpressionStatement<'_>, visitor: &mut impl Visitor) {
     if !visitor.enter_expression_statement(node) {
         return;
     }
@@ -1605,7 +1640,7 @@ pub fn accept_expression_statement(node: &ExpressionStatement, visitor: &mut imp
     visitor.leave_expression_statement(node);
 }
 
-pub fn accept_for_statement(node: &ForStatement, visitor: &mut impl Visitor) {
+pub fn accept_for_statement(node: &ForStatement<'_>, visitor: &mut impl Visitor) {
     if !visitor.enter_for_statement(node) {
         return;
     }
@@ -1618,7 +1653,7 @@ pub fn accept_for_statement(node: &ForStatement, visitor: &mut impl Visitor) {
     visitor.leave_for_statement(node);
 }
 
-pub fn accept_function_attributes(node: &FunctionAttributes, visitor: &mut impl Visitor) {
+pub fn accept_function_attributes(node: &FunctionAttributes<'_>, visitor: &mut impl Visitor) {
     if !visitor.enter_function_attributes(node) {
         return;
     }
@@ -1631,7 +1666,10 @@ pub fn accept_function_attributes(node: &FunctionAttributes, visitor: &mut impl 
     visitor.leave_function_attributes(node);
 }
 
-pub fn accept_function_call_expression(node: &FunctionCallExpression, visitor: &mut impl Visitor) {
+pub fn accept_function_call_expression(
+    node: &FunctionCallExpression<'_>,
+    visitor: &mut impl Visitor,
+) {
     if !visitor.enter_function_call_expression(node) {
         return;
     }
@@ -1640,7 +1678,7 @@ pub fn accept_function_call_expression(node: &FunctionCallExpression, visitor: &
     visitor.leave_function_call_expression(node);
 }
 
-pub fn accept_function_definition(node: &FunctionDefinition, visitor: &mut impl Visitor) {
+pub fn accept_function_definition(node: &FunctionDefinition<'_>, visitor: &mut impl Visitor) {
     if !visitor.enter_function_definition(node) {
         return;
     }
@@ -1659,7 +1697,7 @@ pub fn accept_function_definition(node: &FunctionDefinition, visitor: &mut impl 
     visitor.leave_function_definition(node);
 }
 
-pub fn accept_function_type(node: &FunctionType, visitor: &mut impl Visitor) {
+pub fn accept_function_type(node: &FunctionType<'_>, visitor: &mut impl Visitor) {
     if !visitor.enter_function_type(node) {
         return;
     }
@@ -1671,7 +1709,10 @@ pub fn accept_function_type(node: &FunctionType, visitor: &mut impl Visitor) {
     visitor.leave_function_type(node);
 }
 
-pub fn accept_function_type_attributes(node: &FunctionTypeAttributes, visitor: &mut impl Visitor) {
+pub fn accept_function_type_attributes(
+    node: &FunctionTypeAttributes<'_>,
+    visitor: &mut impl Visitor,
+) {
     if !visitor.enter_function_type_attributes(node) {
         return;
     }
@@ -1680,7 +1721,7 @@ pub fn accept_function_type_attributes(node: &FunctionTypeAttributes, visitor: &
     visitor.leave_function_type_attributes(node);
 }
 
-pub fn accept_hex_number_expression(node: &HexNumberExpression, visitor: &mut impl Visitor) {
+pub fn accept_hex_number_expression(node: &HexNumberExpression<'_>, visitor: &mut impl Visitor) {
     if !visitor.enter_hex_number_expression(node) {
         return;
     }
@@ -1688,7 +1729,7 @@ pub fn accept_hex_number_expression(node: &HexNumberExpression, visitor: &mut im
     visitor.leave_hex_number_expression(node);
 }
 
-pub fn accept_if_statement(node: &IfStatement, visitor: &mut impl Visitor) {
+pub fn accept_if_statement(node: &IfStatement<'_>, visitor: &mut impl Visitor) {
     if !visitor.enter_if_statement(node) {
         return;
     }
@@ -1700,7 +1741,7 @@ pub fn accept_if_statement(node: &IfStatement, visitor: &mut impl Visitor) {
     visitor.leave_if_statement(node);
 }
 
-pub fn accept_import_deconstruction(node: &ImportDeconstruction, visitor: &mut impl Visitor) {
+pub fn accept_import_deconstruction(node: &ImportDeconstruction<'_>, visitor: &mut impl Visitor) {
     if !visitor.enter_import_deconstruction(node) {
         return;
     }
@@ -1710,7 +1751,7 @@ pub fn accept_import_deconstruction(node: &ImportDeconstruction, visitor: &mut i
 }
 
 pub fn accept_import_deconstruction_symbol(
-    node: &ImportDeconstructionSymbol,
+    node: &ImportDeconstructionSymbol<'_>,
     visitor: &mut impl Visitor,
 ) {
     if !visitor.enter_import_deconstruction_symbol(node) {
@@ -1723,7 +1764,10 @@ pub fn accept_import_deconstruction_symbol(
     visitor.leave_import_deconstruction_symbol(node);
 }
 
-pub fn accept_index_access_expression(node: &IndexAccessExpression, visitor: &mut impl Visitor) {
+pub fn accept_index_access_expression(
+    node: &IndexAccessExpression<'_>,
+    visitor: &mut impl Visitor,
+) {
     if !visitor.enter_index_access_expression(node) {
         return;
     }
@@ -1737,7 +1781,7 @@ pub fn accept_index_access_expression(node: &IndexAccessExpression, visitor: &mu
     visitor.leave_index_access_expression(node);
 }
 
-pub fn accept_inequality_expression(node: &InequalityExpression, visitor: &mut impl Visitor) {
+pub fn accept_inequality_expression(node: &InequalityExpression<'_>, visitor: &mut impl Visitor) {
     if !visitor.enter_inequality_expression(node) {
         return;
     }
@@ -1747,7 +1791,7 @@ pub fn accept_inequality_expression(node: &InequalityExpression, visitor: &mut i
     visitor.leave_inequality_expression(node);
 }
 
-pub fn accept_inheritance_type(node: &InheritanceType, visitor: &mut impl Visitor) {
+pub fn accept_inheritance_type(node: &InheritanceType<'_>, visitor: &mut impl Visitor) {
     if !visitor.enter_inheritance_type(node) {
         return;
     }
@@ -1758,7 +1802,7 @@ pub fn accept_inheritance_type(node: &InheritanceType, visitor: &mut impl Visito
     visitor.leave_inheritance_type(node);
 }
 
-pub fn accept_interface_definition(node: &InterfaceDefinition, visitor: &mut impl Visitor) {
+pub fn accept_interface_definition(node: &InterfaceDefinition<'_>, visitor: &mut impl Visitor) {
     if !visitor.enter_interface_definition(node) {
         return;
     }
@@ -1770,7 +1814,7 @@ pub fn accept_interface_definition(node: &InterfaceDefinition, visitor: &mut imp
     visitor.leave_interface_definition(node);
 }
 
-pub fn accept_library_definition(node: &LibraryDefinition, visitor: &mut impl Visitor) {
+pub fn accept_library_definition(node: &LibraryDefinition<'_>, visitor: &mut impl Visitor) {
     if !visitor.enter_library_definition(node) {
         return;
     }
@@ -1779,7 +1823,7 @@ pub fn accept_library_definition(node: &LibraryDefinition, visitor: &mut impl Vi
     visitor.leave_library_definition(node);
 }
 
-pub fn accept_mapping_type(node: &MappingType, visitor: &mut impl Visitor) {
+pub fn accept_mapping_type(node: &MappingType<'_>, visitor: &mut impl Visitor) {
     if !visitor.enter_mapping_type(node) {
         return;
     }
@@ -1788,7 +1832,10 @@ pub fn accept_mapping_type(node: &MappingType, visitor: &mut impl Visitor) {
     visitor.leave_mapping_type(node);
 }
 
-pub fn accept_member_access_expression(node: &MemberAccessExpression, visitor: &mut impl Visitor) {
+pub fn accept_member_access_expression(
+    node: &MemberAccessExpression<'_>,
+    visitor: &mut impl Visitor,
+) {
     if !visitor.enter_member_access_expression(node) {
         return;
     }
@@ -1797,7 +1844,7 @@ pub fn accept_member_access_expression(node: &MemberAccessExpression, visitor: &
     visitor.leave_member_access_expression(node);
 }
 
-pub fn accept_modifier_attributes(node: &ModifierAttributes, visitor: &mut impl Visitor) {
+pub fn accept_modifier_attributes(node: &ModifierAttributes<'_>, visitor: &mut impl Visitor) {
     if !visitor.enter_modifier_attributes(node) {
         return;
     }
@@ -1807,7 +1854,7 @@ pub fn accept_modifier_attributes(node: &ModifierAttributes, visitor: &mut impl 
     visitor.leave_modifier_attributes(node);
 }
 
-pub fn accept_modifier_definition(node: &ModifierDefinition, visitor: &mut impl Visitor) {
+pub fn accept_modifier_definition(node: &ModifierDefinition<'_>, visitor: &mut impl Visitor) {
     if !visitor.enter_modifier_definition(node) {
         return;
     }
@@ -1820,7 +1867,7 @@ pub fn accept_modifier_definition(node: &ModifierDefinition, visitor: &mut impl 
     visitor.leave_modifier_definition(node);
 }
 
-pub fn accept_modifier_invocation(node: &ModifierInvocation, visitor: &mut impl Visitor) {
+pub fn accept_modifier_invocation(node: &ModifierInvocation<'_>, visitor: &mut impl Visitor) {
     if !visitor.enter_modifier_invocation(node) {
         return;
     }
@@ -1831,7 +1878,10 @@ pub fn accept_modifier_invocation(node: &ModifierInvocation, visitor: &mut impl 
     visitor.leave_modifier_invocation(node);
 }
 
-pub fn accept_multi_typed_declaration(node: &MultiTypedDeclaration, visitor: &mut impl Visitor) {
+pub fn accept_multi_typed_declaration(
+    node: &MultiTypedDeclaration<'_>,
+    visitor: &mut impl Visitor,
+) {
     if !visitor.enter_multi_typed_declaration(node) {
         return;
     }
@@ -1841,7 +1891,7 @@ pub fn accept_multi_typed_declaration(node: &MultiTypedDeclaration, visitor: &mu
 }
 
 pub fn accept_multi_typed_declaration_element(
-    node: &MultiTypedDeclarationElement,
+    node: &MultiTypedDeclarationElement<'_>,
     visitor: &mut impl Visitor,
 ) {
     if !visitor.enter_multi_typed_declaration_element(node) {
@@ -1854,7 +1904,7 @@ pub fn accept_multi_typed_declaration_element(
 }
 
 pub fn accept_multiplicative_expression(
-    node: &MultiplicativeExpression,
+    node: &MultiplicativeExpression<'_>,
     visitor: &mut impl Visitor,
 ) {
     if !visitor.enter_multiplicative_expression(node) {
@@ -1866,7 +1916,7 @@ pub fn accept_multiplicative_expression(
     visitor.leave_multiplicative_expression(node);
 }
 
-pub fn accept_named_argument(node: &NamedArgument, visitor: &mut impl Visitor) {
+pub fn accept_named_argument(node: &NamedArgument<'_>, visitor: &mut impl Visitor) {
     if !visitor.enter_named_argument(node) {
         return;
     }
@@ -1875,7 +1925,7 @@ pub fn accept_named_argument(node: &NamedArgument, visitor: &mut impl Visitor) {
     visitor.leave_named_argument(node);
 }
 
-pub fn accept_new_expression(node: &NewExpression, visitor: &mut impl Visitor) {
+pub fn accept_new_expression(node: &NewExpression<'_>, visitor: &mut impl Visitor) {
     if !visitor.enter_new_expression(node) {
         return;
     }
@@ -1883,7 +1933,7 @@ pub fn accept_new_expression(node: &NewExpression, visitor: &mut impl Visitor) {
     visitor.leave_new_expression(node);
 }
 
-pub fn accept_or_expression(node: &OrExpression, visitor: &mut impl Visitor) {
+pub fn accept_or_expression(node: &OrExpression<'_>, visitor: &mut impl Visitor) {
     if !visitor.enter_or_expression(node) {
         return;
     }
@@ -1892,7 +1942,7 @@ pub fn accept_or_expression(node: &OrExpression, visitor: &mut impl Visitor) {
     visitor.leave_or_expression(node);
 }
 
-pub fn accept_parameter(node: &Parameter, visitor: &mut impl Visitor) {
+pub fn accept_parameter(node: &Parameter<'_>, visitor: &mut impl Visitor) {
     if !visitor.enter_parameter(node) {
         return;
     }
@@ -1906,7 +1956,7 @@ pub fn accept_parameter(node: &Parameter, visitor: &mut impl Visitor) {
     visitor.leave_parameter(node);
 }
 
-pub fn accept_path_import(node: &PathImport, visitor: &mut impl Visitor) {
+pub fn accept_path_import(node: &PathImport<'_>, visitor: &mut impl Visitor) {
     if !visitor.enter_path_import(node) {
         return;
     }
@@ -1917,7 +1967,7 @@ pub fn accept_path_import(node: &PathImport, visitor: &mut impl Visitor) {
     visitor.leave_path_import(node);
 }
 
-pub fn accept_postfix_expression(node: &PostfixExpression, visitor: &mut impl Visitor) {
+pub fn accept_postfix_expression(node: &PostfixExpression<'_>, visitor: &mut impl Visitor) {
     if !visitor.enter_postfix_expression(node) {
         return;
     }
@@ -1926,7 +1976,7 @@ pub fn accept_postfix_expression(node: &PostfixExpression, visitor: &mut impl Vi
     visitor.leave_postfix_expression(node);
 }
 
-pub fn accept_pragma_directive(node: &PragmaDirective, visitor: &mut impl Visitor) {
+pub fn accept_pragma_directive(node: &PragmaDirective<'_>, visitor: &mut impl Visitor) {
     if !visitor.enter_pragma_directive(node) {
         return;
     }
@@ -1934,7 +1984,7 @@ pub fn accept_pragma_directive(node: &PragmaDirective, visitor: &mut impl Visito
     visitor.leave_pragma_directive(node);
 }
 
-pub fn accept_prefix_expression(node: &PrefixExpression, visitor: &mut impl Visitor) {
+pub fn accept_prefix_expression(node: &PrefixExpression<'_>, visitor: &mut impl Visitor) {
     if !visitor.enter_prefix_expression(node) {
         return;
     }
@@ -1943,7 +1993,7 @@ pub fn accept_prefix_expression(node: &PrefixExpression, visitor: &mut impl Visi
     visitor.leave_prefix_expression(node);
 }
 
-pub fn accept_return_statement(node: &ReturnStatement, visitor: &mut impl Visitor) {
+pub fn accept_return_statement(node: &ReturnStatement<'_>, visitor: &mut impl Visitor) {
     if !visitor.enter_return_statement(node) {
         return;
     }
@@ -1953,7 +2003,7 @@ pub fn accept_return_statement(node: &ReturnStatement, visitor: &mut impl Visito
     visitor.leave_return_statement(node);
 }
 
-pub fn accept_revert_statement(node: &RevertStatement, visitor: &mut impl Visitor) {
+pub fn accept_revert_statement(node: &RevertStatement<'_>, visitor: &mut impl Visitor) {
     if !visitor.enter_revert_statement(node) {
         return;
     }
@@ -1962,7 +2012,7 @@ pub fn accept_revert_statement(node: &RevertStatement, visitor: &mut impl Visito
     visitor.leave_revert_statement(node);
 }
 
-pub fn accept_shift_expression(node: &ShiftExpression, visitor: &mut impl Visitor) {
+pub fn accept_shift_expression(node: &ShiftExpression<'_>, visitor: &mut impl Visitor) {
     if !visitor.enter_shift_expression(node) {
         return;
     }
@@ -1972,7 +2022,10 @@ pub fn accept_shift_expression(node: &ShiftExpression, visitor: &mut impl Visito
     visitor.leave_shift_expression(node);
 }
 
-pub fn accept_single_typed_declaration(node: &SingleTypedDeclaration, visitor: &mut impl Visitor) {
+pub fn accept_single_typed_declaration(
+    node: &SingleTypedDeclaration<'_>,
+    visitor: &mut impl Visitor,
+) {
     if !visitor.enter_single_typed_declaration(node) {
         return;
     }
@@ -1983,7 +2036,7 @@ pub fn accept_single_typed_declaration(node: &SingleTypedDeclaration, visitor: &
     visitor.leave_single_typed_declaration(node);
 }
 
-pub fn accept_source_unit(node: &SourceUnit, visitor: &mut impl Visitor) {
+pub fn accept_source_unit(node: &SourceUnit<'_>, visitor: &mut impl Visitor) {
     if !visitor.enter_source_unit(node) {
         return;
     }
@@ -1992,7 +2045,7 @@ pub fn accept_source_unit(node: &SourceUnit, visitor: &mut impl Visitor) {
 }
 
 pub fn accept_state_variable_attributes(
-    node: &StateVariableAttributes,
+    node: &StateVariableAttributes<'_>,
     visitor: &mut impl Visitor,
 ) {
     if !visitor.enter_state_variable_attributes(node) {
@@ -2007,7 +2060,7 @@ pub fn accept_state_variable_attributes(
 }
 
 pub fn accept_state_variable_definition(
-    node: &StateVariableDefinition,
+    node: &StateVariableDefinition<'_>,
     visitor: &mut impl Visitor,
 ) {
     if !visitor.enter_state_variable_definition(node) {
@@ -2022,7 +2075,7 @@ pub fn accept_state_variable_definition(
     visitor.leave_state_variable_definition(node);
 }
 
-pub fn accept_struct_definition(node: &StructDefinition, visitor: &mut impl Visitor) {
+pub fn accept_struct_definition(node: &StructDefinition<'_>, visitor: &mut impl Visitor) {
     if !visitor.enter_struct_definition(node) {
         return;
     }
@@ -2031,7 +2084,7 @@ pub fn accept_struct_definition(node: &StructDefinition, visitor: &mut impl Visi
     visitor.leave_struct_definition(node);
 }
 
-pub fn accept_struct_member(node: &StructMember, visitor: &mut impl Visitor) {
+pub fn accept_struct_member(node: &StructMember<'_>, visitor: &mut impl Visitor) {
     if !visitor.enter_struct_member(node) {
         return;
     }
@@ -2040,7 +2093,7 @@ pub fn accept_struct_member(node: &StructMember, visitor: &mut impl Visitor) {
     visitor.leave_struct_member(node);
 }
 
-pub fn accept_try_statement(node: &TryStatement, visitor: &mut impl Visitor) {
+pub fn accept_try_statement(node: &TryStatement<'_>, visitor: &mut impl Visitor) {
     if !visitor.enter_try_statement(node) {
         return;
     }
@@ -2053,7 +2106,7 @@ pub fn accept_try_statement(node: &TryStatement, visitor: &mut impl Visitor) {
     visitor.leave_try_statement(node);
 }
 
-pub fn accept_tuple_expression(node: &TupleExpression, visitor: &mut impl Visitor) {
+pub fn accept_tuple_expression(node: &TupleExpression<'_>, visitor: &mut impl Visitor) {
     if !visitor.enter_tuple_expression(node) {
         return;
     }
@@ -2061,7 +2114,7 @@ pub fn accept_tuple_expression(node: &TupleExpression, visitor: &mut impl Visito
     visitor.leave_tuple_expression(node);
 }
 
-pub fn accept_tuple_value(node: &TupleValue, visitor: &mut impl Visitor) {
+pub fn accept_tuple_value(node: &TupleValue<'_>, visitor: &mut impl Visitor) {
     if !visitor.enter_tuple_value(node) {
         return;
     }
@@ -2071,7 +2124,7 @@ pub fn accept_tuple_value(node: &TupleValue, visitor: &mut impl Visitor) {
     visitor.leave_tuple_value(node);
 }
 
-pub fn accept_type_expression(node: &TypeExpression, visitor: &mut impl Visitor) {
+pub fn accept_type_expression(node: &TypeExpression<'_>, visitor: &mut impl Visitor) {
     if !visitor.enter_type_expression(node) {
         return;
     }
@@ -2079,7 +2132,7 @@ pub fn accept_type_expression(node: &TypeExpression, visitor: &mut impl Visitor)
     visitor.leave_type_expression(node);
 }
 
-pub fn accept_unchecked_block(node: &UncheckedBlock, visitor: &mut impl Visitor) {
+pub fn accept_unchecked_block(node: &UncheckedBlock<'_>, visitor: &mut impl Visitor) {
     if !visitor.enter_unchecked_block(node) {
         return;
     }
@@ -2088,7 +2141,7 @@ pub fn accept_unchecked_block(node: &UncheckedBlock, visitor: &mut impl Visitor)
 }
 
 pub fn accept_user_defined_value_type_definition(
-    node: &UserDefinedValueTypeDefinition,
+    node: &UserDefinedValueTypeDefinition<'_>,
     visitor: &mut impl Visitor,
 ) {
     if !visitor.enter_user_defined_value_type_definition(node) {
@@ -2099,7 +2152,7 @@ pub fn accept_user_defined_value_type_definition(
     visitor.leave_user_defined_value_type_definition(node);
 }
 
-pub fn accept_using_deconstruction(node: &UsingDeconstruction, visitor: &mut impl Visitor) {
+pub fn accept_using_deconstruction(node: &UsingDeconstruction<'_>, visitor: &mut impl Visitor) {
     if !visitor.enter_using_deconstruction(node) {
         return;
     }
@@ -2108,7 +2161,7 @@ pub fn accept_using_deconstruction(node: &UsingDeconstruction, visitor: &mut imp
 }
 
 pub fn accept_using_deconstruction_symbol(
-    node: &UsingDeconstructionSymbol,
+    node: &UsingDeconstructionSymbol<'_>,
     visitor: &mut impl Visitor,
 ) {
     if !visitor.enter_using_deconstruction_symbol(node) {
@@ -2121,7 +2174,7 @@ pub fn accept_using_deconstruction_symbol(
     visitor.leave_using_deconstruction_symbol(node);
 }
 
-pub fn accept_using_directive(node: &UsingDirective, visitor: &mut impl Visitor) {
+pub fn accept_using_directive(node: &UsingDirective<'_>, visitor: &mut impl Visitor) {
     if !visitor.enter_using_directive(node) {
         return;
     }
@@ -2130,7 +2183,7 @@ pub fn accept_using_directive(node: &UsingDirective, visitor: &mut impl Visitor)
     visitor.leave_using_directive(node);
 }
 
-pub fn accept_variable_declaration(node: &VariableDeclaration, visitor: &mut impl Visitor) {
+pub fn accept_variable_declaration(node: &VariableDeclaration<'_>, visitor: &mut impl Visitor) {
     if !visitor.enter_variable_declaration(node) {
         return;
     }
@@ -2143,7 +2196,7 @@ pub fn accept_variable_declaration(node: &VariableDeclaration, visitor: &mut imp
 }
 
 pub fn accept_variable_declaration_statement(
-    node: &VariableDeclarationStatement,
+    node: &VariableDeclarationStatement<'_>,
     visitor: &mut impl Visitor,
 ) {
     if !visitor.enter_variable_declaration_statement(node) {
@@ -2153,7 +2206,7 @@ pub fn accept_variable_declaration_statement(
     visitor.leave_variable_declaration_statement(node);
 }
 
-pub fn accept_version_pragma(node: &VersionPragma, visitor: &mut impl Visitor) {
+pub fn accept_version_pragma(node: &VersionPragma<'_>, visitor: &mut impl Visitor) {
     if !visitor.enter_version_pragma(node) {
         return;
     }
@@ -2162,7 +2215,7 @@ pub fn accept_version_pragma(node: &VersionPragma, visitor: &mut impl Visitor) {
 }
 
 pub fn accept_version_pragma_comparator(
-    node: &VersionPragmaComparator,
+    node: &VersionPragmaComparator<'_>,
     visitor: &mut impl Visitor,
 ) {
     if !visitor.enter_version_pragma_comparator(node) {
@@ -2173,7 +2226,7 @@ pub fn accept_version_pragma_comparator(
     visitor.leave_version_pragma_comparator(node);
 }
 
-pub fn accept_while_statement(node: &WhileStatement, visitor: &mut impl Visitor) {
+pub fn accept_while_statement(node: &WhileStatement<'_>, visitor: &mut impl Visitor) {
     if !visitor.enter_while_statement(node) {
         return;
     }
@@ -2182,7 +2235,7 @@ pub fn accept_while_statement(node: &WhileStatement, visitor: &mut impl Visitor)
     visitor.leave_while_statement(node);
 }
 
-pub fn accept_yul_block(node: &YulBlock, visitor: &mut impl Visitor) {
+pub fn accept_yul_block(node: &YulBlock<'_>, visitor: &mut impl Visitor) {
     if !visitor.enter_yul_block(node) {
         return;
     }
@@ -2190,21 +2243,21 @@ pub fn accept_yul_block(node: &YulBlock, visitor: &mut impl Visitor) {
     visitor.leave_yul_block(node);
 }
 
-pub fn accept_yul_break_statement(node: &YulBreakStatement, visitor: &mut impl Visitor) {
+pub fn accept_yul_break_statement(node: &YulBreakStatement<'_>, visitor: &mut impl Visitor) {
     if !visitor.enter_yul_break_statement(node) {
         return;
     }
     visitor.leave_yul_break_statement(node);
 }
 
-pub fn accept_yul_continue_statement(node: &YulContinueStatement, visitor: &mut impl Visitor) {
+pub fn accept_yul_continue_statement(node: &YulContinueStatement<'_>, visitor: &mut impl Visitor) {
     if !visitor.enter_yul_continue_statement(node) {
         return;
     }
     visitor.leave_yul_continue_statement(node);
 }
 
-pub fn accept_yul_default_case(node: &YulDefaultCase, visitor: &mut impl Visitor) {
+pub fn accept_yul_default_case(node: &YulDefaultCase<'_>, visitor: &mut impl Visitor) {
     if !visitor.enter_yul_default_case(node) {
         return;
     }
@@ -2212,7 +2265,7 @@ pub fn accept_yul_default_case(node: &YulDefaultCase, visitor: &mut impl Visitor
     visitor.leave_yul_default_case(node);
 }
 
-pub fn accept_yul_for_statement(node: &YulForStatement, visitor: &mut impl Visitor) {
+pub fn accept_yul_for_statement(node: &YulForStatement<'_>, visitor: &mut impl Visitor) {
     if !visitor.enter_yul_for_statement(node) {
         return;
     }
@@ -2224,7 +2277,7 @@ pub fn accept_yul_for_statement(node: &YulForStatement, visitor: &mut impl Visit
 }
 
 pub fn accept_yul_function_call_expression(
-    node: &YulFunctionCallExpression,
+    node: &YulFunctionCallExpression<'_>,
     visitor: &mut impl Visitor,
 ) {
     if !visitor.enter_yul_function_call_expression(node) {
@@ -2235,7 +2288,10 @@ pub fn accept_yul_function_call_expression(
     visitor.leave_yul_function_call_expression(node);
 }
 
-pub fn accept_yul_function_definition(node: &YulFunctionDefinition, visitor: &mut impl Visitor) {
+pub fn accept_yul_function_definition(
+    node: &YulFunctionDefinition<'_>,
+    visitor: &mut impl Visitor,
+) {
     if !visitor.enter_yul_function_definition(node) {
         return;
     }
@@ -2248,7 +2304,7 @@ pub fn accept_yul_function_definition(node: &YulFunctionDefinition, visitor: &mu
     visitor.leave_yul_function_definition(node);
 }
 
-pub fn accept_yul_if_statement(node: &YulIfStatement, visitor: &mut impl Visitor) {
+pub fn accept_yul_if_statement(node: &YulIfStatement<'_>, visitor: &mut impl Visitor) {
     if !visitor.enter_yul_if_statement(node) {
         return;
     }
@@ -2257,14 +2313,14 @@ pub fn accept_yul_if_statement(node: &YulIfStatement, visitor: &mut impl Visitor
     visitor.leave_yul_if_statement(node);
 }
 
-pub fn accept_yul_leave_statement(node: &YulLeaveStatement, visitor: &mut impl Visitor) {
+pub fn accept_yul_leave_statement(node: &YulLeaveStatement<'_>, visitor: &mut impl Visitor) {
     if !visitor.enter_yul_leave_statement(node) {
         return;
     }
     visitor.leave_yul_leave_statement(node);
 }
 
-pub fn accept_yul_switch_statement(node: &YulSwitchStatement, visitor: &mut impl Visitor) {
+pub fn accept_yul_switch_statement(node: &YulSwitchStatement<'_>, visitor: &mut impl Visitor) {
     if !visitor.enter_yul_switch_statement(node) {
         return;
     }
@@ -2276,7 +2332,7 @@ pub fn accept_yul_switch_statement(node: &YulSwitchStatement, visitor: &mut impl
     visitor.leave_yul_switch_statement(node);
 }
 
-pub fn accept_yul_value_case(node: &YulValueCase, visitor: &mut impl Visitor) {
+pub fn accept_yul_value_case(node: &YulValueCase<'_>, visitor: &mut impl Visitor) {
     if !visitor.enter_yul_value_case(node) {
         return;
     }
@@ -2286,7 +2342,7 @@ pub fn accept_yul_value_case(node: &YulValueCase, visitor: &mut impl Visitor) {
 }
 
 pub fn accept_yul_variable_assignment_statement(
-    node: &YulVariableAssignmentStatement,
+    node: &YulVariableAssignmentStatement<'_>,
     visitor: &mut impl Visitor,
 ) {
     if !visitor.enter_yul_variable_assignment_statement(node) {
@@ -2298,7 +2354,7 @@ pub fn accept_yul_variable_assignment_statement(
 }
 
 pub fn accept_yul_variable_declaration_statement(
-    node: &YulVariableDeclarationStatement,
+    node: &YulVariableDeclarationStatement<'_>,
     visitor: &mut impl Visitor,
 ) {
     if !visitor.enter_yul_variable_declaration_statement(node) {
@@ -2312,7 +2368,7 @@ pub fn accept_yul_variable_declaration_statement(
 }
 
 pub fn accept_yul_variable_declaration_value(
-    node: &YulVariableDeclarationValue,
+    node: &YulVariableDeclarationValue<'_>,
     visitor: &mut impl Visitor,
 ) {
     if !visitor.enter_yul_variable_declaration_value(node) {
@@ -2338,7 +2394,7 @@ pub fn accept_abicoder_version(node: &AbicoderVersion, visitor: &mut impl Visito
 }
 
 pub fn accept_additive_expression_operator(
-    node: &AdditiveExpressionOperator,
+    node: &AdditiveExpressionOperator<'_>,
     visitor: &mut impl Visitor,
 ) {
     if !visitor.enter_additive_expression_operator(node) {
@@ -2351,7 +2407,7 @@ pub fn accept_additive_expression_operator(
     visitor.leave_additive_expression_operator(node);
 }
 
-pub fn accept_arguments_declaration(node: &ArgumentsDeclaration, visitor: &mut impl Visitor) {
+pub fn accept_arguments_declaration(node: &ArgumentsDeclaration<'_>, visitor: &mut impl Visitor) {
     if !visitor.enter_arguments_declaration(node) {
         return;
     }
@@ -2367,7 +2423,7 @@ pub fn accept_arguments_declaration(node: &ArgumentsDeclaration, visitor: &mut i
 }
 
 pub fn accept_assignment_expression_operator(
-    node: &AssignmentExpressionOperator,
+    node: &AssignmentExpressionOperator<'_>,
     visitor: &mut impl Visitor,
 ) {
     if !visitor.enter_assignment_expression_operator(node) {
@@ -2402,7 +2458,7 @@ pub fn accept_catch_clause_kind(node: &CatchClauseKind, visitor: &mut impl Visit
     visitor.leave_catch_clause_kind(node);
 }
 
-pub fn accept_contract_member(node: &ContractMember, visitor: &mut impl Visitor) {
+pub fn accept_contract_member(node: &ContractMember<'_>, visitor: &mut impl Visitor) {
     if !visitor.enter_contract_member(node) {
         return;
     }
@@ -2441,7 +2497,7 @@ pub fn accept_contract_member(node: &ContractMember, visitor: &mut impl Visitor)
     visitor.leave_contract_member(node);
 }
 
-pub fn accept_elementary_type(node: &ElementaryType, visitor: &mut impl Visitor) {
+pub fn accept_elementary_type(node: &ElementaryType<'_>, visitor: &mut impl Visitor) {
     if !visitor.enter_elementary_type(node) {
         return;
     }
@@ -2471,7 +2527,7 @@ pub fn accept_elementary_type(node: &ElementaryType, visitor: &mut impl Visitor)
 }
 
 pub fn accept_equality_expression_operator(
-    node: &EqualityExpressionOperator,
+    node: &EqualityExpressionOperator<'_>,
     visitor: &mut impl Visitor,
 ) {
     if !visitor.enter_equality_expression_operator(node) {
@@ -2497,7 +2553,7 @@ pub fn accept_experimental_feature(node: &ExperimentalFeature, visitor: &mut imp
     visitor.leave_experimental_feature(node);
 }
 
-pub fn accept_expression(node: &Expression, visitor: &mut impl Visitor) {
+pub fn accept_expression(node: &Expression<'_>, visitor: &mut impl Visitor) {
     if !visitor.enter_expression(node) {
         return;
     }
@@ -2595,7 +2651,10 @@ pub fn accept_expression(node: &Expression, visitor: &mut impl Visitor) {
     visitor.leave_expression(node);
 }
 
-pub fn accept_for_statement_condition(node: &ForStatementCondition, visitor: &mut impl Visitor) {
+pub fn accept_for_statement_condition(
+    node: &ForStatementCondition<'_>,
+    visitor: &mut impl Visitor,
+) {
     if !visitor.enter_for_statement_condition(node) {
         return;
     }
@@ -2609,7 +2668,7 @@ pub fn accept_for_statement_condition(node: &ForStatementCondition, visitor: &mu
 }
 
 pub fn accept_for_statement_initialization(
-    node: &ForStatementInitialization,
+    node: &ForStatementInitialization<'_>,
     visitor: &mut impl Visitor,
 ) {
     if !visitor.enter_for_statement_initialization(node) {
@@ -2668,7 +2727,7 @@ pub fn accept_function_visibility(node: &FunctionVisibility, visitor: &mut impl 
     visitor.leave_function_visibility(node);
 }
 
-pub fn accept_import_clause(node: &ImportClause, visitor: &mut impl Visitor) {
+pub fn accept_import_clause(node: &ImportClause<'_>, visitor: &mut impl Visitor) {
     if !visitor.enter_import_clause(node) {
         return;
     }
@@ -2684,7 +2743,7 @@ pub fn accept_import_clause(node: &ImportClause, visitor: &mut impl Visitor) {
 }
 
 pub fn accept_inequality_expression_operator(
-    node: &InequalityExpressionOperator,
+    node: &InequalityExpressionOperator<'_>,
     visitor: &mut impl Visitor,
 ) {
     if !visitor.enter_inequality_expression_operator(node) {
@@ -2700,7 +2759,7 @@ pub fn accept_inequality_expression_operator(
 }
 
 pub fn accept_multiplicative_expression_operator(
-    node: &MultiplicativeExpressionOperator,
+    node: &MultiplicativeExpressionOperator<'_>,
     visitor: &mut impl Visitor,
 ) {
     if !visitor.enter_multiplicative_expression_operator(node) {
@@ -2714,7 +2773,7 @@ pub fn accept_multiplicative_expression_operator(
     visitor.leave_multiplicative_expression_operator(node);
 }
 
-pub fn accept_number_unit(node: &NumberUnit, visitor: &mut impl Visitor) {
+pub fn accept_number_unit(node: &NumberUnit<'_>, visitor: &mut impl Visitor) {
     if !visitor.enter_number_unit(node) {
         return;
     }
@@ -2732,7 +2791,7 @@ pub fn accept_number_unit(node: &NumberUnit, visitor: &mut impl Visitor) {
 }
 
 pub fn accept_postfix_expression_operator(
-    node: &PostfixExpressionOperator,
+    node: &PostfixExpressionOperator<'_>,
     visitor: &mut impl Visitor,
 ) {
     if !visitor.enter_postfix_expression_operator(node) {
@@ -2745,7 +2804,7 @@ pub fn accept_postfix_expression_operator(
     visitor.leave_postfix_expression_operator(node);
 }
 
-pub fn accept_pragma(node: &Pragma, visitor: &mut impl Visitor) {
+pub fn accept_pragma(node: &Pragma<'_>, visitor: &mut impl Visitor) {
     if !visitor.enter_pragma(node) {
         return;
     }
@@ -2764,7 +2823,7 @@ pub fn accept_pragma(node: &Pragma, visitor: &mut impl Visitor) {
 }
 
 pub fn accept_prefix_expression_operator(
-    node: &PrefixExpressionOperator,
+    node: &PrefixExpressionOperator<'_>,
     visitor: &mut impl Visitor,
 ) {
     if !visitor.enter_prefix_expression_operator(node) {
@@ -2782,7 +2841,7 @@ pub fn accept_prefix_expression_operator(
 }
 
 pub fn accept_shift_expression_operator(
-    node: &ShiftExpressionOperator,
+    node: &ShiftExpressionOperator<'_>,
     visitor: &mut impl Visitor,
 ) {
     if !visitor.enter_shift_expression_operator(node) {
@@ -2796,7 +2855,7 @@ pub fn accept_shift_expression_operator(
     visitor.leave_shift_expression_operator(node);
 }
 
-pub fn accept_source_unit_member(node: &SourceUnitMember, visitor: &mut impl Visitor) {
+pub fn accept_source_unit_member(node: &SourceUnitMember<'_>, visitor: &mut impl Visitor) {
     if !visitor.enter_source_unit_member(node) {
         return;
     }
@@ -2875,7 +2934,7 @@ pub fn accept_state_variable_visibility(
     visitor.leave_state_variable_visibility(node);
 }
 
-pub fn accept_statement(node: &Statement, visitor: &mut impl Visitor) {
+pub fn accept_statement(node: &Statement<'_>, visitor: &mut impl Visitor) {
     if !visitor.enter_statement(node) {
         return;
     }
@@ -2929,7 +2988,7 @@ pub fn accept_statement(node: &Statement, visitor: &mut impl Visitor) {
     visitor.leave_statement(node);
 }
 
-pub fn accept_storage_location(node: &StorageLocation, visitor: &mut impl Visitor) {
+pub fn accept_storage_location(node: &StorageLocation<'_>, visitor: &mut impl Visitor) {
     if !visitor.enter_storage_location(node) {
         return;
     }
@@ -2941,7 +3000,7 @@ pub fn accept_storage_location(node: &StorageLocation, visitor: &mut impl Visito
     visitor.leave_storage_location(node);
 }
 
-pub fn accept_string_expression(node: &StringExpression, visitor: &mut impl Visitor) {
+pub fn accept_string_expression(node: &StringExpression<'_>, visitor: &mut impl Visitor) {
     if !visitor.enter_string_expression(node) {
         return;
     }
@@ -2959,7 +3018,7 @@ pub fn accept_string_expression(node: &StringExpression, visitor: &mut impl Visi
     visitor.leave_string_expression(node);
 }
 
-pub fn accept_type_name(node: &TypeName, visitor: &mut impl Visitor) {
+pub fn accept_type_name(node: &TypeName<'_>, visitor: &mut impl Visitor) {
     if !visitor.enter_type_name(node) {
         return;
     }
@@ -2983,7 +3042,7 @@ pub fn accept_type_name(node: &TypeName, visitor: &mut impl Visitor) {
     visitor.leave_type_name(node);
 }
 
-pub fn accept_using_clause(node: &UsingClause, visitor: &mut impl Visitor) {
+pub fn accept_using_clause(node: &UsingClause<'_>, visitor: &mut impl Visitor) {
     if !visitor.enter_using_clause(node) {
         return;
     }
@@ -2998,7 +3057,7 @@ pub fn accept_using_clause(node: &UsingClause, visitor: &mut impl Visitor) {
     visitor.leave_using_clause(node);
 }
 
-pub fn accept_using_operator(node: &UsingOperator, visitor: &mut impl Visitor) {
+pub fn accept_using_operator(node: &UsingOperator<'_>, visitor: &mut impl Visitor) {
     if !visitor.enter_using_operator(node) {
         return;
     }
@@ -3022,7 +3081,7 @@ pub fn accept_using_operator(node: &UsingOperator, visitor: &mut impl Visitor) {
     visitor.leave_using_operator(node);
 }
 
-pub fn accept_using_target(node: &UsingTarget, visitor: &mut impl Visitor) {
+pub fn accept_using_target(node: &UsingTarget<'_>, visitor: &mut impl Visitor) {
     if !visitor.enter_using_target(node) {
         return;
     }
@@ -3036,7 +3095,7 @@ pub fn accept_using_target(node: &UsingTarget, visitor: &mut impl Visitor) {
 }
 
 pub fn accept_variable_declaration_target(
-    node: &VariableDeclarationTarget,
+    node: &VariableDeclarationTarget<'_>,
     visitor: &mut impl Visitor,
 ) {
     if !visitor.enter_variable_declaration_target(node) {
@@ -3053,7 +3112,10 @@ pub fn accept_variable_declaration_target(
     visitor.leave_variable_declaration_target(node);
 }
 
-pub fn accept_version_pragma_component(node: &VersionPragmaComponent, visitor: &mut impl Visitor) {
+pub fn accept_version_pragma_component(
+    node: &VersionPragmaComponent<'_>,
+    visitor: &mut impl Visitor,
+) {
     if !visitor.enter_version_pragma_component(node) {
         return;
     }
@@ -3081,7 +3143,7 @@ pub fn accept_version_pragma_operator(node: &VersionPragmaOperator, visitor: &mu
     visitor.leave_version_pragma_operator(node);
 }
 
-pub fn accept_yul_expression(node: &YulExpression, visitor: &mut impl Visitor) {
+pub fn accept_yul_expression(node: &YulExpression<'_>, visitor: &mut impl Visitor) {
     if !visitor.enter_yul_expression(node) {
         return;
     }
@@ -3099,7 +3161,7 @@ pub fn accept_yul_expression(node: &YulExpression, visitor: &mut impl Visitor) {
     visitor.leave_yul_expression(node);
 }
 
-pub fn accept_yul_literal(node: &YulLiteral, visitor: &mut impl Visitor) {
+pub fn accept_yul_literal(node: &YulLiteral<'_>, visitor: &mut impl Visitor) {
     if !visitor.enter_yul_literal(node) {
         return;
     }
@@ -3122,7 +3184,7 @@ pub fn accept_yul_literal(node: &YulLiteral, visitor: &mut impl Visitor) {
     visitor.leave_yul_literal(node);
 }
 
-pub fn accept_yul_statement(node: &YulStatement, visitor: &mut impl Visitor) {
+pub fn accept_yul_statement(node: &YulStatement<'_>, visitor: &mut impl Visitor) {
     if !visitor.enter_yul_statement(node) {
         return;
     }
@@ -3169,7 +3231,7 @@ pub fn accept_yul_statement(node: &YulStatement, visitor: &mut impl Visitor) {
 //
 
 #[inline]
-fn accept_array_values(items: &ArrayValues, visitor: &mut impl Visitor) {
+fn accept_array_values(items: &ArrayValues<'_>, visitor: &mut impl Visitor) {
     if !visitor.enter_array_values(items) {
         return;
     }
@@ -3180,7 +3242,7 @@ fn accept_array_values(items: &ArrayValues, visitor: &mut impl Visitor) {
 }
 
 #[inline]
-fn accept_call_options(items: &CallOptions, visitor: &mut impl Visitor) {
+fn accept_call_options(items: &CallOptions<'_>, visitor: &mut impl Visitor) {
     if !visitor.enter_call_options(items) {
         return;
     }
@@ -3191,7 +3253,7 @@ fn accept_call_options(items: &CallOptions, visitor: &mut impl Visitor) {
 }
 
 #[inline]
-fn accept_catch_clauses(items: &CatchClauses, visitor: &mut impl Visitor) {
+fn accept_catch_clauses(items: &CatchClauses<'_>, visitor: &mut impl Visitor) {
     if !visitor.enter_catch_clauses(items) {
         return;
     }
@@ -3202,7 +3264,7 @@ fn accept_catch_clauses(items: &CatchClauses, visitor: &mut impl Visitor) {
 }
 
 #[inline]
-fn accept_contract_members(items: &ContractMembers, visitor: &mut impl Visitor) {
+fn accept_contract_members(items: &ContractMembers<'_>, visitor: &mut impl Visitor) {
     if !visitor.enter_contract_members(items) {
         return;
     }
@@ -3213,7 +3275,7 @@ fn accept_contract_members(items: &ContractMembers, visitor: &mut impl Visitor) 
 }
 
 #[inline]
-fn accept_enum_members(items: &EnumMembers, visitor: &mut impl Visitor) {
+fn accept_enum_members(items: &EnumMembers<'_>, visitor: &mut impl Visitor) {
     if !visitor.enter_enum_members(items) {
         return;
     }
@@ -3224,7 +3286,7 @@ fn accept_enum_members(items: &EnumMembers, visitor: &mut impl Visitor) {
 }
 
 #[inline]
-fn accept_hex_string_literals(items: &HexStringLiterals, visitor: &mut impl Visitor) {
+fn accept_hex_string_literals(items: &HexStringLiterals<'_>, visitor: &mut impl Visitor) {
     if !visitor.enter_hex_string_literals(items) {
         return;
     }
@@ -3235,7 +3297,7 @@ fn accept_hex_string_literals(items: &HexStringLiterals, visitor: &mut impl Visi
 }
 
 #[inline]
-fn accept_identifier_path(items: &IdentifierPath, visitor: &mut impl Visitor) {
+fn accept_identifier_path(items: &IdentifierPath<'_>, visitor: &mut impl Visitor) {
     if !visitor.enter_identifier_path(items) {
         return;
     }
@@ -3247,7 +3309,7 @@ fn accept_identifier_path(items: &IdentifierPath, visitor: &mut impl Visitor) {
 
 #[inline]
 fn accept_import_deconstruction_symbols(
-    items: &ImportDeconstructionSymbols,
+    items: &ImportDeconstructionSymbols<'_>,
     visitor: &mut impl Visitor,
 ) {
     if !visitor.enter_import_deconstruction_symbols(items) {
@@ -3260,7 +3322,7 @@ fn accept_import_deconstruction_symbols(
 }
 
 #[inline]
-fn accept_inheritance_types(items: &InheritanceTypes, visitor: &mut impl Visitor) {
+fn accept_inheritance_types(items: &InheritanceTypes<'_>, visitor: &mut impl Visitor) {
     if !visitor.enter_inheritance_types(items) {
         return;
     }
@@ -3271,7 +3333,7 @@ fn accept_inheritance_types(items: &InheritanceTypes, visitor: &mut impl Visitor
 }
 
 #[inline]
-fn accept_interface_members(items: &InterfaceMembers, visitor: &mut impl Visitor) {
+fn accept_interface_members(items: &InterfaceMembers<'_>, visitor: &mut impl Visitor) {
     if !visitor.enter_interface_members(items) {
         return;
     }
@@ -3282,7 +3344,7 @@ fn accept_interface_members(items: &InterfaceMembers, visitor: &mut impl Visitor
 }
 
 #[inline]
-fn accept_library_members(items: &LibraryMembers, visitor: &mut impl Visitor) {
+fn accept_library_members(items: &LibraryMembers<'_>, visitor: &mut impl Visitor) {
     if !visitor.enter_library_members(items) {
         return;
     }
@@ -3293,7 +3355,7 @@ fn accept_library_members(items: &LibraryMembers, visitor: &mut impl Visitor) {
 }
 
 #[inline]
-fn accept_modifier_invocations(items: &ModifierInvocations, visitor: &mut impl Visitor) {
+fn accept_modifier_invocations(items: &ModifierInvocations<'_>, visitor: &mut impl Visitor) {
     if !visitor.enter_modifier_invocations(items) {
         return;
     }
@@ -3305,7 +3367,7 @@ fn accept_modifier_invocations(items: &ModifierInvocations, visitor: &mut impl V
 
 #[inline]
 fn accept_multi_typed_declaration_elements(
-    items: &MultiTypedDeclarationElements,
+    items: &MultiTypedDeclarationElements<'_>,
     visitor: &mut impl Visitor,
 ) {
     if !visitor.enter_multi_typed_declaration_elements(items) {
@@ -3318,7 +3380,7 @@ fn accept_multi_typed_declaration_elements(
 }
 
 #[inline]
-fn accept_named_arguments(items: &NamedArguments, visitor: &mut impl Visitor) {
+fn accept_named_arguments(items: &NamedArguments<'_>, visitor: &mut impl Visitor) {
     if !visitor.enter_named_arguments(items) {
         return;
     }
@@ -3329,7 +3391,7 @@ fn accept_named_arguments(items: &NamedArguments, visitor: &mut impl Visitor) {
 }
 
 #[inline]
-fn accept_override_paths(items: &OverridePaths, visitor: &mut impl Visitor) {
+fn accept_override_paths(items: &OverridePaths<'_>, visitor: &mut impl Visitor) {
     if !visitor.enter_override_paths(items) {
         return;
     }
@@ -3340,7 +3402,7 @@ fn accept_override_paths(items: &OverridePaths, visitor: &mut impl Visitor) {
 }
 
 #[inline]
-fn accept_parameters(items: &Parameters, visitor: &mut impl Visitor) {
+fn accept_parameters(items: &Parameters<'_>, visitor: &mut impl Visitor) {
     if !visitor.enter_parameters(items) {
         return;
     }
@@ -3351,7 +3413,7 @@ fn accept_parameters(items: &Parameters, visitor: &mut impl Visitor) {
 }
 
 #[inline]
-fn accept_positional_arguments(items: &PositionalArguments, visitor: &mut impl Visitor) {
+fn accept_positional_arguments(items: &PositionalArguments<'_>, visitor: &mut impl Visitor) {
     if !visitor.enter_positional_arguments(items) {
         return;
     }
@@ -3362,7 +3424,7 @@ fn accept_positional_arguments(items: &PositionalArguments, visitor: &mut impl V
 }
 
 #[inline]
-fn accept_source_unit_members(items: &SourceUnitMembers, visitor: &mut impl Visitor) {
+fn accept_source_unit_members(items: &SourceUnitMembers<'_>, visitor: &mut impl Visitor) {
     if !visitor.enter_source_unit_members(items) {
         return;
     }
@@ -3373,7 +3435,7 @@ fn accept_source_unit_members(items: &SourceUnitMembers, visitor: &mut impl Visi
 }
 
 #[inline]
-fn accept_statements(items: &Statements, visitor: &mut impl Visitor) {
+fn accept_statements(items: &Statements<'_>, visitor: &mut impl Visitor) {
     if !visitor.enter_statements(items) {
         return;
     }
@@ -3384,7 +3446,7 @@ fn accept_statements(items: &Statements, visitor: &mut impl Visitor) {
 }
 
 #[inline]
-fn accept_string_literals(items: &StringLiterals, visitor: &mut impl Visitor) {
+fn accept_string_literals(items: &StringLiterals<'_>, visitor: &mut impl Visitor) {
     if !visitor.enter_string_literals(items) {
         return;
     }
@@ -3395,7 +3457,7 @@ fn accept_string_literals(items: &StringLiterals, visitor: &mut impl Visitor) {
 }
 
 #[inline]
-fn accept_struct_members(items: &StructMembers, visitor: &mut impl Visitor) {
+fn accept_struct_members(items: &StructMembers<'_>, visitor: &mut impl Visitor) {
     if !visitor.enter_struct_members(items) {
         return;
     }
@@ -3406,7 +3468,7 @@ fn accept_struct_members(items: &StructMembers, visitor: &mut impl Visitor) {
 }
 
 #[inline]
-fn accept_tuple_values(items: &TupleValues, visitor: &mut impl Visitor) {
+fn accept_tuple_values(items: &TupleValues<'_>, visitor: &mut impl Visitor) {
     if !visitor.enter_tuple_values(items) {
         return;
     }
@@ -3417,7 +3479,7 @@ fn accept_tuple_values(items: &TupleValues, visitor: &mut impl Visitor) {
 }
 
 #[inline]
-fn accept_unicode_string_literals(items: &UnicodeStringLiterals, visitor: &mut impl Visitor) {
+fn accept_unicode_string_literals(items: &UnicodeStringLiterals<'_>, visitor: &mut impl Visitor) {
     if !visitor.enter_unicode_string_literals(items) {
         return;
     }
@@ -3429,7 +3491,7 @@ fn accept_unicode_string_literals(items: &UnicodeStringLiterals, visitor: &mut i
 
 #[inline]
 fn accept_using_deconstruction_symbols(
-    items: &UsingDeconstructionSymbols,
+    items: &UsingDeconstructionSymbols<'_>,
     visitor: &mut impl Visitor,
 ) {
     if !visitor.enter_using_deconstruction_symbols(items) {
@@ -3443,7 +3505,7 @@ fn accept_using_deconstruction_symbols(
 
 #[inline]
 fn accept_version_pragma_expression_set(
-    items: &VersionPragmaExpressionSet,
+    items: &VersionPragmaExpressionSet<'_>,
     visitor: &mut impl Visitor,
 ) {
     if !visitor.enter_version_pragma_expression_set(items) {
@@ -3457,7 +3519,7 @@ fn accept_version_pragma_expression_set(
 
 #[inline]
 fn accept_version_pragma_expression_sets(
-    items: &VersionPragmaExpressionSets,
+    items: &VersionPragmaExpressionSets<'_>,
     visitor: &mut impl Visitor,
 ) {
     if !visitor.enter_version_pragma_expression_sets(items) {
@@ -3470,7 +3532,7 @@ fn accept_version_pragma_expression_sets(
 }
 
 #[inline]
-fn accept_version_pragma_specifier(items: &VersionPragmaSpecifier, visitor: &mut impl Visitor) {
+fn accept_version_pragma_specifier(items: &VersionPragmaSpecifier<'_>, visitor: &mut impl Visitor) {
     if !visitor.enter_version_pragma_specifier(items) {
         return;
     }
@@ -3481,7 +3543,7 @@ fn accept_version_pragma_specifier(items: &VersionPragmaSpecifier, visitor: &mut
 }
 
 #[inline]
-fn accept_yul_arguments(items: &YulArguments, visitor: &mut impl Visitor) {
+fn accept_yul_arguments(items: &YulArguments<'_>, visitor: &mut impl Visitor) {
     if !visitor.enter_yul_arguments(items) {
         return;
     }
@@ -3492,7 +3554,7 @@ fn accept_yul_arguments(items: &YulArguments, visitor: &mut impl Visitor) {
 }
 
 #[inline]
-fn accept_yul_parameters(items: &YulParameters, visitor: &mut impl Visitor) {
+fn accept_yul_parameters(items: &YulParameters<'_>, visitor: &mut impl Visitor) {
     if !visitor.enter_yul_parameters(items) {
         return;
     }
@@ -3503,7 +3565,7 @@ fn accept_yul_parameters(items: &YulParameters, visitor: &mut impl Visitor) {
 }
 
 #[inline]
-fn accept_yul_path(items: &YulPath, visitor: &mut impl Visitor) {
+fn accept_yul_path(items: &YulPath<'_>, visitor: &mut impl Visitor) {
     if !visitor.enter_yul_path(items) {
         return;
     }
@@ -3514,7 +3576,7 @@ fn accept_yul_path(items: &YulPath, visitor: &mut impl Visitor) {
 }
 
 #[inline]
-fn accept_yul_paths(items: &YulPaths, visitor: &mut impl Visitor) {
+fn accept_yul_paths(items: &YulPaths<'_>, visitor: &mut impl Visitor) {
     if !visitor.enter_yul_paths(items) {
         return;
     }
@@ -3525,7 +3587,7 @@ fn accept_yul_paths(items: &YulPaths, visitor: &mut impl Visitor) {
 }
 
 #[inline]
-fn accept_yul_statements(items: &YulStatements, visitor: &mut impl Visitor) {
+fn accept_yul_statements(items: &YulStatements<'_>, visitor: &mut impl Visitor) {
     if !visitor.enter_yul_statements(items) {
         return;
     }
@@ -3536,7 +3598,7 @@ fn accept_yul_statements(items: &YulStatements, visitor: &mut impl Visitor) {
 }
 
 #[inline]
-fn accept_yul_value_cases(items: &YulValueCases, visitor: &mut impl Visitor) {
+fn accept_yul_value_cases(items: &YulValueCases<'_>, visitor: &mut impl Visitor) {
     if !visitor.enter_yul_value_cases(items) {
         return;
     }
@@ -3547,7 +3609,7 @@ fn accept_yul_value_cases(items: &YulValueCases, visitor: &mut impl Visitor) {
 }
 
 #[inline]
-fn accept_yul_variable_names(items: &YulVariableNames, visitor: &mut impl Visitor) {
+fn accept_yul_variable_names(items: &YulVariableNames<'_>, visitor: &mut impl Visitor) {
     if !visitor.enter_yul_variable_names(items) {
         return;
     }

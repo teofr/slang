@@ -2,7 +2,7 @@ use crate::abi::entries::{Entry, Error};
 use crate::abi::selector_from_signature;
 use crate::ast::ErrorDefinitionStruct;
 
-impl ErrorDefinitionStruct {
+impl<'a> ErrorDefinitionStruct<'a> {
     pub fn compute_canonical_signature(&self) -> Option<String> {
         let name = self.ir_node.name.unparse();
         let parameters = self.parameters().compute_canonical_signature()?;

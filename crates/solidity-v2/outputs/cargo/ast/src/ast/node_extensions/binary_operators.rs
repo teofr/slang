@@ -8,10 +8,10 @@ use crate::ast::{
 
 /// A binary operator expression, whose two operands are reconciled to a common
 /// type before the operator applies.
-pub trait BinaryOperatorExpression {
+pub trait BinaryOperatorExpression<'a> {
     /// The common type both operands reconcile to before the operator applies;
     /// `None` when they have no common type.
-    fn common_operand_type(&self) -> Option<Type>;
+    fn common_operand_type(&self) -> Option<Type<'a>>;
 }
 
 /// The comparison operators are the only binary operators whose common operand
@@ -20,14 +20,14 @@ pub trait BinaryOperatorExpression {
 macro_rules! impl_recorded_common_operand_type {
     ($($node:ident),* $(,)?) => {
         $(
-            impl BinaryOperatorExpression for $node {
-                fn common_operand_type(&self) -> Option<Type> {
+            impl<'a> BinaryOperatorExpression<'a> for $node<'a> {
+                fn common_operand_type(&self) -> Option<Type<'a>> {
                     let type_id = self
                         .semantic
                         .binder()
                         .common_operand_typing(self.ir_node.id())
                         .as_type_id()?;
-                    Some(Type::create(type_id, &self.semantic))
+                    Some(Type::create(type_id, self.semantic))
                 }
             }
         )*
@@ -39,8 +39,8 @@ macro_rules! impl_recorded_common_operand_type {
 macro_rules! impl_result_common_operand_type {
     ($($node:ident),* $(,)?) => {
         $(
-            impl BinaryOperatorExpression for $node {
-                fn common_operand_type(&self) -> Option<Type> {
+            impl<'a> BinaryOperatorExpression<'a> for $node<'a> {
+                fn common_operand_type(&self) -> Option<Type<'a>> {
                     self.get_type()
                 }
             }

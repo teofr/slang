@@ -1,12 +1,12 @@
 use super::super::{ContractDefinition, Definition, InterfaceDefinition};
 
-pub enum ContractBase {
-    Contract(ContractDefinition),
-    Interface(InterfaceDefinition),
+pub enum ContractBase<'a> {
+    Contract(ContractDefinition<'a>),
+    Interface(InterfaceDefinition<'a>),
 }
 
-impl ContractBase {
-    pub(crate) fn from_definition(definition: &Definition) -> Option<Self> {
+impl<'a> ContractBase<'a> {
+    pub(crate) fn from_definition(definition: &Definition<'a>) -> Option<Self> {
         match definition {
             Definition::Contract(contract) => Some(Self::Contract(contract.clone())),
             Definition::Interface(interface) => Some(Self::Interface(interface.clone())),

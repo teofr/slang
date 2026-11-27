@@ -7,8 +7,8 @@ use super::super::{
 };
 use super::ContractBase;
 
-impl InterfaceDefinitionStruct {
-    pub fn functions(&self) -> Vec<FunctionDefinition> {
+impl<'a> InterfaceDefinitionStruct<'a> {
+    pub fn functions(&self) -> Vec<FunctionDefinition<'a>> {
         self.members()
             .iter_function_definitions()
             .filter(|function| {
@@ -23,7 +23,7 @@ impl InterfaceDefinitionStruct {
     /// Returns the list of interfaces/contracts in the hierarchy (including
     /// self) in the order given by the C3 linearisation, with self interface
     /// always first
-    pub fn linearised_bases(&self) -> Vec<ContractBase> {
+    pub fn linearised_bases(&self) -> Vec<ContractBase<'a>> {
         let Some(base_node_ids) = self
             .semantic
             .binder()
@@ -38,7 +38,7 @@ impl InterfaceDefinitionStruct {
             .iter()
             .map(|node_id| {
                 let base_definition =
-                    Definition::try_create(*node_id, &self.semantic).expect("node is a definition");
+                    Definition::try_create(*node_id, self.semantic).expect("node is a definition");
                 ContractBase::from_definition(&base_definition)
                     .expect("Linearised base is either a contract or interface")
             })
@@ -48,27 +48,27 @@ impl InterfaceDefinitionStruct {
     /// Returns the list of functions declared in all the hierarchy of the
     /// interface, in alphabetical order, an overriding declaration standing in
     /// for the one it overrides.
-    pub fn linearised_functions(&self) -> Vec<FunctionDefinition> {
+    pub fn linearised_functions(&self) -> Vec<FunctionDefinition<'a>> {
         self.semantic
             .linearised_functions(self.ir_node.id())
             .iter()
-            .map(|ir_node| create_function_definition(ir_node, &self.semantic))
+            .map(|ir_node| create_function_definition(ir_node, self.semantic))
             .collect()
     }
 
-    pub fn linearised_errors(&self) -> Vec<ErrorDefinition> {
+    pub fn linearised_errors(&self) -> Vec<ErrorDefinition<'a>> {
         self.semantic
             .linearised_errors(self.ir_node.id())
             .iter()
-            .map(|ir_node| create_error_definition(ir_node, &self.semantic))
+            .map(|ir_node| create_error_definition(ir_node, self.semantic))
             .collect()
     }
 
-    pub fn linearised_events(&self) -> Vec<EventDefinition> {
+    pub fn linearised_events(&self) -> Vec<EventDefinition<'a>> {
         self.semantic
             .linearised_events(self.ir_node.id())
             .iter()
-            .map(|ir_node| create_event_definition(ir_node, &self.semantic))
+            .map(|ir_node| create_event_definition(ir_node, self.semantic))
             .collect()
     }
 }

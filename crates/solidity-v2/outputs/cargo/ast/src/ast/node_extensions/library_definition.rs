@@ -4,12 +4,12 @@ use super::super::{
     LibraryDefinitionStruct, StateVariableDefinition,
 };
 
-impl LibraryDefinitionStruct {
-    pub fn state_variables(&self) -> Vec<StateVariableDefinition> {
+impl<'a> LibraryDefinitionStruct<'a> {
+    pub fn state_variables(&self) -> Vec<StateVariableDefinition<'a>> {
         self.members().iter_state_variable_definitions().collect()
     }
 
-    pub fn functions(&self) -> Vec<FunctionDefinition> {
+    pub fn functions(&self) -> Vec<FunctionDefinition<'a>> {
         self.members()
             .iter_function_definitions()
             .filter(|function| matches!(function.kind(), FunctionKind::Regular))
@@ -19,35 +19,35 @@ impl LibraryDefinitionStruct {
     /// The errors this library's external and public functions can revert
     /// with, directly or through the code they reach, wherever they are
     /// declared.
-    pub fn used_errors(&self) -> Vec<ErrorDefinition> {
+    pub fn used_errors(&self) -> Vec<ErrorDefinition<'a>> {
         self.semantic
             .used_errors(self.ir_node.id())
             .iter()
-            .map(|ir_node| create_error_definition(ir_node, &self.semantic))
+            .map(|ir_node| create_error_definition(ir_node, self.semantic))
             .collect()
     }
 
     /// The events this library's external and public functions can emit,
     /// directly or through the code they reach, wherever they are declared.
-    pub fn used_events(&self) -> Vec<EventDefinition> {
+    pub fn used_events(&self) -> Vec<EventDefinition<'a>> {
         self.semantic
             .used_events(self.ir_node.id())
             .iter()
-            .map(|ir_node| create_event_definition(ir_node, &self.semantic))
+            .map(|ir_node| create_event_definition(ir_node, self.semantic))
             .collect()
     }
 
     /// The contracts and libraries whose bytecode this library's externally
     /// callable functions and public constants embed, directly or through the
     /// code they reach, through `new` or `type(...).creationCode`/`runtimeCode`.
-    pub fn deployed_bytecode_dependencies(&self) -> Vec<Definition> {
+    pub fn deployed_bytecode_dependencies(&self) -> Vec<Definition<'a>> {
         self.semantic
             .deployed_bytecode_dependencies()
             .get(&self.ir_node.id())
             .into_iter()
             .flat_map(|dependencies| dependencies.keys())
             .map(|node_id| {
-                Definition::try_create(*node_id, &self.semantic).expect("node is a definition")
+                Definition::try_create(*node_id, self.semantic).expect("node is a definition")
             })
             .collect()
     }

@@ -8,7 +8,7 @@ use crate::abi::entries::{Entry, Function, Parameter, SpellingPolicy};
 use crate::abi::{AbiMutability, SignatureHasher};
 use crate::ast::{StateVariableDefinitionStruct, StateVariableVisibility};
 
-impl StateVariableDefinitionStruct {
+impl<'a> StateVariableDefinitionStruct<'a> {
     pub fn is_externally_visible(&self) -> bool {
         matches!(
             self.attributes().visibility(),
@@ -37,7 +37,7 @@ impl StateVariableDefinitionStruct {
                         parameter.name().map(str::to_owned),
                         parameter.type_id()?,
                         false,
-                        &self.semantic,
+                        self.semantic,
                     )
                 })
                 .collect::<Option<Vec<_>>>()

@@ -1,5 +1,3 @@
-use std::sync::Arc;
-
 use slang_solidity_v2_common::built_ins::BuiltIn;
 use slang_solidity_v2_common::nodes::NodeId;
 use slang_solidity_v2_ir::ir;
@@ -8,12 +6,12 @@ use slang_solidity_v2_semantic::context::SemanticContext;
 use super::{Definition, Identifier, create_identifier};
 
 #[derive(Clone)]
-pub struct Reference {
-    identifier: Identifier,
+pub struct Reference<'a> {
+    identifier: Identifier<'a>,
 }
 
-impl Reference {
-    pub fn try_create(ir_node: &ir::Identifier, semantic: &Arc<SemanticContext>) -> Option<Self> {
+impl<'a> Reference<'a> {
+    pub fn try_create(ir_node: &'a ir::Identifier, semantic: &'a SemanticContext) -> Option<Self> {
         // ensure the terminal node is actually functioning as a reference
         semantic
             .binder()
@@ -28,11 +26,11 @@ impl Reference {
         self.identifier.name()
     }
 
-    pub fn resolve_to_definition(&self) -> Option<Definition> {
+    pub fn resolve_to_definition(&self) -> Option<Definition<'a>> {
         self.identifier.resolve_to_definition()
     }
 
-    pub fn resolve_to_immediate_definition(&self) -> Option<Definition> {
+    pub fn resolve_to_immediate_definition(&self) -> Option<Definition<'a>> {
         self.identifier.resolve_to_immediate_definition()
     }
 
@@ -41,10 +39,10 @@ impl Reference {
     }
 }
 
-pub(crate) fn references_binding_to_definition(
+pub(crate) fn references_binding_to_definition<'a>(
     node_id: NodeId,
-    semantic: &Arc<SemanticContext>,
-) -> Vec<Reference> {
+    semantic: &'a SemanticContext,
+) -> Vec<Reference<'a>> {
     semantic
         .binder()
         .get_references_by_definition_id(node_id)

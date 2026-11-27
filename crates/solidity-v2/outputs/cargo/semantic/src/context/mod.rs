@@ -186,7 +186,7 @@ impl SemanticContext {
     pub fn find_contract_by_name<'a, 'b>(
         &'a self,
         name: &'b str,
-    ) -> impl Iterator<Item = ir::ContractDefinition> + use<'a>
+    ) -> impl Iterator<Item = &'a ir::ContractDefinition> + use<'a>
     where
         'b: 'a,
     {

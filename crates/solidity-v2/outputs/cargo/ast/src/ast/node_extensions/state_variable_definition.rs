@@ -3,7 +3,7 @@ use slang_solidity_v2_semantic::types::TypeId;
 
 use super::super::{Definition, StateVariableDefinitionStruct, StructMember, Type};
 
-impl StateVariableDefinitionStruct {
+impl<'a> StateVariableDefinitionStruct<'a> {
     fn getter(&self) -> Option<&binder::StateVariableGetter> {
         let Some(binder::Definition::StateVariable(definition)) = self
             .semantic
@@ -36,18 +36,18 @@ impl StateVariableDefinitionStruct {
 
     /// Returns the type of the getter generated for this state variable, or
     /// `None` if it is not public.
-    pub fn getter_type(&self) -> Option<Type> {
-        Some(Type::create(self.getter_type_id()?, &self.semantic))
+    pub fn getter_type(&self) -> Option<Type<'a>> {
+        Some(Type::create(self.getter_type_id()?, self.semantic))
     }
 
     /// Returns the struct members the getter's return type is built from, in
     /// declaration order, or an empty list if it is not built from a struct.
-    pub fn getter_struct_members(&self) -> Vec<StructMember> {
+    pub fn getter_struct_members(&self) -> Vec<StructMember<'a>> {
         self.getter_return_parameters()
             .unwrap_or_default()
             .iter()
             .filter_map(|parameter| {
-                match Definition::try_create(parameter.definition_id()?, &self.semantic) {
+                match Definition::try_create(parameter.definition_id()?, self.semantic) {
                     Some(Definition::StructMember(member)) => Some(member),
                     _ => None,
                 }

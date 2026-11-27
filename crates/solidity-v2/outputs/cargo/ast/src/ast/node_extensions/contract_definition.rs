@@ -1,4 +1,3 @@
-use std::sync::Arc;
 
 use slang_solidity_v2_semantic::context::VirtualTarget as SemanticVirtualTarget;
 
@@ -13,8 +12,8 @@ use super::super::{
 };
 use super::{ContractBase, VirtualTarget};
 
-impl ContractDefinitionStruct {
-    pub fn direct_bases(&self) -> Vec<ContractBase> {
+impl<'a> ContractDefinitionStruct<'a> {
+    pub fn direct_bases(&self) -> Vec<ContractBase<'a>> {
         self.inheritance_types()
             .iter()
             .filter_map(|inheritance_type| {
@@ -27,7 +26,7 @@ impl ContractDefinitionStruct {
     /// Returns the list of contracts/interfaces in the hierarchy (including
     /// self) in the order given by the C3 linearisation, with self contract
     /// always first
-    pub fn linearised_bases(&self) -> Vec<ContractBase> {
+    pub fn linearised_bases(&self) -> Vec<ContractBase<'a>> {
         let Some(base_node_ids) = self
             .semantic
             .binder()
@@ -42,27 +41,27 @@ impl ContractDefinitionStruct {
             .iter()
             .map(|node_id| {
                 let base_definition =
-                    Definition::try_create(*node_id, &self.semantic).expect("node is a definition");
+                    Definition::try_create(*node_id, self.semantic).expect("node is a definition");
                 ContractBase::from_definition(&base_definition)
                     .expect("Linearised base is either a contract or interface")
             })
             .collect()
     }
 
-    pub fn state_variables(&self) -> Vec<StateVariableDefinition> {
+    pub fn state_variables(&self) -> Vec<StateVariableDefinition<'a>> {
         self.members().iter_state_variable_definitions().collect()
     }
 
     /// Returns the list of state variable definitions in the order laid out in storage
-    pub fn linearised_state_variables(&self) -> Vec<StateVariableDefinition> {
+    pub fn linearised_state_variables(&self) -> Vec<StateVariableDefinition<'a>> {
         self.semantic
             .linearised_state_variables(self.ir_node.id())
             .iter()
-            .map(|ir_node| create_state_variable_definition(ir_node, &self.semantic))
+            .map(|ir_node| create_state_variable_definition(ir_node, self.semantic))
             .collect()
     }
 
-    pub fn functions(&self) -> Vec<FunctionDefinition> {
+    pub fn functions(&self) -> Vec<FunctionDefinition<'a>> {
         self.members()
             .iter_function_definitions()
             .filter(|function| {
@@ -92,11 +91,11 @@ impl ContractDefinitionStruct {
         })
     }
 
-    pub fn modifiers(&self) -> Vec<ModifierDefinition> {
+    pub fn modifiers(&self) -> Vec<ModifierDefinition<'a>> {
         self.members().iter_modifier_definitions().collect()
     }
 
-    pub fn constructor(&self) -> Option<FunctionDefinition> {
+    pub fn constructor(&self) -> Option<FunctionDefinition<'a>> {
         self.members()
             .iter_function_definitions()
             .find(|function| matches!(function.kind(), FunctionKind::Constructor))
@@ -104,11 +103,11 @@ impl ContractDefinitionStruct {
 
     /// Returns the list of functions defined in all the hierarchy of the
     /// contract, in alphabetical order
-    pub fn linearised_functions(&self) -> Vec<FunctionDefinition> {
+    pub fn linearised_functions(&self) -> Vec<FunctionDefinition<'a>> {
         self.semantic
             .linearised_functions(self.ir_node.id())
             .iter()
-            .map(|ir_node| create_function_definition(ir_node, &self.semantic))
+            .map(|ir_node| create_function_definition(ir_node, self.semantic))
             .collect()
     }
 
@@ -120,20 +119,20 @@ impl ContractDefinitionStruct {
     /// contract's hierarchy and belongs to the same compilation unit.
     /// Constructors and free or library functions are not accepted. A modifier
     /// is resolved with `resolve_modifier` instead.
-    pub fn resolve_virtual(&self, function: &FunctionDefinition) -> Option<VirtualTarget> {
-        if !Arc::ptr_eq(&self.semantic, &function.semantic) {
+    pub fn resolve_virtual(&self, function: &FunctionDefinition<'a>) -> Option<VirtualTarget<'a>> {
+        if !std::ptr::eq(self.semantic, function.semantic) {
             return None;
         }
         Some(
             match self
                 .semantic
-                .resolve_virtual(self.ir_node.id(), &function.ir_node)?
+                .resolve_virtual(self.ir_node.id(), function.ir_node)?
             {
                 SemanticVirtualTarget::Function(target) => {
-                    VirtualTarget::Function(create_function_definition(target, &self.semantic))
+                    VirtualTarget::Function(create_function_definition(target, self.semantic))
                 }
                 SemanticVirtualTarget::Getter(state_variable) => VirtualTarget::Getter(
-                    create_state_variable_definition(state_variable, &self.semantic),
+                    create_state_variable_definition(state_variable, self.semantic),
                 ),
             },
         )
@@ -148,21 +147,21 @@ impl ContractDefinitionStruct {
     /// follows. Super targets are functions, never getters.
     pub fn resolve_super(
         &self,
-        function: &FunctionDefinition,
-        enclosing_contract: &ContractDefinition,
-    ) -> Option<FunctionDefinition> {
-        if !Arc::ptr_eq(&self.semantic, &function.semantic)
-            || !Arc::ptr_eq(&self.semantic, &enclosing_contract.semantic)
+        function: &FunctionDefinition<'a>,
+        enclosing_contract: &ContractDefinition<'a>,
+    ) -> Option<FunctionDefinition<'a>> {
+        if !std::ptr::eq(self.semantic, function.semantic)
+            || !std::ptr::eq(self.semantic, enclosing_contract.semantic)
         {
             return None;
         }
         Some(create_function_definition(
             self.semantic.resolve_super(
                 self.ir_node.id(),
-                &function.ir_node,
+                function.ir_node,
                 enclosing_contract.node_id(),
             )?,
-            &self.semantic,
+            self.semantic,
         ))
     }
 
@@ -173,87 +172,87 @@ impl ContractDefinitionStruct {
     /// Returns `None` if `invocation` comes from another compilation unit, if
     /// it calls a base constructor instead of a modifier, or if the modifier
     /// is not declared in this contract or its bases.
-    pub fn resolve_modifier(&self, invocation: &ModifierInvocation) -> Option<ModifierDefinition> {
-        if !Arc::ptr_eq(&self.semantic, &invocation.semantic) {
+    pub fn resolve_modifier(&self, invocation: &ModifierInvocation<'a>) -> Option<ModifierDefinition<'a>> {
+        if !std::ptr::eq(self.semantic, invocation.semantic) {
             return None;
         }
         Some(create_modifier_definition(
             self.semantic
-                .resolve_modifier(self.ir_node.id(), &invocation.ir_node)?,
-            &self.semantic,
+                .resolve_modifier(self.ir_node.id(), invocation.ir_node)?,
+            self.semantic,
         ))
     }
 
-    pub fn errors(&self) -> Vec<ErrorDefinition> {
+    pub fn errors(&self) -> Vec<ErrorDefinition<'a>> {
         self.members().iter_error_definitions().collect()
     }
 
-    pub fn linearised_errors(&self) -> Vec<ErrorDefinition> {
+    pub fn linearised_errors(&self) -> Vec<ErrorDefinition<'a>> {
         self.semantic
             .linearised_errors(self.ir_node.id())
             .iter()
-            .map(|ir_node| create_error_definition(ir_node, &self.semantic))
+            .map(|ir_node| create_error_definition(ir_node, self.semantic))
             .collect()
     }
 
-    pub fn events(&self) -> Vec<EventDefinition> {
+    pub fn events(&self) -> Vec<EventDefinition<'a>> {
         self.members().iter_event_definitions().collect()
     }
 
-    pub fn linearised_events(&self) -> Vec<EventDefinition> {
+    pub fn linearised_events(&self) -> Vec<EventDefinition<'a>> {
         self.semantic
             .linearised_events(self.ir_node.id())
             .iter()
-            .map(|ir_node| create_event_definition(ir_node, &self.semantic))
+            .map(|ir_node| create_event_definition(ir_node, self.semantic))
             .collect()
     }
 
     /// The errors this contract's constructor, entry points and function
     /// pointers can revert with, directly or through the code they reach,
     /// wherever they are declared.
-    pub fn used_errors(&self) -> Vec<ErrorDefinition> {
+    pub fn used_errors(&self) -> Vec<ErrorDefinition<'a>> {
         self.semantic
             .used_errors(self.ir_node.id())
             .iter()
-            .map(|ir_node| create_error_definition(ir_node, &self.semantic))
+            .map(|ir_node| create_error_definition(ir_node, self.semantic))
             .collect()
     }
 
     /// The events this contract's constructor, entry points and function
     /// pointers can emit, directly or through the code they reach, wherever
     /// they are declared.
-    pub fn used_events(&self) -> Vec<EventDefinition> {
+    pub fn used_events(&self) -> Vec<EventDefinition<'a>> {
         self.semantic
             .used_events(self.ir_node.id())
             .iter()
-            .map(|ir_node| create_event_definition(ir_node, &self.semantic))
+            .map(|ir_node| create_event_definition(ir_node, self.semantic))
             .collect()
     }
 
     /// The contracts and libraries whose bytecode this contract's creation
     /// code embeds, through `new` or `type(...).creationCode`/`runtimeCode`.
-    pub fn creation_bytecode_dependencies(&self) -> Vec<Definition> {
+    pub fn creation_bytecode_dependencies(&self) -> Vec<Definition<'a>> {
         self.semantic
             .creation_bytecode_dependencies()
             .get(&self.ir_node.id())
             .into_iter()
             .flat_map(|dependencies| dependencies.keys())
             .map(|node_id| {
-                Definition::try_create(*node_id, &self.semantic).expect("node is a definition")
+                Definition::try_create(*node_id, self.semantic).expect("node is a definition")
             })
             .collect()
     }
 
     /// The contracts and libraries whose bytecode this contract's deployed
     /// code embeds, through `new` or `type(...).creationCode`/`runtimeCode`.
-    pub fn deployed_bytecode_dependencies(&self) -> Vec<Definition> {
+    pub fn deployed_bytecode_dependencies(&self) -> Vec<Definition<'a>> {
         self.semantic
             .deployed_bytecode_dependencies()
             .get(&self.ir_node.id())
             .into_iter()
             .flat_map(|dependencies| dependencies.keys())
             .map(|node_id| {
-                Definition::try_create(*node_id, &self.semantic).expect("node is a definition")
+                Definition::try_create(*node_id, self.semantic).expect("node is a definition")
             })
             .collect()
     }

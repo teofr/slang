@@ -1,5 +1,3 @@
-use std::sync::Arc;
-
 use paste::paste;
 use ruint::aliases::U256;
 use slang_solidity_v2_common::nodes::NodeId;
@@ -14,31 +12,31 @@ use super::Definition;
 
 // __SLANG_TYPE_TYPES__ keep in sync with binder types
 #[derive(Clone)]
-pub enum Type {
+pub enum Type<'a> {
     Address(AddressType),
-    Array(ArrayType),
-    ArraySlice(ArraySliceType),
+    Array(ArrayType<'a>),
+    ArraySlice(ArraySliceType<'a>),
     Boolean(BooleanType),
     ByteArray(ByteArrayType),
     Bytes(BytesType),
-    Contract(ContractType),
-    Enum(EnumType),
-    Error(ErrorType),
-    Event(EventType),
-    FixedSizeArray(FixedSizeArrayType),
+    Contract(ContractType<'a>),
+    Enum(EnumType<'a>),
+    Error(ErrorType<'a>),
+    Event(EventType<'a>),
+    FixedSizeArray(FixedSizeArrayType<'a>),
     FixedPointNumber(FixedPointNumberType),
-    Function(FunctionType),
+    Function(FunctionType<'a>),
     Integer(IntegerType),
-    Interface(InterfaceType),
-    Library(LibraryType),
-    Literal(LiteralType),
-    Mapping(MappingType),
-    MetaType(MetaType),
+    Interface(InterfaceType<'a>),
+    Library(LibraryType<'a>),
+    Literal(LiteralType<'a>),
+    Mapping(MappingType<'a>),
+    MetaType(MetaType<'a>),
     String(StringType),
-    Struct(StructType),
-    Tuple(TupleType),
-    UserDefinedValue(UserDefinedValueType),
-    UserMetaType(UserMetaType),
+    Struct(StructType<'a>),
+    Tuple(TupleType<'a>),
+    UserDefinedValue(UserDefinedValueType<'a>),
+    UserMetaType(UserMetaType<'a>),
 }
 
 macro_rules! define_value_type_variant {
@@ -56,9 +54,9 @@ macro_rules! define_type_variant {
     ($type:ident) => {
         paste! {
             #[derive(Clone)]
-            pub struct [<$type Type>] {
+            pub struct [<$type Type>]<'a> {
                 inner: types::[<$type Type>],
-                semantic: Arc<SemanticContext>,
+                semantic: &'a SemanticContext,
             }
         }
     };
@@ -92,28 +90,27 @@ define_type_variant!(UserDefinedValue);
 define_type_variant!(UserMeta);
 
 #[derive(Clone)]
-pub struct LiteralType {
+pub struct LiteralType<'a> {
     type_id: TypeId,
-    semantic: Arc<SemanticContext>,
+    semantic: &'a SemanticContext,
 }
 
 #[derive(Clone)]
 pub struct BooleanType;
 
-impl Type {
+impl<'a> Type<'a> {
     pub fn try_create_for_node_id(
         node_id: NodeId,
-        semantic: &Arc<SemanticContext>,
+        semantic: &'a SemanticContext,
     ) -> Option<Self> {
         let type_id = semantic.binder().node_typing(node_id).as_type_id()?;
         Some(Self::create(type_id, semantic))
     }
 
-    pub(crate) fn create(type_id: TypeId, semantic: &Arc<SemanticContext>) -> Self {
+    pub(crate) fn create(type_id: TypeId, semantic: &'a SemanticContext) -> Self {
         // Matched by reference, so that a literal is not copied: it may own a
         // large string value, and is read back from the registry instead.
         let type_ = semantic.types().get_type_by_id(type_id);
-        let semantic = Arc::clone(semantic);
         match type_ {
             types::Type::Address(inner) => Self::Address(AddressType {
                 inner: inner.clone(),
@@ -244,20 +241,20 @@ impl AddressType {
     }
 }
 
-impl ArrayType {
-    pub fn element_type(&self) -> Type {
-        Type::create(self.inner.element_type, &self.semantic)
+impl<'a> ArrayType<'a> {
+    pub fn element_type(&self) -> Type<'a> {
+        Type::create(self.inner.element_type, self.semantic)
     }
     pub fn location(&self) -> DataLocation {
         self.inner.location
     }
 }
 
-impl ArraySliceType {
+impl<'a> ArraySliceType<'a> {
     /// The array this is a slice of (an `Array`, `Bytes`, or `String`, always in
     /// `calldata`).
-    pub fn array_type(&self) -> Type {
-        Type::create(self.inner.array_type_id, &self.semantic)
+    pub fn array_type(&self) -> Type<'a> {
+        Type::create(self.inner.array_type_id, self.semantic)
     }
 }
 
@@ -275,37 +272,37 @@ impl BytesType {
     }
 }
 
-impl ContractType {
-    pub fn definition(&self) -> Definition {
-        Definition::try_create(self.inner.definition_id, &self.semantic)
+impl<'a> ContractType<'a> {
+    pub fn definition(&self) -> Definition<'a> {
+        Definition::try_create(self.inner.definition_id, self.semantic)
             .expect("invalid contract definition")
     }
 }
 
-impl EnumType {
-    pub fn definition(&self) -> Definition {
-        Definition::try_create(self.inner.definition_id, &self.semantic)
+impl<'a> EnumType<'a> {
+    pub fn definition(&self) -> Definition<'a> {
+        Definition::try_create(self.inner.definition_id, self.semantic)
             .expect("invalid enum definition")
     }
 }
 
-impl ErrorType {
-    pub fn definition(&self) -> Definition {
-        Definition::try_create(self.inner.definition_id, &self.semantic)
+impl<'a> ErrorType<'a> {
+    pub fn definition(&self) -> Definition<'a> {
+        Definition::try_create(self.inner.definition_id, self.semantic)
             .expect("invalid error definition")
     }
 }
 
-impl EventType {
-    pub fn definition(&self) -> Definition {
-        Definition::try_create(self.inner.definition_id, &self.semantic)
+impl<'a> EventType<'a> {
+    pub fn definition(&self) -> Definition<'a> {
+        Definition::try_create(self.inner.definition_id, self.semantic)
             .expect("invalid event definition")
     }
 }
 
-impl FixedSizeArrayType {
-    pub fn element_type(&self) -> Type {
-        Type::create(self.inner.element_type, &self.semantic)
+impl<'a> FixedSizeArrayType<'a> {
+    pub fn element_type(&self) -> Type<'a> {
+        Type::create(self.inner.element_type, self.semantic)
     }
     pub fn location(&self) -> DataLocation {
         self.inner.location
@@ -327,33 +324,33 @@ impl FixedPointNumberType {
     }
 }
 
-impl FunctionType {
+impl<'a> FunctionType<'a> {
     /// The function or getter this type was declared by, if it names one.
     /// A function value that flows through an expression no longer does, eg.
     /// `cond ? f : g`.
-    pub fn associated_definition(&self) -> Option<Definition> {
+    pub fn associated_definition(&self) -> Option<Definition<'a>> {
         self.inner.definition_id.map(|definition_id| {
-            Definition::try_create(definition_id, &self.semantic)
+            Definition::try_create(definition_id, self.semantic)
                 .expect("invalid function definition")
         })
     }
 
-    pub fn implicit_receiver_type(&self) -> Option<Type> {
+    pub fn implicit_receiver_type(&self) -> Option<Type<'a>> {
         self.inner
             .implicit_receiver_type
-            .map(|type_id| Type::create(type_id, &self.semantic))
+            .map(|type_id| Type::create(type_id, self.semantic))
     }
 
-    pub fn parameter_types(&self) -> Vec<Type> {
+    pub fn parameter_types(&self) -> Vec<Type<'a>> {
         self.inner
             .parameter_types
             .iter()
-            .map(|type_id| Type::create(*type_id, &self.semantic))
+            .map(|type_id| Type::create(*type_id, self.semantic))
             .collect()
     }
 
-    pub fn return_type(&self) -> Type {
-        Type::create(self.inner.return_type, &self.semantic)
+    pub fn return_type(&self) -> Type<'a> {
+        Type::create(self.inner.return_type, self.semantic)
     }
 
     pub fn call_mode(&self) -> CallMode {
@@ -374,23 +371,23 @@ impl IntegerType {
     }
 }
 
-impl InterfaceType {
-    pub fn definition(&self) -> Definition {
-        Definition::try_create(self.inner.definition_id, &self.semantic)
+impl<'a> InterfaceType<'a> {
+    pub fn definition(&self) -> Definition<'a> {
+        Definition::try_create(self.inner.definition_id, self.semantic)
             .expect("invalid interface definition")
     }
 }
 
-impl LibraryType {
-    pub fn definition(&self) -> Definition {
-        Definition::try_create(self.inner.definition_id, &self.semantic)
+impl<'a> LibraryType<'a> {
+    pub fn definition(&self) -> Definition<'a> {
+        Definition::try_create(self.inner.definition_id, self.semantic)
             .expect("invalid library definition")
     }
 }
 
-impl LiteralType {
+impl<'a> LiteralType<'a> {
     /// Returns the narrowed kind of this literal type.
-    pub fn kind(&self) -> &LiteralKind {
+    pub fn kind(&self) -> &'a LiteralKind {
         let types::Type::Literal(kind) = self.semantic.types().get_type_by_id(self.type_id) else {
             unreachable!("a literal type wrapper refers to a literal type");
         };
@@ -403,7 +400,7 @@ impl LiteralType {
     /// for a string literal). Returns `None` when the literal cannot be
     /// represented (eg. integer would require more than 256 bits).
     // __SLANG_MOBILE_TYPE__ keep in sync with `LiteralKind::mobile_type`
-    pub fn mobile_type(&self) -> Option<Type> {
+    pub fn mobile_type(&self) -> Option<Type<'a>> {
         self.kind().mobile_type().and_then(|mobile| match mobile {
             types::Type::Integer(inner) => Some(Type::Integer(IntegerType { inner })),
             types::Type::FixedPointNumber(inner) => {
@@ -415,29 +412,29 @@ impl LiteralType {
     }
 }
 
-impl MetaType {
+impl<'a> MetaType<'a> {
     /// Returns the type this is a meta-type of, eg. `uint` for the meta-type of
     /// the `uint` in `uint(x)`.
-    pub fn meta_type(&self) -> Type {
-        Type::create(self.inner.type_id, &self.semantic)
+    pub fn meta_type(&self) -> Type<'a> {
+        Type::create(self.inner.type_id, self.semantic)
     }
 }
 
-impl UserMetaType {
+impl<'a> UserMetaType<'a> {
     /// Returns the user-defined type definition this meta-type refers to, eg.
     /// the contract, struct or enum named by the expression.
-    pub fn definition(&self) -> Definition {
-        Definition::try_create(self.inner.definition_id, &self.semantic)
+    pub fn definition(&self) -> Definition<'a> {
+        Definition::try_create(self.inner.definition_id, self.semantic)
             .expect("invalid user meta-type definition")
     }
 }
 
-impl MappingType {
-    pub fn key_type(&self) -> Type {
-        Type::create(self.inner.key_type_id, &self.semantic)
+impl<'a> MappingType<'a> {
+    pub fn key_type(&self) -> Type<'a> {
+        Type::create(self.inner.key_type_id, self.semantic)
     }
-    pub fn value_type(&self) -> Type {
-        Type::create(self.inner.value_type_id, &self.semantic)
+    pub fn value_type(&self) -> Type<'a> {
+        Type::create(self.inner.value_type_id, self.semantic)
     }
 }
 
@@ -447,9 +444,9 @@ impl StringType {
     }
 }
 
-impl StructType {
-    pub fn definition(&self) -> Definition {
-        Definition::try_create(self.inner.definition_id, &self.semantic)
+impl<'a> StructType<'a> {
+    pub fn definition(&self) -> Definition<'a> {
+        Definition::try_create(self.inner.definition_id, self.semantic)
             .expect("invalid struct definition")
     }
     pub fn location(&self) -> DataLocation {
@@ -457,26 +454,26 @@ impl StructType {
     }
 }
 
-impl TupleType {
-    pub fn types(&self) -> Vec<Type> {
+impl<'a> TupleType<'a> {
+    pub fn types(&self) -> Vec<Type<'a>> {
         self.inner
             .types
             .iter()
-            .map(|type_id| Type::create(*type_id, &self.semantic))
+            .map(|type_id| Type::create(*type_id, self.semantic))
             .collect()
     }
 }
 
-impl UserDefinedValueType {
-    pub fn definition(&self) -> Definition {
-        Definition::try_create(self.inner.definition_id, &self.semantic)
+impl<'a> UserDefinedValueType<'a> {
+    pub fn definition(&self) -> Definition<'a> {
+        Definition::try_create(self.inner.definition_id, self.semantic)
             .expect("invalid user defined value definition")
     }
 
     /// Returns the underlying elementary type that this UDVT wraps, or `None`
     /// if the binder did not resolve a target type (e.g., the declaration is
     /// ill-formed or references an unsupported elementary type).
-    pub fn target_type(&self) -> Option<Type> {
+    pub fn target_type(&self) -> Option<Type<'a>> {
         let binder_definition = self
             .semantic
             .binder()
@@ -486,7 +483,7 @@ impl UserDefinedValueType {
         };
         Some(Type::create(
             udvt_definition.target_type_id?,
-            &self.semantic,
+            self.semantic,
         ))
     }
 }

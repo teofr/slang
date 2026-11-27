@@ -4,7 +4,7 @@ use slang_solidity_v2_semantic::{binder, types};
 
 use super::super::{FunctionCallExpressionStruct, Type};
 
-impl FunctionCallExpressionStruct {
+impl<'a> FunctionCallExpressionStruct<'a> {
     /// Returns `true` if this call is a type conversion (e.g. `uint256(x)`,
     /// `address(y)`) rather than a function call: ie. its operand names a
     /// type — types as a meta-type — rather than a value.
@@ -18,8 +18,8 @@ impl FunctionCallExpressionStruct {
     /// its arguments against, with `calldata` parameters transformed into
     /// `memory`. `None` for any other call, and for a callee that is not an
     /// externally callable function.
-    pub fn encode_call_callee_type(&self) -> Option<Type> {
-        let semantic = &self.semantic;
+    pub fn encode_call_callee_type(&self) -> Option<Type<'a>> {
+        let semantic = self.semantic;
         let binder::Typing::BuiltIn(InternalBuiltIn::AbiEncodeCall) = semantic
             .binder()
             .node_typing(self.ir_node.operand.node_id()?)

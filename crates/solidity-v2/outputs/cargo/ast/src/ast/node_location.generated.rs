@@ -27,7 +27,7 @@ pub trait NodeLocation {
     fn calculate_text_range(&self) -> Option<Range<usize>>;
 }
 
-impl NodeLocation for AbicoderPragmaStruct {
+impl NodeLocation for AbicoderPragmaStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         Some(self.get_file_id())
     }
@@ -37,7 +37,7 @@ impl NodeLocation for AbicoderPragmaStruct {
     }
 }
 
-impl NodeLocation for AdditiveExpressionStruct {
+impl NodeLocation for AdditiveExpressionStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         Some(self.get_file_id())
     }
@@ -47,7 +47,7 @@ impl NodeLocation for AdditiveExpressionStruct {
     }
 }
 
-impl NodeLocation for AddressTypeStruct {
+impl NodeLocation for AddressTypeStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         Some(self.get_file_id())
     }
@@ -57,7 +57,7 @@ impl NodeLocation for AddressTypeStruct {
     }
 }
 
-impl NodeLocation for AndExpressionStruct {
+impl NodeLocation for AndExpressionStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         Some(self.get_file_id())
     }
@@ -67,7 +67,7 @@ impl NodeLocation for AndExpressionStruct {
     }
 }
 
-impl NodeLocation for ArrayExpressionStruct {
+impl NodeLocation for ArrayExpressionStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         Some(self.get_file_id())
     }
@@ -77,7 +77,7 @@ impl NodeLocation for ArrayExpressionStruct {
     }
 }
 
-impl NodeLocation for ArrayTypeNameStruct {
+impl NodeLocation for ArrayTypeNameStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         Some(self.get_file_id())
     }
@@ -87,7 +87,7 @@ impl NodeLocation for ArrayTypeNameStruct {
     }
 }
 
-impl NodeLocation for AssemblyStatementStruct {
+impl NodeLocation for AssemblyStatementStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         Some(self.get_file_id())
     }
@@ -97,7 +97,7 @@ impl NodeLocation for AssemblyStatementStruct {
     }
 }
 
-impl NodeLocation for AssignmentExpressionStruct {
+impl NodeLocation for AssignmentExpressionStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         Some(self.get_file_id())
     }
@@ -107,7 +107,7 @@ impl NodeLocation for AssignmentExpressionStruct {
     }
 }
 
-impl NodeLocation for BitwiseAndExpressionStruct {
+impl NodeLocation for BitwiseAndExpressionStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         Some(self.get_file_id())
     }
@@ -117,7 +117,7 @@ impl NodeLocation for BitwiseAndExpressionStruct {
     }
 }
 
-impl NodeLocation for BitwiseOrExpressionStruct {
+impl NodeLocation for BitwiseOrExpressionStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         Some(self.get_file_id())
     }
@@ -127,7 +127,7 @@ impl NodeLocation for BitwiseOrExpressionStruct {
     }
 }
 
-impl NodeLocation for BitwiseXorExpressionStruct {
+impl NodeLocation for BitwiseXorExpressionStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         Some(self.get_file_id())
     }
@@ -137,7 +137,7 @@ impl NodeLocation for BitwiseXorExpressionStruct {
     }
 }
 
-impl NodeLocation for BlockStruct {
+impl NodeLocation for BlockStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         Some(self.get_file_id())
     }
@@ -147,7 +147,7 @@ impl NodeLocation for BlockStruct {
     }
 }
 
-impl NodeLocation for BreakStatementStruct {
+impl NodeLocation for BreakStatementStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         Some(self.get_file_id())
     }
@@ -157,7 +157,7 @@ impl NodeLocation for BreakStatementStruct {
     }
 }
 
-impl NodeLocation for CallOptionsExpressionStruct {
+impl NodeLocation for CallOptionsExpressionStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         Some(self.get_file_id())
     }
@@ -167,7 +167,7 @@ impl NodeLocation for CallOptionsExpressionStruct {
     }
 }
 
-impl NodeLocation for CatchClauseStruct {
+impl NodeLocation for CatchClauseStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         Some(self.get_file_id())
     }
@@ -177,7 +177,7 @@ impl NodeLocation for CatchClauseStruct {
     }
 }
 
-impl NodeLocation for ConditionalExpressionStruct {
+impl NodeLocation for ConditionalExpressionStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         Some(self.get_file_id())
     }
@@ -187,7 +187,7 @@ impl NodeLocation for ConditionalExpressionStruct {
     }
 }
 
-impl NodeLocation for ConstantDefinitionStruct {
+impl NodeLocation for ConstantDefinitionStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         Some(self.get_file_id())
     }
@@ -197,7 +197,7 @@ impl NodeLocation for ConstantDefinitionStruct {
     }
 }
 
-impl NodeLocation for ContinueStatementStruct {
+impl NodeLocation for ContinueStatementStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         Some(self.get_file_id())
     }
@@ -207,7 +207,7 @@ impl NodeLocation for ContinueStatementStruct {
     }
 }
 
-impl NodeLocation for ContractDefinitionStruct {
+impl NodeLocation for ContractDefinitionStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         Some(self.get_file_id())
     }
@@ -217,7 +217,7 @@ impl NodeLocation for ContractDefinitionStruct {
     }
 }
 
-impl NodeLocation for DecimalNumberExpressionStruct {
+impl NodeLocation for DecimalNumberExpressionStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         Some(self.get_file_id())
     }
@@ -227,7 +227,7 @@ impl NodeLocation for DecimalNumberExpressionStruct {
     }
 }
 
-impl NodeLocation for DoWhileStatementStruct {
+impl NodeLocation for DoWhileStatementStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         Some(self.get_file_id())
     }
@@ -237,7 +237,7 @@ impl NodeLocation for DoWhileStatementStruct {
     }
 }
 
-impl NodeLocation for EmitStatementStruct {
+impl NodeLocation for EmitStatementStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         Some(self.get_file_id())
     }
@@ -247,7 +247,7 @@ impl NodeLocation for EmitStatementStruct {
     }
 }
 
-impl NodeLocation for EnumDefinitionStruct {
+impl NodeLocation for EnumDefinitionStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         Some(self.get_file_id())
     }
@@ -257,7 +257,7 @@ impl NodeLocation for EnumDefinitionStruct {
     }
 }
 
-impl NodeLocation for EqualityExpressionStruct {
+impl NodeLocation for EqualityExpressionStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         Some(self.get_file_id())
     }
@@ -267,7 +267,7 @@ impl NodeLocation for EqualityExpressionStruct {
     }
 }
 
-impl NodeLocation for ErrorDefinitionStruct {
+impl NodeLocation for ErrorDefinitionStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         Some(self.get_file_id())
     }
@@ -277,7 +277,7 @@ impl NodeLocation for ErrorDefinitionStruct {
     }
 }
 
-impl NodeLocation for EventDefinitionStruct {
+impl NodeLocation for EventDefinitionStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         Some(self.get_file_id())
     }
@@ -287,7 +287,7 @@ impl NodeLocation for EventDefinitionStruct {
     }
 }
 
-impl NodeLocation for ExperimentalPragmaStruct {
+impl NodeLocation for ExperimentalPragmaStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         Some(self.get_file_id())
     }
@@ -297,7 +297,7 @@ impl NodeLocation for ExperimentalPragmaStruct {
     }
 }
 
-impl NodeLocation for ExponentiationExpressionStruct {
+impl NodeLocation for ExponentiationExpressionStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         Some(self.get_file_id())
     }
@@ -307,7 +307,7 @@ impl NodeLocation for ExponentiationExpressionStruct {
     }
 }
 
-impl NodeLocation for ExpressionStatementStruct {
+impl NodeLocation for ExpressionStatementStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         Some(self.get_file_id())
     }
@@ -317,7 +317,7 @@ impl NodeLocation for ExpressionStatementStruct {
     }
 }
 
-impl NodeLocation for ForStatementStruct {
+impl NodeLocation for ForStatementStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         Some(self.get_file_id())
     }
@@ -327,7 +327,7 @@ impl NodeLocation for ForStatementStruct {
     }
 }
 
-impl NodeLocation for FunctionAttributesStruct {
+impl NodeLocation for FunctionAttributesStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         Some(self.get_file_id())
     }
@@ -337,7 +337,7 @@ impl NodeLocation for FunctionAttributesStruct {
     }
 }
 
-impl NodeLocation for FunctionCallExpressionStruct {
+impl NodeLocation for FunctionCallExpressionStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         Some(self.get_file_id())
     }
@@ -347,7 +347,7 @@ impl NodeLocation for FunctionCallExpressionStruct {
     }
 }
 
-impl NodeLocation for FunctionDefinitionStruct {
+impl NodeLocation for FunctionDefinitionStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         Some(self.get_file_id())
     }
@@ -357,7 +357,7 @@ impl NodeLocation for FunctionDefinitionStruct {
     }
 }
 
-impl NodeLocation for FunctionTypeStruct {
+impl NodeLocation for FunctionTypeStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         Some(self.get_file_id())
     }
@@ -367,7 +367,7 @@ impl NodeLocation for FunctionTypeStruct {
     }
 }
 
-impl NodeLocation for FunctionTypeAttributesStruct {
+impl NodeLocation for FunctionTypeAttributesStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         Some(self.get_file_id())
     }
@@ -377,7 +377,7 @@ impl NodeLocation for FunctionTypeAttributesStruct {
     }
 }
 
-impl NodeLocation for HexNumberExpressionStruct {
+impl NodeLocation for HexNumberExpressionStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         Some(self.get_file_id())
     }
@@ -387,7 +387,7 @@ impl NodeLocation for HexNumberExpressionStruct {
     }
 }
 
-impl NodeLocation for IfStatementStruct {
+impl NodeLocation for IfStatementStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         Some(self.get_file_id())
     }
@@ -397,7 +397,7 @@ impl NodeLocation for IfStatementStruct {
     }
 }
 
-impl NodeLocation for ImportDeconstructionStruct {
+impl NodeLocation for ImportDeconstructionStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         Some(self.get_file_id())
     }
@@ -407,7 +407,7 @@ impl NodeLocation for ImportDeconstructionStruct {
     }
 }
 
-impl NodeLocation for ImportDeconstructionSymbolStruct {
+impl NodeLocation for ImportDeconstructionSymbolStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         Some(self.get_file_id())
     }
@@ -417,7 +417,7 @@ impl NodeLocation for ImportDeconstructionSymbolStruct {
     }
 }
 
-impl NodeLocation for IndexAccessExpressionStruct {
+impl NodeLocation for IndexAccessExpressionStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         Some(self.get_file_id())
     }
@@ -427,7 +427,7 @@ impl NodeLocation for IndexAccessExpressionStruct {
     }
 }
 
-impl NodeLocation for InequalityExpressionStruct {
+impl NodeLocation for InequalityExpressionStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         Some(self.get_file_id())
     }
@@ -437,7 +437,7 @@ impl NodeLocation for InequalityExpressionStruct {
     }
 }
 
-impl NodeLocation for InheritanceTypeStruct {
+impl NodeLocation for InheritanceTypeStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         Some(self.get_file_id())
     }
@@ -447,7 +447,7 @@ impl NodeLocation for InheritanceTypeStruct {
     }
 }
 
-impl NodeLocation for InterfaceDefinitionStruct {
+impl NodeLocation for InterfaceDefinitionStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         Some(self.get_file_id())
     }
@@ -457,7 +457,7 @@ impl NodeLocation for InterfaceDefinitionStruct {
     }
 }
 
-impl NodeLocation for LibraryDefinitionStruct {
+impl NodeLocation for LibraryDefinitionStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         Some(self.get_file_id())
     }
@@ -467,7 +467,7 @@ impl NodeLocation for LibraryDefinitionStruct {
     }
 }
 
-impl NodeLocation for MappingTypeStruct {
+impl NodeLocation for MappingTypeStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         Some(self.get_file_id())
     }
@@ -477,7 +477,7 @@ impl NodeLocation for MappingTypeStruct {
     }
 }
 
-impl NodeLocation for MemberAccessExpressionStruct {
+impl NodeLocation for MemberAccessExpressionStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         Some(self.get_file_id())
     }
@@ -487,7 +487,7 @@ impl NodeLocation for MemberAccessExpressionStruct {
     }
 }
 
-impl NodeLocation for ModifierAttributesStruct {
+impl NodeLocation for ModifierAttributesStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         Some(self.get_file_id())
     }
@@ -497,7 +497,7 @@ impl NodeLocation for ModifierAttributesStruct {
     }
 }
 
-impl NodeLocation for ModifierDefinitionStruct {
+impl NodeLocation for ModifierDefinitionStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         Some(self.get_file_id())
     }
@@ -507,7 +507,7 @@ impl NodeLocation for ModifierDefinitionStruct {
     }
 }
 
-impl NodeLocation for ModifierInvocationStruct {
+impl NodeLocation for ModifierInvocationStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         Some(self.get_file_id())
     }
@@ -517,7 +517,7 @@ impl NodeLocation for ModifierInvocationStruct {
     }
 }
 
-impl NodeLocation for MultiTypedDeclarationStruct {
+impl NodeLocation for MultiTypedDeclarationStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         Some(self.get_file_id())
     }
@@ -527,7 +527,7 @@ impl NodeLocation for MultiTypedDeclarationStruct {
     }
 }
 
-impl NodeLocation for MultiTypedDeclarationElementStruct {
+impl NodeLocation for MultiTypedDeclarationElementStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         Some(self.get_file_id())
     }
@@ -537,7 +537,7 @@ impl NodeLocation for MultiTypedDeclarationElementStruct {
     }
 }
 
-impl NodeLocation for MultiplicativeExpressionStruct {
+impl NodeLocation for MultiplicativeExpressionStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         Some(self.get_file_id())
     }
@@ -547,7 +547,7 @@ impl NodeLocation for MultiplicativeExpressionStruct {
     }
 }
 
-impl NodeLocation for NamedArgumentStruct {
+impl NodeLocation for NamedArgumentStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         Some(self.get_file_id())
     }
@@ -557,7 +557,7 @@ impl NodeLocation for NamedArgumentStruct {
     }
 }
 
-impl NodeLocation for NewExpressionStruct {
+impl NodeLocation for NewExpressionStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         Some(self.get_file_id())
     }
@@ -567,7 +567,7 @@ impl NodeLocation for NewExpressionStruct {
     }
 }
 
-impl NodeLocation for OrExpressionStruct {
+impl NodeLocation for OrExpressionStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         Some(self.get_file_id())
     }
@@ -577,7 +577,7 @@ impl NodeLocation for OrExpressionStruct {
     }
 }
 
-impl NodeLocation for ParameterStruct {
+impl NodeLocation for ParameterStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         Some(self.get_file_id())
     }
@@ -587,7 +587,7 @@ impl NodeLocation for ParameterStruct {
     }
 }
 
-impl NodeLocation for PathImportStruct {
+impl NodeLocation for PathImportStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         Some(self.get_file_id())
     }
@@ -597,7 +597,7 @@ impl NodeLocation for PathImportStruct {
     }
 }
 
-impl NodeLocation for PostfixExpressionStruct {
+impl NodeLocation for PostfixExpressionStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         Some(self.get_file_id())
     }
@@ -607,7 +607,7 @@ impl NodeLocation for PostfixExpressionStruct {
     }
 }
 
-impl NodeLocation for PragmaDirectiveStruct {
+impl NodeLocation for PragmaDirectiveStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         Some(self.get_file_id())
     }
@@ -617,7 +617,7 @@ impl NodeLocation for PragmaDirectiveStruct {
     }
 }
 
-impl NodeLocation for PrefixExpressionStruct {
+impl NodeLocation for PrefixExpressionStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         Some(self.get_file_id())
     }
@@ -627,7 +627,7 @@ impl NodeLocation for PrefixExpressionStruct {
     }
 }
 
-impl NodeLocation for ReturnStatementStruct {
+impl NodeLocation for ReturnStatementStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         Some(self.get_file_id())
     }
@@ -637,7 +637,7 @@ impl NodeLocation for ReturnStatementStruct {
     }
 }
 
-impl NodeLocation for RevertStatementStruct {
+impl NodeLocation for RevertStatementStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         Some(self.get_file_id())
     }
@@ -647,7 +647,7 @@ impl NodeLocation for RevertStatementStruct {
     }
 }
 
-impl NodeLocation for ShiftExpressionStruct {
+impl NodeLocation for ShiftExpressionStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         Some(self.get_file_id())
     }
@@ -657,7 +657,7 @@ impl NodeLocation for ShiftExpressionStruct {
     }
 }
 
-impl NodeLocation for SingleTypedDeclarationStruct {
+impl NodeLocation for SingleTypedDeclarationStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         Some(self.get_file_id())
     }
@@ -667,7 +667,7 @@ impl NodeLocation for SingleTypedDeclarationStruct {
     }
 }
 
-impl NodeLocation for SourceUnitStruct {
+impl NodeLocation for SourceUnitStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         Some(self.get_file_id())
     }
@@ -677,7 +677,7 @@ impl NodeLocation for SourceUnitStruct {
     }
 }
 
-impl NodeLocation for StateVariableAttributesStruct {
+impl NodeLocation for StateVariableAttributesStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         Some(self.get_file_id())
     }
@@ -687,7 +687,7 @@ impl NodeLocation for StateVariableAttributesStruct {
     }
 }
 
-impl NodeLocation for StateVariableDefinitionStruct {
+impl NodeLocation for StateVariableDefinitionStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         Some(self.get_file_id())
     }
@@ -697,7 +697,7 @@ impl NodeLocation for StateVariableDefinitionStruct {
     }
 }
 
-impl NodeLocation for StructDefinitionStruct {
+impl NodeLocation for StructDefinitionStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         Some(self.get_file_id())
     }
@@ -707,7 +707,7 @@ impl NodeLocation for StructDefinitionStruct {
     }
 }
 
-impl NodeLocation for StructMemberStruct {
+impl NodeLocation for StructMemberStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         Some(self.get_file_id())
     }
@@ -717,7 +717,7 @@ impl NodeLocation for StructMemberStruct {
     }
 }
 
-impl NodeLocation for TryStatementStruct {
+impl NodeLocation for TryStatementStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         Some(self.get_file_id())
     }
@@ -727,7 +727,7 @@ impl NodeLocation for TryStatementStruct {
     }
 }
 
-impl NodeLocation for TupleExpressionStruct {
+impl NodeLocation for TupleExpressionStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         Some(self.get_file_id())
     }
@@ -737,7 +737,7 @@ impl NodeLocation for TupleExpressionStruct {
     }
 }
 
-impl NodeLocation for TupleValueStruct {
+impl NodeLocation for TupleValueStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         Some(self.get_file_id())
     }
@@ -747,7 +747,7 @@ impl NodeLocation for TupleValueStruct {
     }
 }
 
-impl NodeLocation for TypeExpressionStruct {
+impl NodeLocation for TypeExpressionStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         Some(self.get_file_id())
     }
@@ -757,7 +757,7 @@ impl NodeLocation for TypeExpressionStruct {
     }
 }
 
-impl NodeLocation for UncheckedBlockStruct {
+impl NodeLocation for UncheckedBlockStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         Some(self.get_file_id())
     }
@@ -767,7 +767,7 @@ impl NodeLocation for UncheckedBlockStruct {
     }
 }
 
-impl NodeLocation for UserDefinedValueTypeDefinitionStruct {
+impl NodeLocation for UserDefinedValueTypeDefinitionStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         Some(self.get_file_id())
     }
@@ -777,7 +777,7 @@ impl NodeLocation for UserDefinedValueTypeDefinitionStruct {
     }
 }
 
-impl NodeLocation for UsingDeconstructionStruct {
+impl NodeLocation for UsingDeconstructionStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         Some(self.get_file_id())
     }
@@ -787,7 +787,7 @@ impl NodeLocation for UsingDeconstructionStruct {
     }
 }
 
-impl NodeLocation for UsingDeconstructionSymbolStruct {
+impl NodeLocation for UsingDeconstructionSymbolStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         Some(self.get_file_id())
     }
@@ -797,7 +797,7 @@ impl NodeLocation for UsingDeconstructionSymbolStruct {
     }
 }
 
-impl NodeLocation for UsingDirectiveStruct {
+impl NodeLocation for UsingDirectiveStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         Some(self.get_file_id())
     }
@@ -807,7 +807,7 @@ impl NodeLocation for UsingDirectiveStruct {
     }
 }
 
-impl NodeLocation for VariableDeclarationStruct {
+impl NodeLocation for VariableDeclarationStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         Some(self.get_file_id())
     }
@@ -817,7 +817,7 @@ impl NodeLocation for VariableDeclarationStruct {
     }
 }
 
-impl NodeLocation for VariableDeclarationStatementStruct {
+impl NodeLocation for VariableDeclarationStatementStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         Some(self.get_file_id())
     }
@@ -827,7 +827,7 @@ impl NodeLocation for VariableDeclarationStatementStruct {
     }
 }
 
-impl NodeLocation for VersionPragmaStruct {
+impl NodeLocation for VersionPragmaStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         Some(self.get_file_id())
     }
@@ -837,7 +837,7 @@ impl NodeLocation for VersionPragmaStruct {
     }
 }
 
-impl NodeLocation for VersionPragmaComparatorStruct {
+impl NodeLocation for VersionPragmaComparatorStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         Some(self.get_file_id())
     }
@@ -847,7 +847,7 @@ impl NodeLocation for VersionPragmaComparatorStruct {
     }
 }
 
-impl NodeLocation for WhileStatementStruct {
+impl NodeLocation for WhileStatementStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         Some(self.get_file_id())
     }
@@ -857,7 +857,7 @@ impl NodeLocation for WhileStatementStruct {
     }
 }
 
-impl NodeLocation for YulBlockStruct {
+impl NodeLocation for YulBlockStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         Some(self.get_file_id())
     }
@@ -867,7 +867,7 @@ impl NodeLocation for YulBlockStruct {
     }
 }
 
-impl NodeLocation for YulBreakStatementStruct {
+impl NodeLocation for YulBreakStatementStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         Some(self.get_file_id())
     }
@@ -877,7 +877,7 @@ impl NodeLocation for YulBreakStatementStruct {
     }
 }
 
-impl NodeLocation for YulContinueStatementStruct {
+impl NodeLocation for YulContinueStatementStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         Some(self.get_file_id())
     }
@@ -887,7 +887,7 @@ impl NodeLocation for YulContinueStatementStruct {
     }
 }
 
-impl NodeLocation for YulDefaultCaseStruct {
+impl NodeLocation for YulDefaultCaseStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         Some(self.get_file_id())
     }
@@ -897,7 +897,7 @@ impl NodeLocation for YulDefaultCaseStruct {
     }
 }
 
-impl NodeLocation for YulForStatementStruct {
+impl NodeLocation for YulForStatementStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         Some(self.get_file_id())
     }
@@ -907,7 +907,7 @@ impl NodeLocation for YulForStatementStruct {
     }
 }
 
-impl NodeLocation for YulFunctionCallExpressionStruct {
+impl NodeLocation for YulFunctionCallExpressionStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         Some(self.get_file_id())
     }
@@ -917,7 +917,7 @@ impl NodeLocation for YulFunctionCallExpressionStruct {
     }
 }
 
-impl NodeLocation for YulFunctionDefinitionStruct {
+impl NodeLocation for YulFunctionDefinitionStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         Some(self.get_file_id())
     }
@@ -927,7 +927,7 @@ impl NodeLocation for YulFunctionDefinitionStruct {
     }
 }
 
-impl NodeLocation for YulIfStatementStruct {
+impl NodeLocation for YulIfStatementStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         Some(self.get_file_id())
     }
@@ -937,7 +937,7 @@ impl NodeLocation for YulIfStatementStruct {
     }
 }
 
-impl NodeLocation for YulLeaveStatementStruct {
+impl NodeLocation for YulLeaveStatementStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         Some(self.get_file_id())
     }
@@ -947,7 +947,7 @@ impl NodeLocation for YulLeaveStatementStruct {
     }
 }
 
-impl NodeLocation for YulSwitchStatementStruct {
+impl NodeLocation for YulSwitchStatementStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         Some(self.get_file_id())
     }
@@ -957,7 +957,7 @@ impl NodeLocation for YulSwitchStatementStruct {
     }
 }
 
-impl NodeLocation for YulValueCaseStruct {
+impl NodeLocation for YulValueCaseStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         Some(self.get_file_id())
     }
@@ -967,7 +967,7 @@ impl NodeLocation for YulValueCaseStruct {
     }
 }
 
-impl NodeLocation for YulVariableAssignmentStatementStruct {
+impl NodeLocation for YulVariableAssignmentStatementStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         Some(self.get_file_id())
     }
@@ -977,7 +977,7 @@ impl NodeLocation for YulVariableAssignmentStatementStruct {
     }
 }
 
-impl NodeLocation for YulVariableDeclarationStatementStruct {
+impl NodeLocation for YulVariableDeclarationStatementStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         Some(self.get_file_id())
     }
@@ -987,7 +987,7 @@ impl NodeLocation for YulVariableDeclarationStatementStruct {
     }
 }
 
-impl NodeLocation for YulVariableDeclarationValueStruct {
+impl NodeLocation for YulVariableDeclarationValueStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         Some(self.get_file_id())
     }
@@ -1015,7 +1015,7 @@ impl NodeLocation for AbicoderVersion {
     }
 }
 
-impl NodeLocation for AdditiveExpressionOperator {
+impl NodeLocation for AdditiveExpressionOperator<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         match self {
             AdditiveExpressionOperator::Minus(inner) => inner.calculate_file_id(),
@@ -1033,7 +1033,7 @@ impl NodeLocation for AdditiveExpressionOperator {
     }
 }
 
-impl NodeLocation for ArgumentsDeclaration {
+impl NodeLocation for ArgumentsDeclaration<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         match self {
             ArgumentsDeclaration::PositionalArguments(inner) => inner.calculate_file_id(),
@@ -1051,7 +1051,7 @@ impl NodeLocation for ArgumentsDeclaration {
     }
 }
 
-impl NodeLocation for AssignmentExpressionOperator {
+impl NodeLocation for AssignmentExpressionOperator<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         match self {
             AssignmentExpressionOperator::AmpersandEqual(inner) => inner.calculate_file_id(),
@@ -1141,7 +1141,7 @@ impl NodeLocation for CatchClauseKind {
     }
 }
 
-impl NodeLocation for ContractMember {
+impl NodeLocation for ContractMember<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         match self {
             ContractMember::UsingDirective(inner) => inner.calculate_file_id(),
@@ -1191,7 +1191,7 @@ impl NodeLocation for ContractMember {
     }
 }
 
-impl NodeLocation for ElementaryType {
+impl NodeLocation for ElementaryType<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         match self {
             ElementaryType::BoolKeyword(inner) => inner.calculate_file_id(),
@@ -1233,7 +1233,7 @@ impl NodeLocation for ElementaryType {
     }
 }
 
-impl NodeLocation for EqualityExpressionOperator {
+impl NodeLocation for EqualityExpressionOperator<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         match self {
             EqualityExpressionOperator::BangEqual(inner) => inner.calculate_file_id(),
@@ -1277,7 +1277,7 @@ impl NodeLocation for ExperimentalFeature {
     }
 }
 
-impl NodeLocation for Expression {
+impl NodeLocation for Expression<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         match self {
             Expression::AssignmentExpression(inner) => inner.calculate_file_id(),
@@ -1419,7 +1419,7 @@ impl NodeLocation for Expression {
     }
 }
 
-impl NodeLocation for ForStatementCondition {
+impl NodeLocation for ForStatementCondition<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         match self {
             ForStatementCondition::ExpressionStatement(inner) => inner.calculate_file_id(),
@@ -1437,7 +1437,7 @@ impl NodeLocation for ForStatementCondition {
     }
 }
 
-impl NodeLocation for ForStatementInitialization {
+impl NodeLocation for ForStatementInitialization<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         match self {
             ForStatementInitialization::VariableDeclarationStatement(inner) => {
@@ -1541,7 +1541,7 @@ impl NodeLocation for FunctionVisibility {
     }
 }
 
-impl NodeLocation for ImportClause {
+impl NodeLocation for ImportClause<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         match self {
             ImportClause::PathImport(inner) => inner.calculate_file_id(),
@@ -1559,7 +1559,7 @@ impl NodeLocation for ImportClause {
     }
 }
 
-impl NodeLocation for InequalityExpressionOperator {
+impl NodeLocation for InequalityExpressionOperator<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         match self {
             InequalityExpressionOperator::GreaterThan(inner) => inner.calculate_file_id(),
@@ -1585,7 +1585,7 @@ impl NodeLocation for InequalityExpressionOperator {
     }
 }
 
-impl NodeLocation for MultiplicativeExpressionOperator {
+impl NodeLocation for MultiplicativeExpressionOperator<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         match self {
             MultiplicativeExpressionOperator::Asterisk(inner) => inner.calculate_file_id(),
@@ -1607,7 +1607,7 @@ impl NodeLocation for MultiplicativeExpressionOperator {
     }
 }
 
-impl NodeLocation for NumberUnit {
+impl NodeLocation for NumberUnit<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         match self {
             NumberUnit::WeiKeyword(inner) => inner.calculate_file_id(),
@@ -1649,7 +1649,7 @@ impl NodeLocation for NumberUnit {
     }
 }
 
-impl NodeLocation for PostfixExpressionOperator {
+impl NodeLocation for PostfixExpressionOperator<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         match self {
             PostfixExpressionOperator::MinusMinus(inner) => inner.calculate_file_id(),
@@ -1667,7 +1667,7 @@ impl NodeLocation for PostfixExpressionOperator {
     }
 }
 
-impl NodeLocation for Pragma {
+impl NodeLocation for Pragma<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         match self {
             Pragma::VersionPragma(inner) => inner.calculate_file_id(),
@@ -1689,7 +1689,7 @@ impl NodeLocation for Pragma {
     }
 }
 
-impl NodeLocation for PrefixExpressionOperator {
+impl NodeLocation for PrefixExpressionOperator<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         match self {
             PrefixExpressionOperator::Bang(inner) => inner.calculate_file_id(),
@@ -1723,7 +1723,7 @@ impl NodeLocation for PrefixExpressionOperator {
     }
 }
 
-impl NodeLocation for ShiftExpressionOperator {
+impl NodeLocation for ShiftExpressionOperator<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         match self {
             ShiftExpressionOperator::GreaterThanGreaterThan(inner) => inner.calculate_file_id(),
@@ -1749,7 +1749,7 @@ impl NodeLocation for ShiftExpressionOperator {
     }
 }
 
-impl NodeLocation for SourceUnitMember {
+impl NodeLocation for SourceUnitMember<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         match self {
             SourceUnitMember::PragmaDirective(inner) => inner.calculate_file_id(),
@@ -1859,7 +1859,7 @@ impl NodeLocation for StateVariableVisibility {
     }
 }
 
-impl NodeLocation for Statement {
+impl NodeLocation for Statement<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         match self {
             Statement::IfStatement(inner) => inner.calculate_file_id(),
@@ -1929,7 +1929,7 @@ impl NodeLocation for Statement {
     }
 }
 
-impl NodeLocation for StorageLocation {
+impl NodeLocation for StorageLocation<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         match self {
             StorageLocation::MemoryKeyword(inner) => inner.calculate_file_id(),
@@ -1951,7 +1951,7 @@ impl NodeLocation for StorageLocation {
     }
 }
 
-impl NodeLocation for StringExpression {
+impl NodeLocation for StringExpression<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         match self {
             StringExpression::StringLiterals(inner) => inner.calculate_file_id(),
@@ -1973,7 +1973,7 @@ impl NodeLocation for StringExpression {
     }
 }
 
-impl NodeLocation for TypeName {
+impl NodeLocation for TypeName<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         match self {
             TypeName::ArrayTypeName(inner) => inner.calculate_file_id(),
@@ -2003,7 +2003,7 @@ impl NodeLocation for TypeName {
     }
 }
 
-impl NodeLocation for UsingClause {
+impl NodeLocation for UsingClause<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         match self {
             UsingClause::IdentifierPath(inner) => inner.calculate_file_id(),
@@ -2021,7 +2021,7 @@ impl NodeLocation for UsingClause {
     }
 }
 
-impl NodeLocation for UsingOperator {
+impl NodeLocation for UsingOperator<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         match self {
             UsingOperator::Ampersand(inner) => inner.calculate_file_id(),
@@ -2091,7 +2091,7 @@ impl NodeLocation for UsingOperator {
     }
 }
 
-impl NodeLocation for UsingTarget {
+impl NodeLocation for UsingTarget<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         match self {
             UsingTarget::TypeName(inner) => inner.calculate_file_id(),
@@ -2109,7 +2109,7 @@ impl NodeLocation for UsingTarget {
     }
 }
 
-impl NodeLocation for VariableDeclarationTarget {
+impl NodeLocation for VariableDeclarationTarget<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         match self {
             VariableDeclarationTarget::SingleTypedDeclaration(inner) => inner.calculate_file_id(),
@@ -2129,7 +2129,7 @@ impl NodeLocation for VariableDeclarationTarget {
     }
 }
 
-impl NodeLocation for VersionPragmaComponent {
+impl NodeLocation for VersionPragmaComponent<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         match self {
             VersionPragmaComponent::Wildcard => None,
@@ -2189,7 +2189,7 @@ impl NodeLocation for VersionPragmaOperator {
     }
 }
 
-impl NodeLocation for YulExpression {
+impl NodeLocation for YulExpression<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         match self {
             YulExpression::YulFunctionCallExpression(inner) => inner.calculate_file_id(),
@@ -2211,7 +2211,7 @@ impl NodeLocation for YulExpression {
     }
 }
 
-impl NodeLocation for YulLiteral {
+impl NodeLocation for YulLiteral<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         match self {
             YulLiteral::TrueKeyword(inner) => inner.calculate_file_id(),
@@ -2245,7 +2245,7 @@ impl NodeLocation for YulLiteral {
     }
 }
 
-impl NodeLocation for YulStatement {
+impl NodeLocation for YulStatement<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         match self {
             YulStatement::YulBlock(inner) => inner.calculate_file_id(),
@@ -2299,7 +2299,7 @@ impl NodeLocation for YulStatement {
     }
 }
 
-impl NodeLocation for ArrayValuesStruct {
+impl NodeLocation for ArrayValuesStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         self.ir_nodes
             .node_id()
@@ -2311,7 +2311,7 @@ impl NodeLocation for ArrayValuesStruct {
     }
 }
 
-impl NodeLocation for CallOptionsStruct {
+impl NodeLocation for CallOptionsStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         self.ir_nodes
             .node_id()
@@ -2323,7 +2323,7 @@ impl NodeLocation for CallOptionsStruct {
     }
 }
 
-impl NodeLocation for CatchClausesStruct {
+impl NodeLocation for CatchClausesStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         self.ir_nodes
             .node_id()
@@ -2335,7 +2335,7 @@ impl NodeLocation for CatchClausesStruct {
     }
 }
 
-impl NodeLocation for ContractMembersStruct {
+impl NodeLocation for ContractMembersStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         self.ir_nodes
             .node_id()
@@ -2347,7 +2347,7 @@ impl NodeLocation for ContractMembersStruct {
     }
 }
 
-impl NodeLocation for EnumMembersStruct {
+impl NodeLocation for EnumMembersStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         self.ir_nodes
             .node_id()
@@ -2359,7 +2359,7 @@ impl NodeLocation for EnumMembersStruct {
     }
 }
 
-impl NodeLocation for HexStringLiteralsStruct {
+impl NodeLocation for HexStringLiteralsStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         self.ir_nodes
             .node_id()
@@ -2371,7 +2371,7 @@ impl NodeLocation for HexStringLiteralsStruct {
     }
 }
 
-impl NodeLocation for IdentifierPathStruct {
+impl NodeLocation for IdentifierPathStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         self.ir_nodes
             .node_id()
@@ -2383,7 +2383,7 @@ impl NodeLocation for IdentifierPathStruct {
     }
 }
 
-impl NodeLocation for ImportDeconstructionSymbolsStruct {
+impl NodeLocation for ImportDeconstructionSymbolsStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         self.ir_nodes
             .node_id()
@@ -2395,7 +2395,7 @@ impl NodeLocation for ImportDeconstructionSymbolsStruct {
     }
 }
 
-impl NodeLocation for InheritanceTypesStruct {
+impl NodeLocation for InheritanceTypesStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         self.ir_nodes
             .node_id()
@@ -2407,7 +2407,7 @@ impl NodeLocation for InheritanceTypesStruct {
     }
 }
 
-impl NodeLocation for InterfaceMembersStruct {
+impl NodeLocation for InterfaceMembersStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         self.ir_nodes
             .node_id()
@@ -2419,7 +2419,7 @@ impl NodeLocation for InterfaceMembersStruct {
     }
 }
 
-impl NodeLocation for LibraryMembersStruct {
+impl NodeLocation for LibraryMembersStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         self.ir_nodes
             .node_id()
@@ -2431,7 +2431,7 @@ impl NodeLocation for LibraryMembersStruct {
     }
 }
 
-impl NodeLocation for ModifierInvocationsStruct {
+impl NodeLocation for ModifierInvocationsStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         self.ir_nodes
             .node_id()
@@ -2443,7 +2443,7 @@ impl NodeLocation for ModifierInvocationsStruct {
     }
 }
 
-impl NodeLocation for MultiTypedDeclarationElementsStruct {
+impl NodeLocation for MultiTypedDeclarationElementsStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         self.ir_nodes
             .node_id()
@@ -2455,7 +2455,7 @@ impl NodeLocation for MultiTypedDeclarationElementsStruct {
     }
 }
 
-impl NodeLocation for NamedArgumentsStruct {
+impl NodeLocation for NamedArgumentsStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         self.ir_nodes
             .node_id()
@@ -2467,7 +2467,7 @@ impl NodeLocation for NamedArgumentsStruct {
     }
 }
 
-impl NodeLocation for OverridePathsStruct {
+impl NodeLocation for OverridePathsStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         self.ir_nodes
             .node_id()
@@ -2479,7 +2479,7 @@ impl NodeLocation for OverridePathsStruct {
     }
 }
 
-impl NodeLocation for ParametersStruct {
+impl NodeLocation for ParametersStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         self.ir_nodes
             .node_id()
@@ -2491,7 +2491,7 @@ impl NodeLocation for ParametersStruct {
     }
 }
 
-impl NodeLocation for PositionalArgumentsStruct {
+impl NodeLocation for PositionalArgumentsStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         self.ir_nodes
             .node_id()
@@ -2503,7 +2503,7 @@ impl NodeLocation for PositionalArgumentsStruct {
     }
 }
 
-impl NodeLocation for SourceUnitMembersStruct {
+impl NodeLocation for SourceUnitMembersStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         self.ir_nodes
             .node_id()
@@ -2515,7 +2515,7 @@ impl NodeLocation for SourceUnitMembersStruct {
     }
 }
 
-impl NodeLocation for StatementsStruct {
+impl NodeLocation for StatementsStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         self.ir_nodes
             .node_id()
@@ -2527,7 +2527,7 @@ impl NodeLocation for StatementsStruct {
     }
 }
 
-impl NodeLocation for StringLiteralsStruct {
+impl NodeLocation for StringLiteralsStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         self.ir_nodes
             .node_id()
@@ -2539,7 +2539,7 @@ impl NodeLocation for StringLiteralsStruct {
     }
 }
 
-impl NodeLocation for StructMembersStruct {
+impl NodeLocation for StructMembersStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         self.ir_nodes
             .node_id()
@@ -2551,7 +2551,7 @@ impl NodeLocation for StructMembersStruct {
     }
 }
 
-impl NodeLocation for TupleValuesStruct {
+impl NodeLocation for TupleValuesStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         self.ir_nodes
             .node_id()
@@ -2563,7 +2563,7 @@ impl NodeLocation for TupleValuesStruct {
     }
 }
 
-impl NodeLocation for UnicodeStringLiteralsStruct {
+impl NodeLocation for UnicodeStringLiteralsStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         self.ir_nodes
             .node_id()
@@ -2575,7 +2575,7 @@ impl NodeLocation for UnicodeStringLiteralsStruct {
     }
 }
 
-impl NodeLocation for UsingDeconstructionSymbolsStruct {
+impl NodeLocation for UsingDeconstructionSymbolsStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         self.ir_nodes
             .node_id()
@@ -2587,7 +2587,7 @@ impl NodeLocation for UsingDeconstructionSymbolsStruct {
     }
 }
 
-impl NodeLocation for VersionPragmaExpressionSetStruct {
+impl NodeLocation for VersionPragmaExpressionSetStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         self.ir_nodes
             .node_id()
@@ -2599,7 +2599,7 @@ impl NodeLocation for VersionPragmaExpressionSetStruct {
     }
 }
 
-impl NodeLocation for VersionPragmaExpressionSetsStruct {
+impl NodeLocation for VersionPragmaExpressionSetsStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         self.ir_nodes
             .node_id()
@@ -2611,7 +2611,7 @@ impl NodeLocation for VersionPragmaExpressionSetsStruct {
     }
 }
 
-impl NodeLocation for VersionPragmaSpecifierStruct {
+impl NodeLocation for VersionPragmaSpecifierStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         self.ir_nodes
             .node_id()
@@ -2623,7 +2623,7 @@ impl NodeLocation for VersionPragmaSpecifierStruct {
     }
 }
 
-impl NodeLocation for YulArgumentsStruct {
+impl NodeLocation for YulArgumentsStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         self.ir_nodes
             .node_id()
@@ -2635,7 +2635,7 @@ impl NodeLocation for YulArgumentsStruct {
     }
 }
 
-impl NodeLocation for YulParametersStruct {
+impl NodeLocation for YulParametersStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         self.ir_nodes
             .node_id()
@@ -2647,7 +2647,7 @@ impl NodeLocation for YulParametersStruct {
     }
 }
 
-impl NodeLocation for YulPathStruct {
+impl NodeLocation for YulPathStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         self.ir_nodes
             .node_id()
@@ -2659,7 +2659,7 @@ impl NodeLocation for YulPathStruct {
     }
 }
 
-impl NodeLocation for YulPathsStruct {
+impl NodeLocation for YulPathsStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         self.ir_nodes
             .node_id()
@@ -2671,7 +2671,7 @@ impl NodeLocation for YulPathsStruct {
     }
 }
 
-impl NodeLocation for YulStatementsStruct {
+impl NodeLocation for YulStatementsStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         self.ir_nodes
             .node_id()
@@ -2683,7 +2683,7 @@ impl NodeLocation for YulStatementsStruct {
     }
 }
 
-impl NodeLocation for YulValueCasesStruct {
+impl NodeLocation for YulValueCasesStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         self.ir_nodes
             .node_id()
@@ -2695,7 +2695,7 @@ impl NodeLocation for YulValueCasesStruct {
     }
 }
 
-impl NodeLocation for YulVariableNamesStruct {
+impl NodeLocation for YulVariableNamesStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         self.ir_nodes
             .node_id()
@@ -2707,7 +2707,7 @@ impl NodeLocation for YulVariableNamesStruct {
     }
 }
 
-impl NodeLocation for AmpersandStruct {
+impl NodeLocation for AmpersandStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         Some(self.get_file_id())
     }
@@ -2717,7 +2717,7 @@ impl NodeLocation for AmpersandStruct {
     }
 }
 
-impl NodeLocation for AmpersandEqualStruct {
+impl NodeLocation for AmpersandEqualStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         Some(self.get_file_id())
     }
@@ -2727,7 +2727,7 @@ impl NodeLocation for AmpersandEqualStruct {
     }
 }
 
-impl NodeLocation for AsteriskStruct {
+impl NodeLocation for AsteriskStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         Some(self.get_file_id())
     }
@@ -2737,7 +2737,7 @@ impl NodeLocation for AsteriskStruct {
     }
 }
 
-impl NodeLocation for AsteriskEqualStruct {
+impl NodeLocation for AsteriskEqualStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         Some(self.get_file_id())
     }
@@ -2747,7 +2747,7 @@ impl NodeLocation for AsteriskEqualStruct {
     }
 }
 
-impl NodeLocation for BangStruct {
+impl NodeLocation for BangStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         Some(self.get_file_id())
     }
@@ -2757,7 +2757,7 @@ impl NodeLocation for BangStruct {
     }
 }
 
-impl NodeLocation for BangEqualStruct {
+impl NodeLocation for BangEqualStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         Some(self.get_file_id())
     }
@@ -2767,7 +2767,7 @@ impl NodeLocation for BangEqualStruct {
     }
 }
 
-impl NodeLocation for BarStruct {
+impl NodeLocation for BarStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         Some(self.get_file_id())
     }
@@ -2777,7 +2777,7 @@ impl NodeLocation for BarStruct {
     }
 }
 
-impl NodeLocation for BarEqualStruct {
+impl NodeLocation for BarEqualStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         Some(self.get_file_id())
     }
@@ -2787,7 +2787,7 @@ impl NodeLocation for BarEqualStruct {
     }
 }
 
-impl NodeLocation for BoolKeywordStruct {
+impl NodeLocation for BoolKeywordStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         Some(self.get_file_id())
     }
@@ -2797,7 +2797,7 @@ impl NodeLocation for BoolKeywordStruct {
     }
 }
 
-impl NodeLocation for BytesKeywordStruct {
+impl NodeLocation for BytesKeywordStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         Some(self.get_file_id())
     }
@@ -2807,7 +2807,7 @@ impl NodeLocation for BytesKeywordStruct {
     }
 }
 
-impl NodeLocation for CallDataKeywordStruct {
+impl NodeLocation for CallDataKeywordStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         Some(self.get_file_id())
     }
@@ -2817,7 +2817,7 @@ impl NodeLocation for CallDataKeywordStruct {
     }
 }
 
-impl NodeLocation for CaretStruct {
+impl NodeLocation for CaretStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         Some(self.get_file_id())
     }
@@ -2827,7 +2827,7 @@ impl NodeLocation for CaretStruct {
     }
 }
 
-impl NodeLocation for CaretEqualStruct {
+impl NodeLocation for CaretEqualStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         Some(self.get_file_id())
     }
@@ -2837,7 +2837,7 @@ impl NodeLocation for CaretEqualStruct {
     }
 }
 
-impl NodeLocation for DaysKeywordStruct {
+impl NodeLocation for DaysKeywordStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         Some(self.get_file_id())
     }
@@ -2847,7 +2847,7 @@ impl NodeLocation for DaysKeywordStruct {
     }
 }
 
-impl NodeLocation for DecimalLiteralStruct {
+impl NodeLocation for DecimalLiteralStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         Some(self.get_file_id())
     }
@@ -2857,7 +2857,7 @@ impl NodeLocation for DecimalLiteralStruct {
     }
 }
 
-impl NodeLocation for DeleteKeywordStruct {
+impl NodeLocation for DeleteKeywordStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         Some(self.get_file_id())
     }
@@ -2867,7 +2867,7 @@ impl NodeLocation for DeleteKeywordStruct {
     }
 }
 
-impl NodeLocation for EqualStruct {
+impl NodeLocation for EqualStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         Some(self.get_file_id())
     }
@@ -2877,7 +2877,7 @@ impl NodeLocation for EqualStruct {
     }
 }
 
-impl NodeLocation for EqualEqualStruct {
+impl NodeLocation for EqualEqualStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         Some(self.get_file_id())
     }
@@ -2887,7 +2887,7 @@ impl NodeLocation for EqualEqualStruct {
     }
 }
 
-impl NodeLocation for EtherKeywordStruct {
+impl NodeLocation for EtherKeywordStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         Some(self.get_file_id())
     }
@@ -2897,7 +2897,7 @@ impl NodeLocation for EtherKeywordStruct {
     }
 }
 
-impl NodeLocation for FalseKeywordStruct {
+impl NodeLocation for FalseKeywordStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         Some(self.get_file_id())
     }
@@ -2907,7 +2907,7 @@ impl NodeLocation for FalseKeywordStruct {
     }
 }
 
-impl NodeLocation for FixedKeywordStruct {
+impl NodeLocation for FixedKeywordStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         Some(self.get_file_id())
     }
@@ -2917,7 +2917,7 @@ impl NodeLocation for FixedKeywordStruct {
     }
 }
 
-impl NodeLocation for GreaterThanStruct {
+impl NodeLocation for GreaterThanStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         Some(self.get_file_id())
     }
@@ -2927,7 +2927,7 @@ impl NodeLocation for GreaterThanStruct {
     }
 }
 
-impl NodeLocation for GreaterThanEqualStruct {
+impl NodeLocation for GreaterThanEqualStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         Some(self.get_file_id())
     }
@@ -2937,7 +2937,7 @@ impl NodeLocation for GreaterThanEqualStruct {
     }
 }
 
-impl NodeLocation for GreaterThanGreaterThanStruct {
+impl NodeLocation for GreaterThanGreaterThanStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         Some(self.get_file_id())
     }
@@ -2947,7 +2947,7 @@ impl NodeLocation for GreaterThanGreaterThanStruct {
     }
 }
 
-impl NodeLocation for GreaterThanGreaterThanEqualStruct {
+impl NodeLocation for GreaterThanGreaterThanEqualStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         Some(self.get_file_id())
     }
@@ -2957,7 +2957,7 @@ impl NodeLocation for GreaterThanGreaterThanEqualStruct {
     }
 }
 
-impl NodeLocation for GreaterThanGreaterThanGreaterThanStruct {
+impl NodeLocation for GreaterThanGreaterThanGreaterThanStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         Some(self.get_file_id())
     }
@@ -2967,7 +2967,7 @@ impl NodeLocation for GreaterThanGreaterThanGreaterThanStruct {
     }
 }
 
-impl NodeLocation for GreaterThanGreaterThanGreaterThanEqualStruct {
+impl NodeLocation for GreaterThanGreaterThanGreaterThanEqualStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         Some(self.get_file_id())
     }
@@ -2977,7 +2977,7 @@ impl NodeLocation for GreaterThanGreaterThanGreaterThanEqualStruct {
     }
 }
 
-impl NodeLocation for GweiKeywordStruct {
+impl NodeLocation for GweiKeywordStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         Some(self.get_file_id())
     }
@@ -2987,7 +2987,7 @@ impl NodeLocation for GweiKeywordStruct {
     }
 }
 
-impl NodeLocation for HexLiteralStruct {
+impl NodeLocation for HexLiteralStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         Some(self.get_file_id())
     }
@@ -2997,7 +2997,7 @@ impl NodeLocation for HexLiteralStruct {
     }
 }
 
-impl NodeLocation for HexStringLiteralStruct {
+impl NodeLocation for HexStringLiteralStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         Some(self.get_file_id())
     }
@@ -3007,7 +3007,7 @@ impl NodeLocation for HexStringLiteralStruct {
     }
 }
 
-impl NodeLocation for HoursKeywordStruct {
+impl NodeLocation for HoursKeywordStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         Some(self.get_file_id())
     }
@@ -3017,7 +3017,7 @@ impl NodeLocation for HoursKeywordStruct {
     }
 }
 
-impl NodeLocation for IdentifierStruct {
+impl NodeLocation for IdentifierStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         Some(self.get_file_id())
     }
@@ -3027,7 +3027,7 @@ impl NodeLocation for IdentifierStruct {
     }
 }
 
-impl NodeLocation for IntKeywordStruct {
+impl NodeLocation for IntKeywordStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         Some(self.get_file_id())
     }
@@ -3037,7 +3037,7 @@ impl NodeLocation for IntKeywordStruct {
     }
 }
 
-impl NodeLocation for LessThanStruct {
+impl NodeLocation for LessThanStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         Some(self.get_file_id())
     }
@@ -3047,7 +3047,7 @@ impl NodeLocation for LessThanStruct {
     }
 }
 
-impl NodeLocation for LessThanEqualStruct {
+impl NodeLocation for LessThanEqualStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         Some(self.get_file_id())
     }
@@ -3057,7 +3057,7 @@ impl NodeLocation for LessThanEqualStruct {
     }
 }
 
-impl NodeLocation for LessThanLessThanStruct {
+impl NodeLocation for LessThanLessThanStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         Some(self.get_file_id())
     }
@@ -3067,7 +3067,7 @@ impl NodeLocation for LessThanLessThanStruct {
     }
 }
 
-impl NodeLocation for LessThanLessThanEqualStruct {
+impl NodeLocation for LessThanLessThanEqualStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         Some(self.get_file_id())
     }
@@ -3077,7 +3077,7 @@ impl NodeLocation for LessThanLessThanEqualStruct {
     }
 }
 
-impl NodeLocation for MemoryKeywordStruct {
+impl NodeLocation for MemoryKeywordStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         Some(self.get_file_id())
     }
@@ -3087,7 +3087,7 @@ impl NodeLocation for MemoryKeywordStruct {
     }
 }
 
-impl NodeLocation for MinusStruct {
+impl NodeLocation for MinusStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         Some(self.get_file_id())
     }
@@ -3097,7 +3097,7 @@ impl NodeLocation for MinusStruct {
     }
 }
 
-impl NodeLocation for MinusEqualStruct {
+impl NodeLocation for MinusEqualStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         Some(self.get_file_id())
     }
@@ -3107,7 +3107,7 @@ impl NodeLocation for MinusEqualStruct {
     }
 }
 
-impl NodeLocation for MinusMinusStruct {
+impl NodeLocation for MinusMinusStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         Some(self.get_file_id())
     }
@@ -3117,7 +3117,7 @@ impl NodeLocation for MinusMinusStruct {
     }
 }
 
-impl NodeLocation for MinutesKeywordStruct {
+impl NodeLocation for MinutesKeywordStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         Some(self.get_file_id())
     }
@@ -3127,7 +3127,7 @@ impl NodeLocation for MinutesKeywordStruct {
     }
 }
 
-impl NodeLocation for PayableKeywordStruct {
+impl NodeLocation for PayableKeywordStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         Some(self.get_file_id())
     }
@@ -3137,7 +3137,7 @@ impl NodeLocation for PayableKeywordStruct {
     }
 }
 
-impl NodeLocation for PercentStruct {
+impl NodeLocation for PercentStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         Some(self.get_file_id())
     }
@@ -3147,7 +3147,7 @@ impl NodeLocation for PercentStruct {
     }
 }
 
-impl NodeLocation for PercentEqualStruct {
+impl NodeLocation for PercentEqualStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         Some(self.get_file_id())
     }
@@ -3157,7 +3157,7 @@ impl NodeLocation for PercentEqualStruct {
     }
 }
 
-impl NodeLocation for PlusStruct {
+impl NodeLocation for PlusStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         Some(self.get_file_id())
     }
@@ -3167,7 +3167,7 @@ impl NodeLocation for PlusStruct {
     }
 }
 
-impl NodeLocation for PlusEqualStruct {
+impl NodeLocation for PlusEqualStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         Some(self.get_file_id())
     }
@@ -3177,7 +3177,7 @@ impl NodeLocation for PlusEqualStruct {
     }
 }
 
-impl NodeLocation for PlusPlusStruct {
+impl NodeLocation for PlusPlusStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         Some(self.get_file_id())
     }
@@ -3187,7 +3187,7 @@ impl NodeLocation for PlusPlusStruct {
     }
 }
 
-impl NodeLocation for SecondsKeywordStruct {
+impl NodeLocation for SecondsKeywordStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         Some(self.get_file_id())
     }
@@ -3197,7 +3197,7 @@ impl NodeLocation for SecondsKeywordStruct {
     }
 }
 
-impl NodeLocation for SemicolonStruct {
+impl NodeLocation for SemicolonStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         Some(self.get_file_id())
     }
@@ -3207,7 +3207,7 @@ impl NodeLocation for SemicolonStruct {
     }
 }
 
-impl NodeLocation for SlashStruct {
+impl NodeLocation for SlashStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         Some(self.get_file_id())
     }
@@ -3217,7 +3217,7 @@ impl NodeLocation for SlashStruct {
     }
 }
 
-impl NodeLocation for SlashEqualStruct {
+impl NodeLocation for SlashEqualStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         Some(self.get_file_id())
     }
@@ -3227,7 +3227,7 @@ impl NodeLocation for SlashEqualStruct {
     }
 }
 
-impl NodeLocation for StorageKeywordStruct {
+impl NodeLocation for StorageKeywordStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         Some(self.get_file_id())
     }
@@ -3237,7 +3237,7 @@ impl NodeLocation for StorageKeywordStruct {
     }
 }
 
-impl NodeLocation for StringKeywordStruct {
+impl NodeLocation for StringKeywordStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         Some(self.get_file_id())
     }
@@ -3247,7 +3247,7 @@ impl NodeLocation for StringKeywordStruct {
     }
 }
 
-impl NodeLocation for StringLiteralStruct {
+impl NodeLocation for StringLiteralStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         Some(self.get_file_id())
     }
@@ -3257,7 +3257,7 @@ impl NodeLocation for StringLiteralStruct {
     }
 }
 
-impl NodeLocation for SuperKeywordStruct {
+impl NodeLocation for SuperKeywordStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         Some(self.get_file_id())
     }
@@ -3267,7 +3267,7 @@ impl NodeLocation for SuperKeywordStruct {
     }
 }
 
-impl NodeLocation for ThisKeywordStruct {
+impl NodeLocation for ThisKeywordStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         Some(self.get_file_id())
     }
@@ -3277,7 +3277,7 @@ impl NodeLocation for ThisKeywordStruct {
     }
 }
 
-impl NodeLocation for TildeStruct {
+impl NodeLocation for TildeStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         Some(self.get_file_id())
     }
@@ -3287,7 +3287,7 @@ impl NodeLocation for TildeStruct {
     }
 }
 
-impl NodeLocation for TrueKeywordStruct {
+impl NodeLocation for TrueKeywordStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         Some(self.get_file_id())
     }
@@ -3297,7 +3297,7 @@ impl NodeLocation for TrueKeywordStruct {
     }
 }
 
-impl NodeLocation for UfixedKeywordStruct {
+impl NodeLocation for UfixedKeywordStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         Some(self.get_file_id())
     }
@@ -3307,7 +3307,7 @@ impl NodeLocation for UfixedKeywordStruct {
     }
 }
 
-impl NodeLocation for UintKeywordStruct {
+impl NodeLocation for UintKeywordStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         Some(self.get_file_id())
     }
@@ -3317,7 +3317,7 @@ impl NodeLocation for UintKeywordStruct {
     }
 }
 
-impl NodeLocation for UnicodeStringLiteralStruct {
+impl NodeLocation for UnicodeStringLiteralStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         Some(self.get_file_id())
     }
@@ -3327,7 +3327,7 @@ impl NodeLocation for UnicodeStringLiteralStruct {
     }
 }
 
-impl NodeLocation for WeeksKeywordStruct {
+impl NodeLocation for WeeksKeywordStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         Some(self.get_file_id())
     }
@@ -3337,7 +3337,7 @@ impl NodeLocation for WeeksKeywordStruct {
     }
 }
 
-impl NodeLocation for WeiKeywordStruct {
+impl NodeLocation for WeiKeywordStruct<'_> {
     fn calculate_file_id(&self) -> Option<&FileId> {
         Some(self.get_file_id())
     }

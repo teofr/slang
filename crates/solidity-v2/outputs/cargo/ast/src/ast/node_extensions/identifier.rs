@@ -5,7 +5,7 @@ use super::super::nodes::IdentifierStruct;
 use crate::ast::references::references_binding_to_definition;
 use crate::ast::{Definition, Reference};
 
-impl IdentifierStruct {
+impl<'a> IdentifierStruct<'a> {
     pub fn name(&self) -> &str {
         self.ir_node.unparse()
     }
@@ -20,11 +20,11 @@ impl IdentifierStruct {
     /// Attempts to resolve the identifier to a definition, following symbol
     /// aliases (import deconstructions). Returns `None` if the identifier is
     /// not acting as a reference, or the reference cannot be resolved.
-    pub fn resolve_to_definition(&self) -> Option<Definition> {
+    pub fn resolve_to_definition(&self) -> Option<Definition<'a>> {
         let definition_id = self
             .semantic
             .resolve_reference_identifier_to_definition_id(self.ir_node.id())?;
-        Definition::try_create(definition_id, &self.semantic)
+        Definition::try_create(definition_id, self.semantic)
     }
 
     /// Attempts to resolve the identifier to an immediate definition, without
@@ -33,11 +33,11 @@ impl IdentifierStruct {
     /// equivalent to `resolve_to_definition()`. Returns `None` if the
     /// identifier is not acting as a reference, or the reference cannot be
     /// resolved.
-    pub fn resolve_to_immediate_definition(&self) -> Option<Definition> {
+    pub fn resolve_to_immediate_definition(&self) -> Option<Definition<'a>> {
         let definition_id = self
             .semantic
             .resolve_reference_identifier_to_immediate_definition_id(self.ir_node.id())?;
-        Definition::try_create(definition_id, &self.semantic)
+        Definition::try_create(definition_id, self.semantic)
     }
 
     /// If this identifier resolves to a built-in (e.g. `msg`, `block`,
@@ -60,19 +60,19 @@ impl IdentifierStruct {
 
     /// Returns the `Definition` for this identifier, if the identifier is a
     /// definitions by itself (eg. an enum member), or `None` otherwise.
-    pub fn as_definition(&self) -> Option<Definition> {
-        Definition::try_create(self.ir_node.id(), &self.semantic)
+    pub fn as_definition(&self) -> Option<Definition<'a>> {
+        Definition::try_create(self.ir_node.id(), self.semantic)
     }
 
     /// Returns the enclosing definition for an identifier that is itself a
     /// definition (eg. an enum member), or `None` if it is not a definition or
     /// doesn't have an immediately enclosing definition.
-    pub fn enclosing_definition(&self) -> Option<Definition> {
+    pub fn enclosing_definition(&self) -> Option<Definition<'a>> {
         let enclosing = self
             .semantic
             .binder()
             .enclosing_definition_node_id(self.ir_node.id())?;
-        Definition::try_create(enclosing, &self.semantic)
+        Definition::try_create(enclosing, self.semantic)
     }
 
     /// Returns `true` if the identifier is a definition itself, or is the name
@@ -86,15 +86,15 @@ impl IdentifierStruct {
 
     /// Returns the `Definition` this identifier names, if any. If the
     /// identifier is a reference only, returns `None`.
-    pub fn named_definition(&self) -> Option<Definition> {
+    pub fn named_definition(&self) -> Option<Definition<'a>> {
         self.semantic
             .binder()
             .find_definition_by_identifier_node_id(self.ir_node.id())
-            .and_then(|definition| Definition::try_create(definition.node_id(), &self.semantic))
+            .and_then(|definition| Definition::try_create(definition.node_id(), self.semantic))
     }
 
     // only makes sense if `is_definition()` is true
-    pub fn references(&self) -> Vec<Reference> {
-        references_binding_to_definition(self.ir_node.id(), &self.semantic)
+    pub fn references(&self) -> Vec<Reference<'a>> {
+        references_binding_to_definition(self.ir_node.id(), self.semantic)
     }
 }

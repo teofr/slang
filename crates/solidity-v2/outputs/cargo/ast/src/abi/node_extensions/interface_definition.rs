@@ -3,7 +3,7 @@ use slang_solidity_v2_ir::ir;
 use crate::abi::ContractAbi;
 use crate::ast::{ContractBase, InterfaceDefinitionStruct};
 
-impl InterfaceDefinitionStruct {
+impl<'a> InterfaceDefinitionStruct<'a> {
     /// Computes the ERC-165 interface identifier: the XOR of the 4-byte selectors of the regular
     /// functions the interface itself declares, excluding inherited ones.
     pub fn compute_interface_id(&self) -> Option<u32> {
@@ -18,7 +18,7 @@ impl InterfaceDefinitionStruct {
     }
 
     /// `None` when a base is a contract, which solc rejects.
-    pub fn compute_abi(&self) -> Option<ContractAbi> {
+    pub fn compute_abi(&self) -> Option<ContractAbi<'a>> {
         if self.has_contract_base() {
             return None;
         }
@@ -37,7 +37,7 @@ impl InterfaceDefinitionStruct {
             self.ir_node.name.unparse().to_string(),
             self.get_file_id().clone(),
             entries,
-            &self.semantic,
+            self.semantic,
         ))
     }
 

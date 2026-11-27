@@ -14,25 +14,25 @@ use super::types::Type;
 //
 
 {% for parent_type, sequence in target.sequences %}
-  pub type {{ parent_type }} = {{ parent_type }}Struct;
+  pub type {{ parent_type }}<'a> = {{ parent_type }}Struct<'a>;
 
-  #[derive(Clone)]
-  pub struct {{ parent_type }}Struct {
-    pub(crate) ir_node: ir::{{ parent_type }},
-    pub(crate) semantic: Arc<SemanticContext>,
+  #[derive(Clone, Copy)]
+  pub struct {{ parent_type }}Struct<'a> {
+    pub(crate) ir_node: &'a ir::{{ parent_type }},
+    pub(crate) semantic: &'a SemanticContext,
   }
 
-  pub fn create_{{ parent_type | snake_case }}(
-    ir_node: &ir::{{ parent_type }},
-    semantic: &Arc<SemanticContext>,
-  ) -> {{ parent_type }} {
+  pub fn create_{{ parent_type | snake_case }}<'a>(
+    ir_node: &'a ir::{{ parent_type }},
+    semantic: &'a SemanticContext,
+  ) -> {{ parent_type }}<'a> {
     {{ parent_type }}Struct {
-      ir_node: Arc::clone(ir_node),
-      semantic: Arc::clone(semantic),
+      ir_node,
+      semantic,
     }
   }
 
-  impl {{ parent_type }}Struct {
+  impl<'a> {{ parent_type }}Struct<'a> {
     pub fn node_id(&self) -> NodeId {
       self.ir_node.id()
     }
@@ -42,27 +42,27 @@ use super::types::Type;
           self.ir_node.{{ field.label }}
         }
       {% elif field.is_optional %}
-        pub fn {{ field.label }}(&self) -> Option<{{ field.field_type.name }}> {
+        pub fn {{ field.label }}(&self) -> Option<{{ field.field_type.name }}{% if target.borrowed[field.field_type.name] %}<'a>{% endif %}> {
           self.ir_node.{{ field.label }}.as_ref().map(|ir_node| {
-            create_{{ field.field_type.name | snake_case }}(ir_node, &self.semantic)
+            create_{{ field.field_type.name | snake_case }}(ir_node, self.semantic)
           })
         }
       {% else %} {# not field.is_optional #}
-        pub fn {{ field.label }}(&self) -> {{ field.field_type.name }} {
-          create_{{ field.field_type.name | snake_case }}(&self.ir_node.{{ field.label }}, &self.semantic)
+        pub fn {{ field.label }}(&self) -> {{ field.field_type.name }}{% if target.borrowed[field.field_type.name] %}<'a>{% endif %} {
+          create_{{ field.field_type.name | snake_case }}(&self.ir_node.{{ field.label }}, self.semantic)
         }
       {% endif %}
     {% endfor %}
 
-    pub fn get_type(&self) -> Option<Type> {
-      Type::try_create_for_node_id(self.ir_node.id(), &self.semantic)
+    pub fn get_type(&self) -> Option<Type<'a>> {
+      Type::try_create_for_node_id(self.ir_node.id(), self.semantic)
     }
 
-    pub fn get_file_id(&self) -> &FileId {
+    pub fn get_file_id(&self) -> &'a FileId {
         self.semantic.file_id_from_node_id(self.ir_node.id())
     }
 
-    pub fn get_text_range(&self) -> &Range<usize> {
+    pub fn get_text_range(&self) -> &'a Range<usize> {
         &self.ir_node.range
     }
   }
@@ -74,12 +74,14 @@ use super::types::Type;
 //
 
 {% for parent_type, choice in target.choices %}
-  #[derive(Clone)]
-  pub enum {{ parent_type }} {
+  #[derive(Clone, Copy)]
+  pub enum {{ parent_type }}{% if target.borrowed[parent_type] %}<'a>{% endif %} {
     {% for variant in choice.variants -%}
       {{ variant.name }}
-      {%- if not variant.is_unit -%}
-        ({{ variant.type_name }})
+      {%- if variant.is_external -%}
+        (&'a {{ variant.type_name }})
+      {%- elif not variant.is_unit -%}
+        ({{ variant.type_name }}{% if target.borrowed[variant.type_name] %}<'a>{% endif %})
       {%- endif -%}
       ,
     {%- endfor -%}
@@ -88,10 +90,10 @@ use super::types::Type;
   #[allow(clippy::clone_on_copy)]
   #[allow(clippy::too_many_lines)]
   #[allow(clippy::trivially_copy_pass_by_ref)]
-  pub(crate) fn create_{{ parent_type | snake_case }}(
-    ir_node: &ir::{{ parent_type }},
-    semantic: &Arc<SemanticContext>,
-  ) -> {{ parent_type }}{
+  pub(crate) fn create_{{ parent_type | snake_case }}<'a>(
+    ir_node: &'a ir::{{ parent_type }},
+    semantic: &'a SemanticContext,
+  ) -> {{ parent_type }}{% if target.borrowed[parent_type] %}<'a>{% endif %} {
     match ir_node {
       {% for variant in choice.variants -%}
         ir::{{ parent_type }}::{{ variant.name }}
@@ -100,7 +102,7 @@ use super::types::Type;
             create_{{ variant.type_name | snake_case }}(nodes, semantic)
           ),
         {%- elif variant.is_external -%}
-          (variant) => {{ parent_type }}::{{ variant.name }}(variant.clone()),
+          (variant) => {{ parent_type }}::{{ variant.name }}(variant),
         {%- elif not variant.is_unit -%}
           (variant) => {{ parent_type }}::{{ variant.name }}(
             create_{{ variant.type_name | snake_case }}(variant, semantic)
@@ -119,29 +121,30 @@ use super::types::Type;
 //
 
 {% for parent_type, collection in target.collections -%}
-  pub type {{ parent_type }} = {{ parent_type }}Struct;
+  pub type {{ parent_type }}<'a> = {{ parent_type }}Struct<'a>;
 
-  pub(crate) fn create_{{ parent_type | snake_case }}(
-    nodes: &ir::{{ parent_type }},
-    semantic: &Arc<SemanticContext>,
-  ) -> {{ parent_type }} {
+  pub(crate) fn create_{{ parent_type | snake_case }}<'a>(
+    nodes: &'a ir::{{ parent_type }},
+    semantic: &'a SemanticContext,
+  ) -> {{ parent_type }}<'a> {
     {{ parent_type }}Struct {
-      ir_nodes: Arc::clone(nodes),
-      semantic: Arc::clone(semantic),
+      ir_nodes: nodes,
+      semantic,
     }
   }
 
-  #[derive(Clone)]
-  pub struct {{ parent_type }}Struct {
-    pub(crate) ir_nodes: ir::{{ parent_type }},
-    pub(crate) semantic: Arc<SemanticContext>,
+  #[derive(Clone, Copy)]
+  pub struct {{ parent_type }}Struct<'a> {
+    pub(crate) ir_nodes: &'a ir::{{ parent_type }},
+    pub(crate) semantic: &'a SemanticContext,
   }
 
-  impl {{ parent_type }}Struct {
-    pub fn iter(&self) -> impl Iterator<Item = {{ collection.item_type.name }}> + use<'_> {
+  impl<'a> {{ parent_type }}Struct<'a> {
+    pub fn iter(&self) -> impl Iterator<Item = {{ collection.item_type.name }}{% if target.borrowed[collection.item_type.name] %}<'a>{% endif %}> + use<'a> {
+      let semantic = self.semantic;
       self.ir_nodes
           .iter()
-          .map(|ir_node| create_{{ collection.item_type.name | snake_case }}(ir_node, &self.semantic))
+          .map(move |ir_node| create_{{ collection.item_type.name | snake_case }}(ir_node, semantic))
     }
 
     pub fn len(&self) -> usize {
@@ -159,42 +162,42 @@ use super::types::Type;
 //
 
 {% for terminal_type, terminal in target.terminals %}
-  pub type {{ terminal_type }} = {{ terminal_type }}Struct;
+  pub type {{ terminal_type }}<'a> = {{ terminal_type }}Struct<'a>;
 
-  #[derive(Clone)]
-  pub struct {{ terminal_type }}Struct {
-    pub(crate) ir_node: ir::{{ terminal_type }},
-    pub(crate) semantic: Arc<SemanticContext>,
+  #[derive(Clone, Copy)]
+  pub struct {{ terminal_type }}Struct<'a> {
+    pub(crate) ir_node: &'a ir::{{ terminal_type }},
+    pub(crate) semantic: &'a SemanticContext,
   }
 
-  pub(crate) fn create_{{ terminal_type | snake_case }}(
-    ir_node: &ir::{{ terminal_type }},
-    semantic: &Arc<SemanticContext>,
-  ) -> {{ terminal_type }} {
+  pub(crate) fn create_{{ terminal_type | snake_case }}<'a>(
+    ir_node: &'a ir::{{ terminal_type }},
+    semantic: &'a SemanticContext,
+  ) -> {{ terminal_type }}<'a> {
     {{ terminal_type }}Struct {
-      ir_node: Arc::clone(ir_node),
-      semantic: Arc::clone(semantic),
+      ir_node,
+      semantic,
     }
   }
 
-  impl {{ terminal_type }}Struct {
+  impl<'a> {{ terminal_type }}Struct<'a> {
     pub fn node_id(&self) -> NodeId {
       self.ir_node.id()
     }
 
-      pub fn unparse(&self) -> &str {
+      pub fn unparse(&self) -> &'a str {
         self.ir_node.unparse()
       }
 
-    pub fn get_type(&self) -> Option<Type> {
-      Type::try_create_for_node_id(self.ir_node.id(), &self.semantic)
+    pub fn get_type(&self) -> Option<Type<'a>> {
+      Type::try_create_for_node_id(self.ir_node.id(), self.semantic)
     }
 
-    pub fn get_file_id(&self) -> &FileId {
+    pub fn get_file_id(&self) -> &'a FileId {
         self.semantic.file_id_from_node_id(self.ir_node.id())
     }
 
-    pub fn get_text_range(&self) -> &Range<usize> {
+    pub fn get_text_range(&self) -> &'a Range<usize> {
         &self.ir_node.range
     }
   }

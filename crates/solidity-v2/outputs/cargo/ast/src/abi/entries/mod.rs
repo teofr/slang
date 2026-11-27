@@ -1,7 +1,6 @@
 mod serialize;
 
 use std::fmt;
-use std::sync::Arc;
 
 use itertools::Either;
 use slang_solidity_v2_common::files::FileId;
@@ -16,22 +15,22 @@ use slang_solidity_v2_semantic::types::{
 use crate::ast::{self, Definition};
 
 /// Serializes as the JSON ABI, the array of its entries.
-pub struct ContractAbi {
+pub struct ContractAbi<'a> {
     node_id: NodeId,
     name: String,
     file_id: FileId,
     entries: Vec<Entry>,
-    semantic: Arc<SemanticContext>,
+    semantic: &'a SemanticContext,
 }
 
-impl ContractAbi {
+impl<'a> ContractAbi<'a> {
     /// Builds the ABI with its entries in the order [`Self::entries`] describes.
     pub(crate) fn new(
         node_id: NodeId,
         name: String,
         file_id: FileId,
         mut entries: Vec<Entry>,
-        semantic: &Arc<SemanticContext>,
+        semantic: &'a SemanticContext,
     ) -> Self {
         entries.sort_by(|this, other| this.sort_key().cmp(&other.sort_key()));
         order_overloads_by_selector(&mut entries, semantic);
@@ -40,7 +39,7 @@ impl ContractAbi {
             name,
             file_id,
             entries,
-            semantic: Arc::clone(semantic),
+            semantic,
         }
     }
 
@@ -61,7 +60,7 @@ impl ContractAbi {
     pub fn entries(&self) -> AbiEntries<'_> {
         AbiEntries {
             entries: &self.entries,
-            semantic: &self.semantic,
+            semantic: self.semantic,
         }
     }
 }
@@ -116,7 +115,7 @@ pub(crate) enum SpellingPolicy {
 
 impl SpellingPolicy {
     /// The policy of a function declared in `enclosing_definition`.
-    pub(crate) fn of(enclosing_definition: Option<&Definition>) -> Self {
+    pub(crate) fn of(enclosing_definition: Option<&Definition<'_>>) -> Self {
         match enclosing_definition {
             Some(Definition::Library(_)) => Self::Library,
             _ => Self::Canonical,
@@ -182,7 +181,7 @@ impl Entry {
 
 /// Reorders each run of same-named functions in sorted `entries` by selector, hashing a selector
 /// only for a function that has overloads.
-fn order_overloads_by_selector(entries: &mut [Entry], semantic: &Arc<SemanticContext>) {
+fn order_overloads_by_selector(entries: &mut [Entry], semantic: &SemanticContext) {
     for run in entries.chunk_by_mut(same_function_name) {
         if run.len() > 1 {
             run.sort_by_cached_key(|entry| overload_selector(entry, semantic));
@@ -197,7 +196,7 @@ fn same_function_name(this: &Entry, other: &Entry) -> bool {
     }
 }
 
-fn overload_selector(entry: &Entry, semantic: &Arc<SemanticContext>) -> u32 {
+fn overload_selector(entry: &Entry, semantic: &SemanticContext) -> u32 {
     let Entry::Function(function) = entry else {
         unreachable!("only functions share a name");
     };
@@ -242,7 +241,7 @@ impl Parameter {
 #[derive(Clone, Copy)]
 pub struct AbiEntries<'a> {
     entries: &'a [Entry],
-    semantic: &'a Arc<SemanticContext>,
+    semantic: &'a SemanticContext,
 }
 
 impl<'a> AbiEntries<'a> {
@@ -274,7 +273,7 @@ pub enum AbiEntry<'a> {
 }
 
 impl<'a> AbiEntry<'a> {
-    fn new(entry: &'a Entry, semantic: &'a Arc<SemanticContext>) -> Self {
+    fn new(entry: &'a Entry, semantic: &'a SemanticContext) -> Self {
         match entry {
             Entry::Constructor(constructor) => Self::Constructor(AbiConstructor {
                 constructor,
@@ -303,7 +302,7 @@ impl<'a> AbiEntry<'a> {
 #[derive(Clone, Copy)]
 pub struct AbiConstructor<'a> {
     constructor: &'a Constructor,
-    semantic: &'a Arc<SemanticContext>,
+    semantic: &'a SemanticContext,
 }
 
 impl<'a> AbiConstructor<'a> {
@@ -328,7 +327,7 @@ impl<'a> AbiConstructor<'a> {
 #[derive(Clone, Copy)]
 pub struct AbiError<'a> {
     error: &'a Error,
-    semantic: &'a Arc<SemanticContext>,
+    semantic: &'a SemanticContext,
 }
 
 impl<'a> AbiError<'a> {
@@ -353,7 +352,7 @@ impl<'a> AbiError<'a> {
 #[derive(Clone, Copy)]
 pub struct AbiEvent<'a> {
     event: &'a Event,
-    semantic: &'a Arc<SemanticContext>,
+    semantic: &'a SemanticContext,
 }
 
 impl<'a> AbiEvent<'a> {
@@ -397,7 +396,7 @@ impl<'a> AbiFallback<'a> {
 #[derive(Clone, Copy)]
 pub struct AbiFunction<'a> {
     function: &'a Function,
-    semantic: &'a Arc<SemanticContext>,
+    semantic: &'a SemanticContext,
 }
 
 impl<'a> AbiFunction<'a> {
@@ -452,7 +451,7 @@ impl<'a> AbiReceive<'a> {
 pub struct AbiParameters<'a> {
     source: ParameterSource<'a>,
     spelling_policy: SpellingPolicy,
-    semantic: &'a Arc<SemanticContext>,
+    semantic: &'a SemanticContext,
 }
 
 #[derive(Clone, Copy)]
@@ -471,7 +470,7 @@ impl<'a> AbiParameters<'a> {
         parameters: &'a [Parameter],
         spelling_policy: SpellingPolicy,
         with_indexed: bool,
-        semantic: &'a Arc<SemanticContext>,
+        semantic: &'a SemanticContext,
     ) -> Self {
         Self {
             source: ParameterSource::Entry {
@@ -532,7 +531,7 @@ pub struct AbiParameter<'a> {
     /// `Some` only on an event's input, the only parameter the JSON marks `indexed`.
     indexed: Option<bool>,
     spelling_policy: SpellingPolicy,
-    semantic: &'a Arc<SemanticContext>,
+    semantic: &'a SemanticContext,
 }
 
 impl<'a> AbiParameter<'a> {
@@ -545,7 +544,7 @@ impl<'a> AbiParameter<'a> {
     }
 
     /// The Solidity type behind the parameter.
-    pub fn get_type(&self) -> ast::Type {
+    pub fn get_type(&self) -> ast::Type<'a> {
         ast::Type::create(self.type_id, self.semantic)
     }
 

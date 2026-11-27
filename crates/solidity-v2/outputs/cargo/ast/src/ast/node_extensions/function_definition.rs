@@ -2,12 +2,12 @@ use slang_solidity_v2_semantic::binder;
 
 use super::super::{FunctionDefinitionStruct, Type};
 
-impl FunctionDefinitionStruct {
+impl<'a> FunctionDefinitionStruct<'a> {
     /// Returns the type this function is dispatched through — external
     /// visibility, with `calldata` locations changed to `memory` — or `None`
     /// when nothing selects on it: an internal or private function, or a
     /// constructor, fallback or receive.
-    pub fn externalized_type(&self) -> Option<Type> {
+    pub fn externalized_type(&self) -> Option<Type<'a>> {
         let binder::Definition::Function(definition) = self
             .semantic
             .binder()
@@ -17,7 +17,7 @@ impl FunctionDefinitionStruct {
         };
         Some(Type::create(
             definition.externalized_type_id?,
-            &self.semantic,
+            self.semantic,
         ))
     }
 }

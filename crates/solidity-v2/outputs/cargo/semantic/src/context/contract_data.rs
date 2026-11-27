@@ -158,11 +158,10 @@ impl ContractData {
     pub(super) fn find_contract_by_name<'a>(
         &'a self,
         name: &'a str,
-    ) -> impl Iterator<Item = ir::ContractDefinition> + use<'a> {
+    ) -> impl Iterator<Item = &'a ir::ContractDefinition> + use<'a> {
         self.contracts
             .iter()
             .filter(move |contract| contract.name.unparse() == name)
-            .cloned()
     }
 
     pub(crate) fn linearised_functions(&self, contract_id: NodeId) -> &[ir::FunctionDefinition] {

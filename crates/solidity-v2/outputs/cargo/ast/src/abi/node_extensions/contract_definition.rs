@@ -7,8 +7,8 @@ use crate::abi::{
 };
 use crate::ast::ContractDefinitionStruct;
 
-impl ContractDefinitionStruct {
-    pub fn compute_abi(&self) -> Option<ContractAbi> {
+impl<'a> ContractDefinitionStruct<'a> {
+    pub fn compute_abi(&self) -> Option<ContractAbi<'a>> {
         let mut entries = Vec::new();
         // An abstract contract cannot be deployed, so leave its constructor out.
         if let Some(constructor) = self.constructor()
@@ -44,7 +44,7 @@ impl ContractDefinitionStruct {
             self.ir_node.name.unparse().to_string(),
             self.get_file_id().clone(),
             entries,
-            &self.semantic,
+            self.semantic,
         ))
     }
 
@@ -124,7 +124,7 @@ impl ContractDefinitionStruct {
             items.iter().map(StorageVariable::type_id),
             |type_id, layout| StorageType {
                 type_id,
-                type_identifier: storage_type_identifier(&self.semantic, type_id),
+                type_identifier: storage_type_identifier(self.semantic, type_id),
                 label: self.semantic.type_abi_internal_name(type_id),
                 size: layout.size,
                 kind: layout.kind,

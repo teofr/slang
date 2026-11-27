@@ -2,7 +2,7 @@ use slang_solidity_v2_semantic::binder;
 
 use super::super::StructDefinitionStruct;
 
-impl StructDefinitionStruct {
+impl<'a> StructDefinitionStruct<'a> {
     /// Whether a cycle is reachable from this struct through struct members,
     /// arrays and mapping values, excluding function parameter and return types.
     /// Includes structs that reach a cycle without belonging to it.

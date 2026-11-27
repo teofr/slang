@@ -1,10 +1,10 @@
 use crate::abi;
 use crate::ast::{SourceUnitMember, SourceUnitStruct};
 
-impl SourceUnitStruct {
+impl<'a> SourceUnitStruct<'a> {
     /// Returns the ABIs of every contract, interface, and library in this
     /// source unit. A definition whose ABI cannot be computed is left out.
-    pub fn compute_abi(&self) -> Vec<abi::ContractAbi> {
+    pub fn compute_abi(&self) -> Vec<abi::ContractAbi<'a>> {
         self.members()
             .iter()
             .filter_map(|member| match member {

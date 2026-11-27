@@ -4,20 +4,20 @@ use super::nodes::*;
 
 pub trait Visitor {
   {%- for parent_type, sequence in target.sequences %}
-    fn enter_{{ parent_type | snake_case }}(&mut self, _node: &{{ parent_type }}) -> bool { true }
-    fn leave_{{ parent_type | snake_case }}(&mut self, _node: &{{ parent_type }}) {}
+    fn enter_{{ parent_type | snake_case }}(&mut self, _node: &{{ parent_type }}{% if target.borrowed[parent_type] %}<'_>{% endif %}) -> bool { true }
+    fn leave_{{ parent_type | snake_case }}(&mut self, _node: &{{ parent_type }}{% if target.borrowed[parent_type] %}<'_>{% endif %}) {}
   {% endfor -%}
   {%- for parent_type, choice in target.choices %}
-    fn enter_{{ parent_type | snake_case }}(&mut self, _node: &{{ parent_type }}) -> bool { true }
-    fn leave_{{ parent_type | snake_case }}(&mut self, _node: &{{ parent_type }}) {}
+    fn enter_{{ parent_type | snake_case }}(&mut self, _node: &{{ parent_type }}{% if target.borrowed[parent_type] %}<'_>{% endif %}) -> bool { true }
+    fn leave_{{ parent_type | snake_case }}(&mut self, _node: &{{ parent_type }}{% if target.borrowed[parent_type] %}<'_>{% endif %}) {}
   {% endfor -%}
   {%- for parent_type, collection in target.collections %}
-    fn enter_{{ parent_type | snake_case }}(&mut self, _items: &{{ parent_type }}) -> bool { true }
-    fn leave_{{ parent_type | snake_case }}(&mut self, _items: &{{ parent_type }}) {}
+    fn enter_{{ parent_type | snake_case }}(&mut self, _items: &{{ parent_type }}{% if target.borrowed[parent_type] %}<'_>{% endif %}) -> bool { true }
+    fn leave_{{ parent_type | snake_case }}(&mut self, _items: &{{ parent_type }}{% if target.borrowed[parent_type] %}<'_>{% endif %}) {}
   {% endfor -%}
   {%- for terminal_type, terminal in target.terminals %}
     {%- if not terminal.unique_symbol %}
-      fn visit_{{ terminal_type | snake_case }}(&mut self, _node: &{{ terminal_type }}) {}
+      fn visit_{{ terminal_type | snake_case }}(&mut self, _node: &{{ terminal_type }}<'_>) {}
     {% endif -%}
   {% endfor -%}
 }
@@ -29,12 +29,12 @@ pub trait Visitor {
 macro_rules! impl_nonterminal_visitor_hooks {
     (enter = $enter:ident $(, leave = $leave:ident)?) => {
       {%- for parent_type, sequence in target.sequences %}
-        fn enter_{{ parent_type | snake_case }}(&mut self, node: &$crate::ast::{{ parent_type }}Struct) -> bool { self.$enter(node) }
-        $(fn leave_{{ parent_type | snake_case }}(&mut self, node: &$crate::ast::{{ parent_type }}Struct) { self.$leave(node); })?
+        fn enter_{{ parent_type | snake_case }}(&mut self, node: &$crate::ast::{{ parent_type }}Struct<'_>) -> bool { self.$enter(node) }
+        $(fn leave_{{ parent_type | snake_case }}(&mut self, node: &$crate::ast::{{ parent_type }}Struct<'_>) { self.$leave(node); })?
       {% endfor -%}
       {%- for parent_type, collection in target.collections %}
-        fn enter_{{ parent_type | snake_case }}(&mut self, items: &$crate::ast::{{ parent_type }}Struct) -> bool { self.$enter(items) }
-        $(fn leave_{{ parent_type | snake_case }}(&mut self, items: &$crate::ast::{{ parent_type }}Struct) { self.$leave(items); })?
+        fn enter_{{ parent_type | snake_case }}(&mut self, items: &$crate::ast::{{ parent_type }}Struct<'_>) -> bool { self.$enter(items) }
+        $(fn leave_{{ parent_type | snake_case }}(&mut self, items: &$crate::ast::{{ parent_type }}Struct<'_>) { self.$leave(items); })?
       {% endfor -%}
     };
 }
@@ -46,7 +46,7 @@ pub use crate::impl_nonterminal_visitor_hooks;
 //
 
 {% for parent_type, sequence in target.sequences %}
-  pub fn accept_{{ parent_type | snake_case }}(node: &{{ parent_type }}, visitor: &mut impl Visitor) {
+  pub fn accept_{{ parent_type | snake_case }}(node: &{{ parent_type }}{% if target.borrowed[parent_type] %}<'_>{% endif %}, visitor: &mut impl Visitor) {
     if !visitor.enter_{{ parent_type | snake_case }}(node) {
       return;
     }
@@ -79,7 +79,7 @@ pub use crate::impl_nonterminal_visitor_hooks;
 //
 
 {% for parent_type, choice in target.choices %}
-  pub fn accept_{{ parent_type | snake_case }}(node: &{{ parent_type }}, visitor: &mut impl Visitor) {
+  pub fn accept_{{ parent_type | snake_case }}(node: &{{ parent_type }}{% if target.borrowed[parent_type] %}<'_>{% endif %}, visitor: &mut impl Visitor) {
     if !visitor.enter_{{ parent_type | snake_case }}(node) {
       return;
     }
@@ -112,7 +112,7 @@ pub use crate::impl_nonterminal_visitor_hooks;
 
 {% for parent_type, collection in target.collections -%}
   #[inline]
-  fn accept_{{ parent_type | snake_case }}(items: &{{ parent_type }}, visitor: &mut impl Visitor) {
+  fn accept_{{ parent_type | snake_case }}(items: &{{ parent_type }}{% if target.borrowed[parent_type] %}<'_>{% endif %}, visitor: &mut impl Visitor) {
     if !visitor.enter_{{ parent_type | snake_case }}(items) {
       return;
     }

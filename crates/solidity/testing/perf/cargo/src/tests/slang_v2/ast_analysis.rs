@@ -58,7 +58,7 @@ struct AnalysisWalk {
 }
 
 impl Visitor for AnalysisWalk {
-    fn visit_identifier(&mut self, node: &Identifier) {
+    fn visit_identifier(&mut self, node: &Identifier<'_>) {
         if black_box(node.resolve_to_definition()).is_some()
             || black_box(node.resolve_to_built_in()).is_some()
         {
@@ -66,7 +66,7 @@ impl Visitor for AnalysisWalk {
         }
     }
 
-    fn enter_expression(&mut self, node: &Expression) -> bool {
+    fn enter_expression(&mut self, node: &Expression<'_>) -> bool {
         if black_box(node.get_type()).is_some() {
             self.typed_expressions_count += 1;
         }
