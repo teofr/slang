@@ -2,7 +2,10 @@
 
 use std::hint::black_box;
 
-use gungraun::{library_benchmark, library_benchmark_group, main};
+use gungraun::{
+    Callgrind, CallgrindMetrics, EventKind, LibraryBenchmarkConfig, library_benchmark,
+    library_benchmark_group, main,
+};
 use solidity_testing_perf_cargo::config::benchmark_config_with_num_callers;
 use solidity_testing_perf_cargo::tests;
 // Local aliases for the setup functions, so the generated benchmark ID reads
@@ -161,10 +164,31 @@ bench_projects! {
     }
 }
 
+// The `ast_visitor` walk, spread over several threads sharing one unit. Valgrind runs a single
+// thread at a time, so this cannot show contention; it only shows what a threaded run looks like
+// through Callgrind's counters.
+// __SLANG_PERF_AST_VISITOR_THREAD_TOGGLE__ (keep in sync)
+#[library_benchmark(
+    setup = ast_visitor_setup,
+    config = LibraryBenchmarkConfig::default().tool(
+        Callgrind::with_args([
+            "--collect-bus=yes",
+            "--toggle-collect=*ast_visitor::walk_thread_chunk*",
+        ])
+        .format([CallgrindMetrics::Default, EventKind::Ge.into()])
+    )
+)]
+#[bench::uniswap("uniswap")]
+fn ast_visitor_threads(
+    input: tests::slang_v2::ast_visitor::Input,
+) -> tests::slang_v2::ast_visitor::Output {
+    black_box(tests::slang_v2::ast_visitor::run_threaded(black_box(input)))
+}
+
 library_benchmark_group!(
     name = pipeline;
     // __SLANG_V2_INFRA_BENCHMARKS_LIST__ (keep in sync)
-    benchmarks = parser, ir_builder, semantic, compute_abi, compute_storage_layout, ast_visitor, ast_analysis, infer_language_versions,
+    benchmarks = parser, ir_builder, semantic, compute_abi, compute_storage_layout, ast_visitor, ast_analysis, infer_language_versions, ast_visitor_threads,
 );
 
 main!(

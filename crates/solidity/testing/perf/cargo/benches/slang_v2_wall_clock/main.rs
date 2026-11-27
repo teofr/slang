@@ -148,6 +148,97 @@ mod thread_scaling {
     }
 }
 
+/// How AST traversal behaves when several threads share one `CompilationUnit`.
+///
+/// The `gungraun` suite cannot see this: Valgrind serializes threads, so contention on shared
+/// atomics (reference counts, for one) never shows up in its counters.
+mod ast_thread_scaling {
+    use divan::{Bencher, black_box};
+    use rayon::prelude::*;
+    use slang_solidity_v2::compilation::File;
+
+    use super::MAX_TIME_SECS;
+    use crate::tests;
+
+    // __SLANG_INFRA_PROJECT_LIST__ (keep in sync)
+    const PROJECT: &str = "uniswap";
+
+    /// `1` is the serial baseline the other rows should be read against.
+    const THREAD_COUNTS: [usize; 4] = [1, 2, 4, 8];
+
+    /// How many times each benchmark iteration repeats its walk, to lift it well above the cost
+    /// of dispatching work to the pool.
+    const ROUNDS: usize = 20;
+
+    fn pool(threads: usize) -> rayon::ThreadPool {
+        rayon::ThreadPoolBuilder::new()
+            .num_threads(threads)
+            .build()
+            .expect("thread pool builds")
+    }
+
+    /// Fixed total work, split across the pool: each file is walked by a single thread, so the
+    /// threads share nothing but what every AST node of a unit shares. Ideally the time drops
+    /// with the thread count.
+    fn bench_split_files<T: Send>(bencher: Bencher<'_, '_>, threads: usize, walk: fn(&File) -> T) {
+        let unit = tests::slang_v2::full_compilation::test(
+            tests::slang_v2::full_compilation::setup(PROJECT),
+        );
+        let files: Vec<File> = unit.files().collect();
+        let pool = pool(threads);
+
+        bencher.bench(|| {
+            pool.install(|| {
+                for _ in 0..ROUNDS {
+                    files.par_iter().for_each(|file| {
+                        black_box(walk(black_box(file)));
+                    });
+                }
+            });
+        });
+    }
+
+    /// Work that grows with the pool: every thread walks every file, so the threads also share
+    /// each node they visit. Ideally the time stays flat while the threads fit the cores.
+    fn bench_same_files<T: Send>(bencher: Bencher<'_, '_>, threads: usize, walk: fn(&File) -> T) {
+        let unit = tests::slang_v2::full_compilation::test(
+            tests::slang_v2::full_compilation::setup(PROJECT),
+        );
+        let files: Vec<File> = unit.files().collect();
+        let pool = pool(threads);
+
+        bencher.bench(|| {
+            pool.broadcast(|_| {
+                for _ in 0..ROUNDS {
+                    for file in &files {
+                        black_box(walk(black_box(file)));
+                    }
+                }
+            });
+        });
+    }
+
+    #[divan::bench(args = THREAD_COUNTS, max_time = MAX_TIME_SECS)]
+    fn ast_visitor_split_files(bencher: Bencher<'_, '_>, threads: usize) {
+        bench_split_files(bencher, threads, tests::slang_v2::ast_visitor::walk_file);
+    }
+
+    #[divan::bench(args = THREAD_COUNTS, max_time = MAX_TIME_SECS)]
+    fn ast_visitor_same_files(bencher: Bencher<'_, '_>, threads: usize) {
+        bench_same_files(bencher, threads, tests::slang_v2::ast_visitor::walk_file);
+    }
+
+    #[divan::bench(args = THREAD_COUNTS, max_time = MAX_TIME_SECS)]
+    fn ast_analysis_split_files(bencher: Bencher<'_, '_>, threads: usize) {
+        bench_split_files(bencher, threads, tests::slang_v2::ast_analysis::walk_file);
+    }
+
+    #[divan::bench(args = THREAD_COUNTS, max_time = MAX_TIME_SECS)]
+    fn ast_analysis_same_files(bencher: Bencher<'_, '_>, threads: usize) {
+        bench_same_files(bencher, threads, tests::slang_v2::ast_analysis::walk_file);
+    }
+}
+
 /// Reports bytes and files processed per second, so that results remain
 /// comparable across projects of very different sizes.
 fn with_throughput_counters<'a, 'b>(

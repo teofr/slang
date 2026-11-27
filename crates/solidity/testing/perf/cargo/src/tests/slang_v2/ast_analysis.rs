@@ -2,7 +2,7 @@ use std::hint::black_box;
 
 use slang_solidity_v2::ast::visitor::{Visitor, accept_source_unit};
 use slang_solidity_v2::ast::{Expression, Identifier};
-use slang_solidity_v2::compilation::CompilationUnit;
+use slang_solidity_v2::compilation::{CompilationUnit, File};
 
 pub type Input = CompilationUnit;
 
@@ -26,18 +26,29 @@ pub fn run(unit: Input) -> Output {
 }
 
 pub fn test(unit: Input) -> Output {
-    let mut walk = AnalysisWalk::default();
+    let mut resolved_references_count = 0;
+    let mut typed_expressions_count = 0;
 
     for file in unit.files() {
-        accept_source_unit(&file.ast(), &mut walk);
+        let (resolved_references, typed_expressions) = walk_file(&file);
+        resolved_references_count += resolved_references;
+        typed_expressions_count += typed_expressions;
     }
 
     Output {
         unit,
 
-        resolved_references_count: walk.resolved_references_count,
-        typed_expressions_count: walk.typed_expressions_count,
+        resolved_references_count,
+        typed_expressions_count,
     }
+}
+
+/// Walks the AST of a single file, returning the number of resolved references and of typed
+/// expressions in it.
+pub fn walk_file(file: &File) -> (usize, usize) {
+    let mut walk = AnalysisWalk::default();
+    accept_source_unit(&file.ast(), &mut walk);
+    (walk.resolved_references_count, walk.typed_expressions_count)
 }
 
 #[derive(Default)]

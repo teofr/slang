@@ -1,4 +1,6 @@
-use gungraun::{Callgrind, Dhat, Direction, FlamegraphConfig, LibraryBenchmarkConfig};
+use gungraun::{
+    Callgrind, CallgrindMetrics, Dhat, Direction, EventKind, FlamegraphConfig, LibraryBenchmarkConfig,
+};
 
 /// Env var that, when set (to any value), makes
 /// [`benchmark_config_with_num_callers`] skip the DHAT tool and run Callgrind
@@ -41,7 +43,11 @@ pub fn benchmark_config_with_num_callers(num_callers: usize) -> LibraryBenchmark
         // We also enable flame graphs into Cargo's 'target' directory.
         // They will be listed by 'infra perf' at the end of the run:
         .tool(
-            Callgrind::default()
+            // `--collect-bus` adds the "Ge" (global bus) event: how many atomic (`lock`-prefixed)
+            // instructions were executed. Valgrind runs one thread at a time, so it can never
+            // show them contending; counting them is the closest deterministic proxy.
+            Callgrind::with_args(["--collect-bus=yes"])
+                .format([CallgrindMetrics::Default, EventKind::Ge.into()])
                 .flamegraph(FlamegraphConfig::default().direction(Direction::BottomToTop)),
         )
         // 'valgrind' executes tests without any environment variables set by default.
