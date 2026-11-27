@@ -57,13 +57,13 @@ impl CompilationUnit {
         self.evm_target
     }
 
-    pub fn files(&self) -> impl Iterator<Item = File> + '_ {
+    pub fn files(&self) -> impl Iterator<Item = File<'_>> + '_ {
         self.files
             .values()
             .map(|internal_file| FileStruct::create(internal_file, &self.semantic))
     }
 
-    pub fn file(&self, id: &FileId) -> Option<File> {
+    pub fn file(&self, id: &FileId) -> Option<File<'_>> {
         self.files
             .get(id)
             .map(|internal_file| FileStruct::create(internal_file, &self.semantic))

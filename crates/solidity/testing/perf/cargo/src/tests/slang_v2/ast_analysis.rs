@@ -45,7 +45,7 @@ pub fn test(unit: Input) -> Output {
 
 /// Walks the AST of a single file, returning the number of resolved references and of typed
 /// expressions in it.
-pub fn walk_file(file: &File) -> (usize, usize) {
+pub fn walk_file(file: &File<'_>) -> (usize, usize) {
     let mut walk = AnalysisWalk::default();
     accept_source_unit(&file.ast(), &mut walk);
     (walk.resolved_references_count, walk.typed_expressions_count)
@@ -57,7 +57,7 @@ struct AnalysisWalk {
     typed_expressions_count: usize,
 }
 
-impl Visitor for AnalysisWalk {
+impl Visitor<'_> for AnalysisWalk {
     fn visit_identifier(&mut self, node: &Identifier<'_>) {
         if black_box(node.resolve_to_definition()).is_some()
             || black_box(node.resolve_to_built_in()).is_some()

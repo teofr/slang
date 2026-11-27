@@ -63,7 +63,7 @@ pub(crate) fn binder_report(report_data: &'_ ReportData<'_>) -> Result<String> {
 
 fn report_all_definitions(
     report: &mut String,
-    all_definitions: &[CollectedDefinition],
+    all_definitions: &[CollectedDefinition<'_>],
 ) -> Result<()> {
     writeln!(
         report,
@@ -76,7 +76,7 @@ fn report_all_definitions(
     Ok(())
 }
 
-fn report_all_references(report: &mut String, all_references: &[CollectedReference]) -> Result<()> {
+fn report_all_references(report: &mut String, all_references: &[CollectedReference<'_>]) -> Result<()> {
     writeln!(
         report,
         "References ({references_count}):",
@@ -90,7 +90,7 @@ fn report_all_references(report: &mut String, all_references: &[CollectedReferen
 
 fn report_unbound_identifiers(
     report: &mut String,
-    unbound_identifiers: &[CollectedIdentifier],
+    unbound_identifiers: &[CollectedIdentifier<'_>],
 ) -> Result<()> {
     writeln!(
         report,
@@ -128,9 +128,9 @@ fn render_bindings_for_file(
     report: &mut String,
     file_id: &FileId,
     contents: &str,
-    all_definitions: &[CollectedDefinition],
-    all_references: &[CollectedReference],
-    unbound_identifiers: &[CollectedIdentifier],
+    all_definitions: &[CollectedDefinition<'_>],
+    all_references: &[CollectedReference<'_>],
+    unbound_identifiers: &[CollectedIdentifier<'_>],
 ) -> Result<()> {
     let file_id_str = file_id.as_str();
     let mut builder: BuilderType<'_> =

@@ -13,9 +13,9 @@ type FileSourceMap = SortedMap<FileId, String>;
 pub(crate) struct ReportData<'a> {
     pub(crate) compilation: &'a CompilationUnit,
     pub(crate) files: &'a FileSourceMap,
-    pub(crate) all_definitions: Vec<CollectedDefinition>,
-    pub(crate) all_references: Vec<CollectedReference>,
-    pub(crate) unbound_identifiers: Vec<CollectedIdentifier>,
+    pub(crate) all_definitions: Vec<CollectedDefinition<'a>>,
+    pub(crate) all_references: Vec<CollectedReference<'a>>,
+    pub(crate) unbound_identifiers: Vec<CollectedIdentifier<'a>>,
 }
 
 /// This `DefinitionId` is local to the `ReportData` and represents the position
@@ -23,13 +23,13 @@ pub(crate) struct ReportData<'a> {
 pub(crate) type DefinitionId = usize;
 
 #[derive(Clone)]
-pub(crate) struct CollectedIdentifier {
-    node: Identifier,
+pub(crate) struct CollectedIdentifier<'a> {
+    node: Identifier<'a>,
     line: usize,
     column: usize,
 }
 
-impl CollectedIdentifier {
+impl CollectedIdentifier<'_> {
     pub(crate) fn file_id(&self) -> &FileId {
         self.node.get_file_id()
     }
@@ -38,11 +38,11 @@ impl CollectedIdentifier {
     }
 }
 
-pub(crate) struct CollectedDefinition {
+pub(crate) struct CollectedDefinition<'a> {
     // This is the index+1 of this definition in the `all_definitions` vector.
     pub(crate) definition_id: DefinitionId,
-    pub(crate) identifier: CollectedIdentifier,
-    definition: Definition,
+    pub(crate) identifier: CollectedIdentifier<'a>,
+    definition: Definition<'a>,
 }
 
 #[derive(Clone, PartialEq, Eq)]
@@ -53,8 +53,8 @@ pub(crate) enum CollectedResolution {
     Definition(DefinitionId),
 }
 
-pub(crate) struct CollectedReference {
-    pub(crate) identifier: CollectedIdentifier,
+pub(crate) struct CollectedReference<'a> {
+    pub(crate) identifier: CollectedIdentifier<'a>,
     pub(crate) resolution: CollectedResolution,
 }
 
@@ -92,10 +92,10 @@ impl<'a> ReportData<'a> {
 
 // Identifier collector trait, to allow reuse in the two collectors
 
-trait IdentifierCollector {
+trait IdentifierCollector<'a> {
     fn file_contents(&self, file_id: &FileId) -> &str;
 
-    fn collect_identifier(&self, node: &Identifier) -> CollectedIdentifier {
+    fn collect_identifier(&self, node: &Identifier<'a>) -> CollectedIdentifier<'a> {
         let range = node.get_text_range().clone();
         let file_id = node.get_file_id();
         let file_contents = self.file_contents(file_id);
@@ -130,14 +130,14 @@ trait IdentifierCollector {
 /// `DefinitionCollector::collect_from()`.
 struct DefinitionCollector<'a> {
     files: &'a FileSourceMap,
-    all_definitions: Vec<CollectedDefinition>,
+    all_definitions: Vec<CollectedDefinition<'a>>,
 }
 
 impl<'a> DefinitionCollector<'a> {
     fn collect_from(
-        compilation: &CompilationUnit,
+        compilation: &'a CompilationUnit,
         files: &'a SortedMap<FileId, String>,
-    ) -> Vec<CollectedDefinition> {
+    ) -> Vec<CollectedDefinition<'a>> {
         let mut collector = Self {
             files,
             all_definitions: Vec::new(),
@@ -150,8 +150,8 @@ impl<'a> DefinitionCollector<'a> {
     }
 }
 
-impl Visitor for DefinitionCollector<'_> {
-    fn visit_identifier(&mut self, node: &Identifier) {
+impl<'a> Visitor<'a> for DefinitionCollector<'a> {
+    fn visit_identifier(&mut self, node: &Identifier<'a>) {
         let Some(definition) = node.named_definition() else {
             return;
         };
@@ -164,7 +164,7 @@ impl Visitor for DefinitionCollector<'_> {
     }
 }
 
-impl IdentifierCollector for DefinitionCollector<'_> {
+impl<'a> IdentifierCollector<'a> for DefinitionCollector<'a> {
     fn file_contents(&self, file_id: &FileId) -> &str {
         &self.files[file_id]
     }
@@ -172,19 +172,19 @@ impl IdentifierCollector for DefinitionCollector<'_> {
 
 // Identifiers collection and classification
 
-struct ReferenceCollector<'a> {
+struct ReferenceCollector<'a, 'm> {
     files: &'a SortedMap<FileId, String>,
-    definitions_by_node_id: &'a Map<NodeId, DefinitionId>,
-    all_references: Vec<CollectedReference>,
-    unbound_identifiers: Vec<CollectedIdentifier>,
+    definitions_by_node_id: &'m Map<NodeId, DefinitionId>,
+    all_references: Vec<CollectedReference<'a>>,
+    unbound_identifiers: Vec<CollectedIdentifier<'a>>,
 }
 
-impl<'a> ReferenceCollector<'a> {
+impl<'a, 'm> ReferenceCollector<'a, 'm> {
     fn collect_from(
-        compilation: &CompilationUnit,
+        compilation: &'a CompilationUnit,
         files: &'a FileSourceMap,
-        definitions_by_node_id: &'a Map<NodeId, DefinitionId>,
-    ) -> (Vec<CollectedReference>, Vec<CollectedIdentifier>) {
+        definitions_by_node_id: &'m Map<NodeId, DefinitionId>,
+    ) -> (Vec<CollectedReference<'a>>, Vec<CollectedIdentifier<'a>>) {
         let mut collector = Self {
             files,
             definitions_by_node_id,
@@ -199,8 +199,8 @@ impl<'a> ReferenceCollector<'a> {
     }
 }
 
-impl Visitor for ReferenceCollector<'_> {
-    fn visit_identifier(&mut self, node: &Identifier) {
+impl<'a> Visitor<'a> for ReferenceCollector<'a, '_> {
+    fn visit_identifier(&mut self, node: &Identifier<'a>) {
         let mut bound = false;
 
         // An identifier is a definition when it is the name of one of the
@@ -239,7 +239,7 @@ impl Visitor for ReferenceCollector<'_> {
     }
 }
 
-impl IdentifierCollector for ReferenceCollector<'_> {
+impl<'a> IdentifierCollector<'a> for ReferenceCollector<'a, '_> {
     fn file_contents(&self, file_id: &FileId) -> &str {
         &self.files[file_id]
     }
@@ -247,7 +247,7 @@ impl IdentifierCollector for ReferenceCollector<'_> {
 
 // Display helpers
 
-impl Display for CollectedDefinition {
+impl Display for CollectedDefinition<'_> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let identifier = &self.identifier;
         write!(
@@ -263,7 +263,7 @@ impl Display for CollectedDefinition {
     }
 }
 
-impl Display for CollectedReference {
+impl Display for CollectedReference<'_> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let identifier = &self.identifier;
         write!(
@@ -285,7 +285,7 @@ impl Display for CollectedReference {
 }
 
 /// Displays a collected identifier as unbound by default
-impl Display for CollectedIdentifier {
+impl Display for CollectedIdentifier<'_> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(
             f,
@@ -300,11 +300,11 @@ impl Display for CollectedIdentifier {
 
 // Data display helpers
 
-fn definition_name(definition: &Definition) -> String {
+fn definition_name(definition: &Definition<'_>) -> String {
     definition.identifier().name().to_string()
 }
 
-fn definition_type(definition: &Definition) -> String {
+fn definition_type(definition: &Definition<'_>) -> String {
     match definition {
         Definition::Constant(constant) => {
             format!(
@@ -368,7 +368,7 @@ fn definition_type(definition: &Definition) -> String {
     }
 }
 
-fn type_or_unresolved(type_: Option<Type>) -> String {
+fn type_or_unresolved(type_: Option<Type<'_>>) -> String {
     match type_ {
         Some(type_) => type_display(&type_),
         None => "unresolved".to_string(),
@@ -376,7 +376,7 @@ fn type_or_unresolved(type_: Option<Type>) -> String {
 }
 
 #[allow(clippy::too_many_lines)]
-fn type_display(type_: &Type) -> String {
+fn type_display(type_: &Type<'_>) -> String {
     match type_ {
         Type::Address(address) => {
             if address.is_payable() {

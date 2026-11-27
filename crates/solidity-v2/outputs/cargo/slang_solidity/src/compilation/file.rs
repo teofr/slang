@@ -1,5 +1,3 @@
-use std::sync::Arc;
-
 use slang_solidity_v2_common::collections::Map;
 use slang_solidity_v2_common::files::FileId;
 use slang_solidity_v2_common::nodes::NodeId;
@@ -46,31 +44,29 @@ impl SemanticFile for InternalFile {
     }
 }
 
-pub struct FileStruct {
-    file: Arc<InternalFile>,
-    semantic: Arc<SemanticContext>,
+#[derive(Clone, Copy)]
+pub struct FileStruct<'a> {
+    file: &'a InternalFile,
+    semantic: &'a SemanticContext,
 }
 
-pub type File = Arc<FileStruct>;
+pub type File<'a> = FileStruct<'a>;
 
-impl FileStruct {
-    pub(crate) fn create(file: &Arc<InternalFile>, semantic: &Arc<SemanticContext>) -> File {
-        Arc::new(Self {
-            file: Arc::clone(file),
-            semantic: Arc::clone(semantic),
-        })
+impl<'a> FileStruct<'a> {
+    pub(crate) fn create(file: &'a InternalFile, semantic: &'a SemanticContext) -> File<'a> {
+        Self { file, semantic }
     }
 
-    pub fn id(&self) -> &FileId {
+    pub fn id(&self) -> &'a FileId {
         &self.file.id
     }
 
-    pub fn ast(&self) -> ast::SourceUnit<'_> {
-        ast::create_source_unit(&self.file.ir_root, &self.semantic)
+    pub fn ast(&self) -> ast::SourceUnit<'a> {
+        ast::create_source_unit(&self.file.ir_root, self.semantic)
     }
 
     #[cfg(test)]
-    pub(crate) fn ir_root(&self) -> &ir::SourceUnit {
+    pub(crate) fn ir_root(&self) -> &'a ir::SourceUnit {
         &self.file.ir_root
     }
 }

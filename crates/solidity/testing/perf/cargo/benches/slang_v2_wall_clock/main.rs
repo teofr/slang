@@ -180,11 +180,11 @@ mod ast_thread_scaling {
     /// Fixed total work, split across the pool: each file is walked by a single thread, so the
     /// threads share nothing but what every AST node of a unit shares. Ideally the time drops
     /// with the thread count.
-    fn bench_split_files<T: Send>(bencher: Bencher<'_, '_>, threads: usize, walk: fn(&File) -> T) {
+    fn bench_split_files<T: Send>(bencher: Bencher<'_, '_>, threads: usize, walk: fn(&File<'_>) -> T) {
         let unit = tests::slang_v2::full_compilation::test(
             tests::slang_v2::full_compilation::setup(PROJECT),
         );
-        let files: Vec<File> = unit.files().collect();
+        let files: Vec<File<'_>> = unit.files().collect();
         let pool = pool(threads);
 
         bencher.bench(|| {
@@ -200,11 +200,11 @@ mod ast_thread_scaling {
 
     /// Work that grows with the pool: every thread walks every file, so the threads also share
     /// each node they visit. Ideally the time stays flat while the threads fit the cores.
-    fn bench_same_files<T: Send>(bencher: Bencher<'_, '_>, threads: usize, walk: fn(&File) -> T) {
+    fn bench_same_files<T: Send>(bencher: Bencher<'_, '_>, threads: usize, walk: fn(&File<'_>) -> T) {
         let unit = tests::slang_v2::full_compilation::test(
             tests::slang_v2::full_compilation::setup(PROJECT),
         );
-        let files: Vec<File> = unit.files().collect();
+        let files: Vec<File<'_>> = unit.files().collect();
         let pool = pool(threads);
 
         bencher.bench(|| {

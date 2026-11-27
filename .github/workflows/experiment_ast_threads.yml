@@ -113,3 +113,30 @@ jobs:
               echo "::endgroup::"
             done
           done
+
+  # The v2 snapshot suites (CST, binder, diagnostics), against the borrowed AST: the snapshots must
+  # not change. The unit tests of 'slang_solidity_v2' are not ported to the borrowed API.
+  snapshots:
+    runs-on: "ubuntu-24.04" # _SLANG_DEV_CONTAINER_BASE_IMAGE_ (keep in sync)
+
+    permissions:
+      contents: "read"
+
+    steps:
+      - name: "Checkout Repository"
+        uses: "actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1" # v7.0.1
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+
+      - name: "Setup"
+        uses: "./.github/actions/common-setup"
+        with:
+          task-setup-args: "setup:cargo"
+          sfw-optional: "true"
+
+      - name: "cargo nextest run -p solidity_v2_cargo_tests"
+        run: "./bin/cargo nextest run --package solidity_v2_cargo_tests --no-fail-fast --status-level fail --final-status-level fail"
+
+      - name: "Snapshots are unchanged"
+        run: "git status --short && git diff --exit-code"

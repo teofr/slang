@@ -35,7 +35,7 @@ pub fn test(unit: Input) -> Output {
 }
 
 /// Walks the AST of a single file, returning the number of identifiers in it.
-pub fn walk_file(file: &File) -> usize {
+pub fn walk_file(file: &File<'_>) -> usize {
     let mut walk = NodeWalk::default();
     accept_source_unit(&file.ast(), &mut walk);
     walk.identifier_count
@@ -46,7 +46,7 @@ struct NodeWalk {
     identifier_count: usize,
 }
 
-impl Visitor for NodeWalk {
+impl Visitor<'_> for NodeWalk {
     fn visit_identifier(&mut self, _node: &Identifier<'_>) {
         self.identifier_count += 1;
     }
@@ -64,7 +64,7 @@ pub const THREADS: usize = 4;
 /// instructions each thread executes do not depend on scheduling.
 #[inline(never)]
 pub fn run_threaded(unit: Input) -> Output {
-    let files: Vec<File> = unit.files().collect();
+    let files: Vec<File<'_>> = unit.files().collect();
 
     let identifier_count = std::thread::scope(|scope| {
         let handles: Vec<_> = (0..THREADS)
@@ -92,7 +92,7 @@ pub fn run_threaded(unit: Input) -> Output {
 /// own: Callgrind collects each thread separately, toggled by this function.
 // __SLANG_PERF_AST_VISITOR_THREAD_TOGGLE__ (keep in sync)
 #[inline(never)]
-pub fn walk_thread_chunk(files: &[File], thread: usize) -> usize {
+pub fn walk_thread_chunk(files: &[File<'_>], thread: usize) -> usize {
     files
         .iter()
         .skip(thread)
